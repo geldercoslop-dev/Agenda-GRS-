@@ -1,0 +1,17 @@
+{
+  "name": "Agenda Pro Max",
+  "short_name": "Agenda",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#021824",
+  "theme_color": "#021824",
+  "description": "Gerenciador de Agenda Profissional",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2693/2693507.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
