@@ -1357,7 +1357,20 @@ function defaultState() {
 }
 
 function save() {
-  try { localStorage.setItem('agendaProMax', JSON.stringify(state)); } catch(e){}
+  try {
+    // Salva fotos separado (podem ser grandes em base64)
+    const photos = state.bucketPhotos || {};
+    const stateWithoutPhotos = Object.assign({}, state, {bucketPhotos: null});
+    localStorage.setItem('agendaProMax', JSON.stringify(stateWithoutPhotos));
+    try {
+      localStorage.setItem('agendaProMax_photos', JSON.stringify(photos));
+    } catch(e2) {
+      // Se fotos não couberem, tenta salvar com menos qualidade (só mantém as últimas 20 por bucket)
+      const trimmed = {};
+      for(const k in photos){ trimmed[k] = (photos[k]||[]).slice(-20); }
+      try { localStorage.setItem('agendaProMax_photos', JSON.stringify(trimmed)); } catch(e3){}
+    }
+  } catch(e){}
 }
 
 // Migra dom2 → dom quando a semana vira (novo domingo)
@@ -1408,6 +1421,11 @@ function load() {
       if (!s.lastManualVarrerWeek) s.lastManualVarrerWeek = null;
       if (!s.lastAutoVarrerWeek) s.lastAutoVarrerWeek = null;
       if (!s.lastDailyReviewDate) s.lastDailyReviewDate = null;
+      // Carrega fotos (salvas separado por serem grandes)
+      try {
+        const rawPhotos = localStorage.getItem('agendaProMax_photos');
+        s.bucketPhotos = rawPhotos ? JSON.parse(rawPhotos) : {};
+      } catch(ep){ s.bucketPhotos = {}; }
       return s;
     }
   } catch(e) {}
@@ -2874,7 +2892,8 @@ function init(){
   document.getElementById('dayPhotoInput').addEventListener('change',(e)=>{
     const file = e.target.files[0];
     if(!file) return;
-    compressImage(file, 0.82, (dataUrl)=>{
+    // Reduz para máx 1200px e qualidade 0.80 para não estourar o localStorage
+    resizeImage(file, 1200, 0.80, (dataUrl)=>{
       if(!state.bucketPhotos) state.bucketPhotos={};
       if(!state.bucketPhotos[currentBucket]) state.bucketPhotos[currentBucket]=[];
       state.bucketPhotos[currentBucket].push({id:'p'+uid(), url:dataUrl, ts:Date.now()});
