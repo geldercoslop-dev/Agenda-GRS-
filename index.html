@@ -452,7 +452,7 @@
       flex-shrink:0; padding:10px 12px 14px;
       padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
       border-top:1px solid var(--line);
-      display:flex; align-items:center; justify-content:space-around; gap:8px;
+      display:flex; align-items:center; justify-content:space-around; gap:4px;
       background: linear-gradient(135deg, rgba(2,24,36,0.97) 0%, rgba(4,53,90,0.97) 100%);
       backdrop-filter: blur(12px);
     }
@@ -523,6 +523,7 @@
     #dayZapSendBtn .dfbi { border-color:rgba(74,222,128,.3);   box-shadow:0 3px 10px rgba(34,197,94,.2),   inset 0 1px 0 rgba(74,222,128,.15); }
     #dayBackBtn   .dfbi { border-color:rgba(251,146,60,.3);    box-shadow:0 3px 10px rgba(249,115,22,.2),  inset 0 1px 0 rgba(251,146,60,.15); }
     #dayAddBtn    .dfbi { border-color:rgba(52,211,153,.35);   box-shadow:0 3px 14px rgba(16,185,129,.3),  inset 0 1px 0 rgba(52,211,153,.2); }
+    #dayPhotoBtn  .dfbi { border-color:rgba(251,191,36,.3);   box-shadow:0 3px 10px rgba(245,158,11,.2),  inset 0 1px 0 rgba(251,191,36,.15); }
 
     .dfbl { font-family:'Space Grotesk',sans-serif; font-size:clamp(9px,2.3vw,10px); font-weight:700; letter-spacing:.3px; color:rgba(255,255,255,.6); white-space:nowrap; text-align:center; display:block; margin-top:1px; }
     [data-theme="light"] .dfbl { color:rgba(15,25,70,.75); font-weight:800; }
@@ -954,6 +955,11 @@
           <span class="dfbi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="2" width="6" height="11" rx="3" stroke="rgba(255,255,255,.85)" stroke-width="2"/><path d="M5 11a7 7 0 0014 0" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="18" x2="12" y2="22" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/></svg></span>
           <span class="dfbl">Voz</span>
         </button>
+        <button class="dayFabBtn" id="dayPhotoBtn">
+          <span class="dfbi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="6" width="20" height="14" rx="3" stroke="rgba(251,191,36,.9)" stroke-width="2"/><circle cx="12" cy="13" r="3.5" stroke="rgba(251,191,36,.9)" stroke-width="2"/><path d="M8 6l1.5-2h5L16 6" stroke="rgba(251,191,36,.9)" stroke-width="2" stroke-linecap="round"/></svg></span>
+          <span class="dfbl">Foto</span>
+        </button>
+        <input type="file" id="dayPhotoInput" accept="image/*" style="display:none">
       </div>
     </div>
 
@@ -1791,9 +1797,21 @@ function navigateBack(){
 function renderDayView(){
   const listArea=document.getElementById('listArea');
   listArea.innerHTML='';
+  // Photo row — shows if bucket has photos
+  const photos=(state.bucketPhotos||{})[currentBucket]||[];
+  if(photos.length>0){
+    const photoRow=document.createElement('div');
+    photoRow.className='taskRow';
+    photoRow.style.cssText='cursor:pointer;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);justify-content:center;gap:8px;padding:10px 14px;';
+    photoRow.innerHTML='<span style="font-size:16px">📷</span><span style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;color:rgba(251,191,36,.9)">Clique aqui para ver suas fotos ('+photos.length+')</span>';
+    photoRow.addEventListener('click',()=>openBucketPhotoGallery(currentBucket));
+    listArea.appendChild(photoRow);
+  }
   const arr=state.tasks[currentBucket]||[];
-  if(arr.length===0){
+  if(arr.length===0 && photos.length===0){
     listArea.innerHTML='<div class="emptyLabel">Nenhuma tarefa. Comece a adicionar! 🚀</div>';
+  } else if(arr.length===0){
+    // photos but no tasks — just show the photo row already added
   } else {
     for(const task of arr){
       const row=document.createElement('div');
@@ -2756,6 +2774,41 @@ function initEmojiPickerIn(container){
       if(sel) sel.style.display = 'block';
     });
   });
+  // Fix: wire up the "+" more button for custom emoji input
+  const moreBtnSub = container.querySelector('#epBtnMore');
+  const nativeInputSub = container.querySelector('#emojiNativeInput');
+  if(moreBtnSub && nativeInputSub){
+    moreBtnSub.addEventListener('click',()=>{
+      nativeInputSub.value='';
+      nativeInputSub.style.position='fixed';
+      nativeInputSub.style.opacity='0.01';
+      nativeInputSub.style.pointerEvents='auto';
+      nativeInputSub.style.width='40px';
+      nativeInputSub.style.height='40px';
+      nativeInputSub.style.top='50%';
+      nativeInputSub.style.left='50%';
+      nativeInputSub.focus();
+    });
+    nativeInputSub.addEventListener('input',()=>{
+      const val=nativeInputSub.value;
+      if(!val) return;
+      const emoji=[...val][0];
+      if(emoji){
+        selectedEmoji=emoji;
+        moreBtnSub.textContent=emoji;
+        const show=container.querySelector('#emojiShow');
+        const sel=container.querySelector('#emojiSelected');
+        if(show) show.textContent=emoji;
+        if(sel) sel.style.display='block';
+        showToast('✅ Ícone "'+emoji+'" selecionado!');
+      }
+      nativeInputSub.value='';
+      nativeInputSub.style.pointerEvents='none';
+      nativeInputSub.style.width='1px';
+      nativeInputSub.style.height='1px';
+      nativeInputSub.blur();
+    });
+  }
   const saveBtn = container.querySelector('#fSaveNova');
   if(saveBtn) saveBtn.addEventListener('click',()=>{
     const nameEl = container.querySelector('#fInputNova');
@@ -2803,6 +2856,23 @@ function init(){
     if(vBtn) vBtn.style.display = 'none';
   }
   document.getElementById('dayZapSendBtn').addEventListener('click',shareWhatsApp);
+  // Photo button
+  document.getElementById('dayPhotoBtn').addEventListener('click',()=>{
+    document.getElementById('dayPhotoInput').click();
+  });
+  document.getElementById('dayPhotoInput').addEventListener('change',(e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    compressImage(file, 0.82, (dataUrl)=>{
+      if(!state.bucketPhotos) state.bucketPhotos={};
+      if(!state.bucketPhotos[currentBucket]) state.bucketPhotos[currentBucket]=[];
+      state.bucketPhotos[currentBucket].push({id:'p'+uid(), url:dataUrl, ts:Date.now()});
+      save();
+      renderDayView();
+      showToast('✅ Foto adicionada!');
+    });
+    e.target.value='';
+  });
 
   // Progress bar today button
   document.getElementById('todayBtn').addEventListener('click',()=>{
@@ -3379,6 +3449,63 @@ function populateFolderSelect(containerId, mode){
     container.appendChild(item);
   }
 }
+
+// ══ PHOTO GALLERY ══
+function openBucketPhotoGallery(bucketId){
+  const photos=(state.bucketPhotos||{})[bucketId]||[];
+  if(!photos.length){showToast('Nenhuma foto nesta pasta.');return;}
+  const isLight=document.body.getAttribute('data-theme')==='light';
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99995;display:flex;flex-direction:column;';
+
+  // Header
+  ov.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1);">
+      <span style="font-family:Space Grotesk,sans-serif;font-weight:800;font-size:16px;color:#fff;">📷 Fotos (${photos.length})</span>
+      <button id="_pgClose" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:10px;color:#fff;font-size:18px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <div id="_pgGrid" style="flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:8px;"></div>
+  `;
+  document.body.appendChild(ov);
+  ov.querySelector('#_pgClose').onclick=()=>ov.remove();
+
+  const grid=ov.querySelector('#_pgGrid');
+  photos.forEach((p,i)=>{
+    const cell=document.createElement('div');
+    cell.style.cssText='position:relative;aspect-ratio:1;overflow:hidden;border-radius:10px;cursor:pointer;';
+    const img=document.createElement('img');
+    img.src=p.url;
+    img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
+    img.addEventListener('click',()=>openPhotoFullscreen(p, bucketId, ov));
+    cell.appendChild(img);
+    grid.appendChild(cell);
+  });
+}
+
+function openPhotoFullscreen(photo, bucketId, galleryOv){
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:99996;display:flex;flex-direction:column;align-items:center;justify-content:center;';
+  ov.innerHTML=`
+    <div style="position:absolute;top:14px;right:14px;display:flex;gap:8px;">
+      <button id="_pfDel" style="background:rgba(255,50,50,.2);border:1px solid rgba(255,50,50,.35);border-radius:10px;color:#ff6b6b;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;font-family:Space Grotesk,sans-serif;">🗑 Excluir</button>
+      <button id="_pfClose" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:10px;color:#fff;font-size:18px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <img src="${photo.url}" style="max-width:95vw;max-height:82vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);">
+    <div style="margin-top:12px;font-size:11px;color:rgba(255,255,255,.4);font-family:Space Grotesk,sans-serif;">${new Date(photo.ts).toLocaleString('pt-BR')}</div>
+  `;
+  document.body.appendChild(ov);
+  ov.querySelector('#_pfClose').onclick=()=>ov.remove();
+  ov.querySelector('#_pfDel').onclick=()=>{
+    if(!confirm('Excluir esta foto?')) return;
+    if(!state.bucketPhotos) state.bucketPhotos={};
+    if(!state.bucketPhotos[bucketId]) state.bucketPhotos[bucketId]=[];
+    state.bucketPhotos[bucketId]=state.bucketPhotos[bucketId].filter(x=>x.id!==photo.id);
+    save(); renderDayView(); ov.remove(); galleryOv.remove();
+    openBucketPhotoGallery(bucketId);
+    showToast('🗑 Foto excluída.');
+  };
+}
+
 function initFolderModal(){
   document.getElementById('fClose').addEventListener('click',closeFolderModal);
   document.getElementById('fModalOverlay').addEventListener('click',(e)=>{
