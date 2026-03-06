@@ -380,7 +380,7 @@
     [data-theme="light"] .bottomBar { background:linear-gradient(135deg,#1E2D5A,#2d3a7a); border-top:1px solid rgba(99,102,241,.2); }
     .cmdLabel { font-size:clamp(8px,2.1vw,10px); font-weight:900; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,.85); margin-bottom:8px; padding-left:2px; }
     [data-theme="light"] .cmdLabel { color:#ffffff; font-weight:900; }
-    .cmdRow { display:grid; grid-template-columns:repeat(8,1fr); gap:6px; }
+    .cmdRow { display:grid; grid-template-columns:repeat(10,1fr); gap:4px; }
 
     .cmdBtn {
       display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -417,6 +417,8 @@
     #cmdBackup    .ci-wrap { border-color:rgba(244,114,182,.3); box-shadow:0 3px 10px rgba(236,72,153,.2),inset 0 1px 0 rgba(244,114,182,.15); }
     #themeBtn     .ci-wrap { border-color:rgba(167,139,250,.3); box-shadow:0 3px 10px rgba(139,92,246,.2),inset 0 1px 0 rgba(167,139,250,.15); }
     #cmdReport    .ci-wrap { border-color:rgba(251,146,60,.3);  box-shadow:0 3px 10px rgba(249,115,22,.2),inset 0 1px 0 rgba(251,146,60,.15); }
+    #cmdConsulta  .ci-wrap { border-color:rgba(56,189,248,.3);  box-shadow:0 3px 10px rgba(14,165,233,.2),inset 0 1px 0 rgba(56,189,248,.15); }
+    #cmdRemedio   .ci-wrap { border-color:rgba(167,139,250,.3); box-shadow:0 3px 10px rgba(139,92,246,.2),inset 0 1px 0 rgba(167,139,250,.15); }
     #todayBtn     .ci-wrap { border-color:rgba(52,211,153,.3);  box-shadow:0 3px 10px rgba(16,185,129,.2),inset 0 1px 0 rgba(52,211,153,.15); }
 
     .cmdBtn .ci { font-size:clamp(18px,4.5vw,22px); line-height:1; display:flex; align-items:center; justify-content:center; position:relative; z-index:1; }
@@ -971,10 +973,12 @@
 
     <!-- ══ CENTRAL DE COMANDO ══ -->
     <div class="bottomBar" id="bottomBar">
-      <div class="cmdLabel">Central de Comando</div>
+      <div class="cmdLabel">Pastas · Central de Comando</div>
       <div class="cmdRow">
         <button class="cmdBtn" id="settingsBtn"><span class="ci-wrap"><span class="ci">⚙️</span></span><span class="cl">Config</span></button>
         <button class="cmdBtn" id="cmdCalendar"><span class="ci-wrap"><span class="ci">📅</span></span><span class="cl">Agenda</span></button>
+        <button class="cmdBtn" id="cmdConsulta"><span class="ci-wrap"><span class="ci">🏥</span></span><span class="cl">Consulta</span></button>
+        <button class="cmdBtn" id="cmdRemedio"><span class="ci-wrap"><span class="ci">💊</span></span><span class="cl">Remédio</span></button>
         <button class="cmdBtn" id="cmdFolders"><span class="ci-wrap"><span class="ci">📁</span></span><span class="cl">Pastas</span></button>
         <button class="cmdBtn" id="cmdZap"><span class="ci-wrap"><span class="ci"><svg style="width:clamp(18px,4.5vw,22px);height:clamp(18px,4.5vw,22px)" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M22.58 9.4A9.3 9.3 0 0016.02 7C11.14 7 7.17 10.97 7.17 15.85c0 1.56.41 3.08 1.19 4.42L7.1 25l4.84-1.27a9.35 9.35 0 004.08.93h.003c4.87 0 8.84-3.97 8.84-8.85a8.8 8.8 0 00-2.25-5.41zm-6.56 13.6h-.003a7.76 7.76 0 01-3.96-1.08l-.28-.17-2.92.77.78-2.85-.19-.29a7.73 7.73 0 01-1.18-4.13c0-4.28 3.48-7.76 7.77-7.76a7.7 7.7 0 017.76 7.77c0 4.28-3.49 7.76-7.77 7.76zm4.26-5.82c-.23-.12-1.38-.68-1.6-.76-.21-.08-.37-.12-.52.12-.16.23-.6.76-.74.92-.13.15-.27.17-.5.06-.23-.12-.97-.36-1.85-1.14-.68-.6-1.14-1.35-1.27-1.58-.13-.23-.01-.35.1-.47.1-.1.23-.27.35-.4.11-.14.15-.23.23-.38.07-.15.04-.28-.02-.4-.06-.12-.52-1.26-.72-1.72-.18-.45-.38-.39-.52-.4h-.44c-.16 0-.41.06-.62.29-.21.23-.82.8-.82 1.95s.84 2.26.96 2.42c.12.15 1.65 2.52 4 3.54.56.24 1 .39 1.34.49.56.18 1.07.16 1.48.1.45-.07 1.38-.57 1.58-1.11.19-.54.19-1.01.13-1.11-.06-.1-.21-.16-.44-.27z" fill="white"/></svg></span></span><span class="cl">Zap</span></button>
         <button class="cmdBtn" id="cmdBackup"><span class="ci-wrap"><span class="ci">💾</span></span><span class="cl">Backup</span></button>
@@ -1350,9 +1354,11 @@ function defaultState() {
     folderOrder: ['pauta'],
     tasks: {dom:[],seg:[],ter:[],qua:[],qui:[],sex:[],sab:[],dom2:[],pauta:[]},
     dateTasks: {}, profilePhoto: null, watermarkPhoto: null,
-    lastManualVarrerWeek: null,  // ISO da semana em que foi varrido manualmente
-    lastAutoVarrerWeek: null,    // ISO da semana em que foi varrido automaticamente
-    lastDailyReviewDate: null    // Data YYYY-MM-DD em que a revisão diária foi exibida
+    lastManualVarrerWeek: null,
+    lastAutoVarrerWeek: null,
+    lastDailyReviewDate: null,
+    consultas: [],   // [{id,especialidade,paciente,data,hora,obs}]
+    remedios: []     // [{id,nome,paciente,dose,qtd,hora,frequencia,freqCustom,ativo}]
   };
 }
 
@@ -1421,6 +1427,8 @@ function load() {
       if (!s.lastManualVarrerWeek) s.lastManualVarrerWeek = null;
       if (!s.lastAutoVarrerWeek) s.lastAutoVarrerWeek = null;
       if (!s.lastDailyReviewDate) s.lastDailyReviewDate = null;
+      if (!Array.isArray(s.consultas)) s.consultas = [];
+      if (!Array.isArray(s.remedios)) s.remedios = [];
       // Carrega fotos (salvas separado por serem grandes)
       try {
         const rawPhotos = localStorage.getItem('agendaProMax_photos');
@@ -1827,7 +1835,7 @@ function renderDayView(){
     photoRow.innerHTML=
       '<span style="font-size:18px">📷</span>'+
       '<span style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;color:rgba(251,191,36,.95)">'+
-        'Clique aqui para ver suas fotos ('+photos.length+')'+
+        'Clique aqui para ver suas imagens'+
       '</span>';
     photoRow.addEventListener('click',()=>openBucketPhotoGallery(currentBucket));
     listArea.appendChild(photoRow);
@@ -2495,10 +2503,20 @@ function showReportChoice(){
         <span style="font-size:18px;">📋</span>
         <span>Todas as Tarefas Pendentes</span>
       </button>
+      <button id="_rConsultas" style="padding:13px 16px;border-radius:14px;border:1px solid ${isLight?'rgba(14,165,233,.3)':'rgba(14,165,233,.3)'};background:${isLight?'rgba(14,165,233,.1)':'rgba(14,165,233,.08)'};color:${isLight?'#0ea5e9':'#38bdf8'};font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;">🏥</span>
+        <span>Histórico de Consultas</span>
+      </button>
+      <button id="_rRemedios" style="padding:13px 16px;border-radius:14px;border:1px solid ${isLight?'rgba(139,92,246,.3)':'rgba(139,92,246,.3)'};background:${isLight?'rgba(139,92,246,.1)':'rgba(139,92,246,.08)'};color:${isLight?'#7c3aed':'#c084fc'};font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;">💊</span>
+        <span>Histórico de Remédios</span>
+      </button>
       <button id="_rCancel" style="padding:11px 16px;border-radius:14px;border:none;background:transparent;color:${isLight?'rgba(60,40,10,.45)':'rgba(255,255,255,.38)'};font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;width:100%;">Cancelar</button>
     </div>`;
   box.querySelector('#_rWeek').addEventListener('click',()=>{close();generateWeekReport(false);});
   box.querySelector('#_rAll').addEventListener('click',()=>{close();generateWeekReport(true);});
+  box.querySelector('#_rConsultas').addEventListener('click',()=>{close();generateConsultasReport();});
+  box.querySelector('#_rRemedios').addEventListener('click',()=>{close();generateRemediosReport();});
   box.querySelector('#_rCancel').addEventListener('click',close);
 }
 
@@ -2918,6 +2936,8 @@ function init(){
   document.getElementById('cmdZap').addEventListener('click',shareWhatsAppGlobal);
   document.getElementById('cmdFolders').addEventListener('click',openFolderModal);
   document.getElementById('cmdCalendar').addEventListener('click',()=>openCalendarModal());
+  document.getElementById('cmdConsulta').addEventListener('click',openListaConsultas);
+  document.getElementById('cmdRemedio').addEventListener('click',openListaRemedios);
 
   // Settings modal
   document.getElementById('subScreenBack').addEventListener('click',()=>goSubBack());
@@ -3057,7 +3077,23 @@ function init(){
     if(calModal && calModal.classList.contains('show')){
       closeCalendarModal(); return;
     }
-    // Fecha qualquer overlay dinâmico (modais criados em JS)
+    // Foto em fullscreen → fecha e volta para galeria
+    const fsOv = document.getElementById('photoFullscreenOv');
+    if(fsOv){ fsOv.remove(); return; }
+    // Galeria de fotos → fecha e volta para pasta/dia
+    const galOv = document.getElementById('photoGalleryOv');
+    if(galOv){ galOv.remove(); return; }
+    // Formulários de consulta/remédio
+    const cForm = document.getElementById('consultaFormOv');
+    if(cForm){ cForm.remove(); return; }
+    const rForm = document.getElementById('remedioFormOv');
+    if(rForm){ rForm.remove(); return; }
+    // Listas de consulta/remédio
+    const cLista = document.getElementById('listaConsultasOv');
+    if(cLista){ cLista.remove(); return; }
+    const rLista = document.getElementById('listaRemediosOv');
+    if(rLista){ rLista.remove(); return; }
+    // Fecha qualquer outro overlay dinâmico (modais criados em JS)
     const dynOvs=document.querySelectorAll('body > div[style*="position:fixed"][style*="z-index:9"]');
     for(const ov of dynOvs){
       if(ov.id) continue; // pula os modais fixos com id
@@ -3482,25 +3518,31 @@ function populateFolderSelect(containerId, mode){
 
 // ══ PHOTO GALLERY ══
 function openBucketPhotoGallery(bucketId){
-  const photos=(state.bucketPhotos||{})[bucketId]||[];
-  if(!photos.length){showToast('Nenhuma foto nesta pasta.');return;}
-  const isLight=document.body.getAttribute('data-theme')==='light';
-  const ov=document.createElement('div');
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99995;display:flex;flex-direction:column;';
+  // Remove galeria anterior se existir
+  const existing = document.getElementById('photoGalleryOv');
+  if(existing) existing.remove();
 
-  // Header
+  const photos=(state.bucketPhotos||{})[bucketId]||[];
+  if(!photos.length){showToast('Nenhuma imagem nesta pasta.');return;}
+
+  const ov=document.createElement('div');
+  ov.id='photoGalleryOv'; // ID fixo — o botão voltar detecta e fecha corretamente
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:99995;display:flex;flex-direction:column;';
+
   ov.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1);">
-      <span style="font-family:Space Grotesk,sans-serif;font-weight:800;font-size:16px;color:#fff;">📷 Fotos (${photos.length})</span>
-      <button id="_pgClose" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:10px;color:#fff;font-size:18px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="_pgBack" style="background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.35);border-radius:10px;color:#fb923c;font-size:18px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;">‹</button>
+        <span style="font-family:Space Grotesk,sans-serif;font-weight:800;font-size:16px;color:#fff;">📷 Imagens</span>
+      </div>
     </div>
     <div id="_pgGrid" style="flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:8px;"></div>
   `;
   document.body.appendChild(ov);
-  ov.querySelector('#_pgClose').onclick=()=>ov.remove();
+  ov.querySelector('#_pgBack').onclick=()=>ov.remove();
 
   const grid=ov.querySelector('#_pgGrid');
-  photos.forEach((p,i)=>{
+  photos.forEach((p)=>{
     const cell=document.createElement('div');
     cell.style.cssText='position:relative;aspect-ratio:1;overflow:hidden;border-radius:10px;cursor:pointer;';
     const img=document.createElement('img');
@@ -3513,26 +3555,35 @@ function openBucketPhotoGallery(bucketId){
 }
 
 function openPhotoFullscreen(photo, bucketId, galleryOv){
+  // Remove fullscreen anterior se existir
+  const existing = document.getElementById('photoFullscreenOv');
+  if(existing) existing.remove();
+
   const ov=document.createElement('div');
+  ov.id='photoFullscreenOv'; // ID fixo — botão voltar detecta e fecha, voltando para a galeria
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:99996;display:flex;flex-direction:column;align-items:center;justify-content:center;';
   ov.innerHTML=`
-    <div style="position:absolute;top:14px;right:14px;display:flex;gap:8px;">
+    <div style="position:absolute;top:14px;left:14px;">
+      <button id="_pfBack" style="background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.35);border-radius:10px;color:#fb923c;font-size:18px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;">‹</button>
+    </div>
+    <div style="position:absolute;top:14px;right:14px;">
       <button id="_pfDel" style="background:rgba(255,50,50,.2);border:1px solid rgba(255,50,50,.35);border-radius:10px;color:#ff6b6b;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;font-family:Space Grotesk,sans-serif;">🗑 Excluir</button>
-      <button id="_pfClose" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:10px;color:#fff;font-size:18px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
     </div>
     <img src="${photo.url}" style="max-width:95vw;max-height:82vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);">
     <div style="margin-top:12px;font-size:11px;color:rgba(255,255,255,.4);font-family:Space Grotesk,sans-serif;">${new Date(photo.ts).toLocaleString('pt-BR')}</div>
   `;
   document.body.appendChild(ov);
-  ov.querySelector('#_pfClose').onclick=()=>ov.remove();
+  // Voltar da foto → volta para a galeria
+  ov.querySelector('#_pfBack').onclick=()=>ov.remove();
   ov.querySelector('#_pfDel').onclick=()=>{
-    if(!confirm('Excluir esta foto?')) return;
+    if(!confirm('Excluir esta imagem?')) return;
     if(!state.bucketPhotos) state.bucketPhotos={};
     if(!state.bucketPhotos[bucketId]) state.bucketPhotos[bucketId]=[];
     state.bucketPhotos[bucketId]=state.bucketPhotos[bucketId].filter(x=>x.id!==photo.id);
-    save(); renderDayView(); ov.remove(); galleryOv.remove();
+    save(); renderDayView(); ov.remove();
+    // Reabre a galeria atualizada
     openBucketPhotoGallery(bucketId);
-    showToast('🗑 Foto excluída.');
+    showToast('🗑 Imagem excluída.');
   };
 }
 
@@ -3987,6 +4038,689 @@ function migrateDataTasksToWeek(){
 }
 
 init();
+
+
+// ════════════════════════════════════════════
+// ══ CONSULTAS ══
+// ════════════════════════════════════════════
+
+function ensureConsultaFolder(){
+  // Cria pasta "Consultas" uma única vez se não existir
+  let f = state.folders.find(x=>x.id==='_consultas');
+  if(!f){
+    f = {id:'_consultas', name:'Consultas', emoji:'🏥', parentId:null};
+    state.folders.push(f);
+    state.folderOrder.push('_consultas');
+    if(!state.tasks['_consultas']) state.tasks['_consultas']=[];
+    save(); renderFolders();
+  }
+  return f;
+}
+
+function ensureRemedioFolder(){
+  let f = state.folders.find(x=>x.id==='_remedios');
+  if(!f){
+    f = {id:'_remedios', name:'Remédios', emoji:'💊', parentId:null};
+    state.folders.push(f);
+    state.folderOrder.push('_remedios');
+    if(!state.tasks['_remedios']) state.tasks['_remedios']=[];
+    save(); renderFolders();
+  }
+  return f;
+}
+
+function openConsultaModal(editId){
+  const isLight=document.body.getAttribute('data-theme')==='light';
+  const bg=isLight?'linear-gradient(160deg,#C4A882,#b8956e)':'linear-gradient(160deg,#021824,#04355a)';
+  const textC=isLight?'#2a1a08':'#e8f4ff';
+  const mutedC=isLight?'rgba(50,30,10,.6)':'rgba(180,220,240,.7)';
+  const bdr=isLight?'rgba(0,160,200,.3)':'rgba(0,160,200,.25)';
+  const iS=`width:100%;padding:10px 12px;border-radius:10px;border:1px solid ${bdr};background:${isLight?'rgba(255,255,255,.6)':'rgba(255,255,255,.07)'};color:${textC};font-family:Plus Jakarta Sans,sans-serif;font-size:13px;font-weight:600;outline:none;box-sizing:border-box;margin-bottom:10px;`;
+  const editing=editId?(state.consultas||[]).find(x=>x.id===editId):null;
+
+  const ov=document.createElement('div');
+  ov.id='consultaFormOv';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99993;display:flex;align-items:center;justify-content:center;padding:16px;';
+  ov.innerHTML=`
+    <div style="background:${bg};border:1px solid ${bdr};border-radius:22px;padding:24px 20px;max-width:360px;width:100%;font-family:Plus Jakarta Sans,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,.5);max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <span style="font-size:22px">🏥</span>
+        <span style="font-size:15px;font-weight:900;color:${textC};flex:1;text-align:center;">${editing?'Editar':'Nova'} Consulta</span>
+        <button id="_cClose" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:9px;color:${textC};width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button>
+      </div>
+      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Especialidade *</div>
+      <input id="_cEspec" style="${iS}" placeholder="Ex: Cardiologista, Dentista..." value="${editing?editing.especialidade:''}">
+      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Médico / Clínica</div>
+      <input id="_cMedico" style="${iS}" placeholder="Nome do médico ou clínica..." value="${editing?editing.medico||'':''}">
+      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Paciente *</div>
+      <input id="_cPac" style="${iS}" placeholder="Nome do paciente..." value="${editing?editing.paciente:''}">
+      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Local / Endereço</div>
+      <input id="_cLocal" style="${iS}" placeholder="Endereço ou nome do local..." value="${editing?editing.local||'':''}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Data *</div>
+          <input id="_cData" type="date" style="${iS}" value="${editing?editing.data:''}">
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Hora *</div>
+          <input id="_cHora" type="time" style="${iS}" value="${editing?editing.hora:''}">
+        </div>
+      </div>
+      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Observação</div>
+      <input id="_cObs" style="${iS}" placeholder="Opcional..." value="${editing?editing.obs||'':''}">
+      <button id="_cSave" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:14px;cursor:pointer;margin-top:4px;">✔ ${editing?'Salvar Alterações':'Agendar Consulta'}</button>
+    </div>`;
+  document.body.appendChild(ov);
+  if(!editing) ov.querySelector('#_cData').value=new Date().toISOString().split('T')[0];
+  ov.querySelector('#_cClose').onclick=()=>ov.remove();
+  ov.addEventListener('click',(e)=>{if(e.target===ov)ov.remove();});
+  ov.querySelector('#_cSave').onclick=()=>{
+    const esp=ov.querySelector('#_cEspec').value.trim();
+    const pac=ov.querySelector('#_cPac').value.trim();
+    const data=ov.querySelector('#_cData').value;
+    const hora=ov.querySelector('#_cHora').value;
+    const medico=ov.querySelector('#_cMedico').value.trim();
+    const local=ov.querySelector('#_cLocal').value.trim();
+    const obs=ov.querySelector('#_cObs').value.trim();
+    if(!esp||!pac||!data||!hora){showToast('⚠️ Preencha os campos obrigatórios!');return;}
+    if(!state.consultas)state.consultas=[];
+    if(editing){
+      const idx=state.consultas.findIndex(x=>x.id===editId);
+      if(idx>=0)state.consultas[idx]={...state.consultas[idx],especialidade:esp,medico,paciente:pac,local,data,hora,obs};
+    } else {
+      const c={id:'c'+uid(),especialidade:esp,medico,paciente:pac,local,data,hora,obs,createdAt:Date.now()};
+      state.consultas.push(c);
+      ensureConsultaFolder();
+      // Lança no calendário
+      if(!state.dateTasks)state.dateTasks={};
+      if(!state.dateTasks[data])state.dateTasks[data]=[];
+      state.dateTasks[data].push({id:uid(),text:'🏥 '+esp+(medico?' · '+medico:'')+(pac?' — '+pac:'')+ ' às '+hora,done:false,createdAt:Date.now()});
+    }
+    state.consultas.sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+    save();
+    ov.remove();
+    showToast(editing?'✅ Consulta atualizada!':'✅ Consulta agendada!');
+    openListaConsultas();
+  };
+}
+
+function openListaConsultas(){
+  const existing=document.getElementById('listaConsultasOv');
+  if(existing)existing.remove();
+  const isLight=document.body.getAttribute('data-theme')==='light';
+  const bg=isLight?'linear-gradient(160deg,#C4A882,#b8956e)':'linear-gradient(160deg,#021824,#04355a)';
+  const textC=isLight?'#2a1a08':'#e8f4ff';
+  const mutedC=isLight?'rgba(50,30,10,.6)':'rgba(180,220,240,.6)';
+  const cardBg=isLight?'rgba(255,255,255,.45)':'rgba(255,255,255,.05)';
+
+  const today=new Date(); today.setHours(0,0,0,0);
+  const consultas=(state.consultas||[]).slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+  // Separa futuras (próximas) e passadas (histórico)
+  const proximas=consultas.filter(c=>{ const d=new Date(c.data+'T'+c.hora); return d>=today; });
+  const historico=consultas.filter(c=>{ const d=new Date(c.data+'T'+c.hora); return d<today; });
+
+  function cardHTML(c,isPast){
+    const dataFmt=c.data?c.data.split('-').reverse().join('/'):'-';
+    const accentC=isLight?'#0ea5e9':'#38bdf8';
+    return `<div style="background:${cardBg};border:1px solid ${isPast?'rgba(255,255,255,.06)':'rgba(14,165,233,.25)'};border-radius:14px;padding:13px 14px;margin-bottom:8px;${isPast?'opacity:.75':''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:800;font-size:13px;color:${isPast?mutedC:accentC};margin-bottom:3px;">${c.especialidade}</div>
+          ${c.medico?`<div style="font-size:11px;color:${textC};opacity:.8;margin-bottom:2px;">👨‍⚕️ ${c.medico}</div>`:''}
+          <div style="font-size:12px;color:${textC};font-weight:600;">👤 ${c.paciente}</div>
+          ${c.local?`<div style="font-size:11px;color:${mutedC};margin-top:2px;">📍 ${c.local}</div>`:''}
+          ${c.obs?`<div style="font-size:11px;color:${mutedC};margin-top:2px;">📝 ${c.obs}</div>`:''}
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-weight:800;font-size:13px;color:${textC};">${dataFmt}</div>
+          <div style="font-size:12px;color:${accentC};font-weight:700;">${c.hora}</div>
+          <div style="display:flex;gap:5px;margin-top:6px;">
+            <button onclick="editConsulta('${c.id}')" style="background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);border-radius:7px;color:#38bdf8;font-size:10px;padding:3px 7px;cursor:pointer;">✏️</button>
+            <button onclick="deleteConsulta('${c.id}')" style="background:rgba(255,50,50,.15);border:1px solid rgba(255,50,50,.25);border-radius:7px;color:#ff6b6b;font-size:10px;padding:3px 7px;cursor:pointer;">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  let body='';
+  if(proximas.length===0 && historico.length===0){
+    body=`<div style="text-align:center;padding:40px 20px;color:${mutedC};font-size:13px;font-weight:700;">Nenhuma consulta cadastrada</div>`;
+  } else {
+    if(proximas.length>0){
+      body+=`<div style="font-size:10px;font-weight:900;color:rgba(14,165,233,.8);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;padding:0 2px;">Próximas (${proximas.length})</div>`;
+      proximas.forEach(c=>{ body+=cardHTML(c,false); });
+    }
+    if(historico.length>0){
+      body+=`<div style="font-size:10px;font-weight:900;color:${mutedC};text-transform:uppercase;letter-spacing:.8px;margin:14px 0 8px;padding:0 2px;">Histórico (${historico.length})</div>`;
+      historico.forEach(c=>{ body+=cardHTML(c,true); });
+    }
+  }
+
+  const ov=document.createElement('div');
+  ov.id='listaConsultasOv';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99997;display:flex;flex-direction:column;';
+  ov.innerHTML=`
+    <div style="background:${bg};display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="_lcBack" style="background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.35);border-radius:10px;color:#fb923c;font-size:20px;width:36px;height:36px;cursor:pointer;">‹</button>
+        <span style="font-family:Space Grotesk,sans-serif;font-weight:800;font-size:16px;color:${textC};">🏥 Consultas</span>
+      </div>
+      <button id="_lcAdd" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8);border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:800;padding:8px 14px;cursor:pointer;font-family:Space Grotesk,sans-serif;">+ Nova</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:12px;">${body}</div>`;
+  document.body.appendChild(ov);
+  ov.querySelector('#_lcBack').onclick=()=>ov.remove();
+  ov.querySelector('#_lcAdd').onclick=()=>{ ov.remove(); openConsultaModal(); };
+}
+
+function editConsulta(id){ document.getElementById('listaConsultasOv')?.remove(); openConsultaModal(id); }
+
+function deleteConsulta(id){
+  if(!confirm('Excluir esta consulta?'))return;
+  state.consultas=(state.consultas||[]).filter(c=>c.id!==id);
+  save(); openListaConsultas(); showToast('🗑 Consulta excluída.');
+}
+
+// ════════════════════════════════════════════
+// ══ REMÉDIOS ══
+// ════════════════════════════════════════════
+
+function gerarHorariosRemedio(remedio){
+  // Gera todos os horários do tratamento completo
+  const horarios=[];
+  const [hh,mm]=remedio.hora.split(':').map(Number);
+  const inicio=new Date(remedio.data+'T'+remedio.hora+':00');
+  const totalTomas=remedio.dias * Math.round(24/remedio.frequencia);
+  for(let i=0;i<totalTomas;i++){
+    const t=new Date(inicio.getTime()+(i*remedio.frequencia*3600000));
+    const dateKey=t.toISOString().split('T')[0];
+    const horaStr=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
+    horarios.push({dateKey, horaStr});
+  }
+  return horarios;
+}
+
+function openRemedioModal(editId){
+  const isLight=document.body.getAttribute('data-theme')==='light';
+  const bg=isLight?'linear-gradient(160deg,#C4A882,#b8956e)':'linear-gradient(160deg,#021824,#04355a)';
+  const textC=isLight?'#2a1a08':'#e8f4ff';
+  const mutedC=isLight?'rgba(50,30,10,.6)':'rgba(180,220,240,.7)';
+  const bdr=isLight?'rgba(140,100,50,.3)':'rgba(167,139,250,.25)';
+  const iS=`width:100%;padding:10px 12px;border-radius:10px;border:1px solid ${bdr};background:${isLight?'rgba(255,255,255,.6)':'rgba(255,255,255,.07)'};color:${textC};font-family:Plus Jakarta Sans,sans-serif;font-size:13px;font-weight:600;outline:none;box-sizing:border-box;margin-bottom:10px;`;
+  const editing=editId?(state.remedios||[]).find(x=>x.id===editId):null;
+
+  const ov=document.createElement('div');
+  ov.id='remedioFormOv';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99993;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;';
+  ov.innerHTML=`
+    <div style="background:${bg};border:1px solid ${bdr};border-radius:22px;padding:24px 20px;max-width:360px;width:100%;font-family:Plus Jakarta Sans,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,.5);margin:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <span style="font-size:22px">💊</span>
+        <span style="font-size:15px;font-weight:900;color:${textC};flex:1;text-align:center;">${editing?'Editar':'Novo'} Remédio</span>
+        <button id="_rmClose" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:9px;color:${textC};width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button>
+      </div>
+      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Nome do Remédio *</div>
+      <input id="_rmNome" style="${iS}" placeholder="Ex: Losartana, Amoxicilina..." value="${editing?editing.nome:''}">
+      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Paciente *</div>
+      <input id="_rmPac" style="${iS}" placeholder="Quem vai tomar..." value="${editing?editing.paciente:''}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Dose</div>
+          <input id="_rmDose" style="${iS}" placeholder="Ex: 50mg, 1cp" value="${editing?editing.dose||'':''}">
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Qtd por toma</div>
+          <input id="_rmQtd" type="number" min="1" style="${iS}" placeholder="Ex: 1" value="${editing?editing.qtd||1:1}">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Data Início *</div>
+          <input id="_rmData" type="date" style="${iS}" value="${editing?editing.data:''}">
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">1ª Hora *</div>
+          <input id="_rmHora" type="time" style="${iS}" value="${editing?editing.hora:''}">
+        </div>
+      </div>
+      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Quantos dias de tratamento *</div>
+      <input id="_rmDias" type="number" min="1" max="365" style="${iS}" placeholder="Ex: 7, 30, 90..." value="${editing?editing.dias:''}">
+      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Frequência *</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+        <label style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:12px;border:2px solid rgba(167,139,250,.25);cursor:pointer;font-size:11px;font-weight:700;color:${textC};background:rgba(255,255,255,.04);">
+          <input type="radio" name="rmFreq" value="8" style="display:none;" ${editing&&editing.frequencia===8?'checked':''}> 8 em 8h</label>
+        <label style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:12px;border:2px solid rgba(167,139,250,.25);cursor:pointer;font-size:11px;font-weight:700;color:${textC};background:rgba(255,255,255,.04);">
+          <input type="radio" name="rmFreq" value="12" style="display:none;" ${editing&&editing.frequencia===12?'checked':''}> 12 em 12h</label>
+        <label style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:12px;border:2px solid rgba(167,139,250,.25);cursor:pointer;font-size:11px;font-weight:700;color:${textC};background:rgba(255,255,255,.04);">
+          <input type="radio" name="rmFreq" value="custom" style="display:none;" ${editing&&editing.frequencia!==8&&editing.frequencia!==12?'checked':''}> Personalizar</label>
+      </div>
+      <div id="_rmFreqCustomDiv" style="display:none;margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;">A cada quantas horas?</div>
+        <input id="_rmFreqH" type="number" min="1" max="72" style="${iS}" placeholder="Ex: 6, 24..." value="${editing&&editing.frequencia!==8&&editing.frequencia!==12?editing.frequencia:''}">
+      </div>
+      <div id="_rmPreview" style="margin-bottom:10px;"></div>
+      <button id="_rmSave" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:14px;cursor:pointer;">✔ ${editing?'Salvar Alterações':'Adicionar Remédio'}</button>
+    </div>`;
+  document.body.appendChild(ov);
+  if(!editing) ov.querySelector('#_rmData').value=new Date().toISOString().split('T')[0];
+
+  // Destaca radio selecionado
+  function updateRadioStyle(){
+    ov.querySelectorAll('label:has(input[name="rmFreq"])').forEach(lbl=>{
+      const radio=lbl.querySelector('input[name="rmFreq"]');
+      lbl.style.borderColor=radio.checked?'rgba(167,139,250,.8)':'rgba(167,139,250,.2)';
+      lbl.style.background=radio.checked?'rgba(167,139,250,.15)':'rgba(255,255,255,.04)';
+    });
+    const checked=ov.querySelector('input[name="rmFreq"]:checked');
+    ov.querySelector('#_rmFreqCustomDiv').style.display=(checked&&checked.value==='custom')?'block':'none';
+    updatePreview();
+  }
+  ov.querySelectorAll('input[name="rmFreq"]').forEach(r=>r.addEventListener('change',updateRadioStyle));
+
+  function updatePreview(){
+    const dias=parseInt(ov.querySelector('#_rmDias').value)||0;
+    const freqR=ov.querySelector('input[name="rmFreq"]:checked');
+    if(!freqR||!dias)return;
+    let freq=freqR.value==='8'?8:freqR.value==='12'?12:parseInt(ov.querySelector('#_rmFreqH').value)||0;
+    if(!freq)return;
+    const total=dias*Math.round(24/freq);
+    const previewEl=ov.querySelector('#_rmPreview');
+    previewEl.innerHTML=`<div style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700;color:rgba(167,139,250,.9);">📋 Total: <strong>${total} tomas</strong> em ${dias} dias — a cada ${freq}h</div>`;
+  }
+  ov.querySelector('#_rmDias').addEventListener('input',updatePreview);
+  ov.querySelector('#_rmFreqH').addEventListener('input',updatePreview);
+
+  if(editing)updateRadioStyle();
+
+  ov.querySelector('#_rmClose').onclick=()=>ov.remove();
+  ov.addEventListener('click',(e)=>{if(e.target===ov)ov.remove();});
+
+  ov.querySelector('#_rmSave').onclick=()=>{
+    const nome=ov.querySelector('#_rmNome').value.trim();
+    const pac=ov.querySelector('#_rmPac').value.trim();
+    const dose=ov.querySelector('#_rmDose').value.trim();
+    const qtd=parseInt(ov.querySelector('#_rmQtd').value)||1;
+    const data=ov.querySelector('#_rmData').value;
+    const hora=ov.querySelector('#_rmHora').value;
+    const dias=parseInt(ov.querySelector('#_rmDias').value)||0;
+    const freqR=ov.querySelector('input[name="rmFreq"]:checked');
+    if(!nome||!pac||!data||!hora||!dias||!freqR){showToast('⚠️ Preencha todos os campos obrigatórios!');return;}
+    let freq=freqR.value==='8'?8:freqR.value==='12'?12:parseInt(ov.querySelector('#_rmFreqH').value)||0;
+    if(!freq){showToast('⚠️ Informe a frequência em horas!');return;}
+
+    if(!state.remedios)state.remedios=[];
+
+    if(editing){
+      // Remove horários antigos do calendário antes de reatribuir
+      const old=state.remedios.find(x=>x.id===editId);
+      if(old&&old.calIds){
+        for(const [dk,cid] of Object.entries(old.calIds||{})){
+          if(state.dateTasks&&state.dateTasks[dk])
+            state.dateTasks[dk]=state.dateTasks[dk].filter(t=>t.id!==cid);
+        }
+      }
+      state.remedios=state.remedios.filter(x=>x.id!==editId);
+    }
+
+    // Gera horários completos e lança no calendário
+    const remedio={id:editing?editId:'r'+uid(),nome,paciente:pac,dose,qtd,data,hora,frequencia:freq,dias,ativo:true,createdAt:Date.now(),calIds:{}};
+    ensureRemedioFolder();
+    if(!state.dateTasks)state.dateTasks={};
+    const inicio=new Date(data+'T'+hora+':00');
+    const totalTomas=dias*Math.round(24/freq);
+    for(let i=0;i<totalTomas;i++){
+      const t=new Date(inicio.getTime()+(i*freq*3600000));
+      const dk=t.toISOString().split('T')[0];
+      const hs=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
+      if(!state.dateTasks[dk])state.dateTasks[dk]=[];
+      const tid=uid();
+      state.dateTasks[dk].push({id:tid,text:'💊 '+nome+(dose?' '+dose:'')+(qtd>1?' x'+qtd:'')+(pac?' — '+pac:'')+ ' às '+hs,done:false,createdAt:Date.now()});
+      remedio.calIds[dk]=(remedio.calIds[dk]||[]); // não precisa guardar todos, só referência do remédio
+    }
+    state.remedios.push(remedio);
+    state.remedios.sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+    save();
+    ov.remove();
+    const total=totalTomas;
+    showToast(`✅ ${total} horários lançados no calendário!`);
+    openListaRemedios();
+  };
+}
+
+function openListaRemedios(){
+  const existing=document.getElementById('listaRemediosOv');
+  if(existing)existing.remove();
+  const isLight=document.body.getAttribute('data-theme')==='light';
+  const bg=isLight?'linear-gradient(160deg,#C4A882,#b8956e)':'linear-gradient(160deg,#021824,#04355a)';
+  const textC=isLight?'#2a1a08':'#e8f4ff';
+  const mutedC=isLight?'rgba(50,30,10,.6)':'rgba(180,220,240,.6)';
+  const cardBg=isLight?'rgba(255,255,255,.45)':'rgba(255,255,255,.05)';
+
+  const today=new Date(); today.setHours(0,0,0,0);
+  const remedios=(state.remedios||[]).slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+  const ativos=remedios.filter(r=>{
+    const fim=new Date(r.data+'T'+r.hora); fim.setDate(fim.getDate()+r.dias); return fim>=today;
+  });
+  const inativos=remedios.filter(r=>{
+    const fim=new Date(r.data+'T'+r.hora); fim.setDate(fim.getDate()+r.dias); return fim<today;
+  });
+
+  function cardHTML(r,isPast){
+    const dataFmt=r.data?r.data.split('-').reverse().join('/'):'-';
+    const freqLabel=r.frequencia===8?'8 em 8h':r.frequencia===12?'12 em 12h':r.frequencia+'h em '+r.frequencia+'h';
+    const dataFim=r.data&&r.dias?new Date(new Date(r.data+'T'+r.hora).getTime()+r.dias*86400000).toLocaleDateString('pt-BR'):'-';
+    const total=r.dias?r.dias*Math.round(24/r.frequencia):'-';
+    const accentC=isLight?'#7c3aed':'#c084fc';
+    return `<div style="background:${cardBg};border:1px solid ${isPast?'rgba(255,255,255,.06)':'rgba(139,92,246,.25)'};border-radius:14px;padding:13px 14px;margin-bottom:8px;${isPast?'opacity:.7':''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:800;font-size:13px;color:${isPast?mutedC:accentC};margin-bottom:3px;">💊 ${r.nome}${r.dose?' <span style="font-size:11px;opacity:.75">'+r.dose+'</span>':''}</div>
+          <div style="font-size:12px;color:${textC};font-weight:600;">👤 ${r.paciente}</div>
+          <div style="font-size:11px;color:${mutedC};margin-top:3px;">${freqLabel} · ${r.dias} dias · ${total} tomas</div>
+          <div style="font-size:11px;color:${mutedC};">Início: ${dataFmt} ${r.hora} → Fim: ${dataFim}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;display:flex;flex-direction:column;gap:5px;align-items:flex-end;margin-top:2px;">
+          <button onclick="editRemedio('${r.id}')" style="background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);border-radius:7px;color:#c084fc;font-size:10px;padding:3px 7px;cursor:pointer;">✏️</button>
+          <button onclick="deleteRemedio('${r.id}')" style="background:rgba(255,50,50,.15);border:1px solid rgba(255,50,50,.25);border-radius:7px;color:#ff6b6b;font-size:10px;padding:3px 7px;cursor:pointer;">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  let body='';
+  if(ativos.length===0&&inativos.length===0){
+    body=`<div style="text-align:center;padding:40px 20px;color:${mutedC};font-size:13px;font-weight:700;">Nenhum remédio cadastrado</div>`;
+  } else {
+    if(ativos.length>0){
+      body+=`<div style="font-size:10px;font-weight:900;color:rgba(139,92,246,.8);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;padding:0 2px;">Em Tratamento (${ativos.length})</div>`;
+      ativos.forEach(r=>{ body+=cardHTML(r,false); });
+    }
+    if(inativos.length>0){
+      body+=`<div style="font-size:10px;font-weight:900;color:${mutedC};text-transform:uppercase;letter-spacing:.8px;margin:14px 0 8px;padding:0 2px;">Histórico (${inativos.length})</div>`;
+      inativos.forEach(r=>{ body+=cardHTML(r,true); });
+    }
+  }
+
+  const ov=document.createElement('div');
+  ov.id='listaRemediosOv';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99997;display:flex;flex-direction:column;';
+  ov.innerHTML=`
+    <div style="background:${bg};display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="_lrBack" style="background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.35);border-radius:10px;color:#fb923c;font-size:20px;width:36px;height:36px;cursor:pointer;">‹</button>
+        <span style="font-family:Space Grotesk,sans-serif;font-weight:800;font-size:16px;color:${textC};">💊 Remédios</span>
+      </div>
+      <button id="_lrAdd" style="background:linear-gradient(135deg,#7c3aed,#a855f7);border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:800;padding:8px 14px;cursor:pointer;font-family:Space Grotesk,sans-serif;">+ Novo</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:12px;">${body}</div>`;
+  document.body.appendChild(ov);
+  ov.querySelector('#_lrBack').onclick=()=>ov.remove();
+  ov.querySelector('#_lrAdd').onclick=()=>{ ov.remove(); openRemedioModal(); };
+}
+
+function editRemedio(id){ document.getElementById('listaRemediosOv')?.remove(); openRemedioModal(id); }
+
+function deleteRemedio(id){
+  if(!confirm('Excluir este remédio?\nOs horários no calendário serão mantidos.'))return;
+  state.remedios=(state.remedios||[]).filter(r=>r.id!==id);
+  save(); openListaRemedios(); showToast('🗑 Remédio excluído.');
+}
+
+
+
+
+function generateConsultasReport(){
+  const consultas=(state.consultas||[]).slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+  const today=new Date().toISOString().split('T')[0];
+
+  const buildHtml=()=>{
+    const proximas=consultas.filter(c=>c.data>=today);
+    const historico=consultas.filter(c=>c.data<today);
+
+    const rowsProx=proximas.length===0
+      ? `<tr><td colspan="5" class="empty-row">Nenhuma consulta futura</td></tr>`
+      : proximas.map(c=>{
+          const df=c.data.split('-').reverse().join('/');
+          return `<tr class="row-future">
+            <td class="td-esp">${escHtml(c.especialidade)}</td>
+            <td>${escHtml(c.medico||'—')}</td>
+            <td>${escHtml(c.paciente)}</td>
+            <td class="td-dt">${df}</td>
+            <td class="td-hr">${c.hora}</td>
+          </tr>${c.local||c.obs?`<tr class="row-obs"><td></td><td colspan="4">${c.local?'📍 '+escHtml(c.local)+'  ':''}${c.obs?'📝 '+escHtml(c.obs):''}</td></tr>`:''}`;
+        }).join('');
+
+    const rowsHist=historico.length===0
+      ? `<tr><td colspan="5" class="empty-row">Nenhum histórico</td></tr>`
+      : historico.map(c=>{
+          const df=c.data.split('-').reverse().join('/');
+          return `<tr class="row-past">
+            <td class="td-esp past">${escHtml(c.especialidade)}</td>
+            <td>${escHtml(c.medico||'—')}</td>
+            <td>${escHtml(c.paciente)}</td>
+            <td class="td-dt">${df}</td>
+            <td class="td-hr">${c.hora}</td>
+          </tr>`;
+        }).join('');
+
+    return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Consultas — Agenda Pro Max</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#021824;color:#e8f4ff;padding:18px 14px;min-height:100vh}
+.wrap{max-width:680px;margin:0 auto}
+.page-hdr{padding:18px 20px 14px;background:linear-gradient(160deg,#021824,#04355a);border:1px solid rgba(0,160,200,.22);border-radius:16px 16px 0 0;margin-bottom:0}
+.page-title{font-size:17px;font-weight:900;color:#38bdf8;letter-spacing:-.2px;margin-bottom:2px}
+.page-sub{font-size:11px;color:rgba(180,220,240,.5);font-weight:600}
+.stats{display:flex;gap:7px;flex-wrap:wrap;padding:10px 20px 12px;background:linear-gradient(160deg,#021824,#04355a);border-left:1px solid rgba(0,160,200,.22);border-right:1px solid rgba(0,160,200,.22);border-bottom:1px solid rgba(0,140,180,.12);margin-bottom:14px}
+.stat{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;background:rgba(0,80,120,.28);border:1px solid rgba(0,160,200,.14)}
+.sn{font-size:13px;font-weight:900;color:#7dd3f0}.sl{font-size:9px;font-weight:800;color:rgba(180,220,240,.5);text-transform:uppercase;letter-spacing:.5px}
+.section-hdr{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.8px;padding:6px 2px;margin:12px 0 4px}
+.section-hdr.fut{color:rgba(14,165,233,.8)} .section-hdr.past{color:rgba(180,220,240,.4)}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px}
+thead tr{border-bottom:2px solid rgba(14,165,233,.35)}
+th{padding:8px 8px;text-align:left;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.4px;color:rgba(14,165,233,.75)}
+.td-esp{font-weight:800;color:#38bdf8} .td-esp.past{color:rgba(180,220,240,.45)}
+.td-dt{white-space:nowrap;font-weight:700} .td-hr{white-space:nowrap;font-weight:800;color:#38bdf8}
+.row-future td{padding:9px 8px;border-bottom:1px solid rgba(14,165,233,.08)}
+.row-past td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.04);opacity:.65}
+.row-obs td{padding:2px 8px 8px;font-size:10px;color:rgba(180,220,240,.5);border-bottom:1px solid rgba(14,165,233,.08)}
+.empty-row{text-align:center;padding:16px;color:rgba(180,220,240,.35);font-style:italic}
+.footer{text-align:center;font-size:10px;color:rgba(180,220,240,.25);padding:14px;font-weight:600}
+@media print{
+  body{background:#fff!important;color:#0f172a!important;padding:10px 8px}
+  .page-hdr,.stats{background:#f0f6ff!important;border-color:#bfdbfe!important}
+  .page-title,.sn{color:#0ea5e9!important} .page-sub,.sl{color:#6b7280!important}
+  .stat{background:#dbeafe!important;border-color:#93c5fd!important}
+  th,.td-hr{color:#0ea5e9!important} .td-esp{color:#0284c7!important}
+  .row-future td{border-bottom-color:#e0f2fe!important}
+  .row-past td{border-bottom-color:#f3f4f6!important}
+  .row-obs td{color:#6b7280!important} .footer{color:#9ca3af!important}
+  .section-hdr.fut{color:#0284c7!important} .section-hdr.past{color:#9ca3af!important}
+}
+</style></head><body>
+<div class="wrap">
+  <div class="page-hdr">
+    <div class="page-title">🏥 Relatório de Consultas</div>
+    <div class="page-sub">Gerado em ${new Date().toLocaleString('pt-BR')} · Total: ${consultas.length} consulta(s)</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><span class="sn">${consultas.length}</span><span class="sl">Total</span></div>
+    <div class="stat"><span class="sn">${proximas.length}</span><span class="sl">Próximas</span></div>
+    <div class="stat"><span class="sn">${historico.length}</span><span class="sl">Realizadas</span></div>
+  </div>
+  <div class="section-hdr fut">📅 Próximas (${proximas.length})</div>
+  <table>
+    <thead><tr><th>Especialidade</th><th>Médico/Clínica</th><th>Paciente</th><th>Data</th><th>Hora</th></tr></thead>
+    <tbody>${rowsProx}</tbody>
+  </table>
+  <div class="section-hdr past">🗂 Histórico (${historico.length})</div>
+  <table>
+    <thead><tr><th>Especialidade</th><th>Médico/Clínica</th><th>Paciente</th><th>Data</th><th>Hora</th></tr></thead>
+    <tbody>${rowsHist}</tbody>
+  </table>
+  <div class="footer">Agenda Pro Max</div>
+</div></body></html>`;
+  };
+
+  showFormatChoice('🏥 Consultas','Como quer ver o relatório?',(fmt)=>{
+    const html=buildHtml();
+    if(fmt==='html') _openHtmlTab(html);
+    else _openAsPdf(html,'Consultas');
+    showToast('✅ Relatório aberto!');
+  });
+}
+
+function generateRemediosReport(){
+  // Monta lista de TODOS os horários calculados, ordenados por data+hora
+  const remedios=(state.remedios||[]);
+  const today=new Date().toISOString().split('T')[0];
+
+  // Gera agenda completa de todas as tomas de todos os remédios
+  const todasTomas=[];
+  remedios.forEach(r=>{
+    if(!r.data||!r.hora||!r.frequencia||!r.dias) return;
+    const inicio=new Date(r.data+'T'+r.hora+':00');
+    const totalTomas=r.dias*Math.round(24/r.frequencia);
+    for(let i=0;i<totalTomas;i++){
+      const t=new Date(inicio.getTime()+(i*r.frequencia*3600000));
+      const dk=t.toISOString().split('T')[0];
+      const hs=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
+      todasTomas.push({dk, hs, nome:r.nome, dose:r.dose, qtd:r.qtd, paciente:r.paciente, remedioId:r.id});
+    }
+  });
+  // Ordena por data+hora
+  todasTomas.sort((a,b)=>(a.dk+a.hs).localeCompare(b.dk+b.hs));
+
+  // Agrupa por data
+  const porData={};
+  todasTomas.forEach(t=>{ if(!porData[t.dk]) porData[t.dk]=[]; porData[t.dk].push(t); });
+  const datas=Object.keys(porData).sort();
+
+  const buildHtml=()=>{
+    const futuras=datas.filter(d=>d>=today);
+    const passadas=datas.filter(d=>d<today);
+
+    function buildSection(dks, cls){
+      if(dks.length===0) return `<div class="empty-msg">Nenhum horário neste período</div>`;
+      return dks.map(dk=>{
+        const df=dk.split('-').reverse().join('/');
+        const dayOfWeek=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][new Date(dk+'T12:00').getDay()];
+        const tomas=porData[dk];
+        const rows=tomas.map(t=>`<tr class="row-${cls}">
+          <td class="td-hr">${t.hs}</td>
+          <td class="td-rem">${escHtml(t.nome)}${t.dose?' <span class="dose">'+escHtml(t.dose)+'</span>':''}</td>
+          <td class="td-pac">👤 ${escHtml(t.paciente)}</td>
+          <td class="td-qtd">${t.qtd>1?t.qtd+'x':'1'}</td>
+        </tr>`).join('');
+        return `<div class="day-block">
+          <div class="day-hdr ${cls}"><span class="dname">${dayOfWeek}</span> <span class="ddate">${df}</span> <span class="dcnt">${tomas.length} toma${tomas.length>1?'s':''}</span></div>
+          <table><thead><tr><th>Hora</th><th>Remédio</th><th>Paciente</th><th>Qtd</th></tr></thead><tbody>${rows}</tbody></table>
+        </div>`;
+      }).join('');
+    }
+
+    // Resumo dos remédios cadastrados
+    const remRows=remedios.sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora)).map(r=>{
+      const df=r.data?r.data.split('-').reverse().join('/'):'-';
+      const freqL=r.frequencia===8?'8 em 8h':r.frequencia===12?'12 em 12h':r.frequencia+'h em '+r.frequencia+'h';
+      const total=r.dias?r.dias*Math.round(24/r.frequencia):'-';
+      const dataFim=r.data&&r.dias?new Date(new Date(r.data+'T'+r.hora).getTime()+r.dias*86400000).toLocaleDateString('pt-BR'):'-';
+      const isPast=r.data<today;
+      return `<tr class="${isPast?'row-past':'row-future'}">
+        <td class="td-rem ${isPast?'past':''}">${escHtml(r.nome)}${r.dose?' <span class="dose">'+escHtml(r.dose)+'</span>':''}</td>
+        <td>${escHtml(r.paciente)}</td>
+        <td>${freqL}</td>
+        <td>${df} → ${dataFim}</td>
+        <td>${total} tomas</td>
+      </tr>`;
+    }).join('');
+
+    return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Remédios — Agenda Pro Max</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#021824;color:#e8f4ff;padding:18px 14px;min-height:100vh}
+.wrap{max-width:680px;margin:0 auto}
+.page-hdr{padding:18px 20px 14px;background:linear-gradient(160deg,#021824,#04355a);border:1px solid rgba(167,139,250,.22);border-radius:16px 16px 0 0}
+.page-title{font-size:17px;font-weight:900;color:#c084fc;margin-bottom:2px}
+.page-sub{font-size:11px;color:rgba(180,220,240,.5);font-weight:600}
+.stats{display:flex;gap:7px;flex-wrap:wrap;padding:10px 20px 12px;background:linear-gradient(160deg,#021824,#04355a);border-left:1px solid rgba(167,139,250,.22);border-right:1px solid rgba(167,139,250,.22);border-bottom:1px solid rgba(139,92,246,.12);margin-bottom:14px}
+.stat{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;background:rgba(80,0,120,.2);border:1px solid rgba(167,139,250,.18)}
+.sn{font-size:13px;font-weight:900;color:#c084fc}.sl{font-size:9px;font-weight:800;color:rgba(180,220,240,.45);text-transform:uppercase;letter-spacing:.5px}
+.section-hdr{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.8px;padding:6px 2px;margin:14px 0 6px}
+.section-hdr.fut{color:rgba(139,92,246,.85)} .section-hdr.past{color:rgba(180,220,240,.4)}
+.day-block{margin-bottom:10px;border-radius:12px;overflow:hidden;border:1px solid rgba(139,92,246,.18)}
+.day-hdr{display:flex;align-items:center;gap:8px;padding:7px 12px;background:rgba(80,0,120,.25)}
+.day-hdr.fut .dname{color:#c084fc;font-weight:900;font-size:12px} .day-hdr.past .dname{color:rgba(180,220,240,.5);font-weight:900;font-size:12px}
+.ddate{font-size:11px;font-weight:700;color:rgba(180,220,240,.7)} .dcnt{font-size:10px;color:rgba(180,220,240,.45);margin-left:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{border-bottom:1px solid rgba(139,92,246,.2)} th{padding:6px 10px;text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:rgba(167,139,250,.7)}
+.td-hr{white-space:nowrap;font-weight:900;font-size:13px;color:#c084fc;padding:8px 10px;width:52px}
+.td-rem{font-weight:700;padding:8px 10px} .td-rem.past{opacity:.55}
+.td-pac{font-size:11px;padding:8px 10px;color:rgba(180,220,240,.7)}
+.td-qtd{font-size:11px;padding:8px 10px;color:rgba(180,220,240,.5);text-align:center;width:36px}
+.dose{font-weight:500;font-size:11px;opacity:.7}
+.row-future td{border-bottom:1px solid rgba(139,92,246,.08)}
+.row-past td{border-bottom:1px solid rgba(255,255,255,.04);opacity:.6}
+.empty-msg{text-align:center;padding:14px;color:rgba(180,220,240,.3);font-style:italic;font-size:12px}
+/* Resumo */
+.resume-table table{margin-bottom:0} .resume-table .td-rem{color:#c084fc}
+.footer{text-align:center;font-size:10px;color:rgba(180,220,240,.22);padding:14px;font-weight:600}
+@media print{
+  body{background:#fff!important;color:#0f172a!important;padding:10px 6px}
+  .page-hdr,.stats{background:#f5f3ff!important;border-color:#ddd6fe!important}
+  .page-title,.sn,.td-hr{color:#7c3aed!important} .page-sub,.sl{color:#6b7280!important}
+  .stat{background:#ede9fe!important;border-color:#c4b5fd!important}
+  th{color:#7c3aed!important}
+  .day-hdr{background:#f5f3ff!important} .day-hdr.fut .dname,.day-hdr.past .dname{color:#6d28d9!important}
+  .ddate{color:#374151!important} .dcnt{color:#9ca3af!important}
+  .day-block{border-color:#ddd6fe!important}
+  .td-rem{color:#374151!important} .dose{color:#6b7280!important}
+  .td-pac{color:#6b7280!important} .td-qtd{color:#9ca3af!important}
+  .row-future td,.row-past td{border-bottom-color:#f3f4f6!important}
+  .section-hdr.fut{color:#6d28d9!important} .section-hdr.past{color:#9ca3af!important}
+  .footer{color:#9ca3af!important}
+}
+</style></head><body>
+<div class="wrap">
+  <div class="page-hdr">
+    <div class="page-title">💊 Relatório de Remédios</div>
+    <div class="page-sub">Gerado em ${new Date().toLocaleString('pt-BR')}</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><span class="sn">${remedios.length}</span><span class="sl">Remédios</span></div>
+    <div class="stat"><span class="sn">${todasTomas.length}</span><span class="sl">Total Tomas</span></div>
+    <div class="stat"><span class="sn">${futuras.length}</span><span class="sl">Dias Futuros</span></div>
+    <div class="stat"><span class="sn">${passadas.length}</span><span class="sl">Dias Passados</span></div>
+  </div>
+
+  <div class="section-hdr fut">📋 Resumo dos Remédios (${remedios.length})</div>
+  <div class="resume-table">
+    <table><thead><tr><th>Remédio</th><th>Paciente</th><th>Frequência</th><th>Período</th><th>Total</th></tr></thead>
+    <tbody>${remRows||'<tr><td colspan="5" style="text-align:center;padding:16px;color:rgba(180,220,240,.35)">Nenhum remédio cadastrado</td></tr>'}</tbody></table>
+  </div>
+
+  <div class="section-hdr fut">⏰ Agenda de Tomas — Futuras (${futuras.reduce((s,d)=>s+porData[d].length,0)})</div>
+  ${buildSection(futuras,'fut')}
+
+  ${passadas.length>0?`<div class="section-hdr past">🗂 Histórico de Tomas (${passadas.reduce((s,d)=>s+porData[d].length,0)})</div>${buildSection(passadas,'past')}`:''}
+
+  <div class="footer">Agenda Pro Max</div>
+</div></body></html>`;
+  };
+
+  showFormatChoice('💊 Remédios','Como quer ver o relatório?',(fmt)=>{
+    const html=buildHtml();
+    if(fmt==='html') _openHtmlTab(html);
+    else _openAsPdf(html,'Remedios');
+    showToast('✅ Relatório aberto!');
+  });
+}
+
 
 
   if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").then(reg => console.log("SW registrado")).catch(err => console.log("Erro SW", err)); }); }
