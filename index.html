@@ -1797,21 +1797,32 @@ function navigateBack(){
 function renderDayView(){
   const listArea=document.getElementById('listArea');
   listArea.innerHTML='';
-  // Photo row — shows if bucket has photos
+
+  // ══ REGRA DE FOTOS ══
+  // Se existir ao menos 1 foto nesta pasta/dia, a PRIMEIRA linha é sempre
+  // a linha de fotos (fixa no topo). Sem fotos → linha não aparece.
   const photos=(state.bucketPhotos||{})[currentBucket]||[];
   if(photos.length>0){
     const photoRow=document.createElement('div');
     photoRow.className='taskRow';
-    photoRow.style.cssText='cursor:pointer;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);justify-content:center;gap:8px;padding:10px 14px;';
-    photoRow.innerHTML='<span style="font-size:16px">📷</span><span style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;color:rgba(251,191,36,.9)">Clique aqui para ver suas fotos ('+photos.length+')</span>';
+    photoRow.style.cssText='cursor:pointer;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);justify-content:center;gap:8px;padding:11px 14px;flex-shrink:0;';
+    photoRow.innerHTML=
+      '<span style="font-size:18px">📷</span>'+
+      '<span style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;color:rgba(251,191,36,.95)">'+
+        'Clique aqui para ver suas fotos ('+photos.length+')'+
+      '</span>';
     photoRow.addEventListener('click',()=>openBucketPhotoGallery(currentBucket));
     listArea.appendChild(photoRow);
   }
+
+  // ══ TAREFAS ══
   const arr=state.tasks[currentBucket]||[];
   if(arr.length===0 && photos.length===0){
-    listArea.innerHTML='<div class="emptyLabel">Nenhuma tarefa. Comece a adicionar! 🚀</div>';
-  } else if(arr.length===0){
-    // photos but no tasks — just show the photo row already added
+    // Nada nesta pasta ainda
+    const empty=document.createElement('div');
+    empty.className='emptyLabel';
+    empty.textContent='Nenhuma tarefa. Comece a adicionar! 🚀';
+    listArea.appendChild(empty);
   } else {
     for(const task of arr){
       const row=document.createElement('div');
