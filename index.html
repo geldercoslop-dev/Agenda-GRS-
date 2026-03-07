@@ -28,8 +28,8 @@
 
     :root {
       --bg0: #000000; --bg1: #080808; --bg2: #0a0a0a; --bg3: #0d0d0d;
-      --card: rgba(255,255,255,0.05); --cardBorder: rgba(255,255,255,0.10);
-      --line: rgba(255,255,255,0.08); --muted: rgba(255,255,255,0.40);
+      --card: rgba(99,102,241,0.09); --cardBorder: rgba(99,102,241,0.20);
+      --line: rgba(99,102,241,0.15); --muted: rgba(165,180,252,0.50);
       --shadow: rgba(0,0,0,0.80);
     }
     [data-theme="light"] {
@@ -450,7 +450,7 @@
 
     /* FAB hamburger */
     .sidebarFab {
-      position:absolute; bottom:16px; left:14px; z-index:50;
+      position:absolute; bottom:16px; right:14px; left:auto; z-index:50;
       width:44px; height:44px; border-radius:14px;
       background:linear-gradient(135deg,rgba(212,175,55,.22),rgba(180,140,30,.15));
       border:1px solid rgba(212,175,55,.35);
@@ -1085,7 +1085,7 @@
     </div>
 
     <!-- ══ FAB HAMBURGER ══ -->
-    <button class="sidebarFab" id="sidebarFab" onclick="openSidebar()">☰</button>
+    <button class="sidebarFab" id="sidebarFab">☰</button>
 
     <!-- ══ CENTRAL DE COMANDO (mantido oculto para compatibilidade) ══ -->
     <div class="bottomBar" id="bottomBar">
@@ -3003,6 +3003,19 @@ function initEmojiPickerIn(container){
 }
 
 // ══ INIT ══
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  const ov=document.getElementById('sidebarOverlay');
+  ov.style.display='block';
+  requestAnimationFrame(()=>ov.classList.add('open'));
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  const ov=document.getElementById('sidebarOverlay');
+  ov.classList.remove('open');
+  setTimeout(()=>{ if(!ov.classList.contains('open')) ov.style.display='none'; },300);
+}
+
 function init(){
   state=load();
   repairRemedioFolder();
@@ -3018,21 +3031,9 @@ function init(){
     document.getElementById('watermarkWrap').style.display='none';
   }
 
-  // ── SIDEBAR ──
-  function openSidebar(){
-    document.getElementById('sidebar').classList.add('open');
-    const ov=document.getElementById('sidebarOverlay');
-    ov.style.display='block';
-    requestAnimationFrame(()=>ov.classList.add('open'));
-  }
-  function closeSidebar(){
-    document.getElementById('sidebar').classList.remove('open');
-    const ov=document.getElementById('sidebarOverlay');
-    ov.classList.remove('open');
-    setTimeout(()=>{ if(!ov.classList.contains('open')) ov.style.display='none'; },300);
-  }
   window.openSidebar=openSidebar;
   window.closeSidebar=closeSidebar;
+  document.getElementById('sidebarFab').addEventListener('click', openSidebar);
 
   // Wire sidebar items
   document.getElementById('sb-consulta').addEventListener('click',()=>{ closeSidebar(); openConsultaModal(); });
