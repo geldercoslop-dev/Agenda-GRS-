@@ -76,6 +76,7 @@
       border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0;
       background: #000000;
       transition: background 0.4s;
+      box-shadow: 0 6px 32px rgba(255,255,255,.09), 0 1px 0 rgba(255,255,255,.12);
     }
     [data-theme="light"] .app {
       background: transparent;
@@ -814,18 +815,33 @@
     /* ══ WATERMARK ══ */
     .watermarkWrap {
       position: absolute;
-      bottom: 80px;
-      right: 10px;
+      bottom: 72px;
+      left: 10px;
       width: 155px;
       pointer-events: none;
       z-index: 1;
-      opacity: 0.42;
+      opacity: 0.85;
     }
     .watermarkWrap img {
       width: 100%;
       height: auto;
       display: block;
       filter: drop-shadow(0 2px 12px rgba(0,0,0,0.22));
+    }
+    /* Foto com fundo: exibe em círculo */
+    .watermarkWrap.has-bg {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,.20);
+      box-shadow: 0 4px 18px rgba(0,0,0,.55);
+    }
+    .watermarkWrap.has-bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: none;
     }
     [data-theme="light"] .watermarkWrap {
       opacity: 0.30;
@@ -968,7 +984,7 @@
     </div>
 
     <!-- ══ PROGRESS BAR ══ -->
-    <div id="progressRow" style="display:flex;align-items:stretch;gap:12px;margin:14px 12px 0; padding-bottom:6px;">
+    <div id="progressRow" style="display:flex;align-items:stretch;gap:12px;margin:22px 12px 0; padding-bottom:6px;">
       <div class="progressWrap" id="progressWrap" style="flex:1;">
         <span class="progressLabel">Progresso</span>
         <div class="progressTrack">
@@ -3021,6 +3037,57 @@ function closeSidebar(){
   setTimeout(()=>{ if(!ov.classList.contains('open')) ov.style.display='none'; },300);
 }
 
+
+
+  // Detecta se imagem da marca d'água tem fundo transparente ou sólido
+  function detectWatermarkBg(dataUrl, callback) {
+    const img = new Image();
+    img.onload = function() {
+      const c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      try {
+        const data = ctx.getImageData(0, 0, c.width, c.height).data;
+        let transparentCount = 0;
+        const total = data.length / 4;
+        const step = Math.max(1, Math.floor(total / 1000));
+        for (let i = 0; i < data.length; i += step * 4) {
+          if (data[i + 3] < 200) transparentCount++;
+        }
+        const ratio = transparentCount / (total / step);
+        callback(ratio > 0.05); // mais de 5% transparente = sem fundo
+      } catch(e) {
+        callback(false); // fallback: assume com fundo
+      }
+    };
+    img.src = dataUrl;
+  }
+
+  function applyWatermarkPhoto(dataUrl) {
+    const wImg = document.getElementById('watermarkImg');
+    const wWrap = document.getElementById('watermarkWrap');
+    if (wImg) wImg.src = dataUrl;
+    if (wWrap) {
+      wWrap.style.display = '';
+      detectWatermarkBg(dataUrl, (hasTrans) => {
+        if (hasTrans) {
+          // Sem fundo: imagem livre (padrão mascote)
+          wWrap.classList.remove('has-bg');
+          wWrap.style.borderRadius = '';
+          wWrap.style.overflow = '';
+          wWrap.style.border = '';
+          wWrap.style.boxShadow = '';
+          wWrap.style.width = '155px';
+          wWrap.style.height = '';
+        } else {
+          // Com fundo: círculo bonito
+          wWrap.classList.add('has-bg');
+        }
+      });
+    }
+  }
+
 function init(){
   state=load();
   repairRemedioFolder();
@@ -3030,8 +3097,7 @@ function init(){
   _ti.style.filter = state.theme==='light' ? 'grayscale(1) brightness(0.5)' : 'none';
   if(state.profilePhoto) document.getElementById('profileImg').src=state.profilePhoto;
   if(state.watermarkPhoto){
-    document.getElementById('watermarkImg').src=state.watermarkPhoto;
-    document.getElementById('watermarkWrap').style.display='';
+    applyWatermarkPhoto(state.watermarkPhoto);
   } else {
     document.getElementById('watermarkWrap').style.display='none';
   }
@@ -3239,10 +3305,7 @@ function init(){
     const f=e.target.files[0]; if(!f) return;
     resizeImage(f,400,0.85,(data)=>{
       state.watermarkPhoto=data;
-      const wImg=document.getElementById('watermarkImg');
-      const wWrap=document.getElementById('watermarkWrap');
-      if(wImg){ wImg.src=data; }
-      if(wWrap){ wWrap.style.display=''; }
+      applyWatermarkPhoto(data);
       pendingWmark=data;
       save();
       showToast('✅ Marca d\'água atualizada!');
