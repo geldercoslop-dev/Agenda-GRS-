@@ -84,8 +84,8 @@
       backdrop-filter: none;
     }
     [data-theme="light"] .hdr {
-      background: #111111;
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: #3a3a3a;
+      border-bottom: 1px solid rgba(255,255,255,.12);
     }
     .profileWrap {
       flex-shrink: 0; width: 62px; height: 62px; border-radius: 18px; overflow: hidden;
@@ -219,6 +219,7 @@
       transition: max-height 0.35s cubic-bezier(.4,0,.2,1);
       max-height: 120px; /* semana + handle embaixo */
       position: relative;
+      margin-top: 10px;
     }
     .weekStripWrap.expanded { max-height: 400px; }
     .weekStrip { display:grid; grid-template-columns:repeat(8,1fr); gap:3px; padding:10px 8px 2px; }
@@ -391,8 +392,8 @@
 
     .sidebar {
       position:fixed; top:0; left:-270px; bottom:0; width:260px; z-index:801;
-      background:#111111;
-      border-right:1px solid rgba(255,255,255,.08);
+      background:#0a0a0a;
+      border-right:1px solid rgba(251,146,60,.18);
       box-shadow:4px 0 40px rgba(0,0,0,.6);
       transition:left .3s cubic-bezier(.4,0,.2,1);
       display:flex; flex-direction:column; overflow:hidden;
@@ -400,23 +401,23 @@
     .sidebar.open { left:0; }
 
     .sb-header {
-      padding:16px 16px 14px;
-      border-bottom:1px solid rgba(255,255,255,.08);
+      padding:11px 14px 10px;
+      border-bottom:1px solid rgba(251,146,60,.22);
       display:flex; align-items:center; justify-content:space-between;
-      background:rgba(255,255,255,.03);
+      background:rgba(251,146,60,.04);
     }
     .sb-title {
       font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:900;
-      color:rgba(255,255,255,.9); letter-spacing:.5px; text-transform:uppercase;
+      color:rgba(251,146,60,.95); letter-spacing:.5px; text-transform:uppercase;
     }
     .sb-close {
       width:30px; height:30px; border-radius:9px;
-      background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
-      color:rgba(255,255,255,.6); font-size:14px; cursor:pointer;
+      background:rgba(251,146,60,.1); border:1px solid rgba(251,146,60,.25);
+      color:rgba(251,146,60,.8); font-size:14px; cursor:pointer;
       display:flex; align-items:center; justify-content:center;
       transition:all .15s;
     }
-    .sb-close:active { transform:scale(.88); background:rgba(255,255,255,.15); }
+    .sb-close:active { transform:scale(.88); background:rgba(251,146,60,.2); }
 
     .sb-body { flex:1; overflow-y:auto; padding:8px 0 24px; }
     .sb-body::-webkit-scrollbar { width:3px; }
@@ -426,40 +427,40 @@
     .sb-section-label {
       font-family:'Space Grotesk',sans-serif; font-size:9px; font-weight:800;
       text-transform:uppercase; letter-spacing:1.2px;
-      color:rgba(255,255,255,.3); padding:12px 16px 4px;
+      color:rgba(251,146,60,.5); padding:8px 14px 3px;
     }
     .sb-item {
-      display:flex; align-items:center; gap:13px;
-      padding:12px 16px; cursor:pointer;
+      display:flex; align-items:center; gap:10px;
+      padding:7px 14px; cursor:pointer;
       transition:background .15s; position:relative;
     }
-    .sb-item:hover, .sb-item:active { background:rgba(255,255,255,.05); }
+    .sb-item:hover, .sb-item:active { background:rgba(251,146,60,.07); }
     .sb-item:active .sb-icon { transform:scale(.9); }
 
     .sb-icon {
-      width:38px; height:38px; border-radius:12px;
+      width:32px; height:32px; border-radius:10px;
       display:flex; align-items:center; justify-content:center;
-      font-size:18px; flex-shrink:0; transition:transform .12s;
+      font-size:15px; flex-shrink:0; transition:transform .12s;
       border:1px solid rgba(255,255,255,.06);
     }
     .sb-label {
-      font-family:'Space Grotesk',sans-serif; font-size:12px;
+      font-family:'Space Grotesk',sans-serif; font-size:11.5px;
       font-weight:700; color:rgba(255,255,255,.75); flex:1;
     }
-    .sb-divider { height:1px; background:rgba(255,255,255,.07); margin:6px 0; }
+    .sb-divider { height:1px; background:rgba(251,146,60,.15); margin:4px 0; }
 
     /* FAB hamburger */
     .sidebarFab {
       position:fixed; bottom:22px; right:16px; z-index:9999;
-      width:50px; height:50px; border-radius:16px;
-      background:rgba(255,255,255,.13);
-      border:1px solid rgba(255,255,255,.22);
-      box-shadow:0 6px 24px rgba(0,0,0,.6);
+      width:52px; height:52px; border-radius:18px;
+      background:linear-gradient(135deg,#f97316,#ea580c);
+      border:1.5px solid rgba(251,146,60,.5);
+      box-shadow:0 6px 24px rgba(234,88,12,.45), 0 2px 8px rgba(0,0,0,.5);
       color:#ffffff; font-size:22px; cursor:pointer;
       display:flex; align-items:center; justify-content:center;
-      transition:all .18s cubic-bezier(.34,1.56,.64,1);
+      transition: opacity .25s ease, transform .25s cubic-bezier(.34,1.56,.64,1), bottom .2s ease;
     }
-    .sidebarFab:active { transform:scale(.88); background:rgba(255,255,255,.22); }
+    .sidebarFab:active { transform:scale(.88) !important; background:linear-gradient(135deg,#fb923c,#f97316); }
     /* hide old bottomBar */
     .bottomBar { display:none !important; }
 
@@ -813,9 +814,9 @@
     /* ══ WATERMARK ══ */
     .watermarkWrap {
       position: absolute;
-      bottom: 130px;
+      bottom: 80px;
       right: 10px;
-      width: 130px;
+      width: 155px;
       pointer-events: none;
       z-index: 1;
       opacity: 0.42;
@@ -967,7 +968,7 @@
     </div>
 
     <!-- ══ PROGRESS BAR ══ -->
-    <div id="progressRow" style="display:flex;align-items:stretch;gap:12px;margin:14px 12px 0;">
+    <div id="progressRow" style="display:flex;align-items:stretch;gap:12px;margin:14px 12px 0; padding-bottom:6px;">
       <div class="progressWrap" id="progressWrap" style="flex:1;">
         <span class="progressLabel">Progresso</span>
         <div class="progressTrack">
@@ -1042,6 +1043,7 @@
           <span class="dfbl">Foto</span>
         </button>
         <input type="file" id="dayPhotoInput" accept="image/*" style="display:none">
+        <input type="file" id="dayPhotoInputCam" accept="image/*" capture="environment" style="display:none">
       </div>
     </div>
 
@@ -1397,7 +1399,7 @@
     <!-- ══ SIDEBAR ══ -->
     <div class="sidebar" id="sidebar">
       <div class="sb-header">
-        <span class="sb-title">⚡ Central</span>
+        <span class="sb-title">⚡ Central de Comando</span>
         <button class="sb-close" onclick="closeSidebar()">✕</button>
       </div>
       <div class="sb-body">
@@ -1887,9 +1889,9 @@ function openBucket(id, _pushCurrent){
   const _sw=document.getElementById('weekStripWrap');
   if(_sw) _sw.classList.remove('expanded');
   document.getElementById('bottomBar').classList.add('hidden');
-  // FAB stays visible but repositioned to not overlap day footer
+  // FAB: hide when inside a folder/task view
   const _fab=document.getElementById('sidebarFab');
-  if(_fab) _fab.style.bottom='70px';
+  if(_fab){ _fab.style.opacity='0'; _fab.style.pointerEvents='none'; _fab.style.transform='scale(.7)'; }
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('show'));
 
   // Se é pasta-pai com subpastas, injeta tiles de subpasta no topo da dayView
@@ -1926,7 +1928,7 @@ function goHome(){
   document.getElementById('weekStripWrap').classList.remove('hidden');
   document.getElementById('bottomBar').classList.remove('hidden');
   const _fab2=document.getElementById('sidebarFab');
-  if(_fab2) _fab2.style.bottom='16px';
+  if(_fab2){ _fab2.style.opacity='1'; _fab2.style.pointerEvents='auto'; _fab2.style.transform='scale(1)'; _fab2.style.bottom='22px'; }
   const sub=document.getElementById('subFolderArea');
   if(sub){sub.innerHTML='';sub.style.display='none';}
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('show'));
@@ -3083,13 +3085,9 @@ function init(){
   }
   document.getElementById('dayZapSendBtn').addEventListener('click',shareWhatsApp);
   // Photo button
-  document.getElementById('dayPhotoBtn').addEventListener('click',()=>{
-    document.getElementById('dayPhotoInput').click();
-  });
-  document.getElementById('dayPhotoInput').addEventListener('change',(e)=>{
-    const file = e.target.files[0];
+  // Função helper para processar arquivo de foto de pasta/dia
+  function _handleBucketPhotoFile(file){
     if(!file) return;
-    // Reduz para máx 1200px e qualidade 0.80 para não estourar o localStorage
     resizeImage(file, 1200, 0.80, (dataUrl)=>{
       if(!state.bucketPhotos) state.bucketPhotos={};
       if(!state.bucketPhotos[currentBucket]) state.bucketPhotos[currentBucket]=[];
@@ -3098,7 +3096,37 @@ function init(){
       renderDayView();
       showToast('✅ Foto adicionada!');
     });
-    e.target.value='';
+  }
+  document.getElementById('dayPhotoBtn').addEventListener('click',()=>{
+    // Modal de escolha: câmera ou galeria
+    const mo = document.createElement('div');
+    mo.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;';
+    mo.innerHTML=`
+      <div style="background:#141414;border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;border-top:1px solid rgba(251,146,60,.25);">
+        <div style="text-align:center;font-family:Space Grotesk,sans-serif;font-size:11px;font-weight:800;color:rgba(251,146,60,.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:16px;">📷 Adicionar Foto</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button id="_bpCam" style="width:100%;padding:14px;border-radius:14px;border:1px solid rgba(251,146,60,.3);background:rgba(251,146,60,.08);color:rgba(251,146,60,.95);font-family:Space Grotesk,sans-serif;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+            📸 Tirar Foto com a Câmera
+          </button>
+          <button id="_bpGal" style="width:100%;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:rgba(255,255,255,.85);font-family:Space Grotesk,sans-serif;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+            🖼️ Escolher da Galeria
+          </button>
+          <button id="_bpCancel" style="width:100%;padding:12px;border-radius:14px;border:none;background:transparent;color:rgba(255,255,255,.35);font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:2px;">
+            Cancelar
+          </button>
+        </div>
+      </div>`;
+    document.body.appendChild(mo);
+    mo.querySelector('#_bpCam').onclick=()=>{ mo.remove(); document.getElementById('dayPhotoInputCam').click(); };
+    mo.querySelector('#_bpGal').onclick=()=>{ mo.remove(); document.getElementById('dayPhotoInput').click(); };
+    mo.querySelector('#_bpCancel').onclick=()=>mo.remove();
+    mo.addEventListener('click',(e)=>{ if(e.target===mo) mo.remove(); });
+  });
+  document.getElementById('dayPhotoInput').addEventListener('change',(e)=>{
+    _handleBucketPhotoFile(e.target.files[0]); e.target.value='';
+  });
+  document.getElementById('dayPhotoInputCam').addEventListener('change',(e)=>{
+    _handleBucketPhotoFile(e.target.files[0]); e.target.value='';
   });
 
   // Progress bar today button
