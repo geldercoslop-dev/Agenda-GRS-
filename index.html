@@ -76,7 +76,7 @@
       border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0;
       background: #000000;
       transition: background 0.4s;
-      box-shadow: 0 6px 32px rgba(255,255,255,.09), 0 1px 0 rgba(255,255,255,.12);
+      box-shadow: 0 8px 0 rgba(255,255,255,.10), 0 1px 0 rgba(255,255,255,.18), inset 0 -1px 0 rgba(255,255,255,.08);
     }
     [data-theme="light"] .app {
       background: transparent;
@@ -85,9 +85,12 @@
       backdrop-filter: none;
     }
     [data-theme="light"] .hdr {
-      background: #3a3a3a;
-      border-bottom: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(135deg,#4f46e5,#6366f1);
+      border-bottom: 1px solid rgba(99,102,241,.35);
+      box-shadow: 0 4px 18px rgba(79,70,229,.35), 0 1px 0 rgba(255,255,255,.15);
     }
+    [data-theme="light"] .hdrGreeting { color: #ffffff !important; }
+    [data-theme="light"] .hdrSub { color: rgba(255,255,255,.75) !important; }
     .profileWrap {
       flex-shrink: 0; width: 62px; height: 62px; border-radius: 18px; overflow: hidden;
       cursor: pointer; border: 1px solid rgba(255,255,255,.18);
@@ -514,11 +517,11 @@
     [data-theme="light"] .taskRow { border-bottom:1px solid rgba(99,102,241,.13); }
     .taskRow:last-child { border-bottom:none; }
     .taskRow.done .tText { text-decoration:line-through; opacity:.38; }
-    .tCheck { flex-shrink:0; width:clamp(24px,6.5vw,30px); height:clamp(24px,6.5vw,30px); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:clamp(15px,4.2vw,19px); font-weight:900; color:rgba(255,255,255,.25); border-radius:50%; transition:color .15s,transform .11s; }
-    [data-theme="light"] .tCheck { color:rgba(20,30,90,.25) !important; }
+    .tCheck { flex-shrink:0; width:clamp(24px,6.5vw,30px); height:clamp(24px,6.5vw,30px); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:clamp(15px,4.2vw,19px); font-weight:900; color:rgba(249,115,22,.55); border-radius:50%; transition:color .15s,transform .11s; }
+    [data-theme="light"] .tCheck { color:rgba(234,88,12,.45) !important; }
     .tCheck:active { transform:scale(1.22); }
-    .taskRow.done .tCheck { color:#00d47a !important; opacity:1 !important; }
-    [data-theme="light"] .taskRow.done .tCheck { color:#00a85a !important; }
+    .taskRow.done .tCheck { color:#22c55e !important; opacity:1 !important; }
+    [data-theme="light"] .taskRow.done .tCheck { color:#16a34a !important; }
     .tText { flex:1; font-size:clamp(13px,3.6vw,16px); font-weight:700; line-height:1.25; cursor:text; outline:none; word-break:break-word; color:#fff; }
     [data-theme="light"] .tText { color:#0f1946; font-weight:800; }
     .tText[contenteditable="true"] { background:rgba(123,0,255,.1); border-radius:7px; padding:2px 6px; }
@@ -815,7 +818,7 @@
     /* ══ WATERMARK ══ */
     .watermarkWrap {
       position: absolute;
-      bottom: 72px;
+      bottom: 42px;
       left: 10px;
       width: 155px;
       pointer-events: none;
@@ -1430,8 +1433,14 @@
         <div class="sb-item" id="sb-backup" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(244,114,182,.1);">💾</div><span class="sb-label">Backup</span></div>
 
         <div class="sb-divider"></div>
+        <div class="sb-section-label">Relatórios</div>
+        <div class="sb-item" id="sb-rWeek" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.1);">📅</div><span class="sb-label">Semana</span></div>
+        <div class="sb-item" id="sb-rAll" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.08);">📋</div><span class="sb-label">Pendentes</span></div>
+        <div class="sb-item" id="sb-rConsultas" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(56,189,248,.08);">🏥</div><span class="sb-label">Rel. Consultas</span></div>
+        <div class="sb-item" id="sb-rRemedios" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(167,139,250,.08);">💊</div><span class="sb-label">Rel. Remédios</span></div>
+        <div class="sb-divider"></div>
         <div class="sb-section-label">App</div>
-        <div class="sb-item" id="sb-report" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.1);">📊</div><span class="sb-label">Relatórios</span></div>
+        <div class="sb-item" id="sb-report" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.1);">📊</div><span class="sb-label">Todos Relatórios</span></div>
         <div class="sb-item" id="sb-notif" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.08);">🔔</div><span class="sb-label">Notificações</span></div>
         <div class="sb-item" id="sb-theme" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(167,139,250,.08);"><span id="sbThIcon">💡</span></div><span class="sb-label">Tema</span></div>
         <div class="sb-item" id="sb-today" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(52,211,153,.1);">🕐</div><span class="sb-label">Ir para Hoje</span></div>
@@ -1908,6 +1917,8 @@ function openBucket(id, _pushCurrent){
   // FAB: hide when inside a folder/task view
   const _fab=document.getElementById('sidebarFab');
   if(_fab){ _fab.style.opacity='0'; _fab.style.pointerEvents='none'; _fab.style.transform='scale(.7)'; }
+  // Ocultar watermark fora da home
+  const _wm=document.getElementById('watermarkWrap'); if(_wm) _wm.style.visibility='hidden';
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('show'));
 
   // Se é pasta-pai com subpastas, injeta tiles de subpasta no topo da dayView
@@ -1945,6 +1956,8 @@ function goHome(){
   document.getElementById('bottomBar').classList.remove('hidden');
   const _fab2=document.getElementById('sidebarFab');
   if(_fab2){ _fab2.style.opacity='1'; _fab2.style.pointerEvents='auto'; _fab2.style.transform='scale(1)'; _fab2.style.bottom='22px'; }
+  // Mostrar watermark na home
+  const _wm2=document.getElementById('watermarkWrap'); if(_wm2 && state.watermarkPhoto) _wm2.style.visibility='visible';
   const sub=document.getElementById('subFolderArea');
   if(sub){sub.innerHTML='';sub.style.display='none';}
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('show'));
@@ -1972,11 +1985,11 @@ function renderDayView(){
   if(photos.length>0){
     const photoRow=document.createElement('div');
     photoRow.className='taskRow';
-    photoRow.style.cssText='cursor:pointer;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);justify-content:center;gap:8px;padding:11px 14px;flex-shrink:0;';
+    photoRow.style.cssText='cursor:pointer;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.18);border-radius:14px;justify-content:flex-start;gap:10px;padding:9px 14px;flex-shrink:0;margin-bottom:4px;';
     photoRow.innerHTML=
-      '<span style="font-size:18px">📷</span>'+
-      '<span style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;color:rgba(251,191,36,.95)">'+
-        'Clique aqui para ver suas imagens'+
+      '<span style="font-size:14px;opacity:.7">📷</span>'+
+      '<span style="font-family:Space Grotesk,sans-serif;font-weight:600;font-size:12px;letter-spacing:.2px;color:rgba(251,191,36,.65)">'+
+        'Ver imagens da pasta'+
       '</span>';
     photoRow.addEventListener('click',()=>openBucketPhotoGallery(currentBucket));
     listArea.appendChild(photoRow);
@@ -2011,7 +2024,38 @@ function renderDayView(){
         save(); renderDayView(); updateProgress(); renderWeekStrip();
       });
       row.appendChild(chk); row.appendChild(txt); row.appendChild(mov); row.appendChild(del);
-      listArea.appendChild(row);
+      if(!task.done) listArea.appendChild(row);
+      else row._isDone=true; // marca para colocar depois
+    }
+    // Mostrar concluídas no final, colapsadas
+    const doneArr=arr.filter(t=>t.done);
+    if(doneArr.length>0){
+      const sep=document.createElement('div');
+      sep.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 4px 4px;cursor:pointer;user-select:none;';
+      const isCollapsed=!window._doneExpanded;
+      sep.innerHTML='<span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:.5px;text-transform:uppercase;">✓ Concluídas</span>'
+        +'<span id="doneChevron" style="font-size:10px;color:rgba(255,255,255,.25);transition:transform .2s;">'+(isCollapsed?'▶':'▼')+'</span>';
+      listArea.appendChild(sep);
+      const doneList=document.createElement('div');
+      doneList.id='doneTaskList';
+      doneList.style.display=isCollapsed?'none':'block';
+      for(const task of doneArr){
+        const row=document.createElement('div');
+        row.className='taskRow done';
+        const chk2=document.createElement('div'); chk2.className='tCheck'; chk2.innerHTML='✓';
+        chk2.addEventListener('click',()=>{task.done=false;save();renderDayView();updateProgress();renderWeekStrip();});
+        const txt2=document.createElement('div'); txt2.className='tText'; txt2.textContent=task.text;
+        const del2=document.createElement('div'); del2.className='tDel'; del2.innerHTML='✕';
+        del2.addEventListener('click',()=>{const i=arr.findIndex(t=>t.id===task.id);if(i>=0)arr.splice(i,1);save();renderDayView();updateProgress();renderWeekStrip();});
+        row.appendChild(chk2); row.appendChild(txt2); row.appendChild(del2);
+        doneList.appendChild(row);
+      }
+      listArea.appendChild(doneList);
+      sep.addEventListener('click',()=>{
+        window._doneExpanded=!window._doneExpanded;
+        doneList.style.display=window._doneExpanded?'block':'none';
+        sep.querySelector('#doneChevron').textContent=window._doneExpanded?'▼':'▶';
+      });
     }
   }
 }
@@ -2337,6 +2381,7 @@ function _showInlineViewer(html, showPrint, printTitle){
   const isLight=document.body.getAttribute('data-theme')==='light';
 
   const ov=document.createElement('div');
+  ov.id='inlineViewerOv';
   ov.style.cssText='position:fixed;inset:0;z-index:9900;background:#021824;display:flex;flex-direction:column;';
 
   // Barra superior
@@ -3104,7 +3149,11 @@ function init(){
 
   window.openSidebar=openSidebar;
   window.closeSidebar=closeSidebar;
-  document.getElementById('sidebarFab').addEventListener('click', openSidebar);
+  document.getElementById('sidebarFab').addEventListener('click', ()=>{
+    const sb = document.getElementById('sidebar');
+    if(sb.classList.contains('open')) closeSidebar();
+    else openSidebar();
+  });
 
   // Wire sidebar items
   document.getElementById('sb-consulta').addEventListener('click',()=>{ closeSidebar(); openConsultaModal(); });
@@ -3113,6 +3162,10 @@ function init(){
   document.getElementById('sb-zap').addEventListener('click',()=>{ closeSidebar(); shareWhatsAppGlobal(); });
   document.getElementById('sb-backup').addEventListener('click',()=>{ closeSidebar(); doBackup(); });
   document.getElementById('sb-report').addEventListener('click',()=>{ closeSidebar(); generateReport(); });
+  document.getElementById('sb-rWeek').addEventListener('click',()=>{ closeSidebar(); generateWeekReport(false); });
+  document.getElementById('sb-rAll').addEventListener('click',()=>{ closeSidebar(); generateWeekReport(true); });
+  document.getElementById('sb-rConsultas').addEventListener('click',()=>{ closeSidebar(); generateConsultasReport(); });
+  document.getElementById('sb-rRemedios').addEventListener('click',()=>{ closeSidebar(); generateRemediosReport(); });
   document.getElementById('sb-notif').addEventListener('click',()=>{ closeSidebar(); if(typeof agendarNotificacoesRemedios==='function') agendarNotificacoesRemedios(true); });
   document.getElementById('sb-theme').addEventListener('click',()=>{ closeSidebar(); toggleTheme(); });
   document.getElementById('sb-today').addEventListener('click',()=>{
@@ -3368,6 +3421,9 @@ function init(){
     if(rLista){ rLista.remove(); return; }
     const hpOv = document.getElementById('historicoPacienteOv');
     if(hpOv){ hpOv.remove(); return; }
+    // Viewer de relatório/backup
+    const viewerOv = document.getElementById('inlineViewerOv');
+    if(viewerOv){ viewerOv.remove(); return; }
     // Fecha qualquer outro overlay dinâmico (modais criados em JS)
     const dynOvs=document.querySelectorAll('body > div[style*="position:fixed"][style*="z-index:9"]');
     for(const ov of dynOvs){
@@ -3377,6 +3433,7 @@ function init(){
     if(currentView==='day'){
       navigateBack();
     }
+    // Na home: não faz nada (não sai do app — o pushSentinel já recolocou o estado)
   });
 
   // ── Pull-to-go-back (swipe down on list) ──
