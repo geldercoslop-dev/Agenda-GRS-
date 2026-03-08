@@ -1,0 +1,236 @@
+/* ═══════════════════════════════════════════════════════
+   Agenda Pro Max — Service Worker
+   Versão automática baseada em timestamp de deploy.
+   Nunca altere manualmente — atualiza sozinho a cada deploy.
+   ═══════════════════════════════════════════════════════ */
+
+// Versão gerada automaticamente no momento do deploy.
+// Date.now() muda a cada novo arquivo sw.js gerado — sem necessidade de v1, v2, v3...
+const CACHE_VERSION = Date.now().toString();
+const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
+
+// Arquivos essenciais para funcionar offline
+const CORE_ASSETS = [
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./icons/leo-192.png",
+  "./icons/leo-512.png"
+];
+
+// ══════════════════════════════════════════════════════
+// INSTALL — pré-cacheia assets essenciais
+// skipWaiting() garante ativação imediata sem esperar
+// abas antigas fecharem
+// ══════════════════════════════════════════════════════
+self.addEventListener("install", (event) => {
+  self.skipWaiting();
+
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(CORE_ASSETS))
+      .catch((err) => console.warn("[SW] Falha ao pré-cachear:", err))
+  );
+});
+
+// ══════════════════════════════════════════════════════
+// ACTIVATE — limpa todos os caches antigos automaticamente
+// clientsClaim() assume controle de todas as abas abertas
+// sem precisar recarregar manualmente
+// ══════════════════════════════════════════════════════
+self.addEventListener("activate", (event) => {
+  event.waitUntil((async () => {
+    // Remove todos os caches que não sejam o atual
+    const keys = await caches.keys();
+    await Promise.all(
+      keys
+        .filter((key) => key !== CACHE_NAME)
+        .map((key) => {
+          console.log("[SW] Removendo cache antigo:", key);
+          return caches.delete(key);
+        })
+    );
+
+    // Assume controle imediato de todas as abas abertas
+    await self.clients.claim();
+
+    // Avisa todas as abas que há nova versão ativa
+    // O index.html escuta esta mensagem e recarrega automaticamente
+    const allClients = await self.clients.matchAll({ includeUncontrolled: true });
+    allClients.forEach((client) =>
+      client.postMessage({ type: "SW_UPDATED", version: CACHE_VERSION })
+    );
+  })());
+});
+
+// ══════════════════════════════════════════════════════
+// FETCH — estratégias por tipo de recurso
+// ══════════════════════════════════════════════════════
+self.addEventListener("fetch", (event) => {
+  const req = event.request;
+
+  // Ignora não-GET
+  if (req.method !== "GET") return;
+
+  const url = new URL(req.url);
+
+  // Ignora rotas internas do Vercel (/_next, /_vercel, etc.)
+  if (url.pathname.startsWith("/_")) return;
+
+  // Ignora origens externas (fontes Google, CDN, APIs)
+  if (url.origin !== self.location.origin) return;
+
+  const path = url.pathname;
+
+  // ── HTML / navegação → Network First ─────────────────
+  // Sempre busca versão nova na rede. Se offline, usa cache.
+  if (req.mode === "navigate" || path.endsWith(".html")) {
+    event.respondWith(networkFirst(req));
+    return;
+  }
+
+  // ── manifest.json → Network First ────────────────────
+  if (path.endsWith("manifest.json")) {
+    event.respondWith(networkFirst(req));
+    return;
+  }
+
+  // ── Imagens → Cache First ─────────────────────────────
+  // Raramente mudam; serve do cache, atualiza em background
+  if (/\.(png|jpg|jpeg|webp|svg|ico)$/.test(path)) {
+    event.respondWith(cacheFirst(req));
+    return;
+  }
+
+  // ── JS / CSS → Stale-While-Revalidate ────────────────
+  // Resposta imediata do cache + atualiza em background
+  if (/\.(js|css)$/.test(path)) {
+    event.respondWith(staleWhileRevalidate(req));
+    return;
+  }
+
+  // ── Demais → Network First ────────────────────────────
+  event.respondWith(networkFirst(req));
+});
+
+// ══════════════════════════════════════════════════════
+// ESTRATÉGIAS DE CACHE
+// ══════════════════════════════════════════════════════
+
+// Network First: tenta rede, fallback para cache se offline
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request, { cache: "no-store" });
+    if (response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    if (request.mode === "navigate") {
+      const fallback = await caches.match("./");
+      if (fallback) return fallback;
+    }
+    return new Response("Offline — sem conexão e sem cache.", {
+      status: 503,
+      headers: { "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+}
+
+// Cache First: cache imediato + atualiza em background
+async function cacheFirst(request) {
+  const cached = await caches.match(request);
+  if (cached) {
+    fetch(request).then((response) => {
+      if (response.ok)
+        caches.open(CACHE_NAME).then((c) => c.put(request, response));
+    }).catch(() => {});
+    return cached;
+  }
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    return new Response("", { status: 404 });
+  }
+}
+
+// Stale-While-Revalidate: responde do cache + atualiza fundo
+async function staleWhileRevalidate(request) {
+  const cached = await caches.match(request);
+  const networkPromise = fetch(request).then((response) => {
+    if (response.ok)
+      caches.open(CACHE_NAME).then((c) => c.put(request, response.clone()));
+    return response;
+  }).catch(() => null);
+  return cached || networkPromise;
+}
+
+// ══════════════════════════════════════════════════════
+// NOTIFICAÇÕES DE REMÉDIO E CONSULTA
+// Preservado integralmente — não afeta dados da agenda
+// ══════════════════════════════════════════════════════
+const agendados = new Map(); // id → timeoutId
+
+self.addEventListener("message", (event) => {
+  const { type, payload } = event.data || {};
+
+  if (type === "AGENDAR_NOTIFICACOES") {
+    agendados.forEach((tid) => clearTimeout(tid));
+    agendados.clear();
+
+    const agora = Date.now();
+    (payload || []).forEach((item) => {
+      const diff = item.ts - agora;
+      if (diff < 0 || diff > 7 * 24 * 3600 * 1000) return; // só próximos 7 dias
+
+      const isConsulta = item.tipo === "consulta";
+      const tid = setTimeout(async () => {
+        await self.registration.showNotification(
+          isConsulta ? `🏥 ${item.nome}` : `💊 ${item.nome}`,
+          {
+            body: `${item.hora}${item.paciente ? " — " + item.paciente : ""}${item.dose ? " · " + item.dose : ""}`,
+            icon: "./icons/leo-192.png",
+            badge: "./icons/leo-192.png",
+            tag: item.id,
+            requireInteraction: true,
+            vibrate: [200, 100, 200],
+            data: { id: item.id, tipo: item.tipo || "remedio" }
+          }
+        );
+      }, diff);
+      agendados.set(item.id, tid);
+    });
+
+    event.source?.postMessage({
+      type: "NOTIFICACOES_AGENDADAS",
+      count: agendados.size
+    });
+  }
+
+  if (type === "CANCELAR_NOTIFICACOES") {
+    agendados.forEach((tid) => clearTimeout(tid));
+    agendados.clear();
+  }
+});
+
+// Clique na notificação → abre/foca o app
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clients) => {
+        const open = clients.find((c) => c.url.includes(self.location.origin));
+        if (open) return open.focus();
+        return self.clients.openWindow("./");
+      })
+  );
+});

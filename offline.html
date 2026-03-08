@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-visual">
+  <title>Agenda Pro Max — Offline</title>
+  <meta name="theme-color" content="#021824">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100dvh;
+      background: #021824;
+      color: #e8f4ff;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Orbs de fundo — consistentes com o app */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .o1 { width: 300px; height: 300px; background: rgba(99,102,241,.10); top: -80px; left: -80px; }
+    .o2 { width: 260px; height: 260px; background: rgba(6,182,212,.08); bottom: -60px; right: -60px; }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      padding: 40px 28px 32px;
+      text-align: center;
+      max-width: 340px;
+      width: 100%;
+    }
+
+    /* Ícone do app com anel animado */
+    .icon-wrap {
+      position: relative;
+      width: 96px;
+      height: 96px;
+      margin-bottom: 28px;
+    }
+
+    .icon-ring {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid rgba(99,102,241,.3);
+      animation: ringPulse 2.4s ease-in-out infinite;
+    }
+    .icon-ring.r2 {
+      inset: -14px;
+      border-color: rgba(99,102,241,.15);
+      animation-delay: .4s;
+    }
+
+    @keyframes ringPulse {
+      0%, 100% { transform: scale(1);   opacity: 1; }
+      50%       { transform: scale(1.08); opacity: .4; }
+    }
+
+    .app-icon {
+      width: 96px;
+      height: 96px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #0d2845, #1a3a6e);
+      border: 1px solid rgba(99,102,241,.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 46px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: #e8f4ff;
+      letter-spacing: -.4px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(165,180,252,.7);
+      line-height: 1.6;
+      margin-bottom: 28px;
+      max-width: 260px;
+    }
+
+    /* Badge de status */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(245,158,11,.1);
+      border: 1px solid rgba(245,158,11,.25);
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fcd34d;
+      margin-bottom: 32px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #f59e0b;
+      animation: dotBlink 1.4s ease-in-out infinite;
+    }
+
+    @keyframes dotBlink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .2; }
+    }
+
+    /* Botões */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 15px 20px;
+      border-radius: 16px;
+      border: none;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: opacity .15s, transform .12s;
+      letter-spacing: -.1px;
+    }
+    .btn:active { opacity: .75; transform: scale(.97); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(99,102,241,.35);
+      margin-bottom: 10px;
+    }
+
+    .btn-secondary {
+      background: rgba(99,102,241,.1);
+      border: 1px solid rgba(99,102,241,.22);
+      color: rgba(165,180,252,.85);
+      margin-bottom: 28px;
+    }
+
+    /* Info de dados seguros */
+    .data-safe {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16,185,129,.08);
+      border: 1px solid rgba(16,185,129,.2);
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(110,231,183,.85);
+      line-height: 1.4;
+      text-align: left;
+    }
+    .data-safe-icon { font-size: 18px; flex-shrink: 0; }
+
+    /* Reconectar animação */
+    @keyframes reconnecting {
+      0%   { content: 'Reconectando.'; }
+      33%  { content: 'Reconectando..'; }
+      66%  { content: 'Reconectando...'; }
+      100% { content: 'Reconectando.'; }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+
+  <div class="container">
+
+    <div class="icon-wrap">
+      <div class="icon-ring r2"></div>
+      <div class="icon-ring"></div>
+      <div class="app-icon">📅</div>
+    </div>
+
+    <h1>Sem conexão</h1>
+    <p class="subtitle">O app está offline. Seus dados estão salvos localmente e não foram perdidos.</p>
+
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      <span id="statusText">Sem internet</span>
+    </div>
+
+    <button class="btn btn-primary" onclick="tryReload()">
+      🔄 Tentar novamente
+    </button>
+
+    <button class="btn btn-secondary" onclick="tryCache()">
+      📱 Abrir versão em cache
+    </button>
+
+    <div class="data-safe">
+      <span class="data-safe-icon">🔒</span>
+      <span>Tarefas, consultas e remédios continuam salvos no dispositivo.</span>
+    </div>
+
+  </div>
+
+  <script>
+    const statusEl = document.getElementById('statusText');
+    let _checking = false;
+
+    // Redirecionar automaticamente quando voltar online
+    window.addEventListener('online', () => {
+      statusEl.textContent = 'Reconectando…';
+      setTimeout(() => window.location.replace('./'), 800);
+    });
+
+    window.addEventListener('offline', () => {
+      statusEl.textContent = 'Sem internet';
+    });
+
+    function tryReload() {
+      statusEl.textContent = 'Verificando conexão…';
+      // Tenta buscar o manifest para verificar conectividade real
+      fetch('./manifest.json?_=' + Date.now(), { cache: 'no-store', mode: 'no-cors' })
+        .then(() => { window.location.replace('./'); })
+        .catch(() => {
+          statusEl.textContent = 'Ainda offline…';
+          setTimeout(() => { statusEl.textContent = 'Sem internet'; }, 2000);
+        });
+    }
+
+    function tryCache() {
+      window.location.replace('./');
+    }
+
+    // Se já tem conexão (redirect rápido ou falso offline)
+    if (navigator.onLine) {
+      window.location.replace('./');
+    }
+  </script>
+</body>
+</html>
