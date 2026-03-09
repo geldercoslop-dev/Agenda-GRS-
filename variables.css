@@ -1,0 +1,328 @@
+/* ═══════════════════════════════════════════════════════════════
+   Agenda Pro Max — Design Tokens (variables.css)
+   Tema: Preto sólido com detalhes laranja
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Backgrounds ─────────────────────────────────────── */
+  --bg0:          #0a0a0a;   /* fundo principal — preto quase puro */
+  --bg1:          #111111;   /* cards, modais */
+  --bg2:          #0f0f0f;   /* sidebar */
+  --card:         #161616;   /* card interno */
+  --cardBorder:   rgba(255,255,255,.08);
+
+  /* ── Accent: laranja ─────────────────────────────────── */
+  --accent:       #ea580c;   /* laranja principal */
+  --accent-2:     #f97316;   /* laranja claro (gradient start) */
+  --orange:       #ea580c;
+  --btn-orange-end: #c2410c;
+  --btn-orange-fab: #f97316;
+
+  /* ── Texto ───────────────────────────────────────────── */
+  --text:         #f0f0f0;
+  --text-white:   #ffffff;
+  --muted:        rgba(255,255,255,.35);
+
+  /* ── Outros ──────────────────────────────────────────── */
+  --cyan:         #f97316;   /* reutiliza laranja no lugar do cyan */
+  --aurora-1:     #ea580c;
+  --aurora-2:     #f97316;
+  --aurora-3:     #fb923c;
+
+  /* Progress bar track */
+  --sky-top:      #2a2a2a;
+  --sky-mid:      #1f1f1f;
+  --sky-bot:      #161616;
+}
+
+/* ── Tema claro: override para off-white ───────────────── */
+[data-theme="light"] {
+  --bg0:        #f5f0eb;     /* off-white levemente quente */
+  --bg1:        #ede8e2;
+  --bg2:        #ddd8d1;
+  --card:       #e8e2db;
+  --cardBorder: rgba(0,0,0,.09);
+  --text:       #1a1a1a;
+  --text-white: #ffffff;
+  --muted:      rgba(0,0,0,.4);
+  --sky-top:    #ccc6be;
+  --sky-mid:    #bbb5ad;
+  --sky-bot:    #aaa49c;
+}
+
+/* ── Reset global ──────────────────────────────────────── */
+*, *::before, *::after {
+  margin: 0; padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-size: clamp(14px, 3.8vw, 18px);
+  overflow-x: hidden;
+  background: var(--bg0);
+}
+
+html, body {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  height: 100dvh;
+  color: var(--text);
+  overflow-x: hidden;
+  background: var(--bg0);
+}
+
+/* ── Sidebar — preto sólido ────────────────────────────── */
+.sidebar {
+  background: #0d0d0d !important;
+  border-right: 1px solid rgba(234,88,12,.2) !important;
+}
+
+.sb-header {
+  background: #111111 !important;
+  border-bottom: 1px solid rgba(234,88,12,.2) !important;
+}
+
+/* ── Modais — preto sólido ─────────────────────────────── */
+.sModalBox, .fModalBox {
+  background: #111111 !important;
+  border: 1px solid rgba(234,88,12,.18) !important;
+}
+
+.sModalHdr, .fModalHdr {
+  background: #0d0d0d !important;
+  border-bottom: 1px solid rgba(234,88,12,.18) !important;
+}
+
+/* ── Settings cards — grid uniforme ────────────────────── */
+.sCardGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 14px;
+}
+
+.sCard {
+  background: #181818;
+  border: 1px solid rgba(234,88,12,.15);
+  border-radius: 14px;
+  padding: 16px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background .15s, transform .12s;
+  text-align: center;
+}
+
+.sCard:active {
+  background: rgba(234,88,12,.12) !important;
+  transform: scale(.95);
+}
+
+.sCardIcon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.sCardLabel {
+  font-size: 12px;
+  font-weight: 800;
+  color: #f0f0f0;
+  letter-spacing: -.1px;
+}
+
+.sCardSub {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,.4);
+}
+
+/* ── Folder cards — mesmo estilo dos settings ──────────── */
+.fActionCards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 14px;
+}
+
+.fCard {
+  background: #181818;
+  border: 1px solid rgba(234,88,12,.15);
+  border-radius: 14px;
+  padding: 16px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background .15s, transform .12s;
+  text-align: center;
+}
+
+.fCard:active {
+  background: rgba(234,88,12,.12) !important;
+  transform: scale(.95);
+}
+
+.fCard.danger {
+  border-color: rgba(239,68,68,.2);
+}
+
+.fCard.danger:active {
+  background: rgba(239,68,68,.1) !important;
+}
+
+.fCardIcon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.fCardLabel {
+  font-size: 12px;
+  font-weight: 800;
+  color: #f0f0f0;
+  letter-spacing: -.1px;
+}
+
+.fCardSub {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,.4);
+}
+
+/* ── Save button — laranja ─────────────────────────────── */
+.sSaveBtn, .fSaveBtn {
+  background: linear-gradient(135deg, #f97316, #ea580c) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+}
+
+/* ── Relatório de consultas / remédios ─────────────────── */
+.rptWrap {
+  background: #0d0d0d;
+  color: #f0f0f0;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.rptHeader {
+  background: linear-gradient(160deg, #111, #1a1a1a);
+  border-bottom: 1px solid rgba(234,88,12,.2);
+  padding: 20px 18px 16px;
+}
+
+.rptTitle {
+  font-size: 18px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -.3px;
+  margin-bottom: 2px;
+}
+
+.rptSub {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,.4);
+}
+
+.rptStatBar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 18px 14px;
+  background: #111;
+  border-bottom: 1px solid rgba(234,88,12,.1);
+}
+
+.rptStat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 6px;
+  background: #181818;
+  border: 1px solid rgba(234,88,12,.15);
+  border-radius: 12px;
+}
+
+.rptStatNum {
+  font-size: 20px;
+  font-weight: 900;
+  color: #ea580c;
+  line-height: 1;
+}
+
+.rptStatLbl {
+  font-size: 9px;
+  font-weight: 800;
+  color: rgba(255,255,255,.4);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.rptCard {
+  background: #161616;
+  border: 1px solid rgba(234,88,12,.12);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.rptCardHdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #111;
+  border-bottom: 1px solid rgba(234,88,12,.1);
+}
+
+.rptCardTitle {
+  font-size: 15px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.rptBadge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(234,88,12,.3);
+  color: #ea580c;
+  background: rgba(234,88,12,.08);
+}
+
+.rptField {
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.rptFieldItem {
+  background: #111;
+  border-radius: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,.05);
+}
+
+.rptFieldLabel {
+  font-size: 9px;
+  font-weight: 800;
+  color: rgba(255,255,255,.3);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 3px;
+}
+
+.rptFieldValue {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f0f0f0;
+}
