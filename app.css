@@ -666,16 +666,16 @@
     .sCardGrid { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:12px; }
     .sCard {
       display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:7px; padding:14px 10px 12px; border-radius:16px;
+      gap:5px; padding:12px 8px 10px; border-radius:14px;
       border:1px solid rgba(0,160,200,.15); background:rgba(0,80,120,.15);
       cursor:pointer; transition:all .15s; text-align:center;
     }
     [data-theme="light"] .sCard { /* same as dark */ }
     .sCard:active { transform:scale(.95); background:rgba(0,120,180,.3); }
-    .sCardIcon { font-size:26px; line-height:1; }
-    .sCardLabel { font-size:12px; font-weight:800; color:var(--text); letter-spacing:-.1px; }
+    .sCardIcon { font-size:22px; line-height:1; }
+    .sCardLabel { font-size:11px; font-weight:800; color:var(--text); letter-spacing:-.1px; }
     [data-theme="light"] .sCardLabel { /* same */ }
-    .sCardSub { font-size:11px; font-weight:600; color:rgba(180,220,240,.6); }
+    .sCardSub { font-size:10px; font-weight:600; color:rgba(180,220,240,.6); }
     [data-theme="light"] .sCardSub { /* same */ }
 
     /* Subform panel that slides in after card tap */
@@ -687,7 +687,7 @@
     [data-theme="light"] .sPhotoBtn { /* same */ }
     .sPreviewImg { width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,.25); margin-top:8px; display:none; }
     .sPreviewWmark { max-width:80px; max-height:36px; object-fit:contain; border-radius:6px; opacity:.8; margin-top:8px; display:none; }
-    .sSaveBtn { display:block; width:calc(100% - 24px); margin:4px 12px 16px; padding:11px; border-radius:12px; border:none; background:linear-gradient(135deg,var(--accent-2),var(--accent)); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:13px; cursor:pointer; transition:transform .12s; }
+    .sSaveBtn { display:block; width:calc(100% - 24px); margin:4px 12px 14px; padding:10px; border-radius:11px; border:none; background:linear-gradient(135deg,#0ea5e9,#0284c7); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:900; font-size:13px; cursor:pointer; transition:transform .12s; }
     .sSaveBtn:active { transform:scale(.97); }
 
     /* ══ FOLDER MODAL ══ */
