@@ -1783,8 +1783,8 @@ function showFormatChoice(titulo, subtitulo, cb){
     headerSub   = subtitulo || 'Como você quer visualizar?';
   }
 
-  // ── Estilo único para TODOS os botões de ação ──
-  const BTN = `padding:13px 16px;border-radius:12px;border:1px solid rgba(0,140,180,.22);background:rgba(0,80,120,.32);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:12px;-webkit-tap-highlight-color:transparent;`;
+  // ── Botões lado a lado, mesmo tamanho ──
+  const BTN_BASE = `flex:1;padding:14px 8px;border-radius:12px;border:1px solid rgba(0,140,180,.22);background:rgba(0,80,120,.32);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent;`;
 
   box.innerHTML=`
     <div style="display:flex;flex-direction:column;align-items:center;padding:8px 0 16px;border-bottom:1px solid rgba(0,140,180,.14);margin-bottom:16px;">
@@ -1792,17 +1792,17 @@ function showFormatChoice(titulo, subtitulo, cb){
       <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:900;color:#e8f4ff;letter-spacing:-.3px;">${headerTitle}</div>
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(180,220,240,.6);margin-top:5px;">${headerSub}</div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <button id="_fHtml" style="${BTN}">
-        <span style="font-size:18px;line-height:1;">🖥️</span>
+    <div style="display:flex;gap:10px;margin-bottom:10px;">
+      <button id="_fHtml" style="${BTN_BASE}">
+        <span style="font-size:22px;line-height:1;">🖥️</span>
         <span>Ver na tela</span>
       </button>
-      <button id="_fPdf" style="${BTN}">
-        <span style="font-size:18px;line-height:1;">📄</span>
-        <span>Salvar como PDF</span>
+      <button id="_fPdf" style="${BTN_BASE}">
+        <span style="font-size:22px;line-height:1;">📄</span>
+        <span>Salvar PDF</span>
       </button>
-      <button id="_fCancel" style="padding:11px 16px;border-radius:12px;border:none;background:transparent;color:rgba(180,220,240,.4);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;width:100%;margin-top:2px;">Cancelar</button>
-    </div>`;
+    </div>
+    <button id="_fCancel" style="padding:11px 16px;border-radius:12px;border:none;background:transparent;color:rgba(180,220,240,.4);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;width:100%;margin-top:2px;">Cancelar</button>`;
 
   box.querySelector('#_fHtml').addEventListener('click',()=>{close();cb('html');});
   box.querySelector('#_fPdf').addEventListener('click',()=>{close();cb('pdf');});
@@ -5585,43 +5585,41 @@ function openHistoricoPaciente(){
   const ACCENT='#7dd3f0';
   const BDR='rgba(0,140,180,.18)';
   const FIELD='rgba(0,80,120,.28)';
-  const HBDR='rgba(0,80,120,.25)';
 
   const ov=document.createElement('div');
   ov.id='historicoPacienteOv';
   ov.style.cssText=`position:fixed;inset:0;z-index:99998;background:${bg};display:flex;flex-direction:column;overflow:hidden;`;
 
-  // Coleta todos os pacientes únicos
   const remedios=state.remedios||[];
   const consultas=state.consultas||[];
-  const pacSet=new Set();
-  remedios.forEach(r=>r.paciente&&pacSet.add(r.paciente.trim()));
-  consultas.forEach(c=>c.paciente&&pacSet.add(c.paciente.trim()));
-  const pacientes=[...pacSet].sort();
+  const totalCards=consultas.length+remedios.length;
 
-  function renderResultados(filtro){
-    const termo=filtro.toLowerCase().trim();
-    // Ordenar por data
-    const remFilt=remedios.filter(r=>r.paciente&&r.paciente.toLowerCase().includes(termo))
-      .sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
-    const consFilt=consultas.filter(c=>c.paciente&&c.paciente.toLowerCase().includes(termo))
-      .sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+  // Gera os cards de um array de itens filtrados
+  function renderCards(filtro){
+    const termo=(filtro||'').toLowerCase().trim();
+    const consFilt=consultas.filter(c=>{
+      if(!termo) return true;
+      return [c.especialidade,c.medico,c.paciente,c.local,c.obs].filter(Boolean).join(' ').toLowerCase().includes(termo);
+    });
+    const remFilt=remedios.filter(r=>{
+      if(!termo) return true;
+      return [r.nome,r.dose,r.paciente].filter(Boolean).join(' ').toLowerCase().includes(termo);
+    });
 
-    // Juntar tudo numa lista única ordenada por data
-    const allItems = [
-      ...consFilt.map(c=>({...c, _tipo:'consulta'})),
-      ...remFilt.map(r=>({...r, _tipo:'remedio'}))
+    // Juntar e ordenar por data ascendente
+    const allItems=[
+      ...consFilt.map(c=>({...c,_tipo:'consulta'})),
+      ...remFilt.map(r=>({...r,_tipo:'remedio'}))
     ].sort((a,b)=>((a.data||'9999')+(a.hora||'')).localeCompare((b.data||'9999')+(b.hora||'')));
 
     if(allItems.length===0){
-      return '<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.4);font-size:14px;">Nenhum resultado encontrado</div>';
+      return `<div style="text-align:center;padding:40px 20px;color:${MUTED};font-size:13px;font-family:'Space Grotesk',sans-serif;">Nenhum resultado encontrado</div>`;
     }
 
-    return allItems.map(item => {
+    return allItems.map(item=>{
       const df=item.data?item.data.split('-').reverse().join('/'):'—';
       if(item._tipo==='consulta'){
         return `<div style="background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.2);border-radius:16px;padding:16px;margin-bottom:12px;">
-          <!-- Header do card -->
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
             <div style="display:flex;align-items:center;gap:8px;">
               <span style="font-size:18px;line-height:1;">🏥</span>
@@ -5630,9 +5628,8 @@ function openHistoricoPaciente(){
                 <div style="font-size:10px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;">Consulta</div>
               </div>
             </div>
-            <span style="font-size:12px;font-weight:900;color:#00c48a;font-family:'Space Grotesk',sans-serif;background:rgba(0,196,138,.1);border:1px solid rgba(0,196,138,.25);border-radius:8px;padding:4px 10px;">${df}${item.hora?' · '+item.hora:''}</span>
+            <span style="font-size:12px;font-weight:900;color:#00c48a;font-family:'Space Grotesk',sans-serif;background:rgba(0,196,138,.1);border:1px solid rgba(0,196,138,.25);border-radius:8px;padding:4px 10px;flex-shrink:0;">${df}${item.hora?' · '+item.hora:''}</span>
           </div>
-          <!-- Grid de dados -->
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
             <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;">
               <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Paciente</div>
@@ -5641,8 +5638,8 @@ function openHistoricoPaciente(){
             ${item.medico?`<div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;">
               <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Médico</div>
               <div style="font-size:13px;font-weight:700;color:${TEXT};">👨‍⚕️ ${escHtml(item.medico)}</div>
-            </div>`:''}
-            ${item.local?`<div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;${!item.medico?'grid-column:span 2;':''}">
+            </div>`:'<div></div>'}
+            ${item.local?`<div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;grid-column:span 2;">
               <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Local</div>
               <div style="font-size:12px;font-weight:600;color:rgba(232,244,255,.75);">📍 ${escHtml(item.local)}</div>
             </div>`:''}
@@ -5666,7 +5663,7 @@ function openHistoricoPaciente(){
                 <div style="font-size:10px;font-weight:800;color:rgba(167,139,250,.6);text-transform:uppercase;letter-spacing:.5px;">Remédio · ${freqL}</div>
               </div>
             </div>
-            <span style="font-size:12px;font-weight:900;color:#a78bfa;font-family:'Space Grotesk',sans-serif;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);border-radius:8px;padding:4px 10px;">${item.hora||'—'}</span>
+            <span style="font-size:12px;font-weight:900;color:#a78bfa;font-family:'Space Grotesk',sans-serif;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);border-radius:8px;padding:4px 10px;flex-shrink:0;">${item.hora||'—'}</span>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
             <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;">
@@ -5687,28 +5684,30 @@ function openHistoricoPaciente(){
     }).join('');
   }
 
-  // Chips de pacientes
-  const chipsHTML=pacientes.map(p=>`<button class="pac-chip" data-pac="${escHtml(p)}" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s;">${escHtml(p)}</button>`).join('');
+  // Todos os cards ao abrir (sem filtro)
+  const allCardsHTML = renderCards('');
 
   ov.innerHTML=`
-    <!-- Header: ícone esquerda + título + botão fechar direita -->
-    <div style="display:flex;align-items:center;gap:12px;padding:16px 18px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};flex-shrink:0;">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;padding:18px 18px 16px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};flex-shrink:0;">
       <span style="font-size:22px;line-height:1;flex-shrink:0;">🔍</span>
       <div style="flex:1;min-width:0;">
         <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:${TEXT};">Pesquisar Paciente</div>
-        <div style="font-size:11px;font-weight:600;color:${MUTED};">${pacientes.length} paciente${pacientes.length!==1?'s':''} cadastrado${pacientes.length!==1?'s':''}</div>
+        <div style="font-size:11px;font-weight:600;color:${MUTED};">${totalCards} registro${totalCards!==1?'s':''} cadastrado${totalCards!==1?'s':''}</div>
       </div>
       <button id="hpClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:10px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
     </div>
-    <!-- Campo de busca -->
-    <div style="padding:14px 18px 8px;flex-shrink:0;">
-      <input id="hpSearch" type="text" placeholder="Digite o nome do paciente..." autocomplete="off"
-        style="width:100%;padding:12px 16px;border-radius:14px;border:1px solid ${BDR};background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;outline:none;box-sizing:border-box;">
-      ${pacientes.length>0?`<div style="display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;">${chipsHTML}</div>`:''}
+    <!-- Campo de busca com respiro -->
+    <div style="padding:16px 18px 14px;flex-shrink:0;">
+      <div style="position:relative;">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;">🔍</span>
+        <input id="hpSearch" type="text" placeholder="Filtrar por nome, especialidade..." autocomplete="off"
+          style="width:100%;padding:12px 16px 12px 42px;border-radius:14px;border:1px solid ${BDR};background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;outline:none;box-sizing:border-box;">
+      </div>
     </div>
-    <!-- Resultados -->
-    <div id="hpResults" style="flex:1;overflow-y:auto;padding:4px 18px 24px;">
-      <div style="text-align:center;padding:48px 20px;color:${MUTED};font-size:13px;font-family:'Space Grotesk',sans-serif;">Digite um nome para pesquisar</div>
+    <!-- Cards com respiro no topo -->
+    <div id="hpResults" style="flex:1;overflow-y:auto;padding:4px 18px 24px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
+      ${allCardsHTML}
     </div>`;
 
   document.body.appendChild(ov);
@@ -5719,301 +5718,11 @@ function openHistoricoPaciente(){
   ov.querySelector('#hpClose').onclick=()=>ov.remove();
 
   inp.addEventListener('input',()=>{
-    const v=inp.value.trim();
-    if(v.length<1){
-      resultsDiv.innerHTML=`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-size:13px;font-family:'Space Grotesk',sans-serif;">Digite um nome para pesquisar</div>`;
-      return;
-    }
-    resultsDiv.innerHTML=renderResultados(v);
+    resultsDiv.innerHTML=renderCards(inp.value);
   });
-
-  // Chips clicáveis
-  ov.querySelectorAll('.pac-chip').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      ov.querySelectorAll('.pac-chip').forEach(b=>{ b.style.background=FIELD; b.style.borderColor='rgba(0,140,180,.25)'; });
-      btn.style.background='rgba(0,140,180,.25)';
-      btn.style.borderColor='rgba(0,160,200,.5)';
-      inp.value=btn.dataset.pac;
-      inp.dispatchEvent(new Event('input'));
-    });
-  });
-
-  setTimeout(()=>inp.focus(),150);
 }
 
 
-
-
-  // ══════════════════════════════════════════════════════════════════
-  // PWA CORE — Service Worker · Online/Offline · Install · Prefetch
-  // ══════════════════════════════════════════════════════════════════
-
-  // ── 1. BANNER DE ATUALIZAÇÃO DO SW ─────────────────────────────
-  // Aparece quando uma nova versão é detectada.
-  // Não recarrega automaticamente — usuário decide quando atualizar.
-  (function _swUpdateBanner() {
-    const BANNER_ID = '_swUpdateBanner';
-
-    function _showUpdateBanner() {
-      if (document.getElementById(BANNER_ID)) return;
-      const banner = document.createElement('div');
-      banner.id = BANNER_ID;
-      banner.setAttribute('role', 'alert');
-      banner.setAttribute('aria-live', 'polite');
-      banner.style.cssText = [
-        'position:fixed', 'bottom:80px', 'left:50%',
-        'transform:translateX(-50%) translateY(20px)',
-        'z-index:99998', 'background:rgba(10,25,47,.97)',
-        'border:1px solid rgba(99,102,241,.45)',
-        'border-radius:16px', 'padding:13px 18px',
-        'display:flex', 'align-items:center', 'gap:12px',
-        'max-width:320px', 'width:calc(100vw - 32px)',
-        'box-shadow:0 8px 32px rgba(0,0,0,.5)',
-        'opacity:0', 'transition:opacity .25s, transform .25s',
-        'font-family:Plus Jakarta Sans,sans-serif',
-      ].join(';');
-      banner.innerHTML = [
-        '<span style="font-size:20px;flex-shrink:0">🔄</span>',
-        '<span style="flex:1;font-size:13px;font-weight:700;color:#e8f4ff;line-height:1.4">',
-          'Nova versão disponível',
-        '</span>',
-        '<button id="_swUpdateBtn" style="',
-          'padding:8px 14px;border-radius:10px;border:none;',
-          'background:linear-gradient(135deg,#4f46e5,#6366f1);',
-          'color:#fff;font-family:Plus Jakarta Sans,sans-serif;',
-          'font-size:12px;font-weight:800;cursor:pointer;',
-          'white-space:nowrap;flex-shrink:0;',
-          '-webkit-tap-highlight-color:transparent;',
-        '">Atualizar</button>',
-        '<button id="_swUpdateDismiss" style="',
-          'padding:6px;border:none;background:transparent;',
-          'color:rgba(165,180,252,.5);cursor:pointer;',
-          'font-size:16px;line-height:1;flex-shrink:0;',
-          '-webkit-tap-highlight-color:transparent;',
-        '">✕</button>',
-      ].join('');
-      document.body.appendChild(banner);
-      requestAnimationFrame(() => {
-        banner.style.opacity = '1';
-        banner.style.transform = 'translateX(-50%) translateY(0)';
-      });
-      banner.querySelector('#_swUpdateBtn').addEventListener('click', () => {
-        banner.style.opacity = '0';
-        banner.style.transform = 'translateX(-50%) translateY(20px)';
-        setTimeout(() => {
-          if (banner.parentNode) banner.remove();
-          window.location.reload();
-        }, 250);
-      });
-      banner.querySelector('#_swUpdateDismiss').addEventListener('click', () => {
-        banner.style.opacity = '0';
-        banner.style.transform = 'translateX(-50%) translateY(20px)';
-        setTimeout(() => { if (banner.parentNode) banner.remove(); }, 280);
-      });
-    }
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js', {
-        updateViaCache: 'none'
-      }).then((reg) => {
-
-        reg.update().catch(() => {});
-        setInterval(() => reg.update().catch(() => {}), 60000);
-
-        document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') reg.update().catch(() => {});
-        });
-
-        // SW manda SW_UPDATED após activate + clients.claim()
-        navigator.serviceWorker.addEventListener('message', (event) => {
-          if (event.data?.type === 'SW_UPDATED') {
-            // Se há campo sendo editado, mostrar banner em vez de recarregar
-            const editing = document.querySelector('[contenteditable="true"]');
-            if (editing) {
-              _showUpdateBanner();
-            } else {
-              window.location.reload();
-            }
-          }
-        });
-
-        // Se o SW foi instalado (waiting) enquanto o app estava aberto
-        if (reg.waiting) _showUpdateBanner();
-        reg.addEventListener('updatefound', () => {
-          const nw = reg.installing;
-          if (!nw) return;
-          nw.addEventListener('statechange', () => {
-            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-              _showUpdateBanner();
-            }
-          });
-        });
-
-        agendarNotificacoesRemedios().catch(() => {});
-
-      }).catch((err) => console.warn('[SW] Erro de registro:', err.message));
-    }
-  })();
-
-  // ── 2. BANNER OFFLINE / ONLINE ──────────────────────────────────
-  (function _offlineBanner() {
-    const BANNER_ID = '_offlineBanner';
-    let _reconnectTimer = null;
-
-    function _show() {
-      if (document.getElementById(BANNER_ID)) return;
-      const banner = document.createElement('div');
-      banner.id = BANNER_ID;
-      banner.setAttribute('role', 'status');
-      banner.setAttribute('aria-live', 'polite');
-      banner.style.cssText = [
-        'position:fixed', 'top:0', 'left:0', 'right:0',
-        'z-index:99997',
-        'background:linear-gradient(90deg,rgba(30,15,5,.97),rgba(50,25,5,.97))',
-        'border-bottom:1px solid rgba(245,158,11,.35)',
-        'padding:9px 16px',
-        'display:flex', 'align-items:center', 'gap:10px',
-        'font-family:Plus Jakarta Sans,sans-serif',
-        'transform:translateY(-100%)',
-        'transition:transform .3s ease',
-      ].join(';');
-      banner.innerHTML = [
-        '<span style="font-size:16px;flex-shrink:0">📵</span>',
-        '<span style="flex:1;font-size:12px;font-weight:700;color:#fcd34d;line-height:1.3">',
-          'Modo offline — dados salvos localmente',
-        '</span>',
-        '<span id="_offlineDot" style="',
-          'width:8px;height:8px;border-radius:50%;',
-          'background:#f59e0b;flex-shrink:0;',
-          'animation:_offlinePulse 1.4s ease-in-out infinite;',
-        '"></span>',
-      ].join('');
-      document.body.appendChild(banner);
-      // injetar @keyframes uma vez
-      if (!document.getElementById('_offlineKF')) {
-        const s = document.createElement('style');
-        s.id = '_offlineKF';
-        s.textContent = '@keyframes _offlinePulse{0%,100%{opacity:1}50%{opacity:.25}}';
-        document.head.appendChild(s);
-      }
-      requestAnimationFrame(() => { banner.style.transform = 'translateY(0)'; });
-    }
-
-    function _hide() {
-      const banner = document.getElementById(BANNER_ID);
-      if (!banner) return;
-      banner.style.transform = 'translateY(-100%)';
-      setTimeout(() => { if (banner.parentNode) banner.remove(); }, 320);
-    }
-
-    window.addEventListener('online',  () => { _hide();  showToast('✅ Conexão restaurada'); });
-    window.addEventListener('offline', () => { _show(); });
-
-    if (!navigator.onLine) _show();
-  })();
-
-  // ── 3. BOTÃO DE INSTALAÇÃO PWA ──────────────────────────────────
-  (function _installPrompt() {
-    let _deferred = null;
-    const BTN_ID = '_pwaInstallBtn';
-
-    // Não exibir se já está instalado (standalone ou fullscreen)
-    const isInstalled = window.matchMedia('(display-mode: standalone)').matches
-      || window.matchMedia('(display-mode: fullscreen)').matches
-      || navigator.standalone === true;
-
-    if (isInstalled) return;
-
-    function _showInstallBtn() {
-      if (document.getElementById(BTN_ID)) return;
-      const btn = document.createElement('button');
-      btn.id = BTN_ID;
-      btn.setAttribute('aria-label', 'Instalar aplicativo');
-      btn.style.cssText = [
-        'position:fixed', 'bottom:80px', 'right:16px',
-        'z-index:99996',
-        'background:linear-gradient(135deg,rgba(10,25,47,.97),rgba(20,40,80,.97))',
-        'border:1px solid rgba(99,102,241,.4)',
-        'border-radius:14px', 'padding:10px 16px',
-        'display:flex', 'align-items:center', 'gap:8px',
-        'cursor:pointer',
-        'font-family:Plus Jakarta Sans,sans-serif',
-        'font-size:13px', 'font-weight:800', 'color:#a5b4fc',
-        'box-shadow:0 4px 20px rgba(0,0,0,.4)',
-        'opacity:0', 'transform:scale(.9)',
-        'transition:opacity .2s, transform .2s',
-        '-webkit-tap-highlight-color:transparent',
-      ].join(';');
-      btn.innerHTML = '<span style="font-size:17px">📲</span> Instalar app';
-      document.body.appendChild(btn);
-      requestAnimationFrame(() => {
-        btn.style.opacity = '1';
-        btn.style.transform = 'scale(1)';
-      });
-
-      btn.addEventListener('click', async () => {
-        if (!_deferred) return;
-        btn.style.opacity = '0';
-        btn.style.transform = 'scale(.9)';
-        setTimeout(() => { if (btn.parentNode) btn.remove(); }, 200);
-        _deferred.prompt();
-        const { outcome } = await _deferred.userChoice;
-        if (outcome === 'accepted') showToast('✅ App instalado!');
-        _deferred = null;
-      });
-
-      // Remover automaticamente após 10 segundos se não clicar
-      setTimeout(() => {
-        if (!document.getElementById(BTN_ID)) return;
-        btn.style.opacity = '0';
-        btn.style.transform = 'scale(.9) translateY(10px)';
-        setTimeout(() => { if (btn.parentNode) btn.remove(); }, 300);
-      }, 10000);
-    }
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      _deferred = e;
-      // Atrasa um pouco para não aparecer no primeiro segundo
-      setTimeout(_showInstallBtn, 3000);
-    });
-
-    window.addEventListener('appinstalled', () => {
-      _deferred = null;
-      const btn = document.getElementById(BTN_ID);
-      if (btn) btn.remove();
-      showToast('✅ Agenda Pro Max instalada!');
-    });
-  })();
-
-  // ── 4. PREFETCH INTELIGENTE ──────────────────────────────────────
-  // Roda após a carga inicial para pré-cachear assets secundários.
-  // Usa requestIdleCallback para não competir com o LCP.
-  (function _prefetch() {
-    const ASSETS = [
-      './offline.html',
-      './icons/leo-192.png',
-      './icons/leo-512.png',
-      './manifest.json',
-    ];
-    function _run() {
-      if (!('caches' in window)) return;
-      caches.open('agenda-static-agenda-2025-03').then((cache) => {
-        ASSETS.forEach((url) => {
-          cache.match(url).then((hit) => {
-            if (!hit) fetch(url, { priority: 'low' }).catch(() => {});
-          });
-        });
-      }).catch(() => {});
-    }
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(_run, { timeout: 4000 });
-    } else {
-      setTimeout(_run, 2500);
-    }
-  })();
-
-// ══ COMPARTILHAR POR WHATSAPP ══
 function compartilharPacienteWhatsApp(paciente) {
   const remedios=(state.remedios||[]).filter(r=>r.paciente===paciente);
   const consultas=(state.consultas||[]).filter(c=>c.paciente===paciente);
@@ -6146,14 +5855,19 @@ async function abrirPainelNotificacoes() {
     <div style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${permColor};">Status: ${permLabel}</div>`;
   box.appendChild(hdr);
 
-  // Container de botões compacto
+  // Container de botões — grade 2 colunas
   const btnContainer=document.createElement('div');
-  btnContainer.style.cssText='display:flex;flex-direction:column;gap:12px;';
+  btnContainer.style.cssText='display:flex;flex-direction:column;gap:10px;';
 
-  const btnStyle='width:100%;padding:14px;border-radius:14px;border:1.5px solid rgba(255,255,255,.15);background:var(--primary,rgba(77,163,255,.15));color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:16px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:opacity .15s;';
+  const ROW1=document.createElement('div');
+  ROW1.style.cssText='display:flex;gap:10px;';
+  const ROW2=document.createElement('div');
+  ROW2.style.cssText='display:flex;gap:10px;';
+
+  const btnStyle='flex:1;padding:14px 6px;border-radius:14px;border:1.5px solid rgba(255,255,255,.15);background:var(--primary,rgba(77,163,255,.15));color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:opacity .15s;';
 
   const b1=document.createElement('button'); b1.style.cssText=btnStyle;
-  b1.innerHTML='<span style="font-size:18px;">🔔</span> Ativar tudo';
+  b1.innerHTML='<span style="font-size:20px;">🔔</span>Ativar tudo';
   b1.addEventListener('click',async()=>{
     close();
     await agendarNotificacoesRemedios();
@@ -6162,7 +5876,7 @@ async function abrirPainelNotificacoes() {
   });
 
   const b2=document.createElement('button'); b2.style.cssText=btnStyle;
-  b2.innerHTML='<span style="font-size:18px;">💊</span> Só remédios';
+  b2.innerHTML='<span style="font-size:20px;">💊</span>Só remédios';
   b2.addEventListener('click',async()=>{
     close();
     await agendarNotificacoesRemedios();
@@ -6170,7 +5884,7 @@ async function abrirPainelNotificacoes() {
   });
 
   const b3=document.createElement('button'); b3.style.cssText=btnStyle;
-  b3.innerHTML='<span style="font-size:18px;">🏥</span> Só consultas';
+  b3.innerHTML='<span style="font-size:20px;">🏥</span>Só consultas';
   b3.addEventListener('click',async()=>{
     close();
     await agendarNotificacoesConsultas();
@@ -6182,7 +5896,9 @@ async function abrirPainelNotificacoes() {
   bCancel.textContent='Fechar';
   bCancel.addEventListener('click',close);
 
-  btnContainer.appendChild(b1); btnContainer.appendChild(b2); btnContainer.appendChild(b3); btnContainer.appendChild(bCancel);
+  ROW1.appendChild(b1); ROW1.appendChild(b2);
+  ROW2.appendChild(b3);
+  btnContainer.appendChild(ROW1); btnContainer.appendChild(ROW2); btnContainer.appendChild(bCancel);
   box.appendChild(btnContainer);
 }
 
