@@ -2780,6 +2780,10 @@ function init(){
     // para manter a sentinela pronta para a próxima vez
     setTimeout(pushSentinel, 0);
 
+    // ── PRIORIDADE 1: fecha a lupa de busca se estiver aberta ──
+    const srchOv=document.getElementById('searchOverlay');
+    if(srchOv && srchOv.style.display==='flex'){ closeSearch(); return; }
+
     // Fecha sidebar se estiver aberto
     const sbEl=document.getElementById('sidebar');
     if(sbEl && sbEl.classList.contains('open')){ closeSidebar(); return; }
@@ -3976,6 +3980,8 @@ function openSearch() {
   overlay.style.display = 'flex';
   input.value = '';
   document.getElementById('searchResults').innerHTML = '<p class="searchEmpty">Digite para pesquisar…</p>';
+  // Empurra estado extra para que o botão VOLTAR do celular feche a busca
+  history.pushState({app:'agendapro',search:true},'');
   setTimeout(() => input.focus(), 100);
 }
 
@@ -4009,6 +4015,20 @@ function _runSearch(query) {
 
   const results = [];
 
+  // Calcular data ISO de cada dayId da semana atual
+  function _bucketDateISO(bid) {
+    const wkISO = state.weekStartISO || (typeof getSunday === 'function' ? getSunday() : null);
+    if (!wkISO) return '';
+    const dayIdx = (typeof DAYS !== 'undefined') ? DAYS.findIndex(d => d.id === bid) : -1;
+    if (dayIdx < 0) return '';
+    const base = parseLocalDate(wkISO);
+    base.setDate(base.getDate() + dayIdx);
+    const y = base.getFullYear();
+    const m = String(base.getMonth()+1).padStart(2,'0');
+    const d = String(base.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+
   // Tarefas (semana atual + dateTasks + pastas)
   const allBuckets = [...Object.keys(state.tasks || {})];
   allBuckets.forEach(bid => {
@@ -4016,9 +4036,10 @@ function _runSearch(query) {
     const folder = state.folders.find(f => f.id === bid);
     const day    = typeof DAYS !== 'undefined' ? DAYS.find(d => d.id === bid) : null;
     const label  = folder ? `${folder.emoji||'📁'} ${folder.name}` : (day ? day.label : bid);
+    const sk = day ? _bucketDateISO(bid) : '';
     arr.forEach(t => {
       if (t.text.toLowerCase().includes(q)) {
-        results.push({ type:'task', icon:'✅', typeLabel:'Tarefa', text:t.text, sub:label, sortKey:'', action:()=>{ closeSearch(); openBucket(bid); } });
+        results.push({ type:'task', icon:'✅', typeLabel:'Tarefa', text:t.text, sub:label, sortKey:sk, action:()=>{ closeSearch(); openBucket(bid); } });
       }
     });
   });
@@ -4062,12 +4083,13 @@ function _runSearch(query) {
     }
   });
 
-  // Ordenar por data (mais próxima primeiro)
+  // Ordenar por data ascendente: mais próxima (hoje ou futura) primeiro
+  // Tarefas sem data vão para o fim
+  const todayISO = new Date().toISOString().split('T')[0];
   results.sort((a, b) => {
-    if(!a.sortKey && !b.sortKey) return 0;
-    if(!a.sortKey) return 1;
-    if(!b.sortKey) return -1;
-    return a.sortKey.localeCompare(b.sortKey);
+    const ka = a.sortKey || '9999-99-99';
+    const kb = b.sortKey || '9999-99-99';
+    return ka.localeCompare(kb);
   });
 
   if (results.length === 0) {
@@ -4697,11 +4719,11 @@ function openListaConsultas(){
         <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;color:${isPast?MUTED:TEXT};flex:1;min-width:0;">${fmtConsultaLabel(c)}</div>
         <span style="font-size:12px;font-weight:900;color:#00c48a;font-family:'Space Grotesk',sans-serif;margin-left:8px;flex-shrink:0;">${c.hora}</span>
       </div>
-      <div style="padding:8px 14px;display:flex;gap:6px;flex-wrap:wrap;">
-        <button onclick="event.stopPropagation();_abrirMiniRelatorio('${c.id}')" style="background:rgba(77,163,255,.15);border:1px solid rgba(77,163,255,.3);border-radius:8px;color:var(--primary,#4da3ff);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">📋 Detalhes</button>
-        <button onclick="event.stopPropagation();compartilharConsultaWhatsApp('${c.id}')" style="background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:8px;color:#25d366;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">📤 Zap</button>
-        <button onclick="event.stopPropagation();editConsulta('${c.id}')" style="background:${FIELD};border:1px solid ${FBDR};border-radius:8px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✏️ Editar</button>
-        <button onclick="event.stopPropagation();deleteConsulta('${c.id}')" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✕</button>
+      <div style="padding:8px 14px;display:flex;gap:6px;align-items:center;">
+        <button onclick="event.stopPropagation();_abrirMiniRelatorio('${c.id}')" style="flex:1;background:rgba(77,163,255,.15);border:1px solid rgba(77,163,255,.3);border-radius:8px;color:var(--primary,#4da3ff);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:7px 4px;cursor:pointer;white-space:nowrap;text-align:center;">📋 Detalhes</button>
+        <button onclick="event.stopPropagation();compartilharConsultaWhatsApp('${c.id}')" style="flex:1;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:8px;color:#25d366;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:7px 4px;cursor:pointer;white-space:nowrap;text-align:center;">📤 Zap</button>
+        <button onclick="event.stopPropagation();editConsulta('${c.id}')" style="flex:1;background:${FIELD};border:1px solid ${FBDR};border-radius:8px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:7px 4px;cursor:pointer;white-space:nowrap;text-align:center;">✏️ Editar</button>
+        <button onclick="event.stopPropagation();deleteConsulta('${c.id}')" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:7px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;">✕</button>
       </div>
     </div>`;
   }
@@ -5230,10 +5252,10 @@ function openListaRemedios(){
         <div style="font-size:12px;font-weight:700;color:${TEXT};margin-bottom:4px;">👤 ${escHtml(r.paciente)}</div>
         <div style="font-size:11px;font-weight:600;color:${MUTED};margin-bottom:2px;">📅 ${dataFmt} ${r.hora} → ${dataFim}</div>
         <div style="font-size:11px;font-weight:600;color:${MUTED};margin-bottom:8px;">${r.dias} dias · ${total} usos</div>
-        <div style="display:flex;gap:6px;">
-          <button onclick="compartilharRemedioWhatsApp('${r.id}')" style="background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:8px;color:#25d366;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">📤 Zap</button>
-          <button onclick="editRemedio('${r.id}')" style="background:${FIELD};border:1px solid ${FBDR};border-radius:8px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✏️ Editar</button>
-          <button onclick="deleteRemedio('${r.id}')" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✕</button>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button onclick="compartilharRemedioWhatsApp('${r.id}')" style="flex:1;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:8px;color:#25d366;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:7px 4px;cursor:pointer;white-space:nowrap;text-align:center;">📤 Zap</button>
+          <button onclick="editRemedio('${r.id}')" style="flex:1;background:${FIELD};border:1px solid ${FBDR};border-radius:8px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:7px 4px;cursor:pointer;white-space:nowrap;text-align:center;">✏️ Editar</button>
+          <button onclick="deleteRemedio('${r.id}')" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:7px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;">✕</button>
         </div>
       </div>
     </div>`;
