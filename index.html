@@ -1198,14 +1198,14 @@ function renderDayView(){
   if(photos.length>0){
     const photoRow=document.createElement('div');
     photoRow.className='taskRow';
-    photoRow.style.cssText='cursor:pointer;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:14px;justify-content:center;gap:0;padding:10px 16px;flex-shrink:0;margin-bottom:4px;';
+    photoRow.style.cssText='cursor:pointer;background:rgba(99,102,241,.09);border:1px solid rgba(99,102,241,.22);border-radius:10px;justify-content:space-between;gap:0;padding:7px 14px;flex-shrink:0;margin-bottom:6px;margin-top:2px;';
     const _pCount=photos.length;
     photoRow.innerHTML=
-      '<div style="display:flex;align-items:center;gap:10px;">'+
-        '<span style="font-size:20px;line-height:1;">🖼️</span>'+
-        '<span style="font-family:Space Grotesk,sans-serif;font-weight:800;font-size:13px;letter-spacing:-.2px;color:#818cf8;">Ver galeria da pasta</span>'+
-        (_pCount>0?'<span style="background:rgba(99,102,241,.18);color:#818cf8;font-size:11px;font-weight:800;padding:2px 8px;border-radius:20px;margin-left:4px;">'+_pCount+'</span>':'')+
-      '</div>';
+      '<div style="display:flex;align-items:center;gap:8px;">'+
+        '<span style="font-size:15px;line-height:1;">🖼️</span>'+
+        '<span style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:12px;letter-spacing:-.1px;color:#a5b4fc;">Galeria da pasta</span>'+
+      '</div>'+
+      (_pCount>0?'<span style="background:rgba(99,102,241,.22);color:#a5b4fc;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;">'+_pCount+'</span>':'');
     photoRow.addEventListener('click',()=>openBucketPhotoGallery(currentBucket));
     listArea.appendChild(photoRow);
   }
@@ -1788,7 +1788,7 @@ function showFormatChoice(titulo, subtitulo, cb){
   }
 
   // ── Botões lado a lado, mesmo tamanho ──
-  const BTN_BASE = `flex:1;padding:14px 8px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent;`;
+  const BTN_BASE = `flex:1;padding:11px 6px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;-webkit-tap-highlight-color:transparent;`;
 
   box.innerHTML=`
     <div style="display:flex;flex-direction:column;align-items:center;padding:8px 0 16px;border-bottom:1px solid rgba(0,140,180,.14);margin-bottom:16px;">
@@ -1797,14 +1797,8 @@ function showFormatChoice(titulo, subtitulo, cb){
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(180,220,240,.6);margin-top:5px;">${headerSub}</div>
     </div>
     <div style="display:flex;gap:10px;margin-bottom:10px;">
-      <button id="_fHtml" style="${BTN_BASE}">
-        <span style="font-size:22px;line-height:1;">🖥️</span>
-        <span>Ver na tela</span>
-      </button>
-      <button id="_fPdf" style="${BTN_BASE}">
-        <span style="font-size:22px;line-height:1;">📄</span>
-        <span>Salvar PDF</span>
-      </button>
+      <button id="_fHtml" style="${BTN_BASE}"><span style="font-size:18px;">🖥️</span><span>Ver na tela</span></button>
+      <button id="_fPdf" style="${BTN_BASE}"><span style="font-size:18px;">📄</span><span>Salvar PDF</span></button>
     </div>
     <button id="_fCancel" style="padding:11px 16px;border-radius:12px;border:none;background:transparent;color:rgba(180,220,240,.4);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;width:100%;margin-top:2px;">Cancelar</button>`;
 
@@ -5029,11 +5023,11 @@ function openRemedioModal(editId){
         <div style="${FGRP}">
           <div style="${LBL}">Frequência *</div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-            <label id="_lbl8" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;color:#fff;background:linear-gradient(135deg,#0ea5e9,#0284c7);text-align:center;transition:all .15s;">
+            <label id="_lbl8" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:1px solid rgba(0,140,180,.22);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;color:rgba(180,220,240,.75);background:rgba(0,80,120,.28);text-align:center;transition:all .15s;">
               <span style="font-size:14px;line-height:1;">⏰</span><input type="radio" name="rmFreq" value="8" style="display:none;" ${editing&&editing.frequencia===8?'checked':''}>8 em 8h</label>
-            <label id="_lbl12" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;color:#fff;background:linear-gradient(135deg,#0ea5e9,#0284c7);text-align:center;transition:all .15s;">
+            <label id="_lbl12" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:1px solid rgba(0,140,180,.22);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;color:rgba(180,220,240,.75);background:rgba(0,80,120,.28);text-align:center;transition:all .15s;">
               <span style="font-size:16px;line-height:1;">🕛</span><input type="radio" name="rmFreq" value="12" style="display:none;" ${editing&&editing.frequencia===12?'checked':''}>12 em 12h</label>
-            <label id="_lblCustom" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;color:#fff;background:linear-gradient(135deg,#0ea5e9,#0284c7);text-align:center;transition:all .15s;">
+            <label id="_lblCustom" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:1px solid rgba(0,140,180,.22);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;color:rgba(180,220,240,.75);background:rgba(0,80,120,.28);text-align:center;transition:all .15s;">
               <span style="font-size:16px;line-height:1;">✏️</span><input type="radio" name="rmFreq" value="custom" style="display:none;" ${editing&&editing.frequencia!==8&&editing.frequencia!==12?'checked':''}>Personalizar</label>
           </div>
           <div id="_rmFreqCustomDiv" style="display:none;margin-top:10px;">
@@ -5075,7 +5069,9 @@ function openRemedioModal(editId){
   function updateRadioStyle(){
     ov.querySelectorAll('label:has(input[name="rmFreq"])').forEach(lbl=>{
       const radio=lbl.querySelector('input[name="rmFreq"]');
-      lbl.style.opacity=radio.checked?'1':'0.5';
+      lbl.style.background=radio.checked?'linear-gradient(135deg,#0ea5e9,#0284c7)':'rgba(0,80,120,.28)';
+      lbl.style.borderColor=radio.checked?'transparent':'rgba(0,140,180,.22)';
+      lbl.style.color=radio.checked?'#fff':'rgba(180,220,240,.75)';
       lbl.style.transform=radio.checked?'scale(1.03)':'scale(1)';
     });
     const checked=ov.querySelector('input[name="rmFreq"]:checked');

@@ -298,12 +298,12 @@
     .homeBody { padding:12px 14px 0; display:flex; flex-direction:column; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; }
     .sectionTitle { font-size:clamp(10px,2.8vw,12px); font-weight:900; letter-spacing:1px; text-transform:uppercase; color:var(--text-white); margin-bottom:12px; padding-left:2px; margin-top:18px; }
     [data-theme="light"] .sectionTitle { color:var(--surface-2); font-weight:900; }
-    .folderGrid { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:16px; }
+    .folderGrid { display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-bottom:16px; padding:0 2px; }
 
     .folderTile {
       width:100%; border:none; background:transparent;
       display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:7px; padding:12px 4px 11px; cursor:pointer; user-select:none;
+      gap:5px; padding:10px 2px 9px; cursor:pointer; user-select:none;
       position:relative; min-height:72px; border-radius:18px;
       transition: transform .15s, background .15s;
     }
@@ -317,8 +317,8 @@
 
     /* Emoji com bolinha glass atrás */
     .folderTile .fi-wrap {
-      width: clamp(40px,10vw,46px);
-      height: clamp(40px,10vw,46px);
+      width: clamp(36px,9vw,42px);
+      height: clamp(36px,9vw,42px);
       border-radius: 14px;
       display: flex; align-items:center; justify-content:center;
       position: relative;
@@ -349,7 +349,7 @@
     .folderTile:nth-child(10n+10) .fi-wrap { border-color:rgba(251,146,60,.35);  box-shadow:0 4px 14px rgba(249,115,22,.25),inset 0 1px 0 rgba(251,146,60,.2); }
 
     .folderTile .fi { font-size:clamp(20px,5vw,24px); line-height:1; position:relative; z-index:1; }
-    .folderTile .fl { font-family:'Space Grotesk',sans-serif; font-size:clamp(10px,2.6vw,13px); font-weight:800; color:rgba(255,255,255,.88); text-align:center; line-height:1.1; word-break:break-word; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 2px; }
+    .folderTile .fl { font-family:'Space Grotesk',sans-serif; font-size:clamp(9px,2.3vw,11px); font-weight:800; color:rgba(255,255,255,.88); text-align:center; line-height:1.1; word-break:break-word; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 2px; }
     [data-theme="light"] .folderTile .fl { color:rgba(15,25,70,.85); font-weight:800; }
     [data-theme="light"] .folderTile .fi-wrap { background:rgba(255,255,255,.45); border-color:rgba(80,90,200,.25); box-shadow:0 4px 14px rgba(80,90,200,.18), inset 0 1px 0 rgba(255,255,255,.7); }
     .folderTile.dragging { opacity:0.35 !important; transform:scale(1.1) !important; }
