@@ -4413,54 +4413,57 @@ function ensureRemedioFolder(){
 }
 
 function openConsultaModal(editId){
-  const isLight=document.body.getAttribute('data-theme')==='light';
-  const bg='linear-gradient(160deg,#021824,#04355a)';
-  const textC=isLight?'#2a1a08':'#e8f4ff';
-  const mutedC=isLight?'rgba(50,30,10,.6)':'rgba(180,220,240,.7)';
-  const bdr=isLight?'rgba(0,160,200,.3)':'rgba(0,160,200,.25)';
-  const iS=`width:100%;padding:10px 12px;border-radius:10px;border:1px solid ${bdr};background:${isLight?'rgba(255,255,255,.6)':'rgba(255,255,255,.07)'};color:${textC};font-family:Plus Jakarta Sans,sans-serif;font-size:13px;font-weight:600;outline:none;box-sizing:border-box;margin-bottom:10px;`;
-  const editing=editId?(state.consultas||[]).find(x=>x.id===editId):null;
+  // ── Paleta fixa: igual ao Relatório Semanal ──
+  const TEXT   = '#e8f4ff';
+  const MUTED  = 'rgba(180,220,240,.55)';
+  const ACCENT = '#7dd3f0';
+  const BG     = 'linear-gradient(160deg,#021824,#04355a)';
+  const CARD   = 'rgba(4,53,90,.45)';
+  const BDR    = 'rgba(0,140,180,.18)';
+  const FBDR   = 'rgba(0,160,200,.22)';
+  const FIELD  = 'rgba(0,80,120,.28)';
+  const iS     = `width:100%;padding:10px 12px;border-radius:10px;border:1px solid ${BDR};background:${FIELD};color:${TEXT};font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;outline:none;box-sizing:border-box;margin-bottom:10px;`;
+  const LBL    = `font-size:10px;font-weight:800;color:${MUTED};margin-bottom:4px;text-transform:uppercase;letter-spacing:.6px;font-family:'Space Grotesk',sans-serif;`;
+  const editing = editId?(state.consultas||[]).find(x=>x.id===editId):null;
 
   const ov=document.createElement('div');
   ov.id='consultaFormOv';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99993;display:flex;align-items:center;justify-content:center;padding:16px;';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,10,20,.82);z-index:99993;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;';
   ov.innerHTML=`
-    <div style="background:${bg};border:1px solid ${bdr};border-radius:22px;padding:24px 20px;max-width:360px;width:100%;font-family:Plus Jakarta Sans,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,.5);max-height:90vh;overflow-y:auto;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-        <span style="font-size:22px">🏥</span>
-        <span style="font-size:15px;font-weight:900;color:${textC};flex:1;text-align:center;">${editing?'Editar':'Nova'} Consulta</span>
-        <button id="_cClose" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:9px;color:${textC};width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button>
-      </div>
-      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Especialidade *</div>
-      <input id="_cEspec" style="${iS}" placeholder="Ex: Cardiologista, Dentista..." value="${editing?editing.especialidade:''}">
-      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Médico / Clínica</div>
-      <input id="_cMedico" style="${iS}" placeholder="Nome do médico ou clínica..." value="${editing?editing.medico||'':''}">
-      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Paciente *</div>
-      <input id="_cPac" style="${iS}" placeholder="Nome do paciente..." value="${editing?editing.paciente:''}">
-      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Local / Endereço</div>
-      <input id="_cLocal" style="${iS}" placeholder="Endereço ou nome do local..." value="${editing?editing.local||'':''}">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div>
-          <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Data *</div>
-          <input id="_cData" type="date" style="${iS}" value="${editing?editing.data:''}">
+    <div style="background:${BG};border:1px solid ${FBDR};border-radius:20px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.65);overflow:hidden;margin:auto;">
+      <!-- Header igual ao page-hdr do relatório -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;line-height:1;">🏥</span>
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:${TEXT};letter-spacing:-.2px;">${editing?'Editar':'Nova'} Consulta</span>
         </div>
-        <div>
-          <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Hora *</div>
-          <input id="_cHora" type="time" style="${iS}" value="${editing?editing.hora:''}">
-        </div>
+        <button id="_cClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:9px;color:${ACCENT};width:32px;height:32px;cursor:pointer;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
       </div>
-      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Observação</div>
-      <input id="_cObs" style="${iS}" placeholder="Opcional..." value="${editing?editing.obs||'':''}">
-      <div style="margin-bottom:10px;">
-        <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">📷 Foto da Receita / Pedido (opcional)</div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button id="_csFotoBtn" type="button" style="padding:9px 14px;border-radius:10px;border:1px dashed rgba(56,189,248,.4);background:rgba(56,189,248,.06);color:rgba(125,211,252,.9);font-size:12px;font-weight:700;cursor:pointer;flex:1;">📷 Tirar / Escolher Foto</button>
-          <div id="_csFotoThumb" style="display:none;width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid rgba(56,189,248,.5);flex-shrink:0;"><img id="_csFotoImg" style="width:100%;height:100%;object-fit:cover;" src=""></div>
-          <button id="_csFotoRemove" type="button" style="display:none;padding:6px 10px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#f87171;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
+      <!-- Campos -->
+      <div style="padding:16px 18px 20px;">
+        <div style="${LBL}">Especialidade *</div>
+        <input id="_cEspec" style="${iS}" placeholder="Ex: Cardiologista, Dentista..." value="${editing?editing.especialidade:''}">
+        <div style="${LBL}">Médico / Clínica</div>
+        <input id="_cMedico" style="${iS}" placeholder="Nome do médico ou clínica..." value="${editing?editing.medico||'':''}">
+        <div style="${LBL}">Paciente *</div>
+        <input id="_cPac" style="${iS}" placeholder="Nome do paciente..." value="${editing?editing.paciente:''}">
+        <div style="${LBL}">Local / Endereço</div>
+        <input id="_cLocal" style="${iS}" placeholder="Endereço ou nome do local..." value="${editing?editing.local||'':''}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><div style="${LBL}">Data *</div><input id="_cData" type="date" style="${iS}" value="${editing?editing.data:''}"></div>
+          <div><div style="${LBL}">Hora *</div><input id="_cHora" type="time" style="${iS}" value="${editing?editing.hora:''}"></div>
+        </div>
+        <div style="${LBL}">Observação</div>
+        <input id="_cObs" style="${iS}" placeholder="Opcional..." value="${editing?editing.obs||'':''}">
+        <div style="${LBL}">📷 Foto da Receita / Pedido (opcional)</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;">
+          <button id="_csFotoBtn" type="button" style="padding:9px 14px;border-radius:10px;border:1px dashed ${BDR};background:${FIELD};color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex:1;">📷 Tirar / Escolher Foto</button>
+          <div id="_csFotoThumb" style="display:none;width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid ${ACCENT};flex-shrink:0;"><img id="_csFotoImg" style="width:100%;height:100%;object-fit:cover;" src=""></div>
+          <button id="_csFotoRemove" type="button" style="display:none;padding:6px 10px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
         </div>
         <input type="file" id="_csFotoInput" accept="image/*" capture="environment" style="display:none;">
+        <button id="_cSave" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:14px;cursor:pointer;letter-spacing:.2px;">✔ ${editing?'Salvar Alterações':'Agendar Consulta'}</button>
       </div>
-      <button id="_cSave" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:14px;cursor:pointer;margin-top:4px;">✔ ${editing?'Salvar Alterações':'Agendar Consulta'}</button>
     </div>`;
   document.body.appendChild(ov);
   if(!editing) ov.querySelector('#_cData').value=new Date().toISOString().split('T')[0];
@@ -4530,69 +4533,72 @@ function openConsultaModal(editId){
 function openListaConsultas(){
   const existing=document.getElementById('listaConsultasOv');
   if(existing)existing.remove();
-  const isLight=document.body.getAttribute('data-theme')==='light';
-  const bg='linear-gradient(160deg,#021824,#04355a)';
-  const textC=isLight?'#2a1a08':'#e8f4ff';
-  const mutedC=isLight?'rgba(50,30,10,.6)':'rgba(180,220,240,.6)';
-  const cardBg=isLight?'rgba(255,255,255,.45)':'rgba(255,255,255,.05)';
+
+  // ── Paleta Relatório Semanal ──
+  const TEXT  = '#e8f4ff';
+  const MUTED = 'rgba(180,220,240,.55)';
+  const ACCENT= '#7dd3f0';
+  const BG    = 'linear-gradient(160deg,#021824,#04355a)';
+  const CARD  = 'rgba(4,53,90,.45)';
+  const BDR   = 'rgba(0,140,180,.18)';
+  const HDR   = 'rgba(0,80,120,.25)';
+  const HBDR  = 'rgba(0,140,180,.12)';
+  const FIELD = 'rgba(0,80,120,.28)';
+  const FBDR  = 'rgba(0,160,200,.14)';
 
   const today=new Date(); today.setHours(0,0,0,0);
   const consultas=(state.consultas||[]).slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
-  // Separa futuras (próximas) e passadas (histórico)
   const proximas=consultas.filter(c=>{ const d=new Date(c.data+'T'+c.hora); return d>=today; });
   const historico=consultas.filter(c=>{ const d=new Date(c.data+'T'+c.hora); return d<today; });
 
   function cardHTML(c,isPast){
     const dataFmt=c.data?c.data.split('-').reverse().join('/'):'-';
-    const accentC=isLight?'#0ea5e9':'#38bdf8';
-    return `<div style="background:${cardBg};border:1px solid ${isPast?'rgba(255,255,255,.06)':'rgba(14,165,233,.25)'};border-radius:14px;padding:13px 14px;margin-bottom:8px;${isPast?'opacity:.75':''}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:800;font-size:13px;color:${isPast?mutedC:accentC};margin-bottom:3px;">${c.especialidade}</div>
-          ${c.medico?`<div style="font-size:11px;color:${textC};opacity:.8;margin-bottom:2px;">👨‍⚕️ ${c.medico}</div>`:''}
-          <div style="font-size:12px;color:${textC};font-weight:600;">👤 ${c.paciente}</div>
-          ${c.local?`<div style="font-size:11px;color:${mutedC};margin-top:2px;">📍 ${c.local}</div>`:''}
-          ${c.obs?`<div style="font-size:11px;color:${mutedC};margin-top:2px;">📝 ${c.obs}</div>`:''}
-        </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div style="font-weight:800;font-size:13px;color:${textC};">${dataFmt}</div>
-          <div style="font-size:12px;color:${accentC};font-weight:700;">${c.hora}</div>
-          <div style="display:flex;gap:5px;margin-top:6px;">
-            <button onclick="compartilharConsultaWhatsApp('${c.id}')" style="background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:7px;color:#25d366;font-size:10px;padding:3px 7px;cursor:pointer;" title='WhatsApp'>📤</button>
-            <button onclick="editConsulta('${c.id}')" style="background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);border-radius:7px;color:#38bdf8;font-size:10px;padding:3px 7px;cursor:pointer;">✏️</button>
-            <button onclick="deleteConsulta('${c.id}')" style="background:rgba(255,50,50,.15);border:1px solid rgba(255,50,50,.25);border-radius:7px;color:#ff6b6b;font-size:10px;padding:3px 7px;cursor:pointer;">✕</button>
-          </div>
+    return `<div style="background:${CARD};border:1px solid ${isPast?'rgba(0,100,140,.12)':BDR};border-radius:14px;overflow:hidden;margin-bottom:10px;${isPast?'opacity:.72':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:${HDR};border-bottom:1px solid ${HBDR};">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:${isPast?MUTED:TEXT};">${escHtml(c.especialidade)}</div>
+        <span style="font-size:13px;font-weight:900;color:#00c48a;font-family:'Space Grotesk',sans-serif;">${c.hora}</span>
+      </div>
+      <div style="padding:10px 14px 8px;">
+        ${c.paciente?`<div style="font-size:12px;font-weight:700;color:${TEXT};margin-bottom:4px;">👤 ${escHtml(c.paciente)}</div>`:''}
+        ${c.medico?`<div style="font-size:11px;font-weight:600;color:${MUTED};margin-bottom:2px;">👨‍⚕️ ${escHtml(c.medico)}</div>`:''}
+        <div style="font-size:11px;font-weight:700;color:${ACCENT};margin-bottom:2px;">📅 ${dataFmt}</div>
+        ${c.local?`<div style="font-size:11px;color:${MUTED};margin-bottom:2px;">📍 ${escHtml(c.local)}</div>`:''}
+        ${c.obs?`<div style="font-size:11px;color:${MUTED};margin-bottom:2px;">📝 ${escHtml(c.obs)}</div>`:''}
+        <div style="display:flex;gap:6px;margin-top:8px;">
+          <button onclick="compartilharConsultaWhatsApp('${c.id}')" style="background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:8px;color:#25d366;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">📤 Zap</button>
+          <button onclick="editConsulta('${c.id}')" style="background:${FIELD};border:1px solid ${FBDR};border-radius:8px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✏️ Editar</button>
+          <button onclick="deleteConsulta('${c.id}')" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✕</button>
         </div>
       </div>
     </div>`;
   }
 
   let body='';
-  if(proximas.length===0 && historico.length===0){
-    body=`<div style="text-align:center;padding:40px 20px;color:${mutedC};font-size:13px;font-weight:700;">Nenhuma consulta cadastrada</div>`;
+  if(proximas.length===0&&historico.length===0){
+    body=`<div style="text-align:center;padding:56px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;">Nenhuma consulta cadastrada</div>`;
   } else {
     if(proximas.length>0){
-      body+=`<div style="font-size:10px;font-weight:900;color:rgba(14,165,233,.8);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;padding:0 2px;">Próximas (${proximas.length})</div>`;
+      body+=`<div style="font-size:9px;font-weight:900;color:${ACCENT};text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-family:'Space Grotesk',sans-serif;">🏥 Próximas (${proximas.length})</div>`;
       proximas.forEach(c=>{ body+=cardHTML(c,false); });
     }
     if(historico.length>0){
-      body+=`<div style="font-size:10px;font-weight:900;color:${mutedC};text-transform:uppercase;letter-spacing:.8px;margin:14px 0 8px;padding:0 2px;">Histórico (${historico.length})</div>`;
+      body+=`<div style="font-size:9px;font-weight:900;color:${MUTED};text-transform:uppercase;letter-spacing:1px;margin:18px 0 10px;font-family:'Space Grotesk',sans-serif;">Histórico (${historico.length})</div>`;
       historico.forEach(c=>{ body+=cardHTML(c,true); });
     }
   }
 
   const ov=document.createElement('div');
   ov.id='listaConsultasOv';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99997;display:flex;flex-direction:column;';
+  ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML=`
-    <div style="background:${bg};display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};flex-shrink:0;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <button id="_lcBack" style="background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.35);border-radius:10px;color:#fb923c;font-size:20px;width:36px;height:36px;cursor:pointer;">‹</button>
-        <span style="font-family:Space Grotesk,sans-serif;font-weight:800;font-size:16px;color:${textC};">🏥 Consultas</span>
+        <button id="_lcBack" style="background:${FIELD};border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:16px;color:${TEXT};letter-spacing:-.2px;">🏥 Consultas</span>
       </div>
-      <button id="_lcAdd" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8);border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:800;padding:8px 14px;cursor:pointer;font-family:Space Grotesk,sans-serif;">+ Nova</button>
+      <button id="_lcAdd" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:9px 16px;cursor:pointer;">+ Nova</button>
     </div>
-    <div style="flex:1;overflow-y:auto;padding:12px;">${body}</div>`;
+    <div style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">${body}</div>`;
   document.body.appendChild(ov);
   ov.querySelector('#_lcBack').onclick=()=>ov.remove();
   ov.querySelector('#_lcAdd').onclick=()=>{ ov.remove(); openConsultaModal(); };
@@ -4622,88 +4628,88 @@ function gerarHorariosRemedio(remedio){
 }
 
 function openRemedioModal(editId){
-  const isLight=document.body.getAttribute('data-theme')==='light';
-  const bg='linear-gradient(160deg,#021824,#04355a)';
-  const textC=isLight?'#2a1a08':'#e8f4ff';
-  const mutedC=isLight?'rgba(50,30,10,.6)':'rgba(180,220,240,.7)';
-  const bdr=isLight?'rgba(140,100,50,.3)':'rgba(167,139,250,.25)';
-  const iS=`width:100%;padding:10px 12px;border-radius:10px;border:1px solid ${bdr};background:${isLight?'rgba(255,255,255,.6)':'rgba(255,255,255,.07)'};color:${textC};font-family:Plus Jakarta Sans,sans-serif;font-size:13px;font-weight:600;outline:none;box-sizing:border-box;margin-bottom:10px;`;
+  // ── Paleta Relatório Semanal ──
+  const TEXT   = '#e8f4ff';
+  const MUTED  = 'rgba(180,220,240,.55)';
+  const ACCENT = '#7dd3f0';
+  const BG     = 'linear-gradient(160deg,#021824,#04355a)';
+  const BDR    = 'rgba(0,140,180,.18)';
+  const FBDR   = 'rgba(0,160,200,.22)';
+  const FIELD  = 'rgba(0,80,120,.28)';
+  const HDR    = 'rgba(0,80,120,.25)';
+  const HBDR   = 'rgba(0,140,180,.12)';
+  const iS     = `width:100%;padding:10px 12px;border-radius:10px;border:1px solid ${BDR};background:${FIELD};color:${TEXT};font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;outline:none;box-sizing:border-box;margin-bottom:10px;`;
+  const LBL    = `font-size:10px;font-weight:800;color:${MUTED};margin-bottom:4px;text-transform:uppercase;letter-spacing:.6px;font-family:'Space Grotesk',sans-serif;`;
   const editing=editId?(state.remedios||[]).find(x=>x.id===editId):null;
 
   const ov=document.createElement('div');
   ov.id='remedioFormOv';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99993;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,10,20,.82);z-index:99993;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;';
   ov.innerHTML=`
-    <div style="background:${bg};border:1px solid ${bdr};border-radius:22px;padding:24px 20px;max-width:360px;width:100%;font-family:Plus Jakarta Sans,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,.5);margin:auto;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-        <span style="font-size:22px">💊</span>
-        <span style="font-size:15px;font-weight:900;color:${textC};flex:1;text-align:center;">${editing?'Editar':'Novo'} Remédio</span>
-        <button id="_rmClose" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:9px;color:${textC};width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button>
+    <div style="background:${BG};border:1px solid ${FBDR};border-radius:20px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.65);overflow:hidden;margin:auto;">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:${HDR};border-bottom:1px solid ${HBDR};">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;line-height:1;">💊</span>
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:${TEXT};letter-spacing:-.2px;">${editing?'Editar':'Novo'} Remédio</span>
+        </div>
+        <button id="_rmClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:9px;color:${ACCENT};width:32px;height:32px;cursor:pointer;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
       </div>
-      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Nome do Remédio *</div>
-      <input id="_rmNome" style="${iS}" placeholder="Ex: Losartana, Amoxicilina..." value="${editing?editing.nome:''}">
-      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Paciente *</div>
-      <input id="_rmPac" style="${iS}" placeholder="Quem vai tomar..." value="${editing?editing.paciente:''}">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div>
-          <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Dose</div>
-          <input id="_rmDose" style="${iS}" placeholder="Ex: 50mg, 1cp" value="${editing?editing.dose||'':''}">
+      <!-- Campos -->
+      <div style="padding:16px 18px 20px;">
+        <div style="${LBL}">Nome do Remédio *</div>
+        <input id="_rmNome" style="${iS}" placeholder="Ex: Losartana, Amoxicilina..." value="${editing?editing.nome:''}">
+        <div style="${LBL}">Paciente *</div>
+        <input id="_rmPac" style="${iS}" placeholder="Quem vai tomar..." value="${editing?editing.paciente:''}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><div style="${LBL}">Dose</div><input id="_rmDose" style="${iS}" placeholder="Ex: 50mg, 1cp" value="${editing?editing.dose||'':''}"></div>
+          <div><div style="${LBL}">Qtd por uso</div><input id="_rmQtd" type="number" min="1" style="${iS}" placeholder="Ex: 1" value="${editing?editing.qtd||1:1}"></div>
         </div>
-        <div>
-          <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Qtd por uso</div>
-          <input id="_rmQtd" type="number" min="1" style="${iS}" placeholder="Ex: 1" value="${editing?editing.qtd||1:1}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><div style="${LBL}">Data Início *</div><input id="_rmData" type="date" style="${iS}" value="${editing?editing.data:''}"></div>
+          <div><div style="${LBL}">1ª Hora *</div><input id="_rmHora" type="time" style="${iS}" value="${editing?editing.hora:''}"></div>
         </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div>
-          <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Data Início *</div>
-          <input id="_rmData" type="date" style="${iS}" value="${editing?editing.data:''}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="${LBL}margin-bottom:0;">Duração do tratamento *</div>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <span style="font-size:11px;font-weight:700;color:${MUTED};font-family:'Space Grotesk',sans-serif;">Uso contínuo</span>
+            <div id="_rmContDiv" style="width:40px;height:22px;border-radius:11px;background:${editing&&editing.continuo?ACCENT:'rgba(255,255,255,.15)'};border:1px solid ${BDR};position:relative;cursor:pointer;transition:background .2s;">
+              <div id="_rmContKnob" style="position:absolute;top:2px;left:${editing&&editing.continuo?'20px':'2px'};width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.3);"></div>
+            </div>
+            <input type="checkbox" id="_rmContinuo" style="display:none;" ${editing&&editing.continuo?'checked':''}>
+          </label>
         </div>
-        <div>
-          <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">1ª Hora *</div>
-          <input id="_rmHora" type="time" style="${iS}" value="${editing?editing.hora:''}">
+        <div id="_rmDiasDiv">
+          <input id="_rmDias" type="number" min="1" max="365" style="${iS}" placeholder="Ex: 7, 30, 90..." value="${editing&&!editing.continuo?editing.dias:''}">
         </div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <div style="font-size:10px;font-weight:800;color:${mutedC};text-transform:uppercase;letter-spacing:.5px;">Duração do tratamento *</div>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-          <span style="font-size:11px;font-weight:700;color:${mutedC};">Uso contínuo</span>
-          <div id="_rmContDiv" style="width:40px;height:22px;border-radius:11px;background:${editing&&editing.continuo?'#7c3aed':'rgba(255,255,255,.15)'};border:1px solid rgba(255,255,255,.2);position:relative;cursor:pointer;transition:background .2s;">
-            <div id="_rmContKnob" style="position:absolute;top:2px;left:${editing&&editing.continuo?'20px':'2px'};width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.3);"></div>
+        <div id="_rmContinuoInfo" style="display:${editing&&editing.continuo?'block':'none'};background:${FIELD};border:1px solid ${BDR};border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;font-weight:700;color:${ACCENT};font-family:'Space Grotesk',sans-serif;">
+          ♾️ Sem data de término — reagende a cada 90 dias nas notificações
+        </div>
+        <div style="${LBL}margin-bottom:8px;">Frequência *</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+          <label style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${TEXT};background:${FIELD};">
+            <input type="radio" name="rmFreq" value="8" style="display:none;" ${editing&&editing.frequencia===8?'checked':''}> 8 em 8h</label>
+          <label style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${TEXT};background:${FIELD};">
+            <input type="radio" name="rmFreq" value="12" style="display:none;" ${editing&&editing.frequencia===12?'checked':''}> 12 em 12h</label>
+          <label style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${TEXT};background:${FIELD};">
+            <input type="radio" name="rmFreq" value="custom" style="display:none;" ${editing&&editing.frequencia!==8&&editing.frequencia!==12?'checked':''}> Personalizar</label>
+        </div>
+        <div id="_rmFreqCustomDiv" style="display:none;margin-bottom:10px;">
+          <div style="${LBL}">A cada quantas horas?</div>
+          <input id="_rmFreqH" type="number" min="1" max="72" style="${iS}" placeholder="Ex: 6, 24..." value="${editing&&editing.frequencia!==8&&editing.frequencia!==12?editing.frequencia:''}">
+        </div>
+        <div id="_rmPreview" style="margin-bottom:10px;"></div>
+        <div id="_rmFotoArea" style="margin-bottom:14px;">
+          <div style="${LBL}">📷 Foto da Receita / Caixa (opcional)</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button id="_rmFotoBtn" type="button" style="padding:9px 14px;border-radius:10px;border:1px dashed ${BDR};background:${FIELD};color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex:1;">📷 Tirar / Escolher Foto</button>
+            <div id="_rmFotoThumb" style="display:none;width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid ${ACCENT};flex-shrink:0;"><img id="_rmFotoImg" style="width:100%;height:100%;object-fit:cover;" src=""></div>
+            <button id="_rmFotoRemove" type="button" style="display:none;padding:6px 10px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
           </div>
-          <input type="checkbox" id="_rmContinuo" style="display:none;" ${editing&&editing.continuo?'checked':''}>
-        </label>
-      </div>
-      <div id="_rmDiasDiv">
-        <input id="_rmDias" type="number" min="1" max="365" style="${iS}" placeholder="Ex: 7, 30, 90..." value="${editing&&!editing.continuo?editing.dias:''}">
-      </div>
-      <div id="_rmContinuoInfo" style="display:${editing&&editing.continuo?'block':'none'};background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;font-weight:700;color:rgba(196,181,253,.9);">
-        ♾️ Sem data de término — reagende a cada 90 dias nas notificações
-      </div>
-      <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Frequência *</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
-        <label style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:12px;border:2px solid rgba(167,139,250,.25);cursor:pointer;font-size:11px;font-weight:700;color:${textC};background:rgba(255,255,255,.04);">
-          <input type="radio" name="rmFreq" value="8" style="display:none;" ${editing&&editing.frequencia===8?'checked':''}> 8 em 8h</label>
-        <label style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:12px;border:2px solid rgba(167,139,250,.25);cursor:pointer;font-size:11px;font-weight:700;color:${textC};background:rgba(255,255,255,.04);">
-          <input type="radio" name="rmFreq" value="12" style="display:none;" ${editing&&editing.frequencia===12?'checked':''}> 12 em 12h</label>
-        <label style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:12px;border:2px solid rgba(167,139,250,.25);cursor:pointer;font-size:11px;font-weight:700;color:${textC};background:rgba(255,255,255,.04);">
-          <input type="radio" name="rmFreq" value="custom" style="display:none;" ${editing&&editing.frequencia!==8&&editing.frequencia!==12?'checked':''}> Personalizar</label>
-      </div>
-      <div id="_rmFreqCustomDiv" style="display:none;margin-bottom:10px;">
-        <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:4px;">A cada quantas horas?</div>
-        <input id="_rmFreqH" type="number" min="1" max="72" style="${iS}" placeholder="Ex: 6, 24..." value="${editing&&editing.frequencia!==8&&editing.frequencia!==12?editing.frequencia:''}">
-      </div>
-      <div id="_rmPreview" style="margin-bottom:10px;"></div>
-      <div id="_rmFotoArea" style="margin-bottom:10px;">
-        <div style="font-size:10px;font-weight:800;color:${mutedC};margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">📷 Foto da Receita / Caixa (opcional)</div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button id="_rmFotoBtn" type="button" style="padding:9px 14px;border-radius:10px;border:1px dashed rgba(167,139,250,.4);background:rgba(167,139,250,.08);color:rgba(196,181,253,.9);font-size:12px;font-weight:700;cursor:pointer;flex:1;">📷 Tirar / Escolher Foto</button>
-          <div id="_rmFotoThumb" style="display:none;width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid rgba(167,139,250,.5);flex-shrink:0;"><img id="_rmFotoImg" style="width:100%;height:100%;object-fit:cover;" src=""></div>
-          <button id="_rmFotoRemove" type="button" style="display:none;padding:6px 10px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#f87171;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
+          <input type="file" id="_rmFotoInput" accept="image/*" capture="environment" style="display:none;">
         </div>
-        <input type="file" id="_rmFotoInput" accept="image/*" capture="environment" style="display:none;">
+        <button id="_rmSave" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:14px;cursor:pointer;letter-spacing:.2px;">✔ ${editing?'Salvar Alterações':'Adicionar Remédio'}</button>
       </div>
-      <button id="_rmSave" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:14px;cursor:pointer;">✔ ${editing?'Salvar Alterações':'Adicionar Remédio'}</button>
     </div>`;
   document.body.appendChild(ov);
   if(!editing) ov.querySelector('#_rmData').value=new Date().toISOString().split('T')[0];
@@ -4712,8 +4718,9 @@ function openRemedioModal(editId){
   function updateRadioStyle(){
     ov.querySelectorAll('label:has(input[name="rmFreq"])').forEach(lbl=>{
       const radio=lbl.querySelector('input[name="rmFreq"]');
-      lbl.style.borderColor=radio.checked?'rgba(167,139,250,.8)':'rgba(167,139,250,.2)';
-      lbl.style.background=radio.checked?'rgba(167,139,250,.15)':'rgba(255,255,255,.04)';
+      lbl.style.borderColor=radio.checked?'rgba(0,160,200,.7)':'rgba(0,140,180,.18)';
+      lbl.style.background=radio.checked?'rgba(0,80,120,.55)':'rgba(0,80,120,.28)';
+      lbl.style.color=radio.checked?'#7dd3f0':'rgba(180,220,240,.7)';
     });
     const checked=ov.querySelector('input[name="rmFreq"]:checked');
     ov.querySelector('#_rmFreqCustomDiv').style.display=(checked&&checked.value==='custom')?'block':'none';
@@ -4729,7 +4736,7 @@ function openRemedioModal(editId){
   const contInfo=ov.querySelector('#_rmContinuoInfo');
   function updateContToggle(){
     const on=contCb.checked;
-    contDiv.style.background=on?'#7c3aed':'rgba(255,255,255,.15)';
+    contDiv.style.background=on?'#7dd3f0':'rgba(255,255,255,.15)';
     contKnob.style.left=on?'20px':'2px';
     diasDiv.style.display=on?'none':'block';
     contInfo.style.display=on?'block':'none';
@@ -4746,7 +4753,7 @@ function openRemedioModal(editId){
     if(!freq)return;
     const total=dias*Math.round(24/freq);
     const previewEl=ov.querySelector('#_rmPreview');
-    previewEl.innerHTML=`<div style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700;color:rgba(167,139,250,.9);">📋 Total: <strong>${total} usos</strong> em ${dias} dias — a cada ${freq}h</div>`;
+    previewEl.innerHTML=`<div style="background:rgba(0,80,120,.28);border:1px solid rgba(0,140,180,.18);border-radius:10px;padding:10px 12px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:#7dd3f0;">📋 Total: <strong>${total} usos</strong> em ${dias} dias — a cada ${freq}h</div>`;
   }
   ov.querySelector('#_rmDias').addEventListener('input',updatePreview);
   ov.querySelector('#_rmFreqH').addEventListener('input',updatePreview);
@@ -4872,11 +4879,18 @@ function openRemedioModal(editId){
 function openListaRemedios(){
   const existing=document.getElementById('listaRemediosOv');
   if(existing)existing.remove();
-  const isLight=document.body.getAttribute('data-theme')==='light';
-  const bg='linear-gradient(160deg,#021824,#04355a)';
-  const textC=isLight?'#2a1a08':'#e8f4ff';
-  const mutedC=isLight?'rgba(50,30,10,.6)':'rgba(180,220,240,.6)';
-  const cardBg=isLight?'rgba(255,255,255,.45)':'rgba(255,255,255,.05)';
+
+  // ── Paleta Relatório Semanal ──
+  const TEXT  = '#e8f4ff';
+  const MUTED = 'rgba(180,220,240,.55)';
+  const ACCENT= '#7dd3f0';
+  const BG    = 'linear-gradient(160deg,#021824,#04355a)';
+  const CARD  = 'rgba(4,53,90,.45)';
+  const BDR   = 'rgba(0,140,180,.18)';
+  const HDR   = 'rgba(0,80,120,.25)';
+  const HBDR  = 'rgba(0,140,180,.12)';
+  const FIELD = 'rgba(0,80,120,.28)';
+  const FBDR  = 'rgba(0,160,200,.14)';
 
   const today=new Date(); today.setHours(0,0,0,0);
   const remedios=(state.remedios||[]).slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
@@ -4892,19 +4906,19 @@ function openListaRemedios(){
     const freqLabel=r.frequencia===8?'8 em 8h':r.frequencia===12?'12 em 12h':r.frequencia+'h em '+r.frequencia+'h';
     const dataFim=r.data&&r.dias?new Date(new Date(r.data+'T'+r.hora).getTime()+r.dias*86400000).toLocaleDateString('pt-BR'):'-';
     const total=r.dias?r.dias*Math.round(24/r.frequencia):'-';
-    const accentC=isLight?'#7c3aed':'#c084fc';
-    return `<div style="background:${cardBg};border:1px solid ${isPast?'rgba(255,255,255,.06)':'rgba(139,92,246,.25)'};border-radius:14px;padding:13px 14px;margin-bottom:8px;${isPast?'opacity:.7':''}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:800;font-size:13px;color:${isPast?mutedC:accentC};margin-bottom:3px;">💊 ${r.nome}${r.dose?' <span style="font-size:11px;opacity:.75">'+r.dose+'</span>':''}</div>
-          <div style="font-size:12px;color:${textC};font-weight:600;">👤 ${r.paciente}</div>
-          <div style="font-size:11px;color:${mutedC};margin-top:3px;">${freqLabel} · ${r.dias} dias · ${total} usos</div>
-          <div style="font-size:11px;color:${mutedC};">Início: ${dataFmt} ${r.hora} → Fim: ${dataFim}</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0;display:flex;flex-direction:column;gap:5px;align-items:flex-end;margin-top:2px;">
-          <button onclick="compartilharRemedioWhatsApp('${r.id}')" style="background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:7px;color:#25d366;font-size:10px;padding:3px 7px;cursor:pointer;" title='WhatsApp'>📤</button>
-          <button onclick="editRemedio('${r.id}')" style="background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);border-radius:7px;color:#c084fc;font-size:10px;padding:3px 7px;cursor:pointer;">✏️</button>
-          <button onclick="deleteRemedio('${r.id}')" style="background:rgba(255,50,50,.15);border:1px solid rgba(255,50,50,.25);border-radius:7px;color:#ff6b6b;font-size:10px;padding:3px 7px;cursor:pointer;">✕</button>
+    return `<div style="background:${CARD};border:1px solid ${isPast?'rgba(0,100,140,.12)':BDR};border-radius:14px;overflow:hidden;margin-bottom:10px;${isPast?'opacity:.72':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:${HDR};border-bottom:1px solid ${HBDR};">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:${isPast?MUTED:TEXT};">💊 ${escHtml(r.nome)}${r.dose?`<span style="font-size:11px;font-weight:600;color:${MUTED};margin-left:6px;">${escHtml(r.dose)}</span>`:''}</div>
+        <span style="font-size:10px;font-weight:800;background:${FIELD};color:${ACCENT};padding:3px 10px;border-radius:20px;border:1px solid ${FBDR};font-family:'Space Grotesk',sans-serif;">${freqLabel}</span>
+      </div>
+      <div style="padding:10px 14px 8px;">
+        <div style="font-size:12px;font-weight:700;color:${TEXT};margin-bottom:4px;">👤 ${escHtml(r.paciente)}</div>
+        <div style="font-size:11px;font-weight:600;color:${MUTED};margin-bottom:2px;">📅 ${dataFmt} ${r.hora} → ${dataFim}</div>
+        <div style="font-size:11px;font-weight:600;color:${MUTED};margin-bottom:8px;">${r.dias} dias · ${total} usos</div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="compartilharRemedioWhatsApp('${r.id}')" style="background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:8px;color:#25d366;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">📤 Zap</button>
+          <button onclick="editRemedio('${r.id}')" style="background:${FIELD};border:1px solid ${FBDR};border-radius:8px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✏️ Editar</button>
+          <button onclick="deleteRemedio('${r.id}')" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✕</button>
         </div>
       </div>
     </div>`;
@@ -4912,30 +4926,30 @@ function openListaRemedios(){
 
   let body='';
   if(ativos.length===0&&inativos.length===0){
-    body=`<div style="text-align:center;padding:40px 20px;color:${mutedC};font-size:13px;font-weight:700;">Nenhum remédio cadastrado</div>`;
+    body=`<div style="text-align:center;padding:56px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;">Nenhum remédio cadastrado</div>`;
   } else {
     if(ativos.length>0){
-      body+=`<div style="font-size:10px;font-weight:900;color:rgba(139,92,246,.8);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;padding:0 2px;">Em Tratamento (${ativos.length})</div>`;
+      body+=`<div style="font-size:9px;font-weight:900;color:${ACCENT};text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-family:'Space Grotesk',sans-serif;">💊 Em Tratamento (${ativos.length})</div>`;
       ativos.forEach(r=>{ body+=cardHTML(r,false); });
     }
     if(inativos.length>0){
-      body+=`<div style="font-size:10px;font-weight:900;color:${mutedC};text-transform:uppercase;letter-spacing:.8px;margin:14px 0 8px;padding:0 2px;">Histórico (${inativos.length})</div>`;
+      body+=`<div style="font-size:9px;font-weight:900;color:${MUTED};text-transform:uppercase;letter-spacing:1px;margin:18px 0 10px;font-family:'Space Grotesk',sans-serif;">Histórico (${inativos.length})</div>`;
       inativos.forEach(r=>{ body+=cardHTML(r,true); });
     }
   }
 
   const ov=document.createElement('div');
   ov.id='listaRemediosOv';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99997;display:flex;flex-direction:column;';
+  ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML=`
-    <div style="background:${bg};display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:${HDR};border-bottom:1px solid ${BDR};flex-shrink:0;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <button id="_lrBack" style="background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.35);border-radius:10px;color:#fb923c;font-size:20px;width:36px;height:36px;cursor:pointer;">‹</button>
-        <span style="font-family:Space Grotesk,sans-serif;font-weight:800;font-size:16px;color:${textC};">💊 Remédios</span>
+        <button id="_lrBack" style="background:${FIELD};border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:16px;color:${TEXT};letter-spacing:-.2px;">💊 Remédios</span>
       </div>
-      <button id="_lrAdd" style="background:linear-gradient(135deg,#7c3aed,#a855f7);border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:800;padding:8px 14px;cursor:pointer;font-family:Space Grotesk,sans-serif;">+ Novo</button>
+      <button id="_lrAdd" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:9px 16px;cursor:pointer;">+ Novo</button>
     </div>
-    <div style="flex:1;overflow-y:auto;padding:12px;">${body}</div>`;
+    <div style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">${body}</div>`;
   document.body.appendChild(ov);
   ov.querySelector('#_lrBack').onclick=()=>ov.remove();
   ov.querySelector('#_lrAdd').onclick=()=>{ ov.remove(); openRemedioModal(); };
@@ -5224,25 +5238,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a1020;color:#e2e8f
 
 // ══ PESQUISA HISTÓRICO POR PACIENTE ══
 function openHistoricoPaciente(){
-  // ── Paleta fixa igual ao Relatório Semanal ──
-  const BG        = 'linear-gradient(160deg,#021824,#04355a)';
-  const TEXT      = '#e8f4ff';
-  const MUTED     = 'rgba(180,220,240,.5)';
-  const ACCENT    = '#7dd3f0';
-  const CARD_BG   = 'rgba(4,53,90,.45)';
-  const CARD_BDR  = 'rgba(0,140,180,.18)';
-  const FIELD_BG  = 'rgba(0,80,120,.28)';
-  const FIELD_BDR = 'rgba(0,160,200,.14)';
-  const HDR_BG    = 'rgba(0,80,120,.25)';
-  const HDR_BDR   = 'rgba(0,140,180,.12)';
-  const LBL       = 'rgba(180,220,240,.55)';
-  const FONT_MAIN = "'Space Grotesk',sans-serif";
-  const FONT_BODY = "'Plus Jakarta Sans',system-ui,sans-serif";
+  const isLight=document.body.getAttribute('data-theme')==='light';
+  const bg='linear-gradient(160deg,#021824,#04355a)';
+  const textC=isLight?'#2a1a08':'#e8f4ff';
+  const cardBg=isLight?'rgba(255,255,255,.35)':'rgba(255,255,255,.06)';
+  const borderC=isLight?'rgba(0,0,0,.1)':'rgba(255,255,255,.1)';
 
   const ov=document.createElement('div');
   ov.id='historicoPacienteOv';
-  ov.style.cssText=`position:fixed;inset:0;z-index:99998;background:${BG};display:flex;flex-direction:column;overflow:hidden;font-family:${FONT_BODY};`;
+  ov.style.cssText=`position:fixed;inset:0;z-index:99998;background:${bg};display:flex;flex-direction:column;overflow:hidden;`;
 
+  // Coleta todos os pacientes únicos
   const remedios=state.remedios||[];
   const consultas=state.consultas||[];
   const pacSet=new Set();
@@ -5250,68 +5256,84 @@ function openHistoricoPaciente(){
   consultas.forEach(c=>c.paciente&&pacSet.add(c.paciente.trim()));
   const pacientes=[...pacSet].sort();
 
-  function field(label,value,span=''){
-    return `<div style="background:${FIELD_BG};border:1px solid ${FIELD_BDR};border-radius:10px;padding:8px 11px;${span?'grid-column:span '+span+';':''}">
-      <div style="font-size:9px;font-weight:800;color:${LBL};text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;">${label}</div>
-      <div style="font-size:12px;font-weight:700;color:${TEXT};">${value}</div>
-    </div>`;
-  }
-
   function renderResultados(filtro){
     const termo=filtro.toLowerCase().trim();
     const remFilt=remedios.filter(r=>r.paciente&&r.paciente.toLowerCase().includes(termo));
     const consFilt=consultas.filter(c=>c.paciente&&c.paciente.toLowerCase().includes(termo));
+
     let html='';
 
-    if(!remFilt.length&&!consFilt.length){
-      return `<div style="text-align:center;padding:52px 20px;color:${MUTED};font-family:${FONT_MAIN};font-size:13px;font-weight:600;">Nenhum resultado encontrado</div>`;
+    if(remFilt.length===0&&consFilt.length===0){
+      html='<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.4);font-size:14px;">Nenhum resultado encontrado</div>';
     }
 
     if(remFilt.length>0){
-      html+=`<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:${ACCENT};font-family:${FONT_MAIN};padding:14px 0 8px;">💊 Remédios (${remFilt.length})</div>`;
+      html+=`<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:#a78bfa;padding:8px 4px 6px;margin-top:4px;">💊 Remédios (${remFilt.length})</div>`;
       remFilt.sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora)).forEach(r=>{
         const df=r.data?r.data.split('-').reverse().join('/'):'—';
         const freqL=r.frequencia===8?'8/8h':r.frequencia===12?'12/12h':r.frequencia+'h';
         const total=r.dias?r.dias*Math.round(24/r.frequencia):'-';
         const rawMs=r.data&&r.hora?new Date(r.data+'T'+r.hora+':00').getTime():0;
-        const fimDate=new Date(rawMs+(r.dias||0)*86400000);
+        const fimMs=rawMs+(r.dias||0)*86400000;
+        const fimDate=new Date(fimMs);
         const dfim=fimDate.getDate()+'/'+(fimDate.getMonth()+1)+'/'+fimDate.getFullYear();
-        html+=`
-        <div style="background:${CARD_BG};border:1px solid ${CARD_BDR};border-radius:14px;overflow:hidden;margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:${HDR_BG};border-bottom:1px solid ${HDR_BDR};">
-            <div style="font-family:${FONT_MAIN};font-size:14px;font-weight:900;color:${TEXT};">💊 ${escHtml(r.nome)}${r.dose?`<span style="font-size:11px;font-weight:600;color:${MUTED};margin-left:6px;">${escHtml(r.dose)}</span>`:''}</div>
-            <span style="font-size:10px;font-weight:800;background:${FIELD_BG};color:${ACCENT};padding:3px 10px;border-radius:20px;border:1px solid ${FIELD_BDR};font-family:${FONT_MAIN};">${freqL}</span>
+        html+=`<div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);border-radius:14px;padding:14px;margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="font-size:15px;font-weight:900;color:#c4b5fd;" data-rid="${r.id}" data-rfield="nome">💊 <span data-rid="${r.id}" data-rfield="nome">${escHtml(r.nome)}</span>${r.dose?'<span style="font-size:11px;font-weight:500;color:#6b7280;margin-left:6px;" data-rid="${r.id}" data-rfield="dose">'+escHtml(r.dose)+'</span>':''}</div>
+            <span style="font-size:10px;font-weight:800;background:rgba(167,139,250,.15);color:#a78bfa;padding:3px 9px;border-radius:20px;border:1px solid rgba(167,139,250,.3);">${freqL}</span>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px 14px;">
-            ${field('Paciente','👤 '+escHtml(r.paciente))}
-            ${field('Início',df)}
-            ${field('Término',r.dias?dfim:'—')}
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
+              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Paciente</div>
+              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">👤 ${escHtml(r.paciente)}</div>
+            </div>
+            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
+              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Início</div>
+              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">${df}</div>
+            </div>
+            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
+              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Término</div>
+              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">${r.dias?dfim:'—'}</div>
+            </div>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 14px 12px;">
-            <span style="font-size:11px;font-weight:600;color:${MUTED};font-family:${FONT_MAIN};">${r.dias||'?'} dias · ${total} usos</span>
-            <span style="font-size:14px;font-weight:900;color:#00c48a;font-family:${FONT_MAIN};">${r.hora||'—'}</span>
+          <div style="margin-top:6px;background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:11px;color:#6b7280;">${r.dias||'?'} dias · ${total} usos</span>
+            <span style="font-size:14px;font-weight:900;color:#4ade80;">${r.hora||'—'}</span>
           </div>
         </div>`;
       });
     }
 
     if(consFilt.length>0){
-      html+=`<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:${ACCENT};font-family:${FONT_MAIN};padding:${remFilt.length?'16px':'14px'} 0 8px;">🏥 Consultas (${consFilt.length})</div>`;
+      html+=`<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:#38bdf8;padding:8px 4px 6px;margin-top:${remFilt.length>0?'12px':'4px'};">🏥 Consultas (${consFilt.length})</div>`;
       consFilt.sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora)).forEach(c=>{
-        const _dp=c.data?c.data.split('-'):null;
-        const df=_dp?String(_dp[2]).padStart(2,'0')+'/'+String(_dp[1]).padStart(2,'0')+'/'+_dp[0]:'—';
-        html+=`
-        <div style="background:${CARD_BG};border:1px solid ${CARD_BDR};border-radius:14px;overflow:hidden;margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:${HDR_BG};border-bottom:1px solid ${HDR_BDR};">
-            <div style="font-family:${FONT_MAIN};font-size:14px;font-weight:900;color:${TEXT};">🏥 ${escHtml(c.especialidade||'Consulta')}</div>
-            <span style="font-size:13px;font-weight:900;color:#00c48a;font-family:${FONT_MAIN};">${c.hora||'—'}</span>
+        const _dp=c.data?c.data.split('-'):null; const df=_dp?String(_dp[2]).padStart(2,'0')+'/'+String(_dp[1]).padStart(2,'0')+'/'+_dp[0]:'—';
+        html+=`<div style="background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);border-radius:14px;padding:14px;margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="font-size:15px;font-weight:900;color:#7dd3fc;">🏥 ${escHtml(c.especialidade)}</div>
+            <span style="font-size:12px;font-weight:900;color:#4ade80;">${c.hora}</span>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px 12px;">
-            ${field('Paciente','👤 '+escHtml(c.paciente))}
-            ${field('Data','📅 '+df)}
-            ${c.medico?field('Médico / Clínica','👨‍⚕️ '+escHtml(c.medico),'2'):''}
-            ${c.local?field('Local','📍 '+escHtml(c.local),'2'):''}
-            ${c.obs?field('Observação','📝 '+escHtml(c.obs),'2'):''}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
+              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Paciente</div>
+              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">👤 ${escHtml(c.paciente)}</div>
+            </div>
+            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
+              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Data</div>
+              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">📅 ${df}</div>
+            </div>
+            ${c.medico?`<div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;grid-column:span 2;">
+              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Médico / Clínica</div>
+              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">👨‍⚕️ ${escHtml(c.medico)}</div>
+            </div>`:'' }
+            ${c.local?`<div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;grid-column:span 2;">
+              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Local</div>
+              <div style="font-size:12px;font-weight:600;color:#cbd5e1;">📍 ${escHtml(c.local)}</div>
+            </div>`:'' }
+            ${c.obs?`<div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;grid-column:span 2;">
+              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Observação</div>
+              <div style="font-size:12px;font-weight:600;color:#cbd5e1;">📝 ${escHtml(c.obs)}</div>
+            </div>`:'' }
           </div>
         </div>`;
       });
@@ -5319,58 +5341,22 @@ function openHistoricoPaciente(){
     return html;
   }
 
-  // Chips de pacientes
-  const chipsHTML=pacientes.map(p=>`
-    <button class="pac-chip" data-pac="${escHtml(p)}" style="
-      padding:6px 14px;border-radius:20px;
-      border:1px solid ${FIELD_BDR};
-      background:${FIELD_BG};
-      color:${ACCENT};
-      font-family:${FONT_MAIN};font-size:12px;font-weight:700;
-      cursor:pointer;white-space:nowrap;flex-shrink:0;
-      -webkit-tap-highlight-color:transparent;
-    ">${escHtml(p)}</button>`).join('');
+  // Sugestões de pacientes como chips
+  const chipsHTML=pacientes.map(p=>`<button class="pac-chip" data-pac="${escHtml(p)}" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:${textC};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">${escHtml(p)}</button>`).join('');
 
   ov.innerHTML=`
-    <!-- ── Cabeçalho igual ao page-hdr do relatório ── -->
-    <div style="
-      padding:18px 16px 14px;
-      background:linear-gradient(160deg,#021824,#04355a);
-      border-bottom:1px solid ${CARD_BDR};
-      display:flex;align-items:center;gap:10px;flex-shrink:0;
-    ">
-      <button id="hpBack" style="
-        background:${FIELD_BG};border:1px solid ${FIELD_BDR};
-        border-radius:10px;color:${ACCENT};
-        font-family:${FONT_MAIN};font-size:13px;font-weight:800;
-        padding:7px 13px;cursor:pointer;white-space:nowrap;
-        -webkit-tap-highlight-color:transparent;
-      ">← Voltar</button>
-      <div style="flex:1;font-family:${FONT_MAIN};font-size:16px;font-weight:900;color:${TEXT};letter-spacing:-.2px;">🔍 Buscar Paciente</div>
-      <button id="hpWaBtn" data-pac="" style="display:none;align-items:center;gap:5px;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);border-radius:10px;color:#25d366;font-family:${FONT_MAIN};font-size:12px;font-weight:800;padding:7px 12px;cursor:pointer;">📤 WhatsApp</button>
+    <div style="padding:16px 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;">
+      <button id="hpBack" style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:${textC};font-size:13px;font-weight:700;padding:7px 12px;cursor:pointer;white-space:nowrap;">← Voltar</button>
+      <div style="flex:1;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:${textC};">🔍 Buscar Paciente</div>
+      <button id="hpWaBtn" data-pac="" style="display:none;align-items:center;gap:5px;background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.4);border-radius:10px;color:#25d366;font-size:12px;font-weight:800;padding:7px 12px;cursor:pointer;">📤 WhatsApp</button>
     </div>
-
-    <!-- ── Barra de busca + chips ── -->
-    <div style="padding:14px 16px 10px;background:linear-gradient(160deg,#021824,#04355a);border-bottom:1px solid ${CARD_BDR};flex-shrink:0;">
+    <div style="padding:12px 16px 8px;flex-shrink:0;">
       <input id="hpSearch" type="text" placeholder="Digite o nome do paciente..." autocomplete="off"
-        style="
-          width:100%;padding:12px 16px;border-radius:12px;
-          border:1px solid ${CARD_BDR};
-          background:${FIELD_BG};
-          color:${TEXT};
-          font-family:${FONT_MAIN};font-size:14px;font-weight:600;
-          outline:none;box-sizing:border-box;
-          -webkit-tap-highlight-color:transparent;
-        ">
-      ${pacientes.length>0?`
-        <div style="display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none;-ms-overflow-style:none;">
-          ${chipsHTML}
-        </div>`:''}
+        style="width:100%;padding:12px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.3);color:${textC};font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;outline:none;box-sizing:border-box;">
+      ${pacientes.length>0?`<div style="display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none;">${chipsHTML}</div>`:''}
     </div>
-
-    <!-- ── Resultados ── -->
-    <div id="hpResults" style="flex:1;overflow-y:auto;padding:0 16px 32px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
-      <div style="text-align:center;padding:56px 20px;color:${MUTED};font-family:${FONT_MAIN};font-size:13px;font-weight:600;">Digite um nome para pesquisar</div>
+    <div id="hpResults" style="flex:1;overflow-y:auto;padding:0 16px 24px;">
+      <div style="text-align:center;padding:48px 20px;color:rgba(255,255,255,.3);font-size:13px;">Digite um nome para pesquisar</div>
     </div>`;
 
   document.body.appendChild(ov);
@@ -5380,10 +5366,7 @@ function openHistoricoPaciente(){
 
   inp.addEventListener('input',()=>{
     const v=inp.value.trim();
-    if(v.length<1){
-      resultsDiv.innerHTML=`<div style="text-align:center;padding:56px 20px;color:${MUTED};font-family:${FONT_MAIN};font-size:13px;font-weight:600;">Digite um nome para pesquisar</div>`;
-      return;
-    }
+    if(v.length<1){ resultsDiv.innerHTML='<div style="text-align:center;padding:48px 20px;color:rgba(255,255,255,.3);font-size:13px;">Digite um nome para pesquisar</div>'; return; }
     resultsDiv.innerHTML=renderResultados(v);
   });
 
@@ -5392,11 +5375,13 @@ function openHistoricoPaciente(){
     btn.addEventListener('click',()=>{
       inp.value=btn.dataset.pac;
       inp.dispatchEvent(new Event('input'));
+      // Mostra botão WA com o paciente selecionado
       const waBtn=ov.querySelector('#hpWaBtn');
       if(waBtn){ waBtn.style.display='flex'; waBtn.dataset.pac=btn.dataset.pac; }
     });
   });
 
+  // Botão WhatsApp para paciente pesquisado
   const waBtnEl=ov.querySelector('#hpWaBtn');
   if(waBtnEl) waBtnEl.addEventListener('click',()=>{
     const pac=waBtnEl.dataset.pac||inp.value.trim();
