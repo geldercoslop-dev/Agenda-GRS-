@@ -5224,17 +5224,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a1020;color:#e2e8f
 
 // ══ PESQUISA HISTÓRICO POR PACIENTE ══
 function openHistoricoPaciente(){
-  const isLight=document.body.getAttribute('data-theme')==='light';
-  const bg='linear-gradient(160deg,#021824,#04355a)';
-  const textC=isLight?'#2a1a08':'#e8f4ff';
-  const cardBg=isLight?'rgba(255,255,255,.35)':'rgba(255,255,255,.06)';
-  const borderC=isLight?'rgba(0,0,0,.1)':'rgba(255,255,255,.1)';
+  // ── Paleta fixa igual ao Relatório Semanal ──
+  const BG        = 'linear-gradient(160deg,#021824,#04355a)';
+  const TEXT      = '#e8f4ff';
+  const MUTED     = 'rgba(180,220,240,.5)';
+  const ACCENT    = '#7dd3f0';
+  const CARD_BG   = 'rgba(4,53,90,.45)';
+  const CARD_BDR  = 'rgba(0,140,180,.18)';
+  const FIELD_BG  = 'rgba(0,80,120,.28)';
+  const FIELD_BDR = 'rgba(0,160,200,.14)';
+  const HDR_BG    = 'rgba(0,80,120,.25)';
+  const HDR_BDR   = 'rgba(0,140,180,.12)';
+  const LBL       = 'rgba(180,220,240,.55)';
+  const FONT_MAIN = "'Space Grotesk',sans-serif";
+  const FONT_BODY = "'Plus Jakarta Sans',system-ui,sans-serif";
 
   const ov=document.createElement('div');
   ov.id='historicoPacienteOv';
-  ov.style.cssText=`position:fixed;inset:0;z-index:99998;background:${bg};display:flex;flex-direction:column;overflow:hidden;`;
+  ov.style.cssText=`position:fixed;inset:0;z-index:99998;background:${BG};display:flex;flex-direction:column;overflow:hidden;font-family:${FONT_BODY};`;
 
-  // Coleta todos os pacientes únicos
   const remedios=state.remedios||[];
   const consultas=state.consultas||[];
   const pacSet=new Set();
@@ -5242,84 +5250,68 @@ function openHistoricoPaciente(){
   consultas.forEach(c=>c.paciente&&pacSet.add(c.paciente.trim()));
   const pacientes=[...pacSet].sort();
 
+  function field(label,value,span=''){
+    return `<div style="background:${FIELD_BG};border:1px solid ${FIELD_BDR};border-radius:10px;padding:8px 11px;${span?'grid-column:span '+span+';':''}">
+      <div style="font-size:9px;font-weight:800;color:${LBL};text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;">${label}</div>
+      <div style="font-size:12px;font-weight:700;color:${TEXT};">${value}</div>
+    </div>`;
+  }
+
   function renderResultados(filtro){
     const termo=filtro.toLowerCase().trim();
     const remFilt=remedios.filter(r=>r.paciente&&r.paciente.toLowerCase().includes(termo));
     const consFilt=consultas.filter(c=>c.paciente&&c.paciente.toLowerCase().includes(termo));
-
     let html='';
 
-    if(remFilt.length===0&&consFilt.length===0){
-      html='<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.4);font-size:14px;">Nenhum resultado encontrado</div>';
+    if(!remFilt.length&&!consFilt.length){
+      return `<div style="text-align:center;padding:52px 20px;color:${MUTED};font-family:${FONT_MAIN};font-size:13px;font-weight:600;">Nenhum resultado encontrado</div>`;
     }
 
     if(remFilt.length>0){
-      html+=`<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:#a78bfa;padding:8px 4px 6px;margin-top:4px;">💊 Remédios (${remFilt.length})</div>`;
+      html+=`<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:${ACCENT};font-family:${FONT_MAIN};padding:14px 0 8px;">💊 Remédios (${remFilt.length})</div>`;
       remFilt.sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora)).forEach(r=>{
         const df=r.data?r.data.split('-').reverse().join('/'):'—';
         const freqL=r.frequencia===8?'8/8h':r.frequencia===12?'12/12h':r.frequencia+'h';
         const total=r.dias?r.dias*Math.round(24/r.frequencia):'-';
         const rawMs=r.data&&r.hora?new Date(r.data+'T'+r.hora+':00').getTime():0;
-        const fimMs=rawMs+(r.dias||0)*86400000;
-        const fimDate=new Date(fimMs);
+        const fimDate=new Date(rawMs+(r.dias||0)*86400000);
         const dfim=fimDate.getDate()+'/'+(fimDate.getMonth()+1)+'/'+fimDate.getFullYear();
-        html+=`<div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);border-radius:14px;padding:14px;margin-bottom:8px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <div style="font-size:15px;font-weight:900;color:#c4b5fd;" data-rid="${r.id}" data-rfield="nome">💊 <span data-rid="${r.id}" data-rfield="nome">${escHtml(r.nome)}</span>${r.dose?'<span style="font-size:11px;font-weight:500;color:#6b7280;margin-left:6px;" data-rid="${r.id}" data-rfield="dose">'+escHtml(r.dose)+'</span>':''}</div>
-            <span style="font-size:10px;font-weight:800;background:rgba(167,139,250,.15);color:#a78bfa;padding:3px 9px;border-radius:20px;border:1px solid rgba(167,139,250,.3);">${freqL}</span>
+        html+=`
+        <div style="background:${CARD_BG};border:1px solid ${CARD_BDR};border-radius:14px;overflow:hidden;margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:${HDR_BG};border-bottom:1px solid ${HDR_BDR};">
+            <div style="font-family:${FONT_MAIN};font-size:14px;font-weight:900;color:${TEXT};">💊 ${escHtml(r.nome)}${r.dose?`<span style="font-size:11px;font-weight:600;color:${MUTED};margin-left:6px;">${escHtml(r.dose)}</span>`:''}</div>
+            <span style="font-size:10px;font-weight:800;background:${FIELD_BG};color:${ACCENT};padding:3px 10px;border-radius:20px;border:1px solid ${FIELD_BDR};font-family:${FONT_MAIN};">${freqL}</span>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
-            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Paciente</div>
-              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">👤 ${escHtml(r.paciente)}</div>
-            </div>
-            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Início</div>
-              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">${df}</div>
-            </div>
-            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Término</div>
-              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">${r.dias?dfim:'—'}</div>
-            </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px 14px;">
+            ${field('Paciente','👤 '+escHtml(r.paciente))}
+            ${field('Início',df)}
+            ${field('Término',r.dias?dfim:'—')}
           </div>
-          <div style="margin-top:6px;background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:11px;color:#6b7280;">${r.dias||'?'} dias · ${total} usos</span>
-            <span style="font-size:14px;font-weight:900;color:#4ade80;">${r.hora||'—'}</span>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 14px 12px;">
+            <span style="font-size:11px;font-weight:600;color:${MUTED};font-family:${FONT_MAIN};">${r.dias||'?'} dias · ${total} usos</span>
+            <span style="font-size:14px;font-weight:900;color:#00c48a;font-family:${FONT_MAIN};">${r.hora||'—'}</span>
           </div>
         </div>`;
       });
     }
 
     if(consFilt.length>0){
-      html+=`<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:#38bdf8;padding:8px 4px 6px;margin-top:${remFilt.length>0?'12px':'4px'};">🏥 Consultas (${consFilt.length})</div>`;
+      html+=`<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:${ACCENT};font-family:${FONT_MAIN};padding:${remFilt.length?'16px':'14px'} 0 8px;">🏥 Consultas (${consFilt.length})</div>`;
       consFilt.sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora)).forEach(c=>{
-        const _dp=c.data?c.data.split('-'):null; const df=_dp?String(_dp[2]).padStart(2,'0')+'/'+String(_dp[1]).padStart(2,'0')+'/'+_dp[0]:'—';
-        html+=`<div style="background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);border-radius:14px;padding:14px;margin-bottom:8px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <div style="font-size:15px;font-weight:900;color:#7dd3fc;">🏥 ${escHtml(c.especialidade)}</div>
-            <span style="font-size:12px;font-weight:900;color:#4ade80;">${c.hora}</span>
+        const _dp=c.data?c.data.split('-'):null;
+        const df=_dp?String(_dp[2]).padStart(2,'0')+'/'+String(_dp[1]).padStart(2,'0')+'/'+_dp[0]:'—';
+        html+=`
+        <div style="background:${CARD_BG};border:1px solid ${CARD_BDR};border-radius:14px;overflow:hidden;margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:${HDR_BG};border-bottom:1px solid ${HDR_BDR};">
+            <div style="font-family:${FONT_MAIN};font-size:14px;font-weight:900;color:${TEXT};">🏥 ${escHtml(c.especialidade||'Consulta')}</div>
+            <span style="font-size:13px;font-weight:900;color:#00c48a;font-family:${FONT_MAIN};">${c.hora||'—'}</span>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Paciente</div>
-              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">👤 ${escHtml(c.paciente)}</div>
-            </div>
-            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Data</div>
-              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">📅 ${df}</div>
-            </div>
-            ${c.medico?`<div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;grid-column:span 2;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Médico / Clínica</div>
-              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">👨‍⚕️ ${escHtml(c.medico)}</div>
-            </div>`:'' }
-            ${c.local?`<div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;grid-column:span 2;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Local</div>
-              <div style="font-size:12px;font-weight:600;color:#cbd5e1;">📍 ${escHtml(c.local)}</div>
-            </div>`:'' }
-            ${c.obs?`<div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;grid-column:span 2;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Observação</div>
-              <div style="font-size:12px;font-weight:600;color:#cbd5e1;">📝 ${escHtml(c.obs)}</div>
-            </div>`:'' }
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px 12px;">
+            ${field('Paciente','👤 '+escHtml(c.paciente))}
+            ${field('Data','📅 '+df)}
+            ${c.medico?field('Médico / Clínica','👨‍⚕️ '+escHtml(c.medico),'2'):''}
+            ${c.local?field('Local','📍 '+escHtml(c.local),'2'):''}
+            ${c.obs?field('Observação','📝 '+escHtml(c.obs),'2'):''}
           </div>
         </div>`;
       });
@@ -5327,22 +5319,58 @@ function openHistoricoPaciente(){
     return html;
   }
 
-  // Sugestões de pacientes como chips
-  const chipsHTML=pacientes.map(p=>`<button class="pac-chip" data-pac="${escHtml(p)}" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:${textC};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">${escHtml(p)}</button>`).join('');
+  // Chips de pacientes
+  const chipsHTML=pacientes.map(p=>`
+    <button class="pac-chip" data-pac="${escHtml(p)}" style="
+      padding:6px 14px;border-radius:20px;
+      border:1px solid ${FIELD_BDR};
+      background:${FIELD_BG};
+      color:${ACCENT};
+      font-family:${FONT_MAIN};font-size:12px;font-weight:700;
+      cursor:pointer;white-space:nowrap;flex-shrink:0;
+      -webkit-tap-highlight-color:transparent;
+    ">${escHtml(p)}</button>`).join('');
 
   ov.innerHTML=`
-    <div style="padding:16px 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;">
-      <button id="hpBack" style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:${textC};font-size:13px;font-weight:700;padding:7px 12px;cursor:pointer;white-space:nowrap;">← Voltar</button>
-      <div style="flex:1;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:${textC};">🔍 Buscar Paciente</div>
-      <button id="hpWaBtn" data-pac="" style="display:none;align-items:center;gap:5px;background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.4);border-radius:10px;color:#25d366;font-size:12px;font-weight:800;padding:7px 12px;cursor:pointer;">📤 WhatsApp</button>
+    <!-- ── Cabeçalho igual ao page-hdr do relatório ── -->
+    <div style="
+      padding:18px 16px 14px;
+      background:linear-gradient(160deg,#021824,#04355a);
+      border-bottom:1px solid ${CARD_BDR};
+      display:flex;align-items:center;gap:10px;flex-shrink:0;
+    ">
+      <button id="hpBack" style="
+        background:${FIELD_BG};border:1px solid ${FIELD_BDR};
+        border-radius:10px;color:${ACCENT};
+        font-family:${FONT_MAIN};font-size:13px;font-weight:800;
+        padding:7px 13px;cursor:pointer;white-space:nowrap;
+        -webkit-tap-highlight-color:transparent;
+      ">← Voltar</button>
+      <div style="flex:1;font-family:${FONT_MAIN};font-size:16px;font-weight:900;color:${TEXT};letter-spacing:-.2px;">🔍 Buscar Paciente</div>
+      <button id="hpWaBtn" data-pac="" style="display:none;align-items:center;gap:5px;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);border-radius:10px;color:#25d366;font-family:${FONT_MAIN};font-size:12px;font-weight:800;padding:7px 12px;cursor:pointer;">📤 WhatsApp</button>
     </div>
-    <div style="padding:12px 16px 8px;flex-shrink:0;">
+
+    <!-- ── Barra de busca + chips ── -->
+    <div style="padding:14px 16px 10px;background:linear-gradient(160deg,#021824,#04355a);border-bottom:1px solid ${CARD_BDR};flex-shrink:0;">
       <input id="hpSearch" type="text" placeholder="Digite o nome do paciente..." autocomplete="off"
-        style="width:100%;padding:12px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.3);color:${textC};font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;outline:none;box-sizing:border-box;">
-      ${pacientes.length>0?`<div style="display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none;">${chipsHTML}</div>`:''}
+        style="
+          width:100%;padding:12px 16px;border-radius:12px;
+          border:1px solid ${CARD_BDR};
+          background:${FIELD_BG};
+          color:${TEXT};
+          font-family:${FONT_MAIN};font-size:14px;font-weight:600;
+          outline:none;box-sizing:border-box;
+          -webkit-tap-highlight-color:transparent;
+        ">
+      ${pacientes.length>0?`
+        <div style="display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none;-ms-overflow-style:none;">
+          ${chipsHTML}
+        </div>`:''}
     </div>
-    <div id="hpResults" style="flex:1;overflow-y:auto;padding:0 16px 24px;">
-      <div style="text-align:center;padding:48px 20px;color:rgba(255,255,255,.3);font-size:13px;">Digite um nome para pesquisar</div>
+
+    <!-- ── Resultados ── -->
+    <div id="hpResults" style="flex:1;overflow-y:auto;padding:0 16px 32px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
+      <div style="text-align:center;padding:56px 20px;color:${MUTED};font-family:${FONT_MAIN};font-size:13px;font-weight:600;">Digite um nome para pesquisar</div>
     </div>`;
 
   document.body.appendChild(ov);
@@ -5352,7 +5380,10 @@ function openHistoricoPaciente(){
 
   inp.addEventListener('input',()=>{
     const v=inp.value.trim();
-    if(v.length<1){ resultsDiv.innerHTML='<div style="text-align:center;padding:48px 20px;color:rgba(255,255,255,.3);font-size:13px;">Digite um nome para pesquisar</div>'; return; }
+    if(v.length<1){
+      resultsDiv.innerHTML=`<div style="text-align:center;padding:56px 20px;color:${MUTED};font-family:${FONT_MAIN};font-size:13px;font-weight:600;">Digite um nome para pesquisar</div>`;
+      return;
+    }
     resultsDiv.innerHTML=renderResultados(v);
   });
 
@@ -5361,13 +5392,11 @@ function openHistoricoPaciente(){
     btn.addEventListener('click',()=>{
       inp.value=btn.dataset.pac;
       inp.dispatchEvent(new Event('input'));
-      // Mostra botão WA com o paciente selecionado
       const waBtn=ov.querySelector('#hpWaBtn');
       if(waBtn){ waBtn.style.display='flex'; waBtn.dataset.pac=btn.dataset.pac; }
     });
   });
 
-  // Botão WhatsApp para paciente pesquisado
   const waBtnEl=ov.querySelector('#hpWaBtn');
   if(waBtnEl) waBtnEl.addEventListener('click',()=>{
     const pac=waBtnEl.dataset.pac||inp.value.trim();

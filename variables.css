@@ -35,20 +35,22 @@
   --sky-bot:      #161616;
 }
 
-/* ── Tema claro: off-white + header/footer laranja claro ── */
+/* ── Tema claro: azul navy no header + fundo lavanda/periwinkle ── */
 [data-theme="light"] {
-  --bg0:           #f5f0eb;   /* off-white quente */
-  --bg1:           #edeae5;
-  --bg2:           #e6e1db;
-  --card:          #e8e3dd;
-  --cardBorder:    rgba(0,0,0,.09);
-  --text:          #1a1a1a;
+  --bg0:           #c8cee8;   /* fundo principal — lavanda azulada (igual ao print) */
+  --bg1:           #d0d5ec;   /* cards, modais */
+  --bg2:           #bcc3e0;   /* sidebar */
+  --card:          #d8ddf0;   /* card interno */
+  --cardBorder:    rgba(50,70,150,.12);
+  --text:          #1a1e3a;   /* texto escuro azul navy */
   --text-white:    #ffffff;
-  --muted:         rgba(0,0,0,.4);
-  --hdr-light-bg:  #f97316;  /* laranja claro para header/footer */
-  --sky-top:       #ccc6be;
-  --sky-mid:       #bbb5ad;
-  --sky-bot:       #aaa49c;
+  --muted:         rgba(30,45,120,.45);
+  --hdr-light-bg:  #1e2d6b;  /* azul navy para header/footer */
+  --accent:        #3b4fcf;   /* accent azul no light */
+  --accent-2:      #5468e0;
+  --sky-top:       #9da8d4;
+  --sky-mid:       #8c98c8;
+  --sky-bot:       #7b88bc;
 }
 
 /* ── Reset global ──────────────────────────────────────── */
@@ -88,15 +90,15 @@ body {
   border-bottom: 1px solid rgba(234,88,12,.2) !important;
 }
 
-/* ── Modais — preto sólido ─────────────────────────────── */
+/* ── Modais — azul marinho igual ao relatório ──────────── */
 .sModalBox, .fModalBox {
-  background: #111111 !important;
-  border: 1px solid rgba(234,88,12,.18) !important;
+  background: #021824 !important;
+  border: 1px solid rgba(0,160,200,.22) !important;
 }
 
 .sModalHdr, .fModalHdr {
-  background: #0d0d0d !important;
-  border-bottom: 1px solid rgba(234,88,12,.18) !important;
+  background: linear-gradient(160deg,#021824,#04355a) !important;
+  border-bottom: 1px solid rgba(0,140,180,.18) !important;
 }
 
 /* ── Settings cards — grid uniforme ────────────────────── */
@@ -108,8 +110,8 @@ body {
 }
 
 .sCard {
-  background: #181818;
-  border: 1px solid rgba(234,88,12,.15);
+  background: rgba(4,53,90,.45);
+  border: 1px solid rgba(0,140,180,.18);
   border-radius: 14px;
   padding: 16px 12px 14px;
   display: flex;
@@ -122,7 +124,7 @@ body {
 }
 
 .sCard:active {
-  background: rgba(234,88,12,.12) !important;
+  background: rgba(0,140,180,.22) !important;
   transform: scale(.95);
 }
 
@@ -134,14 +136,14 @@ body {
 .sCardLabel {
   font-size: 12px;
   font-weight: 800;
-  color: #f0f0f0;
+  color: #e8f4ff;
   letter-spacing: -.1px;
 }
 
 .sCardSub {
   font-size: 10px;
   font-weight: 600;
-  color: rgba(255,255,255,.4);
+  color: rgba(180,220,240,.55);
 }
 
 /* ── Folder cards — mesmo estilo dos settings ──────────── */
@@ -153,8 +155,8 @@ body {
 }
 
 .fCard {
-  background: #181818;
-  border: 1px solid rgba(234,88,12,.15);
+  background: rgba(4,53,90,.45);
+  border: 1px solid rgba(0,140,180,.18);
   border-radius: 14px;
   padding: 16px 12px 14px;
   display: flex;
@@ -167,7 +169,7 @@ body {
 }
 
 .fCard:active {
-  background: rgba(234,88,12,.12) !important;
+  background: rgba(0,140,180,.22) !important;
   transform: scale(.95);
 }
 
@@ -187,19 +189,19 @@ body {
 .fCardLabel {
   font-size: 12px;
   font-weight: 800;
-  color: #f0f0f0;
+  color: #e8f4ff;
   letter-spacing: -.1px;
 }
 
 .fCardSub {
   font-size: 10px;
   font-weight: 600;
-  color: rgba(255,255,255,.4);
+  color: rgba(180,220,240,.55);
 }
 
-/* ── Save button — laranja ─────────────────────────────── */
+/* ── Save button — azul cyan igual ao relatório ─────── */
 .sSaveBtn, .fSaveBtn {
-  background: linear-gradient(135deg, #f97316, #ea580c) !important;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
   color: #fff !important;
   font-weight: 800 !important;
 }
@@ -328,11 +330,11 @@ body {
   color: #f0f0f0;
 }
 
-/* ── Header laranja no tema light ─────────────────────── */
+/* ── Header azul navy no tema light ─────────────────────── */
 [data-theme="light"] .hdr {
-  background: linear-gradient(135deg, #f97316, #ea580c) !important;
-  border-bottom: 1px solid rgba(234,88,12,.3) !important;
-  box-shadow: 0 4px 18px rgba(234,88,12,.25), 0 1px 0 rgba(255,255,255,.15) !important;
+  background: linear-gradient(135deg, #1e2d6b, #162258) !important;
+  border-bottom: 1px solid rgba(30,45,107,.4) !important;
+  box-shadow: 0 4px 18px rgba(20,35,100,.35), 0 1px 0 rgba(255,255,255,.1) !important;
 }
 [data-theme="light"] .hdrGreeting { color: #fff !important; }
 [data-theme="light"] .hdrSub { color: rgba(255,255,255,.8) !important; }
@@ -341,11 +343,11 @@ body {
   border-color: rgba(255,255,255,.25) !important;
 }
 [data-theme="light"] .dayBadge { color: rgba(255,255,255,.9) !important; }
-[data-theme="light"] .progressLabel { color: rgba(255,255,255,.85) !important; }
-/* Footer / bottomBar laranja no light */
+[data-theme="light"] .progressLabel { color: rgba(30,45,107,.85) !important; }
+/* Footer / bottomBar azul navy no light */
 [data-theme="light"] .bottomBar {
-  background: linear-gradient(135deg, #f97316, #ea580c) !important;
-  border-top: 1px solid rgba(234,88,12,.3) !important;
+  background: linear-gradient(135deg, #1e2d6b, #162258) !important;
+  border-top: 1px solid rgba(30,45,107,.4) !important;
 }
 [data-theme="light"] .cmdBtn .cl { color: rgba(255,255,255,.95) !important; }
 [data-theme="light"] .cmdBtn .ci-wrap {
@@ -379,4 +381,53 @@ body {
   background: rgba(255,255,255,.2);
   border-color: rgba(255,255,255,.4);
   color: #fff;
+}
+
+/* ── Calendário azul/roxo no tema light (igual ao print) ── */
+[data-theme="light"] .calWrap,
+[data-theme="light"] .calGrid {
+  background: transparent !important;
+}
+[data-theme="light"] .calDay.today,
+[data-theme="light"] .calDay.selected {
+  background: #3b4fcf !important;
+  color: #fff !important;
+  border-color: #3b4fcf !important;
+}
+[data-theme="light"] .calDay {
+  color: #1a1e3a !important;
+}
+[data-theme="light"] .calDayName {
+  color: #3b4fcf !important;
+  font-weight: 800 !important;
+}
+[data-theme="light"] .calDot {
+  background: #3b4fcf !important;
+}
+/* Texto "arraste para ver o mês" */
+[data-theme="light"] .calDragHint {
+  color: rgba(30,45,107,.65) !important;
+}
+/* Seção PASTAS label */
+[data-theme="light"] .folderSectionTitle,
+[data-theme="light"] .sectionLabel {
+  color: #1a1e3a !important;
+}
+/* Cards de pasta no light — fundo branco levinho */
+[data-theme="light"] .folderCard,
+[data-theme="light"] .folderItem {
+  background: rgba(255,255,255,.55) !important;
+  border-color: rgba(50,70,180,.12) !important;
+  color: #1a1e3a !important;
+}
+/* Progress bar no light */
+[data-theme="light"] .progressBar {
+  background: linear-gradient(90deg, #3b4fcf, #6b7ff0) !important;
+}
+[data-theme="light"] .progressTrack {
+  background: rgba(30,45,120,.15) !important;
+}
+/* Porcentagem label */
+[data-theme="light"] .progressPct {
+  color: #3b4fcf !important;
 }
