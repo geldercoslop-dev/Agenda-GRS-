@@ -979,6 +979,13 @@
   -webkit-tap-highlight-color:transparent;
 }
 .searchItem:active { background:rgba(99,102,241,.15); }
+.searchItemCard {
+  padding:14px;
+  border-radius:14px;
+  background:rgba(4,53,90,.35);
+  border:1px solid rgba(0,140,180,.18);
+}
+.searchItemCard:active { background:rgba(0,140,180,.18); }
 .searchItemType {
   font-size:10px; font-weight:700; letter-spacing:.5px;
   text-transform:uppercase; color:rgba(165,180,252,.5); margin-bottom:4px;

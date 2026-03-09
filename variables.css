@@ -4,6 +4,9 @@
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
+  /* ── Primary color ───────────────────────────────────── */
+  --primary:      #4da3ff;   /* azul principal — botões e destaques */
+
   /* ── Backgrounds ─────────────────────────────────────── */
   --bg0:          #0a0a0a;   /* fundo principal — preto quase puro */
   --bg1:          #111111;   /* cards, modais */
@@ -431,3 +434,35 @@ body {
 [data-theme="light"] .progressPct {
   color: #3b4fcf !important;
 }
+
+/* ══ Campo editável inline — relatório de consultas ══ */
+.editable {
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed rgba(255,255,255,.4);
+  color: #e8f4ff;
+  font-size: 16px;
+  width: 100%;
+  outline: none;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  padding: 2px 0;
+  transition: border-color .2s;
+}
+.editable:focus { border-bottom-color: var(--primary); }
+.editable[readonly] { border-bottom-color: transparent; cursor: default; }
+
+/* ══ Botão primário padrão ══ */
+.btn-primary {
+  background: var(--primary);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 12px 18px;
+  transition: opacity .15s;
+}
+.btn-primary:active { opacity: .8; }

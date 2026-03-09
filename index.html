@@ -107,6 +107,10 @@
   <link rel="stylesheet" href="./app.css">
   <!-- Módulo de sincronização Supabase (offline-first, opt-in) -->
   <script src="./sync.js"></script>
+  <!-- Módulos de arquitetura separados -->
+  <script src="./js/agenda.js" defer></script>
+  <script src="./js/notificacoes.js" defer></script>
+  <script src="./js/ui.js" defer></script>
 </head>
 <body>
 <div class="screen">
@@ -1111,6 +1115,8 @@ function openBucket(id, _pushCurrent){
   if(_fab){ _fab.style.opacity='0'; _fab.style.pointerEvents='none'; _fab.style.transform='scale(.7)'; }
   // Ocultar watermark fora da home
   const _wm=document.getElementById('watermarkWrap'); if(_wm) _wm.style.visibility='hidden';
+  // Ocultar lupa fora da home
+  atualizarLupa('day');
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('show'));
 
   // Se é pasta-pai com subpastas, injeta tiles de subpasta no topo da dayView
@@ -1156,7 +1162,16 @@ function goHome(){
   if(sub){sub.innerHTML='';sub.style.display='none';}
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('show'));
   document.getElementById('homeView').classList.add('show');
+  atualizarLupa('home');
   renderFolders();
+}
+
+// Lupa apenas na home
+function atualizarLupa(tela){
+  const lupa=document.getElementById('searchBtn');
+  if(!lupa) return;
+  if(tela==='home'){ lupa.style.display='flex'; lupa.style.opacity='1'; lupa.style.pointerEvents='auto'; }
+  else { lupa.style.display='none'; }
 }
 
 function navigateBack(){
@@ -1537,7 +1552,7 @@ function _modalBase(){
   ov.className='modalOverlay';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9800;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;';
   const box=document.createElement('div');
-  box.style.cssText='width:100%;max-width:360px;border-radius:20px;padding:16px 14px;overflow-y:auto;max-height:calc(100dvh - 28px);animation:scaleIn .22s ease;font-family:\'Space Grotesk\',sans-serif;box-sizing:border-box;'
+  box.style.cssText='width:100%;max-width:380px;border-radius:22px;padding:22px;overflow-y:auto;max-height:calc(100dvh - 28px);animation:scaleIn .22s ease;font-family:\'Space Grotesk\',sans-serif;box-sizing:border-box;'
     +'background:linear-gradient(160deg,#021824,#04355a);border:1px solid rgba(0,160,200,.2);box-shadow:0 20px 60px rgba(0,0,0,.55);';
   ov.appendChild(box);
   document.body.appendChild(ov);
@@ -2418,39 +2433,40 @@ function closeSidebar(){
   setTimeout(()=>{ if(!ov.classList.contains('open')) ov.style.display='none'; },300);
 }
 
-// ══ SWIPE SIDEBAR ══
+// ══ SWIPE SIDEBAR — qualquer lugar da tela ══
 (function initSwipeSidebar(){
-  const SIDEBAR_W = 260;
-  const EDGE_OPEN  = 30;  // zona da borda esquerda para abrir
-  const THRESHOLD  = 60;  // px mínimos para confirmar gesto
+  const THRESHOLD  = 55;   // px mínimos para confirmar gesto
+  const MIN_RATIO  = 1.8;  // dx deve ser pelo menos 1.8x maior que dy (gesto horizontal)
 
-  let _tx=0, _ty=0, _dragging=false, _intent=null;
+  let _tx=0, _ty=0, _active=false;
   const sidebar = document.getElementById('sidebar');
 
   document.addEventListener('touchstart', e=>{
+    // Ignorar toques dentro do sidebar (para permitir scroll interno)
+    if(sidebar.contains(e.target) && sidebar.classList.contains('open')) return;
     const t = e.touches[0];
-    _tx = t.clientX; _ty = t.clientY; _dragging=false; _intent=null;
-    const isOpen = sidebar.classList.contains('open');
-    // abre: dedo começou na borda esquerda
-    // fecha: dedo começou dentro do sidebar aberto ou em qualquer lugar
-    if(!isOpen && _tx <= EDGE_OPEN) _intent='open';
-    else if(isOpen) _intent='close';
+    _tx = t.clientX; _ty = t.clientY; _active = true;
   },{passive:true});
 
   document.addEventListener('touchmove', e=>{
-    if(!_intent) return;
+    if(!_active) return;
     const dx = e.touches[0].clientX - _tx;
     const dy = e.touches[0].clientY - _ty;
-    if(!_dragging && Math.abs(dy) > Math.abs(dx)) { _intent=null; return; }
-    _dragging = true;
+    // Se vertical demais, cancela
+    if(Math.abs(dy) > Math.abs(dx) * 0.9) { _active = false; }
   },{passive:true});
 
   document.addEventListener('touchend', e=>{
-    if(!_intent || !_dragging) return;
+    if(!_active) { _active=false; return; }
     const dx = e.changedTouches[0].clientX - _tx;
-    if(_intent==='open'  && dx >  THRESHOLD) openSidebar();
-    if(_intent==='close' && dx < -THRESHOLD) closeSidebar();
-    _intent=null; _dragging=false;
+    const dy = e.changedTouches[0].clientY - _ty;
+    _active = false;
+    // Só confirma se o gesto for suficientemente horizontal
+    if(Math.abs(dx) < THRESHOLD) return;
+    if(Math.abs(dy) > Math.abs(dx) * 0.6) return;
+    const isOpen = sidebar.classList.contains('open');
+    if(!isOpen && dx > 0) openSidebar();   // arrastar para direita → abre
+    if(isOpen  && dx < 0) closeSidebar(); // arrastar para esquerda → fecha
   },{passive:true});
 })();
 
@@ -2590,28 +2606,29 @@ function init(){
     });
   }
   document.getElementById('dayPhotoBtn').addEventListener('click',()=>{
-    // Modal de escolha: câmera ou galeria
-    // Modal câmera/galeria — padrão bege
+    // Modal câmera/galeria — botões lado a lado
     const {ov:mo,box:cBox,close:cClose}=_modalBase();
     const cHdr=document.createElement('div');
-    cHdr.style.cssText='display:flex;flex-direction:column;align-items:center;padding:18px 18px 14px;border-bottom:1px solid rgba(140,100,50,.25);';
-    cHdr.innerHTML=`<div style="font-size:32px;margin-bottom:6px;">📷</div>
+    cHdr.style.cssText='display:flex;flex-direction:column;align-items:center;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(0,140,180,.2);';
+    cHdr.innerHTML=`<div style="font-size:28px;margin-bottom:6px;line-height:1;">📷</div>
       <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;">Adicionar Foto</div>`;
     cBox.appendChild(cHdr);
-    const cBody=document.createElement('div');
-    cBody.style.cssText='padding:16px 18px 20px;display:flex;flex-direction:column;gap:10px;';
-    const bS='width:100%;padding:14px 16px;border-radius:14px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:10px;';
-    const bCam=document.createElement('button'); bCam.style.cssText=bS;
-    bCam.innerHTML='<span style="font-size:18px;">📸</span> Tirar Foto com a Câmera';
+    // Botões lado a lado
+    const cRow=document.createElement('div');
+    cRow.style.cssText='display:flex;gap:10px;margin-bottom:10px;';
+    const bCam=document.createElement('button');
+    bCam.style.cssText='flex:1;padding:14px 10px;border-radius:14px;border:1.5px solid rgba(255,255,255,.15);background:var(--primary,rgba(77,163,255,.15));color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;';
+    bCam.innerHTML='<span style="font-size:22px;">📸</span>Tirar foto';
     bCam.addEventListener('click',()=>{ cClose(); document.getElementById('dayPhotoInputCam').click(); });
-    const bGal=document.createElement('button'); bGal.style.cssText=bS;
-    bGal.innerHTML='<span style="font-size:18px;">🖼️</span> Escolher da Galeria';
+    const bGal=document.createElement('button');
+    bGal.style.cssText='flex:1;padding:14px 10px;border-radius:14px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;';
+    bGal.innerHTML='<span style="font-size:22px;">🖼️</span>Galeria';
     bGal.addEventListener('click',()=>{ cClose(); document.getElementById('dayPhotoInput').click(); });
     const bCan=document.createElement('button');
     bCan.style.cssText='width:100%;padding:11px 16px;border-radius:14px;border:none;background:transparent;color:rgba(180,220,240,.45);font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;cursor:pointer;';
     bCan.textContent='Cancelar'; bCan.addEventListener('click',cClose);
-    cBody.appendChild(bCam); cBody.appendChild(bGal); cBody.appendChild(bCan);
-    cBox.appendChild(cBody);
+    cRow.appendChild(bCam); cRow.appendChild(bGal);
+    cBox.appendChild(cRow); cBox.appendChild(bCan);
   });
   document.getElementById('dayPhotoInput').addEventListener('change',(e)=>{
     _handleBucketPhotoFile(e.target.files[0]); e.target.value='';
@@ -3992,10 +4009,8 @@ function _runSearch(query) {
 
   const results = [];
 
-  // Tarefas (semana atual + dateTaskas + pastas)
-  const allBuckets = [
-    ...Object.keys(state.tasks || {}),
-  ];
+  // Tarefas (semana atual + dateTasks + pastas)
+  const allBuckets = [...Object.keys(state.tasks || {})];
   allBuckets.forEach(bid => {
     const arr = state.tasks[bid] || [];
     const folder = state.folders.find(f => f.id === bid);
@@ -4003,7 +4018,7 @@ function _runSearch(query) {
     const label  = folder ? `${folder.emoji||'📁'} ${folder.name}` : (day ? day.label : bid);
     arr.forEach(t => {
       if (t.text.toLowerCase().includes(q)) {
-        results.push({ type:'task', icon:'✅', typeLabel:'Tarefa', text:t.text, sub:label, action:()=>{ closeSearch(); openBucket(bid); } });
+        results.push({ type:'task', icon:'✅', typeLabel:'Tarefa', text:t.text, sub:label, sortKey:'', action:()=>{ closeSearch(); openBucket(bid); } });
       }
     });
   });
@@ -4011,24 +4026,48 @@ function _runSearch(query) {
   Object.entries(state.dateTasks || {}).forEach(([dk, arr]) => {
     (arr||[]).forEach(t => {
       if (t.text.toLowerCase().includes(q)) {
-        results.push({ type:'task', icon:'📅', typeLabel:'Tarefa (calendário)', text:t.text, sub:dk.split('-').reverse().join('/'), action:()=>{ closeSearch(); } });
+        results.push({ type:'task', icon:'📅', typeLabel:'Tarefa (calendário)', text:t.text, sub:dk.split('-').reverse().join('/'), sortKey:dk, action:()=>{ closeSearch(); } });
       }
     });
   });
-  // Consultas
+  // Consultas — com todos os dados
   (state.consultas || []).forEach(c => {
     const searchable = [c.especialidade, c.medico, c.paciente, c.local, c.obs].filter(Boolean).join(' ');
     if (searchable.toLowerCase().includes(q)) {
       const df = c.data ? c.data.split('-').reverse().join('/') : '';
-      results.push({ type:'consulta', icon:'🏥', typeLabel:'Consulta', text:`${c.especialidade||'Consulta'}${c.medico?' · '+c.medico:''}`, sub:`${c.paciente||''}${df?' | '+df:''}${c.hora?' às '+c.hora:''}`, action:()=>{ closeSearch(); openListaConsultas(); } });
+      results.push({
+        type:'consulta', icon:'🏥', typeLabel:'Consulta',
+        text: c.especialidade || 'Consulta',
+        paciente: c.paciente||'', medico: c.medico||'', local: c.local||'',
+        hora: c.hora||'', data: df, obs: c.obs||'',
+        sub: `${c.paciente||''}${df?' | '+df:''}${c.hora?' às '+c.hora:''}`,
+        sortKey: (c.data||'9999')+(c.hora||''),
+        action:()=>{ closeSearch(); _abrirMiniRelatorio(c.id); }
+      });
     }
   });
   // Remédios
   (state.remedios || []).forEach(r => {
     const searchable = [r.nome, r.dose, r.paciente].filter(Boolean).join(' ');
     if (searchable.toLowerCase().includes(q)) {
-      results.push({ type:'remedio', icon:'💊', typeLabel:'Remédio', text:`${r.nome||'Remédio'}${r.dose?' · '+r.dose:''}`, sub:r.paciente||'', action:()=>{ closeSearch(); openListaRemedios(); } });
+      const df = r.data ? r.data.split('-').reverse().join('/') : '';
+      results.push({
+        type:'remedio', icon:'💊', typeLabel:'Remédio',
+        text: r.nome || 'Remédio', paciente: r.paciente||'', dose: r.dose||'',
+        hora: r.hora||'', data: df,
+        sub: r.paciente||'',
+        sortKey: (r.data||'9999')+(r.hora||''),
+        action:()=>{ closeSearch(); openListaRemedios(); }
+      });
     }
+  });
+
+  // Ordenar por data (mais próxima primeiro)
+  results.sort((a, b) => {
+    if(!a.sortKey && !b.sortKey) return 0;
+    if(!a.sortKey) return 1;
+    if(!b.sortKey) return -1;
+    return a.sortKey.localeCompare(b.sortKey);
   });
 
   if (results.length === 0) {
@@ -4036,13 +4075,46 @@ function _runSearch(query) {
     return;
   }
 
-  container.innerHTML = results.slice(0, 40).map((r, i) => `
-    <div class="searchItem" data-idx="${i}">
+  // Renderizar cards horizontais com todos os dados
+  container.innerHTML = results.slice(0, 40).map((r, i) => {
+    if (r.type === 'consulta') {
+      return `<div class="searchItem searchItemCard" data-idx="${i}" style="cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <span style="font-size:20px;line-height:1;">🏥</span>
+          <div style="flex:1;min-width:0;">
+            <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}</div>
+            <div class="searchItemType" style="margin:0;">Consulta</div>
+          </div>
+          ${r.data ? `<span style="font-size:11px;font-weight:800;color:#00c48a;flex-shrink:0;">${r.data}${r.hora?' · '+r.hora:''}</span>` : ''}
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          ${r.paciente ? `<span style="background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:#7dd3f0;">👤 ${_escHtml(r.paciente)}</span>` : ''}
+          ${r.medico ? `<span style="background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:4px 9px;font-size:11px;font-weight:600;color:rgba(232,244,255,.6);">👨‍⚕️ ${_escHtml(r.medico)}</span>` : ''}
+          ${r.local ? `<span style="background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:4px 9px;font-size:11px;font-weight:600;color:rgba(232,244,255,.6);">📍 ${_escHtml(r.local)}</span>` : ''}
+          ${r.obs ? `<span style="background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:4px 9px;font-size:11px;font-weight:600;color:rgba(232,244,255,.5);">📝 ${_escHtml(r.obs)}</span>` : ''}
+        </div>
+      </div>`;
+    }
+    if (r.type === 'remedio') {
+      return `<div class="searchItem searchItemCard" data-idx="${i}" style="cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <span style="font-size:20px;line-height:1;">💊</span>
+          <div style="flex:1;min-width:0;">
+            <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}${r.dose?` <span style="font-size:11px;font-weight:500;color:rgba(165,180,252,.6);">${_escHtml(r.dose)}</span>`:''}  </div>
+            <div class="searchItemType" style="margin:0;">Remédio</div>
+          </div>
+          ${r.data ? `<span style="font-size:11px;font-weight:800;color:#a78bfa;flex-shrink:0;">${r.data}${r.hora?' · '+r.hora:''}</span>` : ''}
+        </div>
+        ${r.paciente ? `<div style="display:flex;flex-wrap:wrap;gap:6px;"><span style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:#c4b5fd;">👤 ${_escHtml(r.paciente)}</span></div>` : ''}
+      </div>`;
+    }
+    // Tarefas
+    return `<div class="searchItem" data-idx="${i}">
       <div class="searchItemType">${_escHtml(r.typeLabel)}</div>
       <div class="searchItemText">${r.icon} ${_highlight(r.text, query)}</div>
       ${r.sub ? `<div class="searchItemSub">${_escHtml(r.sub)}</div>` : ''}
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 
   container.querySelectorAll('.searchItem').forEach((el, i) => {
     el.addEventListener('click', () => results[i].action());
@@ -4612,24 +4684,24 @@ function openListaConsultas(){
   const proximas=consultas.filter(c=>{ const d=new Date(c.data+'T'+c.hora); return d>=today; });
   const historico=consultas.filter(c=>{ const d=new Date(c.data+'T'+c.hora); return d<today; });
 
+  // ── Formato padrão: Paciente • Especialidade • Data Hora ──
+  function fmtConsultaLabel(c){
+    const dataFmt=c.data?c.data.split('-').reverse().join('/'):'';
+    return `${escHtml(c.paciente||'-')} • ${escHtml(c.especialidade||'-')} • ${dataFmt} ${c.hora||''}`;
+  }
+
   function cardHTML(c,isPast){
     const dataFmt=c.data?c.data.split('-').reverse().join('/'):'-';
-    return `<div style="background:${CARD};border:1px solid ${isPast?'rgba(0,100,140,.12)':BDR};border-radius:14px;overflow:hidden;margin-bottom:10px;${isPast?'opacity:.72':''}">
+    return `<div class="_consultaCard" data-id="${c.id}" style="background:${CARD};border:1px solid ${isPast?'rgba(0,100,140,.12)':BDR};border-radius:14px;overflow:hidden;margin-bottom:10px;${isPast?'opacity:.72':''}cursor:pointer;">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:${HDR};border-bottom:1px solid ${HBDR};">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:${isPast?MUTED:TEXT};">${escHtml(c.especialidade)}</div>
-        <span style="font-size:13px;font-weight:900;color:#00c48a;font-family:'Space Grotesk',sans-serif;">${c.hora}</span>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;color:${isPast?MUTED:TEXT};flex:1;min-width:0;">${fmtConsultaLabel(c)}</div>
+        <span style="font-size:12px;font-weight:900;color:#00c48a;font-family:'Space Grotesk',sans-serif;margin-left:8px;flex-shrink:0;">${c.hora}</span>
       </div>
-      <div style="padding:10px 14px 8px;">
-        ${c.paciente?`<div style="font-size:12px;font-weight:700;color:${TEXT};margin-bottom:4px;">👤 ${escHtml(c.paciente)}</div>`:''}
-        ${c.medico?`<div style="font-size:11px;font-weight:600;color:${MUTED};margin-bottom:2px;">👨‍⚕️ ${escHtml(c.medico)}</div>`:''}
-        <div style="font-size:11px;font-weight:700;color:${ACCENT};margin-bottom:2px;">📅 ${dataFmt}</div>
-        ${c.local?`<div style="font-size:11px;color:${MUTED};margin-bottom:2px;">📍 ${escHtml(c.local)}</div>`:''}
-        ${c.obs?`<div style="font-size:11px;color:${MUTED};margin-bottom:2px;">📝 ${escHtml(c.obs)}</div>`:''}
-        <div style="display:flex;gap:6px;margin-top:8px;">
-          <button onclick="compartilharConsultaWhatsApp('${c.id}')" style="background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:8px;color:#25d366;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">📤 Zap</button>
-          <button onclick="editConsulta('${c.id}')" style="background:${FIELD};border:1px solid ${FBDR};border-radius:8px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✏️ Editar</button>
-          <button onclick="deleteConsulta('${c.id}')" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✕</button>
-        </div>
+      <div style="padding:8px 14px;display:flex;gap:6px;flex-wrap:wrap;">
+        <button onclick="event.stopPropagation();_abrirMiniRelatorio('${c.id}')" style="background:rgba(77,163,255,.15);border:1px solid rgba(77,163,255,.3);border-radius:8px;color:var(--primary,#4da3ff);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">📋 Detalhes</button>
+        <button onclick="event.stopPropagation();compartilharConsultaWhatsApp('${c.id}')" style="background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:8px;color:#25d366;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">📤 Zap</button>
+        <button onclick="event.stopPropagation();editConsulta('${c.id}')" style="background:${FIELD};border:1px solid ${FBDR};border-radius:8px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✏️ Editar</button>
+        <button onclick="event.stopPropagation();deleteConsulta('${c.id}')" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✕</button>
       </div>
     </div>`;
   }
@@ -4657,7 +4729,7 @@ function openListaConsultas(){
         <button id="_lcBack" style="background:${FIELD};border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
         <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:16px;color:${TEXT};letter-spacing:-.2px;">🏥 Consultas</span>
       </div>
-      <button id="_lcAdd" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:9px 16px;cursor:pointer;">+ Nova</button>
+      <button id="_lcAdd" style="background:var(--primary,#4da3ff);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:9px 16px;cursor:pointer;">+ Nova</button>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">${body}</div>`;
   document.body.appendChild(ov);
@@ -4665,8 +4737,143 @@ function openListaConsultas(){
   ov.querySelector('#_lcAdd').onclick=()=>{ ov.remove(); openConsultaModal(); };
 }
 
-function editConsulta(id){ document.getElementById('listaConsultasOv')?.remove(); openConsultaModal(id); }
+// ── Mini Relatório ao clicar na consulta ──
+function _abrirMiniRelatorio(id){
+  const c=(state.consultas||[]).find(x=>x.id===id);
+  if(!c) return;
+  const dataFmt=c.data?c.data.split('-').reverse().join('/'):'—';
+  const BG='linear-gradient(160deg,#021824,#04355a)';
+  const BDR='rgba(0,140,180,.18)';
+  const FIELD='rgba(0,80,120,.28)';
+  const TEXT='#e8f4ff';
+  const MUTED='rgba(180,220,240,.55)';
+  const ACCENT='#7dd3f0';
 
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:100000;display:flex;align-items:center;justify-content:center;padding:18px;';
+
+  // Edição inline — campos com classe .editable
+  ov.innerHTML=`
+    <div style="background:${BG};border:1px solid ${BDR};border-radius:22px;max-width:370px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.7);overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};">
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:${TEXT};">🏥 Detalhes da Consulta</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button id="_mrEditBtn" style="background:${FIELD};border:1px solid rgba(0,160,200,.22);border-radius:9px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:800;padding:5px 12px;cursor:pointer;">✏️ Editar</button>
+          <button id="_mrClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:9px;color:${ACCENT};width:30px;height:30px;cursor:pointer;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
+      </div>
+      <div style="padding:18px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Paciente</div>
+            <input class="editable" id="_mrPac" value="${escHtml(c.paciente||'')}" readonly>
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Especialidade</div>
+            <input class="editable" id="_mrEspec" value="${escHtml(c.especialidade||'')}" readonly>
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Médico</div>
+            <input class="editable" id="_mrMedico" value="${escHtml(c.medico||'')}" readonly>
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Local</div>
+            <input class="editable" id="_mrLocal" value="${escHtml(c.local||'')}" readonly>
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Data</div>
+            <input class="editable" id="_mrData" type="date" value="${c.data||''}" readonly>
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Hora</div>
+            <input class="editable" id="_mrHora" type="time" value="${c.hora||''}" readonly>
+          </div>
+        </div>
+        <button id="_mrSaveBtn" style="display:none;width:100%;padding:14px;border-radius:14px;border:none;background:var(--primary,#4da3ff);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:14px;cursor:pointer;margin-top:4px;">✔ Salvar Alterações</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(ov);
+  ov.querySelector('#_mrClose').onclick=()=>ov.remove();
+  ov.addEventListener('click',(e)=>{ if(e.target===ov) ov.remove(); });
+
+  let editMode=false;
+  const fields=['#_mrPac','#_mrEspec','#_mrMedico','#_mrLocal','#_mrData','#_mrHora'];
+
+  ov.querySelector('#_mrEditBtn').onclick=()=>{
+    editMode=!editMode;
+    fields.forEach(sel=>{
+      const el=ov.querySelector(sel);
+      if(editMode){ el.removeAttribute('readonly'); }
+      else { el.setAttribute('readonly',''); }
+    });
+    ov.querySelector('#_mrEditBtn').textContent=editMode?'🔒 Bloquear':'✏️ Editar';
+    ov.querySelector('#_mrSaveBtn').style.display=editMode?'block':'none';
+  };
+
+  ov.querySelector('#_mrSaveBtn').onclick=()=>{
+    atualizarConsulta(id, {
+      paciente: ov.querySelector('#_mrPac').value.trim(),
+      especialidade: ov.querySelector('#_mrEspec').value.trim(),
+      medico: ov.querySelector('#_mrMedico').value.trim(),
+      local: ov.querySelector('#_mrLocal').value.trim(),
+      data: ov.querySelector('#_mrData').value,
+      hora: ov.querySelector('#_mrHora').value
+    });
+    ov.remove();
+    showToast('✅ Consulta atualizada!');
+    // Reabrir lista atualizada
+    setTimeout(()=>openListaConsultas(), 100);
+  };
+}
+
+// ── Atualizar consulta e sincronizar calendário e alertas ──
+function atualizarConsulta(id, campos){
+  if(!state.consultas) return;
+  const idx=state.consultas.findIndex(c=>c.id===id);
+  if(idx<0) return;
+  const c=state.consultas[idx];
+
+  // Remover entrada antiga do calendário (dateTasks)
+  if(c.data && state.dateTasks && state.dateTasks[c.data]){
+    state.dateTasks[c.data]=state.dateTasks[c.data].filter(t=>!t.text.includes(c.especialidade)||!t.text.includes(c.paciente));
+  }
+
+  // Atualizar campos
+  Object.assign(c, campos);
+  if(typeof markDirty==='function') markDirty(c);
+
+  // Recriar no calendário com novos dados
+  if(c.data){
+    if(!state.dateTasks) state.dateTasks={};
+    if(!state.dateTasks[c.data]) state.dateTasks[c.data]=[];
+    const already=state.dateTasks[c.data].find(t=>t.consultaRef===id);
+    if(!already){
+      state.dateTasks[c.data].push(ensureSyncFields({
+        text:'🏥 '+c.especialidade+(c.medico?' · '+c.medico:'')+(c.paciente?' — '+c.paciente:'')+' às '+c.hora,
+        done:false, createdAt:Date.now(), consultaRef:id
+      }));
+    } else {
+      already.text='🏥 '+c.especialidade+(c.medico?' · '+c.medico:'')+(c.paciente?' — '+c.paciente:'')+' às '+c.hora;
+    }
+  }
+
+  // Atualizar item na pasta _consultas
+  if(state.tasks['_consultas']){
+    const taskIdx=state.tasks['_consultas'].findIndex(t=>t.consultaRef===id);
+    if(taskIdx>=0){
+      const df=c.data?c.data.split('-').reverse().join('/'):'';
+      state.tasks['_consultas'][taskIdx].text='🏥 '+c.especialidade+(c.medico?' · '+c.medico:'')+(c.paciente?' — '+c.paciente:'')+' | '+df+' '+c.hora;
+    }
+  }
+
+  state.consultas.sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+  save();
+  // Reagendar alertas automáticos
+  try { agendarNotificacoesConsultas(); } catch(e){}
+}
+
+function editConsulta(id){ document.getElementById('listaConsultasOv')?.remove(); openConsultaModal(id); }
 function deleteConsulta(id){ _deleteConsultaWithUndo(id); }
 
 // ════════════════════════════════════════════
@@ -5350,11 +5557,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a1020;color:#e2e8f
 
 // ══ PESQUISA HISTÓRICO POR PACIENTE ══
 function openHistoricoPaciente(){
-  const isLight=document.body.getAttribute('data-theme')==='light';
   const bg='linear-gradient(160deg,#021824,#04355a)';
-  const textC=isLight?'#2a1a08':'#e8f4ff';
-  const cardBg=isLight?'rgba(255,255,255,.35)':'rgba(255,255,255,.06)';
-  const borderC=isLight?'rgba(0,0,0,.1)':'rgba(255,255,255,.1)';
+  const TEXT='#e8f4ff';
+  const MUTED='rgba(180,220,240,.55)';
+  const ACCENT='#7dd3f0';
+  const BDR='rgba(0,140,180,.18)';
+  const FIELD='rgba(0,80,120,.28)';
+  const HBDR='rgba(0,80,120,.25)';
 
   const ov=document.createElement('div');
   ov.id='historicoPacienteOv';
@@ -5370,105 +5579,114 @@ function openHistoricoPaciente(){
 
   function renderResultados(filtro){
     const termo=filtro.toLowerCase().trim();
-    const remFilt=remedios.filter(r=>r.paciente&&r.paciente.toLowerCase().includes(termo));
-    const consFilt=consultas.filter(c=>c.paciente&&c.paciente.toLowerCase().includes(termo));
+    // Ordenar por data
+    const remFilt=remedios.filter(r=>r.paciente&&r.paciente.toLowerCase().includes(termo))
+      .sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+    const consFilt=consultas.filter(c=>c.paciente&&c.paciente.toLowerCase().includes(termo))
+      .sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
 
-    let html='';
+    // Juntar tudo numa lista única ordenada por data
+    const allItems = [
+      ...consFilt.map(c=>({...c, _tipo:'consulta'})),
+      ...remFilt.map(r=>({...r, _tipo:'remedio'}))
+    ].sort((a,b)=>((a.data||'9999')+(a.hora||'')).localeCompare((b.data||'9999')+(b.hora||'')));
 
-    if(remFilt.length===0&&consFilt.length===0){
-      html='<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.4);font-size:14px;">Nenhum resultado encontrado</div>';
+    if(allItems.length===0){
+      return '<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.4);font-size:14px;">Nenhum resultado encontrado</div>';
     }
 
-    if(remFilt.length>0){
-      html+=`<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:#a78bfa;padding:8px 4px 6px;margin-top:4px;">💊 Remédios (${remFilt.length})</div>`;
-      remFilt.sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora)).forEach(r=>{
-        const df=r.data?r.data.split('-').reverse().join('/'):'—';
-        const freqL=r.frequencia===8?'8/8h':r.frequencia===12?'12/12h':r.frequencia+'h';
-        const total=r.dias?r.dias*Math.round(24/r.frequencia):'-';
-        const rawMs=r.data&&r.hora?new Date(r.data+'T'+r.hora+':00').getTime():0;
-        const fimMs=rawMs+(r.dias||0)*86400000;
-        const fimDate=new Date(fimMs);
-        const dfim=fimDate.getDate()+'/'+(fimDate.getMonth()+1)+'/'+fimDate.getFullYear();
-        html+=`<div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);border-radius:14px;padding:14px;margin-bottom:8px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <div style="font-size:15px;font-weight:900;color:#c4b5fd;" data-rid="${r.id}" data-rfield="nome">💊 <span data-rid="${r.id}" data-rfield="nome">${escHtml(r.nome)}</span>${r.dose?'<span style="font-size:11px;font-weight:500;color:#6b7280;margin-left:6px;" data-rid="${r.id}" data-rfield="dose">'+escHtml(r.dose)+'</span>':''}</div>
-            <span style="font-size:10px;font-weight:800;background:rgba(167,139,250,.15);color:#a78bfa;padding:3px 9px;border-radius:20px;border:1px solid rgba(167,139,250,.3);">${freqL}</span>
+    return allItems.map(item => {
+      const df=item.data?item.data.split('-').reverse().join('/'):'—';
+      if(item._tipo==='consulta'){
+        return `<div style="background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.2);border-radius:16px;padding:16px;margin-bottom:12px;">
+          <!-- Header do card -->
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:18px;line-height:1;">🏥</span>
+              <div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:${TEXT};">${escHtml(item.especialidade||'Consulta')}</div>
+                <div style="font-size:10px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;">Consulta</div>
+              </div>
+            </div>
+            <span style="font-size:12px;font-weight:900;color:#00c48a;font-family:'Space Grotesk',sans-serif;background:rgba(0,196,138,.1);border:1px solid rgba(0,196,138,.25);border-radius:8px;padding:4px 10px;">${df}${item.hora?' · '+item.hora:''}</span>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
-            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Paciente</div>
-              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">👤 ${escHtml(r.paciente)}</div>
+          <!-- Grid de dados -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;">
+              <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Paciente</div>
+              <div style="font-size:13px;font-weight:700;color:${TEXT};">👤 ${escHtml(item.paciente||'—')}</div>
             </div>
-            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Início</div>
-              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">${df}</div>
-            </div>
-            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Término</div>
-              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">${r.dias?dfim:'—'}</div>
-            </div>
-          </div>
-          <div style="margin-top:6px;background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:11px;color:#6b7280;">${r.dias||'?'} dias · ${total} usos</span>
-            <span style="font-size:14px;font-weight:900;color:#4ade80;">${r.hora||'—'}</span>
+            ${item.medico?`<div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;">
+              <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Médico</div>
+              <div style="font-size:13px;font-weight:700;color:${TEXT};">👨‍⚕️ ${escHtml(item.medico)}</div>
+            </div>`:''}
+            ${item.local?`<div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;${!item.medico?'grid-column:span 2;':''}">
+              <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Local</div>
+              <div style="font-size:12px;font-weight:600;color:rgba(232,244,255,.75);">📍 ${escHtml(item.local)}</div>
+            </div>`:''}
+            ${item.obs?`<div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;grid-column:span 2;">
+              <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Observação</div>
+              <div style="font-size:12px;font-weight:600;color:rgba(232,244,255,.65);">📝 ${escHtml(item.obs)}</div>
+            </div>`:''}
           </div>
         </div>`;
-      });
-    }
-
-    if(consFilt.length>0){
-      html+=`<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:#38bdf8;padding:8px 4px 6px;margin-top:${remFilt.length>0?'12px':'4px'};">🏥 Consultas (${consFilt.length})</div>`;
-      consFilt.sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora)).forEach(c=>{
-        const _dp=c.data?c.data.split('-'):null; const df=_dp?String(_dp[2]).padStart(2,'0')+'/'+String(_dp[1]).padStart(2,'0')+'/'+_dp[0]:'—';
-        html+=`<div style="background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);border-radius:14px;padding:14px;margin-bottom:8px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <div style="font-size:15px;font-weight:900;color:#7dd3fc;">🏥 ${escHtml(c.especialidade)}</div>
-            <span style="font-size:12px;font-weight:900;color:#4ade80;">${c.hora}</span>
+      } else {
+        const freqL=item.frequencia===8?'8/8h':item.frequencia===12?'12/12h':(item.frequencia||'?')+'h';
+        const fimMs=item.data&&item.hora?new Date(item.data+'T'+item.hora+':00').getTime()+(item.dias||0)*86400000:0;
+        const fimDate=fimMs?new Date(fimMs):null;
+        const dfim=fimDate?fimDate.getDate()+'/'+(fimDate.getMonth()+1)+'/'+fimDate.getFullYear():'—';
+        return `<div style="background:rgba(80,40,140,.2);border:1px solid rgba(167,139,250,.25);border-radius:16px;padding:16px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:18px;line-height:1;">💊</span>
+              <div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:#c4b5fd;">${escHtml(item.nome||'Remédio')}${item.dose?` <span style="font-size:11px;font-weight:600;color:rgba(196,181,253,.6);">${escHtml(item.dose)}</span>`:''}</div>
+                <div style="font-size:10px;font-weight:800;color:rgba(167,139,250,.6);text-transform:uppercase;letter-spacing:.5px;">Remédio · ${freqL}</div>
+              </div>
+            </div>
+            <span style="font-size:12px;font-weight:900;color:#a78bfa;font-family:'Space Grotesk',sans-serif;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);border-radius:8px;padding:4px 10px;">${item.hora||'—'}</span>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Paciente</div>
-              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">👤 ${escHtml(c.paciente)}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+            <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;">
+              <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Paciente</div>
+              <div style="font-size:12px;font-weight:700;color:${TEXT};">👤 ${escHtml(item.paciente||'—')}</div>
             </div>
-            <div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Data</div>
-              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">📅 ${df}</div>
+            <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;">
+              <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Início</div>
+              <div style="font-size:12px;font-weight:700;color:${TEXT};">${df}</div>
             </div>
-            ${c.medico?`<div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;grid-column:span 2;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Médico / Clínica</div>
-              <div style="font-size:12px;font-weight:700;color:#e2e8f0;">👨‍⚕️ ${escHtml(c.medico)}</div>
-            </div>`:'' }
-            ${c.local?`<div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;grid-column:span 2;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Local</div>
-              <div style="font-size:12px;font-weight:600;color:#cbd5e1;">📍 ${escHtml(c.local)}</div>
-            </div>`:'' }
-            ${c.obs?`<div style="background:rgba(0,0,0,.25);border-radius:8px;padding:8px 10px;grid-column:span 2;">
-              <div style="font-size:9px;font-weight:800;color:#4b5563;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Observação</div>
-              <div style="font-size:12px;font-weight:600;color:#cbd5e1;">📝 ${escHtml(c.obs)}</div>
-            </div>`:'' }
+            <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;">
+              <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Término</div>
+              <div style="font-size:12px;font-weight:700;color:${TEXT};">${item.dias?dfim:'—'}</div>
+            </div>
           </div>
         </div>`;
-      });
-    }
-    return html;
+      }
+    }).join('');
   }
 
-  // Sugestões de pacientes como chips
-  const chipsHTML=pacientes.map(p=>`<button class="pac-chip" data-pac="${escHtml(p)}" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:${textC};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">${escHtml(p)}</button>`).join('');
+  // Chips de pacientes
+  const chipsHTML=pacientes.map(p=>`<button class="pac-chip" data-pac="${escHtml(p)}" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s;">${escHtml(p)}</button>`).join('');
 
   ov.innerHTML=`
-    <div style="padding:16px 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;">
-      <button id="hpBack" style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:${textC};font-size:13px;font-weight:700;padding:7px 12px;cursor:pointer;white-space:nowrap;">← Voltar</button>
-      <div style="flex:1;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:${textC};">🔍 Buscar Paciente</div>
-      <button id="hpWaBtn" data-pac="" style="display:none;align-items:center;gap:5px;background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.4);border-radius:10px;color:#25d366;font-size:12px;font-weight:800;padding:7px 12px;cursor:pointer;">📤 WhatsApp</button>
+    <!-- Header: ícone esquerda + título + botão fechar direita -->
+    <div style="display:flex;align-items:center;gap:12px;padding:16px 18px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <span style="font-size:22px;line-height:1;flex-shrink:0;">🔍</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:${TEXT};">Pesquisar Paciente</div>
+        <div style="font-size:11px;font-weight:600;color:${MUTED};">${pacientes.length} paciente${pacientes.length!==1?'s':''} cadastrado${pacientes.length!==1?'s':''}</div>
+      </div>
+      <button id="hpClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:10px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
     </div>
-    <div style="padding:12px 16px 8px;flex-shrink:0;">
+    <!-- Campo de busca -->
+    <div style="padding:14px 18px 8px;flex-shrink:0;">
       <input id="hpSearch" type="text" placeholder="Digite o nome do paciente..." autocomplete="off"
-        style="width:100%;padding:12px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.3);color:${textC};font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;outline:none;box-sizing:border-box;">
-      ${pacientes.length>0?`<div style="display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none;">${chipsHTML}</div>`:''}
+        style="width:100%;padding:12px 16px;border-radius:14px;border:1px solid ${BDR};background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;outline:none;box-sizing:border-box;">
+      ${pacientes.length>0?`<div style="display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;">${chipsHTML}</div>`:''}
     </div>
-    <div id="hpResults" style="flex:1;overflow-y:auto;padding:0 16px 24px;">
-      <div style="text-align:center;padding:48px 20px;color:rgba(255,255,255,.3);font-size:13px;">Digite um nome para pesquisar</div>
+    <!-- Resultados -->
+    <div id="hpResults" style="flex:1;overflow-y:auto;padding:4px 18px 24px;">
+      <div style="text-align:center;padding:48px 20px;color:${MUTED};font-size:13px;font-family:'Space Grotesk',sans-serif;">Digite um nome para pesquisar</div>
     </div>`;
 
   document.body.appendChild(ov);
@@ -5476,37 +5694,29 @@ function openHistoricoPaciente(){
   const inp=ov.querySelector('#hpSearch');
   const resultsDiv=ov.querySelector('#hpResults');
 
+  ov.querySelector('#hpClose').onclick=()=>ov.remove();
+
   inp.addEventListener('input',()=>{
     const v=inp.value.trim();
-    if(v.length<1){ resultsDiv.innerHTML='<div style="text-align:center;padding:48px 20px;color:rgba(255,255,255,.3);font-size:13px;">Digite um nome para pesquisar</div>'; return; }
+    if(v.length<1){
+      resultsDiv.innerHTML=`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-size:13px;font-family:'Space Grotesk',sans-serif;">Digite um nome para pesquisar</div>`;
+      return;
+    }
     resultsDiv.innerHTML=renderResultados(v);
   });
 
   // Chips clicáveis
   ov.querySelectorAll('.pac-chip').forEach(btn=>{
     btn.addEventListener('click',()=>{
+      ov.querySelectorAll('.pac-chip').forEach(b=>{ b.style.background=FIELD; b.style.borderColor='rgba(0,140,180,.25)'; });
+      btn.style.background='rgba(0,140,180,.25)';
+      btn.style.borderColor='rgba(0,160,200,.5)';
       inp.value=btn.dataset.pac;
       inp.dispatchEvent(new Event('input'));
-      // Mostra botão WA com o paciente selecionado
-      const waBtn=ov.querySelector('#hpWaBtn');
-      if(waBtn){ waBtn.style.display='flex'; waBtn.dataset.pac=btn.dataset.pac; }
     });
   });
 
-  // Botão WhatsApp para paciente pesquisado
-  const waBtnEl=ov.querySelector('#hpWaBtn');
-  if(waBtnEl) waBtnEl.addEventListener('click',()=>{
-    const pac=waBtnEl.dataset.pac||inp.value.trim();
-    if(pac) compartilharPacienteWhatsApp(pac);
-  });
-
-  inp.addEventListener('input',()=>{
-    const waBtn2=ov.querySelector('#hpWaBtn');
-    if(waBtn2&&inp.value.trim()) waBtn2.dataset.pac=inp.value.trim();
-  });
-
-  ov.querySelector('#hpBack').addEventListener('click',()=>ov.remove());
-  setTimeout(()=>inp.focus(),300);
+  setTimeout(()=>inp.focus(),150);
 }
 
 
@@ -5905,26 +6115,26 @@ async function abrirPainelNotificacoes() {
   const permLabel=permAtual==="granted"?"✅ Ativadas":permAtual==="denied"?"❌ Bloqueadas":"⚠️ Não solicitadas";
   const permColor=permAtual==="granted"?"#16a34a":permAtual==="denied"?"#dc2626":"#ea580c";
 
-  // Header
+  // Header com respiro adequado
   const hdr=document.createElement('div');
-  hdr.style.cssText='display:flex;flex-direction:column;align-items:center;padding:20px 18px 14px;border-bottom:1px solid rgba(140,100,50,.25);';
+  hdr.style.cssText='display:flex;flex-direction:column;align-items:center;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(0,140,180,.2);';
   hdr.innerHTML=`
-    <div style="font-size:40px;margin-bottom:8px;">🔔</div>
-    <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:#e8f4ff;margin-bottom:4px;">Notificações</div>
-    <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:${permColor};">Status: ${permLabel}</div>`;
+    <div style="font-size:32px;margin-bottom:6px;line-height:1;">🔔</div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;margin-bottom:3px;">Notificações</div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${permColor};">Status: ${permLabel}</div>`;
   box.appendChild(hdr);
 
-  // Body
-  const body=document.createElement('div');
-  body.style.cssText='padding:16px 18px 20px;display:flex;flex-direction:column;gap:10px;';
+  // Container de botões compacto
+  const btnContainer=document.createElement('div');
+  btnContainer.style.cssText='display:flex;flex-direction:column;gap:12px;';
 
-  const btnStyle='width:100%;padding:14px 16px;border-radius:14px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;';
+  const btnStyle='width:100%;padding:14px;border-radius:14px;border:1.5px solid rgba(255,255,255,.15);background:var(--primary,rgba(77,163,255,.15));color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:16px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:opacity .15s;';
 
   const b1=document.createElement('button'); b1.style.cssText=btnStyle;
   b1.innerHTML='<span style="font-size:18px;">🔔</span> Ativar tudo';
   b1.addEventListener('click',async()=>{
     close();
-    await ativarNotificacoesRemedios();
+    await agendarNotificacoesRemedios();
     await agendarNotificacoesConsultas();
     showToast('🔔 Notificações ativadas!');
   });
@@ -5933,7 +6143,7 @@ async function abrirPainelNotificacoes() {
   b2.innerHTML='<span style="font-size:18px;">💊</span> Só remédios';
   b2.addEventListener('click',async()=>{
     close();
-    await ativarNotificacoesRemedios();
+    await agendarNotificacoesRemedios();
     showToast('💊 Notificações de remédios ativadas!');
   });
 
@@ -5946,12 +6156,12 @@ async function abrirPainelNotificacoes() {
   });
 
   const bCancel=document.createElement('button');
-  bCancel.style.cssText='width:100%;padding:11px 16px;border-radius:14px;border:none;background:transparent;color:rgba(180,220,240,.45);font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;cursor:pointer;';
+  bCancel.style.cssText='width:100%;padding:11px 16px;border-radius:14px;border:none;background:transparent;color:rgba(180,220,240,.45);font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;cursor:pointer;margin-top:2px;';
   bCancel.textContent='Fechar';
   bCancel.addEventListener('click',close);
 
-  body.appendChild(b1); body.appendChild(b2); body.appendChild(b3); body.appendChild(bCancel);
-  box.appendChild(body);
+  btnContainer.appendChild(b1); btnContainer.appendChild(b2); btnContainer.appendChild(b3); btnContainer.appendChild(bCancel);
+  box.appendChild(btnContainer);
 }
 
 function quickCreateSubfolder() {
