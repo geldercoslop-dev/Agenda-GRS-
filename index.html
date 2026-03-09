@@ -192,7 +192,7 @@
     <div class="view" id="dayView">
       <div class="pullIndicator" id="pullIndicator">↑ Soltar para voltar</div>
       <!-- Subpastas dentro da pasta atual -->
-      <div id="quickSubBtn" style="display:none;padding:8px 14px 0;"><button onclick="quickCreateSubfolder()" style="width:100%;padding:9px 14px;border-radius:13px;border:1px dashed rgba(167,139,250,.45);background:rgba(167,139,250,.08);color:#a78bfa;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center;"><span style="font-size:16px;">📂</span><span>+ Nova subpasta aqui</span></button></div>      <div id="subFolderArea" style="display:none;grid-template-columns:repeat(4,1fr);gap:10px 8px;padding:14px 14px 4px;justify-items:center;border-bottom:1px solid var(--line);"></div>
+      <div id="quickSubBtn" style="display:none;"></div>      <div id="subFolderArea" style="display:none;grid-template-columns:repeat(4,1fr);gap:10px 8px;padding:14px 14px 4px;justify-items:center;border-bottom:1px solid var(--line);"></div>
       <div class="listArea" id="listArea"></div>
       <div class="inputBar">
         <button class="dayFabBtn" id="dayZapSendBtn">
@@ -1095,6 +1095,8 @@ function openBucket(id, _pushCurrent){
     else if(currentBucket) navStack.push(currentBucket);
   }
   currentBucket=id; currentView='day';
+  // Reforça sentinela para cada nível de navegação
+  setTimeout(()=>{ history.pushState({app:'agendapro',sentinel:true,bucket:id},''); }, 10);
   // Show day badge (always visible in header right)
   const badge=document.getElementById('dayBadge');
   const folder=state.folders.find(f=>f.id===id);
@@ -2769,13 +2771,16 @@ function init(){
   // ── Botão voltar Android (hardware back) ──
   // Técnica: substitui o estado atual e sempre empurra um novo sentinela.
   // Quando popstate dispara, temos certeza que foi o botão voltar.
-  function pushSentinel(){ history.pushState({app:'agendapro',sentinel:true},''); }
+  // Empurra 2 sentinelas para suportar múltiplos níveis de navegação sem sair do app
+  function pushSentinel(){
+    history.pushState({app:'agendapro',sentinel:true,ts:Date.now()},'');
+    history.pushState({app:'agendapro',sentinel:true,ts:Date.now()+1},'');
+  }
   history.replaceState({app:'agendapro',base:true},'');
   pushSentinel();
 
   window.addEventListener('popstate', function handleBack(e){
-    // Sempre que popstate disparar, voltamos a fazer pushState imediatamente
-    // para manter a sentinela pronta para a próxima vez
+    // Recoloca sentinelas imediatamente após cada popstate — mantém buffer robusto
     setTimeout(pushSentinel, 0);
 
     // ── PRIORIDADE 1: fecha a lupa de busca se estiver aberta ──
@@ -4614,24 +4619,26 @@ function openConsultaModal(editId){
         </div>
         <div style="${LBL}">Observação</div>
         <input id="_cObs" style="${iS}" placeholder="Opcional..." value="${editing?editing.obs||'':''}">
-        <div style="${LBL}">📷 Foto da Receita / Pedido (opcional)</div>
-        <div style="display:flex;gap:8px;margin-bottom:6px;">
-          <button id="_csFotoCam" type="button" style="flex:1;padding:10px 6px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
-            <span style="font-size:16px;">📸</span> Câmera
-          </button>
-          <button id="_csFotoGal" type="button" style="flex:1;padding:10px 6px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
-            <span style="font-size:16px;">🖼️</span> Galeria
-          </button>
-        </div>
-        <div id="_csFotoRow" style="display:none;align-items:center;gap:8px;margin-bottom:10px;">
-          <div id="_csFotoThumb" style="width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid ${ACCENT};flex-shrink:0;"><img id="_csFotoImg" style="width:100%;height:100%;object-fit:cover;" src=""></div>
+        <div style="${LBL}">📷 Foto (opcional)</div>
+        <div id="_csFotoRow" style="display:none;align-items:center;gap:8px;margin-bottom:6px;">
+          <div id="_csFotoThumb" style="width:40px;height:40px;border-radius:8px;overflow:hidden;border:2px solid ${ACCENT};flex-shrink:0;"><img id="_csFotoImg" style="width:100%;height:100%;object-fit:cover;" src=""></div>
           <span style="font-size:11px;font-weight:600;color:${ACCENT};flex:1;">Foto selecionada</span>
-          <button id="_csFotoRemove" type="button" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✕ Remover</button>
+          <button id="_csFotoRemove" type="button" style="padding:5px 8px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
         </div>
         <input type="file" id="_csFotoInput" accept="image/*" style="display:none;">
         <input type="file" id="_csFotoInputCam" accept="image/*" capture="environment" style="display:none;">
-        <div style="height:14px;"></div>
-        <button id="_cSave" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:14px;cursor:pointer;letter-spacing:.2px;">✔ ${editing?'Salvar Alterações':'Agendar Consulta'}</button>
+        <!-- 3 botões em 1 linha -->
+        <div style="display:flex;gap:8px;">
+          <button id="_csFotoCam" type="button" style="flex:1;padding:11px 4px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;">
+            <span style="font-size:17px;line-height:1;">📸</span><span>Câmera</span>
+          </button>
+          <button id="_csFotoGal" type="button" style="flex:1;padding:11px 4px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;">
+            <span style="font-size:17px;line-height:1;">🖼️</span><span>Galeria</span>
+          </button>
+          <button id="_cSave" style="flex:2;padding:11px 4px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;">
+            <span style="font-size:17px;line-height:1;">✔</span><span>${editing?'Salvar':'Agendar'}</span>
+          </button>
+        </div>
       </div>
     </div>`;
   document.body.appendChild(ov);
@@ -5039,27 +5046,29 @@ function openRemedioModal(editId){
         <!-- Preview -->
         <div id="_rmPreview" style="margin-bottom:16px;"></div>
 
-        <!-- Foto -->
+        <!-- Foto + Salvar — 3 botões na mesma linha horizontal -->
         <div style="${FGRP}">
-          <div style="${LBL}">📷 Foto da Receita / Caixa (opcional)</div>
-          <div style="display:flex;gap:8px;margin-bottom:6px;">
-            <button id="_rmFotoCam" type="button" style="flex:1;padding:10px 6px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
-              <span style="font-size:16px;">📸</span> Câmera
-            </button>
-            <button id="_rmFotoGal" type="button" style="flex:1;padding:10px 6px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
-              <span style="font-size:16px;">🖼️</span> Galeria
-            </button>
-          </div>
-          <div id="_rmFotoRow" style="display:none;align-items:center;gap:8px;margin-bottom:4px;">
-            <div id="_rmFotoThumb" style="width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid ${ACCENT};flex-shrink:0;"><img id="_rmFotoImg" style="width:100%;height:100%;object-fit:cover;" src=""></div>
+          <div style="${LBL}">📷 Foto (opcional)</div>
+          <div id="_rmFotoRow" style="display:none;align-items:center;gap:8px;margin-bottom:6px;">
+            <div id="_rmFotoThumb" style="width:40px;height:40px;border-radius:8px;overflow:hidden;border:2px solid ${ACCENT};flex-shrink:0;"><img id="_rmFotoImg" style="width:100%;height:100%;object-fit:cover;" src=""></div>
             <span style="font-size:11px;font-weight:600;color:${ACCENT};flex:1;">Foto selecionada</span>
-            <button id="_rmFotoRemove" type="button" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✕ Remover</button>
+            <button id="_rmFotoRemove" type="button" style="padding:5px 8px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
           </div>
           <input type="file" id="_rmFotoInput" accept="image/*" style="display:none;">
           <input type="file" id="_rmFotoInputCam" accept="image/*" capture="environment" style="display:none;">
+          <!-- 3 botões em 1 linha -->
+          <div style="display:flex;gap:8px;">
+            <button id="_rmFotoCam" type="button" style="flex:1;padding:11px 4px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;">
+              <span style="font-size:17px;line-height:1;">📸</span><span>Câmera</span>
+            </button>
+            <button id="_rmFotoGal" type="button" style="flex:1;padding:11px 4px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;">
+              <span style="font-size:17px;line-height:1;">🖼️</span><span>Galeria</span>
+            </button>
+            <button id="_rmSave" style="flex:2;padding:11px 4px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;">
+              <span style="font-size:17px;line-height:1;">✔</span><span>${editing?'Salvar':'Adicionar'}</span>
+            </button>
+          </div>
         </div>
-
-        <button id="_rmSave" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:14px;cursor:pointer;letter-spacing:.2px;">✔ ${editing?'Salvar Alterações':'Adicionar Remédio'}</button>
       </div>
     </div>`;
   document.body.appendChild(ov);
