@@ -35,19 +35,20 @@
   --sky-bot:      #161616;
 }
 
-/* ── Tema claro: override para off-white ───────────────── */
+/* ── Tema claro: off-white + header/footer laranja claro ── */
 [data-theme="light"] {
-  --bg0:        #f5f0eb;     /* off-white levemente quente */
-  --bg1:        #ede8e2;
-  --bg2:        #ddd8d1;
-  --card:       #e8e2db;
-  --cardBorder: rgba(0,0,0,.09);
-  --text:       #1a1a1a;
-  --text-white: #ffffff;
-  --muted:      rgba(0,0,0,.4);
-  --sky-top:    #ccc6be;
-  --sky-mid:    #bbb5ad;
-  --sky-bot:    #aaa49c;
+  --bg0:           #f5f0eb;   /* off-white quente */
+  --bg1:           #edeae5;
+  --bg2:           #e6e1db;
+  --card:          #e8e3dd;
+  --cardBorder:    rgba(0,0,0,.09);
+  --text:          #1a1a1a;
+  --text-white:    #ffffff;
+  --muted:         rgba(0,0,0,.4);
+  --hdr-light-bg:  #f97316;  /* laranja claro para header/footer */
+  --sky-top:       #ccc6be;
+  --sky-mid:       #bbb5ad;
+  --sky-bot:       #aaa49c;
 }
 
 /* ── Reset global ──────────────────────────────────────── */
@@ -325,4 +326,57 @@ body {
   font-size: 13px;
   font-weight: 700;
   color: #f0f0f0;
+}
+
+/* ── Header laranja no tema light ─────────────────────── */
+[data-theme="light"] .hdr {
+  background: linear-gradient(135deg, #f97316, #ea580c) !important;
+  border-bottom: 1px solid rgba(234,88,12,.3) !important;
+  box-shadow: 0 4px 18px rgba(234,88,12,.25), 0 1px 0 rgba(255,255,255,.15) !important;
+}
+[data-theme="light"] .hdrGreeting { color: #fff !important; }
+[data-theme="light"] .hdrSub { color: rgba(255,255,255,.8) !important; }
+[data-theme="light"] .clockBg {
+  background: rgba(255,255,255,.15) !important;
+  border-color: rgba(255,255,255,.25) !important;
+}
+[data-theme="light"] .dayBadge { color: rgba(255,255,255,.9) !important; }
+[data-theme="light"] .progressLabel { color: rgba(255,255,255,.85) !important; }
+/* Footer / bottomBar laranja no light */
+[data-theme="light"] .bottomBar {
+  background: linear-gradient(135deg, #f97316, #ea580c) !important;
+  border-top: 1px solid rgba(234,88,12,.3) !important;
+}
+[data-theme="light"] .cmdBtn .cl { color: rgba(255,255,255,.95) !important; }
+[data-theme="light"] .cmdBtn .ci-wrap {
+  background: rgba(255,255,255,.18) !important;
+  border-color: rgba(255,255,255,.3) !important;
+}
+
+/* ── Botão de busca flutuante (ao lado do FAB ☰) ──────── */
+.searchFab {
+  position: fixed;
+  bottom: 22px;
+  right: 80px;        /* ao lado do sidebarFab que fica em right:16px */
+  z-index: 9998;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(234,88,12,.15);
+  border: 1.5px solid rgba(234,88,12,.35);
+  box-shadow: 0 4px 16px rgba(0,0,0,.4);
+  color: #f97316;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity .25s ease, transform .25s cubic-bezier(.34,1.56,.64,1);
+  -webkit-tap-highlight-color: transparent;
+}
+.searchFab:active { transform: scale(.88) !important; }
+[data-theme="light"] .searchFab {
+  background: rgba(255,255,255,.2);
+  border-color: rgba(255,255,255,.4);
+  color: #fff;
 }
