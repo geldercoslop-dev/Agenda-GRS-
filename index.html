@@ -42,6 +42,64 @@
     html, body { height: 100dvh; overflow: hidden; background: #021824; color: #e8f4ff; font-family: system-ui, sans-serif; }
     .app { width: 100%; height: 100dvh; background: #000; display: flex; flex-direction: column; overflow: hidden; }
     .screen { height: 100dvh; width: 100vw; background: #000; }
+
+    /* ══ SubScreen — fundo sólido igual ao relatório ══ */
+    .subScreen {
+      background: linear-gradient(160deg,#021824,#04355a) !important;
+    }
+    .subScreenBox {
+      background: linear-gradient(160deg,#021824,#04355a) !important;
+    }
+    .subScreenHdr {
+      background: rgba(0,80,120,.25) !important;
+      border-bottom: 1px solid rgba(0,140,180,.18) !important;
+    }
+    .subScreenBack {
+      background: rgba(0,80,120,.28) !important;
+      border: 1px solid rgba(0,160,200,.22) !important;
+      color: #7dd3f0 !important;
+      border-radius: 10px !important;
+    }
+    .subScreenTitle {
+      color: #e8f4ff !important;
+      font-family: 'Space Grotesk', sans-serif !important;
+      font-weight: 900 !important;
+    }
+    .subScreenBody {
+      background: transparent !important;
+    }
+
+    /* ══ StatCards — paleta relatório semanal ══ */
+    .statGrid {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 10px !important;
+      margin-bottom: 4px !important;
+    }
+    .statCard {
+      background: rgba(4,53,90,.45) !important;
+      border: 1px solid rgba(0,140,180,.18) !important;
+      border-radius: 14px !important;
+      padding: 18px 14px 14px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 6px !important;
+    }
+    .statValue {
+      font-family: 'Space Grotesk', sans-serif !important;
+      font-size: 32px !important;
+      font-weight: 900 !important;
+      color: #e8f4ff !important;
+      line-height: 1 !important;
+    }
+    .statLabel {
+      font-family: 'Space Grotesk', sans-serif !important;
+      font-size: 10px !important;
+      font-weight: 800 !important;
+      color: rgba(180,220,240,.55) !important;
+      text-transform: uppercase !important;
+      letter-spacing: .6px !important;
+    }
   </style>
 
   <!-- ═══ Estilos externos (design tokens + app) ═══ -->
@@ -1689,47 +1747,50 @@ function _makeEditable(el, onSave){
 
 // Modal: pergunta formato (Tela ou PDF) — chama cb('html') ou cb('pdf')
 function showFormatChoice(titulo, subtitulo, cb){
-  const {box,close,isLight}=_modalBase();
-  // Detecta se é compartilhamento via WhatsApp ou relatório
+  const {box,close}=_modalBase();
+
+  // Ícone dinâmico
   const isZap = titulo.toLowerCase().includes('zap') || titulo.toLowerCase().includes('whatsapp') || subtitulo.toLowerCase().includes('compartilhar');
-  // Ícone e título dinâmico conforme contexto
   let headerIcon, headerTitle, headerSub;
   if(isZap){
-    headerIcon = `<svg viewBox="0 0 32 32" width="44" height="44" style="margin-bottom:10px;"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M22.58 9.4A9.3 9.3 0 0016.02 7C11.14 7 7.17 10.97 7.17 15.85c0 1.56.41 3.08 1.19 4.42L7.1 25l4.84-1.27a9.35 9.35 0 004.08.93h.003c4.87 0 8.84-3.97 8.84-8.85a8.8 8.8 0 00-2.25-5.41zm-6.56 13.6h-.003a7.76 7.76 0 01-3.96-1.08l-.28-.17-2.92.77.78-2.85-.19-.29a7.73 7.73 0 01-1.18-4.13c0-4.28 3.48-7.76 7.77-7.76a7.7 7.7 0 017.76 7.77c0 4.28-3.49 7.76-7.77 7.76zm4.26-5.82c-.23-.12-1.38-.68-1.6-.76-.21-.08-.37-.12-.52.12-.16.23-.6.76-.74.92-.13.15-.27.17-.5.06-.23-.12-.97-.36-1.85-1.14-.68-.6-1.14-1.35-1.27-1.58-.13-.23-.01-.35.1-.47.1-.1.23-.27.35-.4.11-.14.15-.23.23-.38.07-.15.04-.28-.02-.4-.06-.12-.52-1.26-.72-1.72-.18-.45-.38-.39-.52-.4h-.44c-.16 0-.41.06-.62.29-.21.23-.82.8-.82 1.95s.84 2.26.96 2.42c.12.15 1.65 2.52 4 3.54.56.24 1 .39 1.34.49.56.18 1.07.16 1.48.1.45-.07 1.38-.57 1.58-1.11.19-.54.19-1.01.13-1.11-.06-.1-.21-.16-.44-.27z" fill="white"/></svg>`;
+    headerIcon = `<svg viewBox="0 0 32 32" width="48" height="48" style="margin-bottom:12px;"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M22.58 9.4A9.3 9.3 0 0016.02 7C11.14 7 7.17 10.97 7.17 15.85c0 1.56.41 3.08 1.19 4.42L7.1 25l4.84-1.27a9.35 9.35 0 004.08.93h.003c4.87 0 8.84-3.97 8.84-8.85a8.8 8.8 0 00-2.25-5.41zm-6.56 13.6h-.003a7.76 7.76 0 01-3.96-1.08l-.28-.17-2.92.77.78-2.85-.19-.29a7.73 7.73 0 01-1.18-4.13c0-4.28 3.48-7.76 7.77-7.76a7.7 7.7 0 017.76 7.77c0 4.28-3.49 7.76-7.77 7.76zm4.26-5.82c-.23-.12-1.38-.68-1.6-.76-.21-.08-.37-.12-.52.12-.16.23-.6.76-.74.92-.13.15-.27.17-.5.06-.23-.12-.97-.36-1.85-1.14-.68-.6-1.14-1.35-1.27-1.58-.13-.23-.01-.35.1-.47.1-.1.23-.27.35-.4.11-.14.15-.23.23-.38.07-.15.04-.28-.02-.4-.06-.12-.52-1.26-.72-1.72-.18-.45-.38-.39-.52-.4h-.44c-.16 0-.41.06-.62.29-.21.23-.82.8-.82 1.95s.84 2.26.96 2.42c.12.15 1.65 2.52 4 3.54.56.24 1 .39 1.34.49.56.18 1.07.16 1.48.1.45-.07 1.38-.57 1.58-1.11.19-.54.19-1.01.13-1.11-.06-.1-.21-.16-.44-.27z" fill="white"/></svg>`;
     headerTitle = 'WhatsApp';
-    headerSub = 'Como você quer compartilhar?';
+    headerSub   = 'Como você quer compartilhar?';
   } else {
-    // Escolhe emoji conforme tipo de relatório
     const t = titulo.toLowerCase();
     let emoji = '📊';
-    if(t.includes('semana')) emoji = '📅';
+    if(t.includes('semana'))  emoji = '📅';
     else if(t.includes('consulta')) emoji = '🏥';
-    else if(t.includes('remédio') || t.includes('remedio')) emoji = '💊';
-    else if(t.includes('pendente') || t.includes('completo')) emoji = '📋';
-    headerIcon = `<div style="font-size:40px;margin-bottom:10px;">${emoji}</div>`;
-    // Título limpo sem emoji
+    else if(t.includes('remédio')||t.includes('remedio')) emoji = '💊';
+    else if(t.includes('pendente')||t.includes('completo')) emoji = '📋';
+    headerIcon  = `<div style="font-size:44px;margin-bottom:12px;line-height:1;">${emoji}</div>`;
     headerTitle = titulo.replace(/^[\s\S]*?([A-ZÀ-Ú])/,(_,c)=>c).trim();
-    headerSub = subtitulo || 'Como você quer visualizar?';
+    headerSub   = subtitulo || 'Como você quer visualizar?';
   }
+
+  // ── Estilo único para TODOS os botões de ação ──
+  const BTN = `padding:13px 16px;border-radius:12px;border:1px solid rgba(0,140,180,.22);background:rgba(0,80,120,.32);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:12px;-webkit-tap-highlight-color:transparent;`;
+
   box.innerHTML=`
-    <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:10px;">
+    <div style="display:flex;flex-direction:column;align-items:center;padding:8px 0 16px;border-bottom:1px solid rgba(0,140,180,.14);margin-bottom:16px;">
       ${headerIcon}
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;letter-spacing:-.2px;">${headerTitle}</div>
-      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;color:rgba(180,220,240,.6);margin-top:3px;">${headerSub}</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:900;color:#e8f4ff;letter-spacing:-.3px;">${headerTitle}</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(180,220,240,.6);margin-top:5px;">${headerSub}</div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:7px;">
-      <button id="_fHtml" style="padding:9px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:9px;">
-        <span style="font-size:16px;">🖥️</span>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button id="_fHtml" style="${BTN}">
+        <span style="font-size:18px;line-height:1;">🖥️</span>
         <span>Ver na tela</span>
       </button>
-      <button id="_fPdf" style="padding:9px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:9px;">
-        <span style="font-size:16px;">📄</span>
+      <button id="_fPdf" style="${BTN}">
+        <span style="font-size:18px;line-height:1;">📄</span>
         <span>Salvar como PDF</span>
       </button>
-      <button id="_fCancel" style="padding:8px 12px;border-radius:12px;border:none;background:transparent;color:rgba(180,220,240,.45);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;cursor:pointer;width:100%;">Cancelar</button>
+      <button id="_fCancel" style="padding:11px 16px;border-radius:12px;border:none;background:transparent;color:rgba(180,220,240,.4);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;width:100%;margin-top:2px;">Cancelar</button>
     </div>`;
+
   box.querySelector('#_fHtml').addEventListener('click',()=>{close();cb('html');});
-  box.querySelector('#_fPdf').addEventListener('click', ()=>{close();cb('pdf');});
+  box.querySelector('#_fPdf').addEventListener('click',()=>{close();cb('pdf');});
   box.querySelector('#_fCancel').addEventListener('click',close);
 }
 
@@ -4045,23 +4106,23 @@ function openStats() {
           <span class="statLabel">🚀 Aberturas</span>
         </div>
       </div>
-      <div style="margin-top:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;">
-        <div style="font-size:12px;font-weight:700;color:rgba(165,180,252,.6);text-transform:uppercase;letter-spacing:.4px;margin-bottom:12px;">Uso do App</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="margin-top:16px;background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.18);border-radius:14px;padding:16px 18px;">
+        <div style="font-size:10px;font-weight:900;color:rgba(180,220,240,.55);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;font-family:'Space Grotesk',sans-serif;">Uso do App</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
           ${[
             ['Primeira utilização', m.firstOpen ? new Date(m.firstOpen).toLocaleDateString('pt-BR') : '—'],
             ['Última abertura',     m.lastOpen  ? new Date(m.lastOpen).toLocaleDateString('pt-BR')  : '—'],
             ['Tempo de uso',        tempoLabel],
             ['Criadas via app',     m.tasksCreated || 0],
           ].map(([l,v]) => `
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:13px;font-weight:600;color:rgba(165,180,252,.7);">${l}</span>
-              <span style="font-size:13px;font-weight:800;color:#e8f4ff;">${v}</span>
+            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,140,180,.1);padding-bottom:8px;">
+              <span style="font-size:13px;font-weight:600;color:rgba(180,220,240,.7);font-family:'Plus Jakarta Sans',sans-serif;">${l}</span>
+              <span style="font-size:13px;font-weight:800;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;">${v}</span>
             </div>
           `).join('')}
         </div>
       </div>
-      <div style="margin-top:10px;font-size:11px;font-weight:600;color:rgba(165,180,252,.35);text-align:center;line-height:1.5;">
+      <div style="margin-top:12px;font-size:11px;font-weight:600;color:rgba(180,220,240,.35);text-align:center;line-height:1.5;font-family:'Space Grotesk',sans-serif;">
         🔒 Todos os dados são locais. Nada é enviado.
       </div>
     </div>`;
@@ -4638,8 +4699,9 @@ function openRemedioModal(editId){
   const FIELD  = 'rgba(0,80,120,.28)';
   const HDR    = 'rgba(0,80,120,.25)';
   const HBDR   = 'rgba(0,140,180,.12)';
-  const iS     = `width:100%;padding:10px 12px;border-radius:10px;border:1px solid ${BDR};background:${FIELD};color:${TEXT};font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;outline:none;box-sizing:border-box;margin-bottom:10px;`;
-  const LBL    = `font-size:10px;font-weight:800;color:${MUTED};margin-bottom:4px;text-transform:uppercase;letter-spacing:.6px;font-family:'Space Grotesk',sans-serif;`;
+  const iS     = `width:100%;padding:11px 13px;border-radius:10px;border:1px solid ${BDR};background:${FIELD};color:${TEXT};font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;outline:none;box-sizing:border-box;`;
+  const LBL    = `font-size:10px;font-weight:800;color:${MUTED};margin-bottom:6px;margin-top:0;text-transform:uppercase;letter-spacing:.6px;font-family:'Space Grotesk',sans-serif;display:block;`;
+  const FGRP   = `margin-bottom:16px;`; // espaçamento entre grupos
   const editing=editId?(state.remedios||[]).find(x=>x.id===editId):null;
 
   const ov=document.createElement('div');
@@ -4653,62 +4715,95 @@ function openRemedioModal(editId){
           <span style="font-size:22px;line-height:1;">💊</span>
           <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:${TEXT};letter-spacing:-.2px;">${editing?'Editar':'Novo'} Remédio</span>
         </div>
-        <button id="_rmClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:9px;color:${ACCENT};width:32px;height:32px;cursor:pointer;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
+        <button id="_rmClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:9px;color:${ACCENT};width:32px;height:32px;cursor:pointer;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>
       </div>
       <!-- Campos -->
-      <div style="padding:16px 18px 20px;">
-        <div style="${LBL}">Nome do Remédio *</div>
-        <input id="_rmNome" style="${iS}" placeholder="Ex: Losartana, Amoxicilina..." value="${editing?editing.nome:''}">
-        <div style="${LBL}">Paciente *</div>
-        <input id="_rmPac" style="${iS}" placeholder="Quem vai tomar..." value="${editing?editing.paciente:''}">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <div><div style="${LBL}">Dose</div><input id="_rmDose" style="${iS}" placeholder="Ex: 50mg, 1cp" value="${editing?editing.dose||'':''}"></div>
-          <div><div style="${LBL}">Qtd por uso</div><input id="_rmQtd" type="number" min="1" style="${iS}" placeholder="Ex: 1" value="${editing?editing.qtd||1:1}"></div>
+      <div style="padding:18px 18px 22px;">
+
+        <div style="${FGRP}">
+          <div style="${LBL}">Nome do Remédio *</div>
+          <input id="_rmNome" style="${iS}" placeholder="Ex: Losartana, Amoxicilina..." value="${editing?editing.nome:''}">
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <div><div style="${LBL}">Data Início *</div><input id="_rmData" type="date" style="${iS}" value="${editing?editing.data:''}"></div>
-          <div><div style="${LBL}">1ª Hora *</div><input id="_rmHora" type="time" style="${iS}" value="${editing?editing.hora:''}"></div>
+
+        <div style="${FGRP}">
+          <div style="${LBL}">Paciente *</div>
+          <input id="_rmPac" style="${iS}" placeholder="Quem vai tomar..." value="${editing?editing.paciente:''}">
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <div style="${LBL}margin-bottom:0;">Duração do tratamento *</div>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-            <span style="font-size:11px;font-weight:700;color:${MUTED};font-family:'Space Grotesk',sans-serif;">Uso contínuo</span>
-            <div id="_rmContDiv" style="width:40px;height:22px;border-radius:11px;background:${editing&&editing.continuo?ACCENT:'rgba(255,255,255,.15)'};border:1px solid ${BDR};position:relative;cursor:pointer;transition:background .2s;">
-              <div id="_rmContKnob" style="position:absolute;top:2px;left:${editing&&editing.continuo?'20px':'2px'};width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.3);"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;${FGRP}">
+          <div>
+            <div style="${LBL}">Dose</div>
+            <input id="_rmDose" style="${iS}" placeholder="Ex: 50mg, 1cp" value="${editing?editing.dose||'':''}">
+          </div>
+          <div>
+            <div style="${LBL}">Qtd por uso</div>
+            <input id="_rmQtd" type="number" min="1" style="${iS}" placeholder="Ex: 1" value="${editing?editing.qtd||'':''}">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;${FGRP}">
+          <div>
+            <div style="${LBL}">Data Início *</div>
+            <input id="_rmData" type="date" style="${iS}" value="${editing?editing.data:''}">
+          </div>
+          <div>
+            <div style="${LBL}">1ª Hora *</div>
+            <input id="_rmHora" type="time" style="${iS}" value="${editing?editing.hora:''}">
+          </div>
+        </div>
+
+        <!-- Duração + toggle uso contínuo -->
+        <div style="${FGRP}">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="${LBL}margin-bottom:0;">Duração do tratamento *</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:11px;font-weight:700;color:${MUTED};font-family:'Space Grotesk',sans-serif;">Uso contínuo</span>
+              <div id="_rmContDiv" style="width:42px;height:24px;border-radius:12px;background:rgba(255,255,255,.15);border:1px solid ${BDR};position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;">
+                <div id="_rmContKnob" style="position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.3);pointer-events:none;"></div>
+              </div>
+              <input type="checkbox" id="_rmContinuo" style="display:none;" ${editing&&editing.continuo?'checked':''}>
             </div>
-            <input type="checkbox" id="_rmContinuo" style="display:none;" ${editing&&editing.continuo?'checked':''}>
-          </label>
+          </div>
+          <div id="_rmDiasDiv" style="${editing&&editing.continuo?'display:none':''}">
+            <input id="_rmDias" type="number" min="1" max="365" style="${iS}" placeholder="Quantos dias? Ex: 7, 30, 90..." value="${editing&&!editing.continuo?editing.dias:''}">
+          </div>
+          <div id="_rmContinuoInfo" style="display:${editing&&editing.continuo?'block':'none'};background:${FIELD};border:1px solid ${BDR};border-radius:10px;padding:11px 14px;font-size:12px;font-weight:700;color:${ACCENT};font-family:'Space Grotesk',sans-serif;line-height:1.4;">
+            ♾️ Sem data de término — reagende a cada 90 dias nas notificações
+          </div>
         </div>
-        <div id="_rmDiasDiv">
-          <input id="_rmDias" type="number" min="1" max="365" style="${iS}" placeholder="Ex: 7, 30, 90..." value="${editing&&!editing.continuo?editing.dias:''}">
+
+        <!-- Frequência -->
+        <div style="${FGRP}">
+          <div style="${LBL}">Frequência *</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+            <label id="_lbl8" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${MUTED};background:${FIELD};text-align:center;">
+              <input type="radio" name="rmFreq" value="8" style="display:none;" ${editing&&editing.frequencia===8?'checked':''}> 8 em 8h</label>
+            <label id="_lbl12" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${MUTED};background:${FIELD};text-align:center;">
+              <input type="radio" name="rmFreq" value="12" style="display:none;" ${editing&&editing.frequencia===12?'checked':''}> 12 em 12h</label>
+            <label id="_lblCustom" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${MUTED};background:${FIELD};text-align:center;">
+              <input type="radio" name="rmFreq" value="custom" style="display:none;" ${editing&&editing.frequencia!==8&&editing.frequencia!==12?'checked':''}> Personalizar</label>
+          </div>
+          <div id="_rmFreqCustomDiv" style="display:none;margin-top:10px;">
+            <div style="${LBL}">A cada quantas horas?</div>
+            <input id="_rmFreqH" type="number" min="1" max="72" style="${iS}" placeholder="Ex: 6, 24..." value="${editing&&editing.frequencia!==8&&editing.frequencia!==12?editing.frequencia:''}">
+          </div>
         </div>
-        <div id="_rmContinuoInfo" style="display:${editing&&editing.continuo?'block':'none'};background:${FIELD};border:1px solid ${BDR};border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;font-weight:700;color:${ACCENT};font-family:'Space Grotesk',sans-serif;">
-          ♾️ Sem data de término — reagende a cada 90 dias nas notificações
-        </div>
-        <div style="${LBL}margin-bottom:8px;">Frequência *</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
-          <label style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${TEXT};background:${FIELD};">
-            <input type="radio" name="rmFreq" value="8" style="display:none;" ${editing&&editing.frequencia===8?'checked':''}> 8 em 8h</label>
-          <label style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${TEXT};background:${FIELD};">
-            <input type="radio" name="rmFreq" value="12" style="display:none;" ${editing&&editing.frequencia===12?'checked':''}> 12 em 12h</label>
-          <label style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${TEXT};background:${FIELD};">
-            <input type="radio" name="rmFreq" value="custom" style="display:none;" ${editing&&editing.frequencia!==8&&editing.frequencia!==12?'checked':''}> Personalizar</label>
-        </div>
-        <div id="_rmFreqCustomDiv" style="display:none;margin-bottom:10px;">
-          <div style="${LBL}">A cada quantas horas?</div>
-          <input id="_rmFreqH" type="number" min="1" max="72" style="${iS}" placeholder="Ex: 6, 24..." value="${editing&&editing.frequencia!==8&&editing.frequencia!==12?editing.frequencia:''}">
-        </div>
-        <div id="_rmPreview" style="margin-bottom:10px;"></div>
-        <div id="_rmFotoArea" style="margin-bottom:14px;">
+
+        <!-- Preview -->
+        <div id="_rmPreview" style="margin-bottom:16px;"></div>
+
+        <!-- Foto -->
+        <div style="${FGRP}">
           <div style="${LBL}">📷 Foto da Receita / Caixa (opcional)</div>
           <div style="display:flex;gap:8px;align-items:center;">
-            <button id="_rmFotoBtn" type="button" style="padding:9px 14px;border-radius:10px;border:1px dashed ${BDR};background:${FIELD};color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex:1;">📷 Tirar / Escolher Foto</button>
+            <button id="_rmFotoBtn" type="button" style="padding:11px 14px;border-radius:10px;border:1px dashed ${BDR};background:${FIELD};color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex:1;">📷 Tirar / Escolher Foto</button>
             <div id="_rmFotoThumb" style="display:none;width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid ${ACCENT};flex-shrink:0;"><img id="_rmFotoImg" style="width:100%;height:100%;object-fit:cover;" src=""></div>
             <button id="_rmFotoRemove" type="button" style="display:none;padding:6px 10px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
           </div>
           <input type="file" id="_rmFotoInput" accept="image/*" capture="environment" style="display:none;">
         </div>
-        <button id="_rmSave" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:14px;cursor:pointer;letter-spacing:.2px;">✔ ${editing?'Salvar Alterações':'Adicionar Remédio'}</button>
+
+        <button id="_rmSave" style="width:100%;padding:15px;border-radius:14px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;cursor:pointer;letter-spacing:.2px;">✔ ${editing?'Salvar Alterações':'Adicionar Remédio'}</button>
       </div>
     </div>`;
   document.body.appendChild(ov);
@@ -4728,21 +4823,34 @@ function openRemedioModal(editId){
   }
   ov.querySelectorAll('input[name="rmFreq"]').forEach(r=>r.addEventListener('change',updateRadioStyle));
 
-  // Toggle uso contínuo
+  // Toggle uso contínuo — div isolado, sem label pai interferindo
   const contDiv=ov.querySelector('#_rmContDiv');
   const contCb=ov.querySelector('#_rmContinuo');
   const contKnob=ov.querySelector('#_rmContKnob');
   const diasDiv=ov.querySelector('#_rmDiasDiv');
   const contInfo=ov.querySelector('#_rmContinuoInfo');
+
   function updateContToggle(){
     const on=contCb.checked;
     contDiv.style.background=on?'#7dd3f0':'rgba(255,255,255,.15)';
-    contKnob.style.left=on?'20px':'2px';
+    contKnob.style.left=on?'21px':'3px';
     diasDiv.style.display=on?'none':'block';
     contInfo.style.display=on?'block':'none';
     updatePreview();
   }
-  contDiv.addEventListener('click',()=>{ contCb.checked=!contCb.checked; updateContToggle(); });
+
+  // Clique somente no div do toggle, sem bubbling pro label
+  contDiv.addEventListener('click',(e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    contCb.checked=!contCb.checked;
+    updateContToggle();
+  });
+
+  // Estado inicial correto
+  if(editing&&editing.continuo){
+    contCb.checked=true;
+  }
   updateContToggle();
 
   function updatePreview(){
@@ -4969,78 +5077,82 @@ function generateConsultasReport(){
   const historico=consultas.filter(c=>c.data<today);
 
   const buildHtml=()=>{
-    // Cards individuais por consulta
     function cardHTML(c,isPast){
       const _dp=c.data?c.data.split('-'):null; const df=_dp?String(_dp[2]).padStart(2,'0')+'/'+String(_dp[1]).padStart(2,'0')+'/'+_dp[0]:'—';
-      const statusColor=isPast?'#64748b':'#38bdf8';
-      const badgeBg=isPast?'rgba(100,116,139,.15)':'rgba(14,165,233,.18)';
       const badgeText=isPast?'Realizada':'Próxima';
-      return `<div style="background:#161616;border:1px solid ${isPast?'rgba(255,255,255,.07)':'rgba(234,88,12,.2)'};border-radius:14px;margin-bottom:12px;overflow:hidden;">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#111;border-bottom:1px solid rgba(255,255,255,.06);">
-          <div style="font-size:15px;font-weight:900;color:#f0f0f0;" data-cid="${c.id}" data-cfield="especialidade">${escHtml(c.especialidade)}</div>
-          <span style="background:${isPast?'rgba(255,255,255,.06)':'rgba(234,88,12,.12)'};color:${isPast?'#888':'#ea580c'};font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;border:1px solid ${isPast?'rgba(255,255,255,.1)':'rgba(234,88,12,.25)'};">${badgeText}</span>
+      return `<div class="card${isPast?' past':''}">
+        <div class="card-hdr">
+          <div class="card-title" data-cid="${c.id}" data-cfield="especialidade">${escHtml(c.especialidade)}</div>
+          <span class="card-badge${isPast?' past':''}">${badgeText}</span>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px;">
-          <div style="background:#111;border-radius:10px;padding:8px 10px;border:1px solid rgba(255,255,255,.05);">
-            <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Paciente</div>
-            <div style="font-size:13px;font-weight:700;color:#f0f0f0;" data-cid="${c.id}" data-cfield="paciente">👤 ${escHtml(c.paciente)}</div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-lbl">Paciente</div>
+            <div class="field-val" data-cid="${c.id}" data-cfield="paciente">👤 ${escHtml(c.paciente)}</div>
           </div>
-          <div style="background:#111;border-radius:10px;padding:8px 10px;border:1px solid rgba(255,255,255,.05);">
-            <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Data e Hora</div>
-            <div style="font-size:13px;font-weight:700;color:#f0f0f0;">📅 ${df} <span style="color:#ea580c;" data-cid="${c.id}" data-cfield="hora">${c.hora}</span></div>
+          <div class="field">
+            <div class="field-lbl">Data e Hora</div>
+            <div class="field-val">📅 ${df} <span class="accent" data-cid="${c.id}" data-cfield="hora">${c.hora}</span></div>
           </div>
-          ${c.local?`<div style="background:#111;border-radius:10px;padding:8px 10px;border:1px solid rgba(255,255,255,.05);">
-            <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Local</div>
-            <div style="font-size:12px;font-weight:600;color:#ccc;" data-cid="${c.id}" data-cfield="local">📍 ${escHtml(c.local)}</div>
-          </div>`:''}
-          ${c.obs?`<div style="background:#111;border-radius:10px;padding:8px 10px;border:1px solid rgba(255,255,255,.05);">
-            <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Observação</div>
-            <div style="font-size:12px;font-weight:600;color:#ccc;" data-cid="${c.id}" data-cfield="obs">📝 ${escHtml(c.obs)}</div>
-          </div>`:''}
+          ${c.medico?`<div class="field"><div class="field-lbl">Médico</div><div class="field-val" data-cid="${c.id}" data-cfield="medico">👨‍⚕️ ${escHtml(c.medico)}</div></div>`:''}
+          ${c.local?`<div class="field"><div class="field-lbl">Local</div><div class="field-val" data-cid="${c.id}" data-cfield="local">📍 ${escHtml(c.local)}</div></div>`:''}
+          ${c.obs?`<div class="field" style="grid-column:span 2"><div class="field-lbl">Observação</div><div class="field-val" data-cid="${c.id}" data-cfield="obs">📝 ${escHtml(c.obs)}</div></div>`:''}
         </div>
       </div>`;
     }
 
     const proximasHTML=proximas.length===0
-      ?'<div style="text-align:center;padding:24px;color:#475569;font-style:italic;">Nenhuma consulta futura</div>'
+      ?'<div style="text-align:center;padding:24px;color:rgba(180,220,240,.4);font-style:italic;font-family:\'Space Grotesk\',sans-serif;">Nenhuma consulta futura</div>'
       :proximas.map(c=>cardHTML(c,false)).join('');
 
     const historicoHTML=historico.length===0
-      ?'<div style="text-align:center;padding:24px;color:#475569;font-style:italic;">Nenhum histórico</div>'
+      ?'<div style="text-align:center;padding:24px;color:rgba(180,220,240,.4);font-style:italic;font-family:\'Space Grotesk\',sans-serif;">Nenhum histórico</div>'
       :historico.map(c=>cardHTML(c,true)).join('');
 
     return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Consultas — Agenda Pro Max</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0a;color:#f0f0f0;padding:16px;min-height:100vh}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:linear-gradient(160deg,#021824,#04355a);color:#e8f4ff;padding:16px;min-height:100vh}
 .wrap{max-width:600px;margin:0 auto}
-.page-hdr{padding:20px 18px 14px;background:#111;border:1px solid rgba(234,88,12,.2);border-radius:14px 14px 0 0}
-.page-title{font-size:18px;font-weight:900;color:#fff;letter-spacing:-.3px;margin-bottom:4px}
-.page-sub{font-size:11px;font-weight:600;color:rgba(255,255,255,.35)}
-.stats{display:flex;gap:8px;padding:12px 18px 14px;background:#111;border-left:1px solid rgba(234,88,12,.15);border-right:1px solid rgba(234,88,12,.15);border-bottom:1px solid rgba(234,88,12,.1);margin-bottom:16px;}
-.stat{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;background:#181818;border:1px solid rgba(234,88,12,.15);border-radius:12px;}
-.stat-n{font-size:20px;font-weight:900;color:#ea580c;line-height:1;}
-.stat-l{font-size:9px;font-weight:800;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.5px;text-align:center;}
-.section-title{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.8px;padding:6px 10px;border-radius:8px;margin-bottom:10px;}
-.section-title.fut{color:#ea580c;background:rgba(234,88,12,.08);border-left:3px solid #ea580c;}
-.section-title.past{color:#888;background:rgba(255,255,255,.04);border-left:3px solid #555;}
-.footer{text-align:center;font-size:10px;color:#333;padding:16px;margin-top:8px;}
+.page-hdr{padding:18px 18px 14px;background:rgba(0,80,120,.25);border:1px solid rgba(0,140,180,.18);border-radius:14px 14px 0 0}
+.page-title{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;color:#e8f4ff;letter-spacing:-.3px;margin-bottom:3px}
+.page-sub{font-size:11px;font-weight:600;color:rgba(180,220,240,.5)}
+.stats{display:flex;gap:8px;padding:12px 16px 14px;background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.18);border-top:none;margin-bottom:14px;}
+.stat{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;background:rgba(0,80,120,.28);border:1px solid rgba(0,160,200,.14);border-radius:12px;}
+.stat-n{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:900;color:#7dd3f0;line-height:1;}
+.stat-l{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:800;color:rgba(180,220,240,.55);text-transform:uppercase;letter-spacing:.6px;text-align:center;}
+.section-label{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:#7dd3f0;margin:14px 0 10px;}
+.section-label.past{color:rgba(180,220,240,.45);}
+.card{background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.18);border-radius:14px;overflow:hidden;margin-bottom:10px;}
+.card.past{opacity:.75;border-color:rgba(0,100,140,.12);}
+.card-hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,80,120,.25);border-bottom:1px solid rgba(0,140,180,.12);}
+.card-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:#e8f4ff;}
+.card-badge{font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;background:rgba(0,80,120,.28);border:1px solid rgba(0,160,200,.14);color:#7dd3f0;}
+.card-badge.past{color:rgba(180,220,240,.45);}
+.card-body{padding:10px 14px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.field{background:rgba(0,80,120,.28);border:1px solid rgba(0,160,200,.14);border-radius:10px;padding:8px 10px;}
+.field-lbl{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:800;color:rgba(180,220,240,.55);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.field-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:#e8f4ff;}
+.field-val.accent{color:#00c48a;}
+.footer{text-align:center;font-family:'Space Grotesk',sans-serif;font-size:10px;color:rgba(180,220,240,.3);padding:18px;margin-top:4px;}
+@media print{body{background:#fff!important;color:#0f172a!important}}
 </style></head><body>
 <div class="wrap">
   <div class="page-hdr">
-    <div class="page-title">Relatório de Consultas</div>
+    <div class="page-title">🏥 Relatório de Consultas</div>
     <div class="page-sub">Gerado em ${new Date().toLocaleDateString('pt-BR')}</div>
   </div>
   <div class="stats">
-    <div class="stat"><span class="stat-n">${String(consultas.length).padStart(2,"0")}</span><span class="stat-l">Total</span></div>
-    <div class="stat"><span class="stat-n" style="color:#00c48a;">${String(proximas.length).padStart(2,"0")}</span><span class="stat-l">Próximas</span></div>
-    <div class="stat"><span class="stat-n" style="color:#888;">${String(historico.length).padStart(2,"0")}</span><span class="stat-l">Realizadas</span></div>
+    <div class="stat"><span class="stat-n">${String(consultas.length).padStart(2,'0')}</span><span class="stat-l">Total</span></div>
+    <div class="stat"><span class="stat-n" style="color:#00c48a;">${String(proximas.length).padStart(2,'0')}</span><span class="stat-l">Próximas</span></div>
+    <div class="stat"><span class="stat-n" style="color:rgba(180,220,240,.5);">${String(historico.length).padStart(2,'0')}</span><span class="stat-l">Realizadas</span></div>
   </div>
-  ${proximas.length>0?`<div class="section-title fut">Próximas — ${proximas.length} consulta${proximas.length>1?'s':''}</div>${proximasHTML}`:''}
-  ${historico.length>0?`<div class="section-title past" style="margin-top:${proximas.length>0?'16px':'0'};">Histórico — ${historico.length} consulta${historico.length>1?'s':''}</div>${historicoHTML}`:''}
-  ${consultas.length===0?'<div style="text-align:center;padding:40px;color:#555;font-size:14px;">Nenhuma consulta cadastrada</div>':''}
+  ${proximas.length>0?`<div class="section-label">🏥 Próximas — ${proximas.length} consulta${proximas.length>1?'s':''}</div>${proximasHTML}`:''}
+  ${historico.length>0?`<div class="section-label past">Histórico — ${historico.length} consulta${historico.length>1?'s':''}</div>${historicoHTML}`:''}
+  ${consultas.length===0?'<div style="text-align:center;padding:40px;color:rgba(180,220,240,.4);font-family:Space Grotesk,sans-serif;font-size:14px;">Nenhuma consulta cadastrada</div>':''}
   <div class="footer">Agenda Pro Max</div>
 </div></body></html>`;
   };
