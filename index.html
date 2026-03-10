@@ -265,7 +265,7 @@
 <div class="sModalOverlay" id="sModalOverlay">
   <div class="sModalBox" style="background:#111;border:1px solid rgba(234,88,12,.2);border-radius:20px;overflow:hidden;width:92%;max-width:360px;box-shadow:0 12px 40px rgba(0,0,0,.7);">
     <div class="sModalHdr" style="background:#0d0d0d;border-bottom:1px solid rgba(234,88,12,.18);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
-      <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#f97316;letter-spacing:.3px;">⚙️ Configurações</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;letter-spacing:.3px;">⚙️ Configurações</span>
       <button class="sCloseBtn" id="sClose" style="width:30px;height:30px;border-radius:9px;background:rgba(234,88,12,.1);border:1px solid rgba(234,88,12,.25);color:rgba(234,88,12,.8);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
     </div>
     <div id="sBody" style="padding:14px;">
@@ -1372,12 +1372,12 @@ function renderDayView(){
   if(photos.length>0){
     const photoRow=document.createElement('div');
     photoRow.className='taskRow';
-    photoRow.style.cssText='cursor:pointer;background:transparent;border:none;border-radius:0;border-bottom:1px solid rgba(255,255,255,.06);padding:12px 16px;flex-shrink:0;margin-bottom:2px;width:100%;box-sizing:border-box;display:flex;align-items:center;';
+    photoRow.style.cssText='cursor:pointer;background:transparent;border:none;border-radius:0;border-bottom:1px solid rgba(255,255,255,.06);padding:10px 16px;flex-shrink:0;margin-bottom:2px;width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;';
     const _pCount=photos.length;
     photoRow.innerHTML=
-      '<div style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:100%;">'+
-        '<span style="font-size:20px;line-height:1;">📷</span>'+
-        '<span style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;letter-spacing:-.1px;color:#818cf8;line-height:1;">Galeria de fotos da pasta</span>'+
+      '<div style="display:inline-flex;align-items:center;justify-content:center;gap:7px;">'+
+        '<span style="font-size:18px;line-height:1;display:flex;align-items:center;">📷</span>'+
+        '<span style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;letter-spacing:-.1px;color:#818cf8;line-height:1;display:flex;align-items:center;">Galeria de fotos da pasta</span>'+
       '</div>';
     photoRow.addEventListener('click',()=>openBucketPhotoGallery(currentBucket));
     listArea.appendChild(photoRow);
@@ -1961,7 +1961,7 @@ function showFormatChoice(titulo, subtitulo, cb){
   }
 
   // ── Estilo único para TODOS os botões de ação ──
-  const BTN = `padding:13px 16px;border-radius:12px;border:1px solid rgba(0,140,180,.22);background:rgba(0,80,120,.32);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:12px;-webkit-tap-highlight-color:transparent;`;
+  const BTN = `padding:11px 16px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:10px;-webkit-tap-highlight-color:transparent;`;
 
   box.innerHTML=`
     <div style="display:flex;flex-direction:column;align-items:center;padding:8px 0 16px;border-bottom:1px solid rgba(0,140,180,.14);margin-bottom:16px;">
@@ -2148,16 +2148,16 @@ function doBackup(){
       <div style="font-size:40px;margin-bottom:10px;">💾</div>
       <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:#e8f4ff;letter-spacing:-.2px;">Backup</div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:9px;">
-      <button id="_bkConfirm" style="padding:13px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:10px;">
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button id="_bkConfirm" style="padding:11px 16px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:10px;">
         <span style="font-size:18px;">📥</span>
         <span>Baixar Backup</span>
       </button>
-      <button id="_bkRestore" style="padding:13px 16px;border-radius:14px;border:1px solid ${isLight?'rgba(100,160,100,.35)':'rgba(100,255,150,.25)'};background:${isLight?'rgba(180,230,180,.45)':'rgba(100,255,150,.1)'};color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:10px;">
+      <button id="_bkRestore" style="padding:11px 16px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:10px;">
         <span style="font-size:18px;">📤</span>
         <span>Restaurar Backup</span>
       </button>
-      <button id="_bkCancel" style="padding:11px 16px;border-radius:14px;border:none;background:transparent;color:rgba(180,220,240,.45);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;width:100%;">Cancelar</button>
+      <button id="_bkCancel" style="padding:9px 16px;border-radius:12px;border:none;background:transparent;color:rgba(180,220,240,.45);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;cursor:pointer;width:100%;">Cancelar</button>
     </div>`;
   box.querySelector('#_bkConfirm').addEventListener('click',()=>{
     close();
@@ -2815,23 +2815,22 @@ function init(){
     // Modal câmera/galeria — botões lado a lado
     const {ov:mo,box:cBox,close:cClose}=_modalBase();
     const cHdr=document.createElement('div');
-    cHdr.style.cssText='display:flex;flex-direction:column;align-items:center;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(0,140,180,.2);';
-    cHdr.innerHTML=`<div style="font-size:28px;margin-bottom:6px;line-height:1;">📷</div>
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;">Adicionar Foto</div>`;
+    cHdr.style.cssText='display:flex;flex-direction:column;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(0,140,180,.2);';
+    cHdr.innerHTML=`<div style="font-size:22px;margin-bottom:4px;line-height:1;">📷</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;color:#e8f4ff;">Adicionar Foto</div>`;
     cBox.appendChild(cHdr);
-    // Botões lado a lado
     const cRow=document.createElement('div');
-    cRow.style.cssText='display:flex;gap:10px;margin-bottom:10px;';
+    cRow.style.cssText='display:flex;gap:8px;margin-bottom:8px;';
     const bCam=document.createElement('button');
-    bCam.style.cssText='flex:1;padding:14px 10px;border-radius:14px;border:1.5px solid rgba(255,255,255,.15);background:var(--primary,rgba(77,163,255,.15));color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;';
-    bCam.innerHTML='<span style="font-size:22px;">📸</span>Tirar foto';
+    bCam.style.cssText='flex:1;padding:10px 8px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;';
+    bCam.innerHTML='<span style="font-size:18px;">📸</span>Câmera';
     bCam.addEventListener('click',()=>{ cClose(); document.getElementById('dayPhotoInputCam').click(); });
     const bGal=document.createElement('button');
-    bGal.style.cssText='flex:1;padding:14px 10px;border-radius:14px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;';
-    bGal.innerHTML='<span style="font-size:22px;">🖼️</span>Galeria';
+    bGal.style.cssText='flex:1;padding:10px 8px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;';
+    bGal.innerHTML='<span style="font-size:18px;">🖼️</span>Galeria';
     bGal.addEventListener('click',()=>{ cClose(); document.getElementById('dayPhotoInput').click(); });
     const bCan=document.createElement('button');
-    bCan.style.cssText='width:100%;padding:11px 16px;border-radius:14px;border:none;background:transparent;color:rgba(180,220,240,.45);font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;cursor:pointer;';
+    bCan.style.cssText='width:100%;padding:8px 16px;border-radius:10px;border:none;background:transparent;color:rgba(180,220,240,.45);font-family:Space Grotesk,sans-serif;font-weight:700;font-size:12px;cursor:pointer;';
     bCan.textContent='Cancelar'; bCan.addEventListener('click',cClose);
     cRow.appendChild(bCam); cRow.appendChild(bGal);
     cBox.appendChild(cRow); cBox.appendChild(bCan);
@@ -2981,50 +2980,36 @@ function init(){
   });
 
   // ── Botão voltar Android (hardware back) ──
-  // Estratégia DUPLO-SENTINELA: mantém 2 entradas extras na history.
-  // Mesmo que o Android dispare popstate 2x seguido, sempre há buffer.
-  // O app NUNCA fecha — na home o voltar não faz nada.
+  // Duplo sentinela — app nunca fecha. Cada pressão volta UMA tela.
   history.replaceState({app:'agendapro',depth:0},'');
   history.pushState({app:'agendapro',depth:1},'');
   history.pushState({app:'agendapro',depth:2},'');
 
   var _backLastTs = 0;
-  var _backBusy = false;
 
   window.addEventListener('popstate', function handleBack(e){
-    // Re-empurra imediatamente para restaurar o buffer
+    // Restaura sentinela imediatamente
     history.pushState({app:'agendapro',depth:2},'');
 
-    // Ignora se já está processando (evita re-entradas)
-    if(_backBusy) return;
-
-    // Debounce: 220ms — protege contra duplo-disparo do Chrome Android
+    // Debounce leve — só evita duplo-disparo acidental (<150ms)
     var now = Date.now();
-    if(now - _backLastTs < 220) return;
+    if(now - _backLastTs < 150) return;
     _backLastTs = now;
-    _backBusy = true;
 
     // ── Tenta fechar o overlay mais ao topo ──
     function _tryCloseTop(){
-      // Sidebar
       const sbEl = document.getElementById('sidebar');
       if(sbEl && sbEl.classList.contains('open')){ closeSidebar(); return true; }
-      // Sub-screen
       const subScr = document.getElementById('subScreenOverlay');
       if(subScr && subScr.classList.contains('show')){ goSubBack(); return true; }
-      // Manual overlay
       const manualOv = document.getElementById('manualOverlay');
       if(manualOv && manualOv.style.display==='flex'){ manualOv.style.display='none'; return true; }
-      // Settings
       const sModal = document.getElementById('sModalOverlay');
       if(sModal && sModal.classList.contains('show')){ closeSettings(); return true; }
-      // Folder modal
       const fModal = document.getElementById('fModalOverlay');
       if(fModal && fModal.classList.contains('show')){ fModal.classList.remove('show'); return true; }
-      // Calendar modal
       const calModal = document.getElementById('calModalOverlay');
       if(calModal && calModal.classList.contains('show')){ closeCalendarModal(); return true; }
-      // Overlays com id fixo (ordem: mais ao topo primeiro)
       const namedOvs = [
         'photoFullscreenOv','photoGalleryOv',
         'consultaFormOv','remedioFormOv',
@@ -3037,7 +3022,6 @@ function init(){
         const el = document.getElementById(oid);
         if(el){ el.remove(); return true; }
       }
-      // Overlays dinâmicos sem id
       const dynOvs = document.querySelectorAll('body > div.modalOverlay');
       if(dynOvs.length > 0){ dynOvs[dynOvs.length-1].remove(); return true; }
       const dynFixed = document.querySelectorAll('body > div[style*="position:fixed"][style*="z-index:9"]');
@@ -3049,15 +3033,12 @@ function init(){
     }
 
     if(!_tryCloseTop()){
-      // Nenhum overlay aberto — navega entre views
+      // Nenhum overlay — navega: pasta → home
       if(currentView === 'day'){
         navigateBack();
       }
-      // Na home: não faz nada — o app não fecha
+      // Na home não faz nada — app não fecha
     }
-
-    // Libera o lock após um tick para garantir que o DOM atualizou
-    setTimeout(function(){ _backBusy = false; }, 50);
   });
 
   // ── Pull-to-go-back (swipe down on list) ──
@@ -5141,7 +5122,62 @@ function _runSearch(query) {
     }
   });
 
-  // Ordenar por data (mais próxima primeiro)
+  // Documentos
+  (_getDocs ? _getDocs() : []).forEach(d => {
+    const searchable = [d.nome, d.numero, d.obs].filter(Boolean).join(' ');
+    if (searchable.toLowerCase().includes(q)) {
+      results.push({
+        type:'doc', icon:'🪪', typeLabel:'Documento',
+        text: d.nome || 'Documento',
+        sub: d.numero ? `Nº ${d.numero}` : '',
+        sortKey:'',
+        action:()=>{ closeSearch(); openDocs(); }
+      });
+    }
+  });
+
+  // Exames
+  (_getExames ? _getExames() : []).forEach(e => {
+    const searchable = [e.tipo, e.paciente, e.obs, e.resultado].filter(Boolean).join(' ');
+    if (searchable.toLowerCase().includes(q)) {
+      const df = e.data ? e.data.split('-').reverse().join('/') : '';
+      results.push({
+        type:'exame', icon:'🩺', typeLabel:'Exame',
+        text: e.tipo || 'Exame',
+        sub: `${e.paciente||''}${df?' | '+df:''}`,
+        sortKey: e.data||'',
+        action:()=>{ closeSearch(); openExames(); }
+      });
+    }
+  });
+
+  // A Pagar (Contas)
+  (_getContas ? _getContas() : []).forEach(c => {
+    const searchable = [c.nome, c.obs, c.valor].filter(Boolean).join(' ');
+    if (searchable.toLowerCase().includes(q)) {
+      results.push({
+        type:'conta', icon:'💳', typeLabel:'A Pagar',
+        text: c.nome || 'Conta',
+        sub: c.valor ? `R$ ${c.valor}` : '',
+        sortKey:'',
+        action:()=>{ closeSearch(); openContas(); }
+      });
+    }
+  });
+
+  // Mercado
+  (_getMercado ? _getMercado() : []).forEach(m => {
+    const searchable = [m.nome, m.qtd].filter(Boolean).join(' ');
+    if (searchable.toLowerCase().includes(q)) {
+      results.push({
+        type:'mercado', icon:'🛍️', typeLabel:'Mercado',
+        text: m.nome || 'Item',
+        sub: m.qtd ? `Qtd: ${m.qtd}` : '',
+        sortKey:'',
+        action:()=>{ closeSearch(); openMercado(); }
+      });
+    }
+  });
   results.sort((a, b) => {
     if(!a.sortKey && !b.sortKey) return 0;
     if(!a.sortKey) return 1;
@@ -5185,6 +5221,51 @@ function _runSearch(query) {
           ${r.data ? `<span style="font-size:11px;font-weight:800;color:#a78bfa;flex-shrink:0;">${r.data}${r.hora?' · '+r.hora:''}</span>` : ''}
         </div>
         ${r.paciente ? `<div style="display:flex;flex-wrap:wrap;gap:6px;"><span style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:#c4b5fd;">👤 ${_escHtml(r.paciente)}</span></div>` : ''}
+      </div>`;
+    }
+    if (r.type === 'doc') {
+      return `<div class="searchItem searchItemCard" data-idx="${i}" style="cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:20px;line-height:1;">🪪</span>
+          <div style="flex:1;min-width:0;">
+            <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}</div>
+            <div class="searchItemType" style="margin:0;">Documento${r.sub?' · '+_escHtml(r.sub):''}</div>
+          </div>
+        </div>
+      </div>`;
+    }
+    if (r.type === 'exame') {
+      return `<div class="searchItem searchItemCard" data-idx="${i}" style="cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:20px;line-height:1;">🩺</span>
+          <div style="flex:1;min-width:0;">
+            <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}</div>
+            <div class="searchItemType" style="margin:0;">Exame${r.sub?' · '+_escHtml(r.sub):''}</div>
+          </div>
+          ${r.sortKey ? `<span style="font-size:11px;font-weight:800;color:#34d399;flex-shrink:0;">${r.sortKey.split('-').reverse().join('/')}</span>` : ''}
+        </div>
+      </div>`;
+    }
+    if (r.type === 'conta') {
+      return `<div class="searchItem searchItemCard" data-idx="${i}" style="cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:20px;line-height:1;">💳</span>
+          <div style="flex:1;min-width:0;">
+            <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}</div>
+            <div class="searchItemType" style="margin:0;">A Pagar${r.sub?' · '+_escHtml(r.sub):''}</div>
+          </div>
+        </div>
+      </div>`;
+    }
+    if (r.type === 'mercado') {
+      return `<div class="searchItem searchItemCard" data-idx="${i}" style="cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:20px;line-height:1;">🛍️</span>
+          <div style="flex:1;min-width:0;">
+            <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}</div>
+            <div class="searchItemType" style="margin:0;">Mercado${r.sub?' · '+_escHtml(r.sub):''}</div>
+          </div>
+        </div>
       </div>`;
     }
     // Tarefas
