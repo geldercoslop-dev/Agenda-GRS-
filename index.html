@@ -2912,9 +2912,10 @@ function init(){
   pushSentinel();
 
   window.addEventListener('popstate', function handleBack(e){
-    // Sempre que popstate disparar, voltamos a fazer pushState imediatamente
-    // para manter a sentinela pronta para a próxima vez
+    // Push sentinel immediately (sync) AND via timeout for double safety
+    history.pushState({app:'agendapro',sentinel:true},'');
     setTimeout(pushSentinel, 0);
+    setTimeout(pushSentinel, 50);
 
     // Fecha sidebar se estiver aberto
     const sbEl=document.getElementById('sidebar');

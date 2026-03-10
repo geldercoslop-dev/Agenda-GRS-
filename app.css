@@ -357,14 +357,14 @@
     /* ══ BOTTOM BAR ══ */
     /* ══ SIDEBAR RETRÁTIL ══ */
     .sidebarOverlay {
-      display:none; position:fixed; inset:0; z-index:800;
+      display:none; position:fixed; inset:0; z-index:9998;
       background:rgba(0,0,0,.55); backdrop-filter:blur(2px);
       opacity:0; transition:opacity .28s ease;
     }
     .sidebarOverlay.open { display:block; opacity:1; }
 
     .sidebar {
-      position:fixed; top:0; left:-270px; bottom:0; width:260px; z-index:801;
+      position:fixed; top:0; left:-270px; bottom:0; width:260px; z-index:9999;
       background:var(--bg2);
       border-right:1px solid rgba(251,146,60,.18);
       box-shadow:4px 0 40px rgba(0,0,0,.6);
