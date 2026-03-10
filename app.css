@@ -417,7 +417,7 @@
       border:1px solid rgba(255,255,255,.06);
     }
     .sb-label {
-      font-family:'Space Grotesk',sans-serif; font-size:11px;
+      font-family:'Space Grotesk',sans-serif; font-size:13px;
       font-weight:700; color:rgba(255,255,255,.75); flex:1;
     }
     .sb-divider { height:1px; background:rgba(251,146,60,.15); margin:3px 0; }

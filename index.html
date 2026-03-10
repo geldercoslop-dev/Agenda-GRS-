@@ -690,7 +690,8 @@
           <span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;z-index:2;filter:drop-shadow(0 0 4px rgba(255,255,255,.8));">⚡</span>
         </div>
       </div>
-      <span class="progressPct" id="progressPct" style="min-width:28px;text-align:right;flex:1;">0%</span>
+      <span class="progressPct" id="progressPct" style="min-width:28px;text-align:left;margin-left:6px;margin-right:0;">0%</span>
+      <div style="flex:1;"></div>
       <button id="sidebarFab" style="
         flex-shrink:0;
         width:42px;height:42px;border-radius:14px;
@@ -2943,14 +2944,54 @@ function init(){
   // Month nav arrows in expanded strip
   const mPrev=document.getElementById('monthPrev');
   const mNext=document.getElementById('monthNext');
-  if(mPrev) mPrev.addEventListener('click',(e)=>{e.stopPropagation();if(viewMonthMonth===null){const n=new Date();viewMonthYear=n.getFullYear();viewMonthMonth=n.getMonth();}viewMonthMonth--;if(viewMonthMonth<0){viewMonthMonth=11;viewMonthYear--;}renderMonthGrid();});
-  if(mNext) mNext.addEventListener('click',(e)=>{e.stopPropagation();if(viewMonthMonth===null){const n=new Date();viewMonthYear=n.getFullYear();viewMonthMonth=n.getMonth();}viewMonthMonth++;if(viewMonthMonth>11){viewMonthMonth=0;viewMonthYear++;}renderMonthGrid();});
+  // Month nav arrows - removed here, handled with animation below
 
   // ── Swipe horizontal no grid do mês (esquerda = próximo, direita = anterior) ──
   (function(){
     const grid=document.getElementById('monthGrid');
     if(!grid) return;
     let sx=0, sy=0, swiping=false;
+
+    function slideMonth(direction){
+      // direction: 'left' (next) or 'right' (prev)
+      const outX = direction==='left' ? '-60px' : '60px';
+      const inX  = direction==='left' ?  '60px' : '-60px';
+      grid.style.transition='transform .22s ease, opacity .22s ease';
+      grid.style.transform='translateX('+outX+')';
+      grid.style.opacity='0';
+      setTimeout(()=>{
+        renderMonthGrid();
+        grid.style.transition='none';
+        grid.style.transform='translateX('+inX+')';
+        grid.style.opacity='0';
+        // force reflow
+        grid.getBoundingClientRect();
+        grid.style.transition='transform .22s ease, opacity .22s ease';
+        grid.style.transform='translateX(0)';
+        grid.style.opacity='1';
+      },200);
+    }
+
+    // Button overrides with animation
+    const mPrevBtn=document.getElementById('monthPrev');
+    const mNextBtn=document.getElementById('monthNext');
+    if(mPrevBtn){
+      mPrevBtn.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        if(viewMonthMonth===null){const n=new Date();viewMonthYear=n.getFullYear();viewMonthMonth=n.getMonth();}
+        viewMonthMonth--;if(viewMonthMonth<0){viewMonthMonth=11;viewMonthYear--;}
+        slideMonth('right');
+      });
+    }
+    if(mNextBtn){
+      mNextBtn.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        if(viewMonthMonth===null){const n=new Date();viewMonthYear=n.getFullYear();viewMonthMonth=n.getMonth();}
+        viewMonthMonth++;if(viewMonthMonth>11){viewMonthMonth=0;viewMonthYear++;}
+        slideMonth('left');
+      });
+    }
+
     grid.addEventListener('touchstart',(e)=>{
       sx=e.touches[0].clientX; sy=e.touches[0].clientY; swiping=true;
     },{passive:true});
@@ -2958,13 +2999,11 @@ function init(){
       if(!swiping) return;
       const dx=e.touches[0].clientX-sx;
       const dy=e.touches[0].clientY-sy;
-      // Só ativa se movimento horizontal > 40px e mais horizontal que vertical
       if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.5){
         swiping=false;
         if(viewMonthMonth===null){const n=new Date();viewMonthYear=n.getFullYear();viewMonthMonth=n.getMonth();}
-        if(dx<0){ viewMonthMonth++;if(viewMonthMonth>11){viewMonthMonth=0;viewMonthYear++;} }
-        else     { viewMonthMonth--;if(viewMonthMonth<0){viewMonthMonth=11;viewMonthYear--;} }
-        renderMonthGrid();
+        if(dx<0){ viewMonthMonth++;if(viewMonthMonth>11){viewMonthMonth=0;viewMonthYear++;} slideMonth('left'); }
+        else     { viewMonthMonth--;if(viewMonthMonth<0){viewMonthMonth=11;viewMonthYear--;} slideMonth('right'); }
       }
     },{passive:true});
     grid.addEventListener('touchend',()=>{ swiping=false; },{passive:true});
