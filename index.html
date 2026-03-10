@@ -1323,7 +1323,7 @@ function openBucket(id, _pushCurrent){
     if(currentView==='home') navStack.push('home');
     else if(currentBucket) navStack.push(currentBucket);
     // Empurra entrada no histórico do Android para cada nível de navegação
-    history.pushState({app:'nav', id}, '');
+
   }
   currentBucket=id; currentView='day';
   // Show day badge (always visible in header right)
@@ -2471,7 +2471,7 @@ function openSettings(){
   document.getElementById('inputUserName').value=state.userName||'';
   ['subName'].forEach(id=>document.getElementById(id).classList.add('hidden'));
   document.getElementById('sModalOverlay').classList.add('show');
-  history.pushState({app:'overlay'},'');
+
 }
 
 function closeSettings(){
@@ -2559,7 +2559,7 @@ function _setFooter(visible){
 function openSubScreen(title, bodyHtml, initFn, exitFn){
   _setFooter(false);
   _subStack.push({ title, bodyHtml, initFn: initFn||null, exitFn: exitFn||null });
-  history.pushState({app:'overlay'},'');
+
   _renderSubScreen();
 }
 function _renderSubScreen(){
@@ -3039,105 +3039,34 @@ function init(){
   });
 
   // ── Botão voltar Android ──
-  // Estratégia: cada openBucket empurra uma entrada real no histórico.
-  // A sentinela base (app:0) fica embaixo de tudo — quando o popstate
-  // retorna para ela, o app está na home e repõe a sentinela sem fechar.
+  // ── Botão voltar Android ──
+  // Lógica: 1 sentinela sempre acima da base. O popstate fecha o overlay
+  // mais ao topo e reempurra a sentinela via setTimeout (safe no Android).
+  // Para navegação multi-nível (pasta→subpasta), openBucket empurra 1 entrada.
   (function(){
-    history.replaceState({app:0, base:true},''); // entrada base — nunca consumida
+    history.replaceState({app:'base'},'');
+    history.pushState({app:'top'},'');
 
-    var _busy = false;
+    window.addEventListener('popstate', function(){
+      // Reempurra sentinela depois que o browser terminar o popstate
+      setTimeout(function(){ history.pushState({app:'top'},''); }, 16);
 
-    window.addEventListener('popstate', function(e){
-      if(_busy) return;
-      _busy = true;
-      setTimeout(function(){ _busy = false; }, 50);
+      // Fecha o que estiver aberto, em ordem de prioridade
+      if(document.getElementById('sidebar')?.classList.contains('open')){ closeSidebar(); return; }
+      if(document.getElementById('subScreenOverlay')?.classList.contains('show')){ goSubBack(); return; }
+      const manualOv=document.getElementById('manualOverlay');
+      if(manualOv?.style.display==='flex'){ manualOv.style.display='none'; if(currentView==='home')_setFooter(true); return; }
+      if(document.getElementById('sModalOverlay')?.classList.contains('show')){ closeSettings(); return; }
+      if(document.getElementById('fModalOverlay')?.classList.contains('show')){ document.getElementById('fModalOverlay').classList.remove('show'); return; }
+      if(document.getElementById('calModalOverlay')?.classList.contains('show')){ closeCalendarModal(); return; }
 
-      const state_data = e.state || {};
+      const namedOvs=['watermarkTipOv','photoFullscreenOv','photoGalleryOv','consultaFormOv','remedioFormOv','listaConsultasOv','listaRemediosOv','historicoPacienteOv','feriadosOv','docsOv','contasOv','examesOv','mercadoOv','inlineViewerOv'];
+      for(const oid of namedOvs){ const el=document.getElementById(oid); if(el){ el.remove(); return; } }
 
-      // Se voltou à entrada base (home), repõe ela e não faz nada mais
-      if(state_data.base){
-        history.pushState({app:0, base:true},'');
-        return;
-      }
+      const dynFixed=[...document.querySelectorAll('body > div[style*="position:fixed"]')].reverse();
+      for(const ov of dynFixed){ if(!ov.id){ ov.remove(); return; } }
 
-      // --- Fecha overlays na ordem de prioridade ---
-
-      const sbEl = document.getElementById('sidebar');
-      if(sbEl && sbEl.classList.contains('open')){
-        closeSidebar();
-        history.pushState({app:'overlay'},''); // repõe entrada consumida
-        return;
-      }
-
-      const subScr = document.getElementById('subScreenOverlay');
-      if(subScr && subScr.classList.contains('show')){
-        goSubBack();
-        history.pushState({app:'overlay'},'');
-        return;
-      }
-
-      const manualOv = document.getElementById('manualOverlay');
-      if(manualOv && manualOv.style.display==='flex'){
-        manualOv.style.display='none';
-        if(currentView==='home') _setFooter(true);
-        history.pushState({app:'overlay'},'');
-        return;
-      }
-
-      const sModal = document.getElementById('sModalOverlay');
-      if(sModal && sModal.classList.contains('show')){
-        closeSettings();
-        history.pushState({app:'overlay'},'');
-        return;
-      }
-
-      const fModal = document.getElementById('fModalOverlay');
-      if(fModal && fModal.classList.contains('show')){
-        fModal.classList.remove('show');
-        history.pushState({app:'overlay'},'');
-        return;
-      }
-
-      const calModal = document.getElementById('calModalOverlay');
-      if(calModal && calModal.classList.contains('show')){
-        closeCalendarModal();
-        history.pushState({app:'overlay'},'');
-        return;
-      }
-
-      const namedOvs = [
-        'watermarkTipOv',
-        'photoFullscreenOv','photoGalleryOv',
-        'consultaFormOv','remedioFormOv',
-        'listaConsultasOv','listaRemediosOv',
-        'historicoPacienteOv','feriadosOv',
-        'docsOv','contasOv','examesOv','mercadoOv',
-        'inlineViewerOv'
-      ];
-      for(const oid of namedOvs){
-        const el = document.getElementById(oid);
-        if(el){
-          el.remove();
-          history.pushState({app:'overlay'},'');
-          return;
-        }
-      }
-
-      const dynFixed = document.querySelectorAll('body > div[style*="position:fixed"]');
-      for(const ov of [...dynFixed].reverse()){
-        if(ov.id) continue;
-        ov.remove();
-        history.pushState({app:'overlay'},'');
-        return;
-      }
-
-      // Navegar dentro do app (pasta → pasta anterior → home)
-      if(currentView === 'day'){
-        navigateBack();
-        // navigateBack já geriu o navStack; não repõe entrada pois
-        // o próprio openBucket vai empurrar se navegar para outra pasta,
-        // ou goHome não precisa de entrada extra.
-      }
+      if(currentView==='day'){ navigateBack(); }
     });
   })();
 
@@ -3603,7 +3532,7 @@ function _saveContas(arr){ localStorage.setItem('agendaProMax_contas', JSON.stri
 function openContas(){
   const existing = document.getElementById('contasOv');
   if(existing){ existing.remove(); return; }
-  history.pushState({app:'overlay'},'');
+
   _renderContasOv();
 }
 
@@ -3759,7 +3688,7 @@ function _saveExames(arr){ localStorage.setItem('agendaProMax_exames', JSON.stri
 function openExames(){
   const existing=document.getElementById('examesOv');
   if(existing){existing.remove();return;}
-  history.pushState({app:'overlay'},'');
+
   _renderExamesOv();
 }
 
@@ -3968,7 +3897,7 @@ function _saveMercado(arr){ localStorage.setItem('agendaProMax_mercado', JSON.st
 function openMercado(){
   const existing=document.getElementById('mercadoOv');
   if(existing){ existing.remove(); return; }
-  history.pushState({app:'overlay'},'');
+
   _renderMercadoOv();
 }
 
@@ -4039,7 +3968,7 @@ function _saveDocs(arr){ localStorage.setItem('agendaProMax_docs', JSON.stringif
 function openDocs(){
   const existing = document.getElementById('docsOv');
   if(existing){ existing.remove(); return; }
-  history.pushState({app:'overlay'},'');
+
   _renderDocsOv();
 }
 
@@ -4353,7 +4282,7 @@ function openFolderModal(){
     document.getElementById(id).classList.add('hidden');
   });
   document.getElementById('fModalOverlay').classList.add('show');
-  history.pushState({app:'overlay'},'');
+
   _setFooter(false);
 }
 function closeFolderModal(){
@@ -4432,7 +4361,7 @@ function openBucketPhotoGallery(bucketId){
   const photos=(state.bucketPhotos||{})[bucketId]||[];
   if(!photos.length){showToast('Nenhuma imagem nesta pasta.');return;}
 
-  history.pushState({app:'overlay'},'');
+
   const ov=document.createElement('div');
   ov.id='photoGalleryOv'; // ID fixo — o botão voltar detecta e fecha corretamente
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:99995;display:flex;flex-direction:column;';
@@ -5936,7 +5865,7 @@ function openConsultaModal(editId){
 function openListaConsultas(){
   const existing=document.getElementById('listaConsultasOv');
   if(existing)existing.remove();
-  history.pushState({app:'overlay'},'');
+
 
   // ── Paleta Relatório Semanal ──
   const TEXT  = '#e8f4ff';
@@ -6464,7 +6393,7 @@ function openRemedioModal(editId){
 }
 
 function openListaRemedios(){
-  history.pushState({app:'overlay'},'');
+
   const existing=document.getElementById('listaRemediosOv');
   if(existing)existing.remove();
 
