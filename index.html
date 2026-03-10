@@ -694,6 +694,17 @@
         <span class="sb-title">⚡ Central de Comando</span>
       </div>
             <div class="sb-body">
+
+        <div class="sb-section-label">📌 Pastas Fixas</div>
+        <div class="sb-item" id="sb-pauta" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,113,133,.12);">📋</div><span class="sb-label">Pauta</span></div>
+        <div class="sb-item" id="sb-consultas-fp" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(56,189,248,.12);">🏥</div><span class="sb-label">Consultas</span></div>
+        <div class="sb-item" id="sb-remedios-fp" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(167,139,250,.12);">💊</div><span class="sb-label">Remédios</span></div>
+        <div class="sb-item" id="sb-exames-fp" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(52,211,153,.12);">🩺</div><span class="sb-label">Exames</span></div>
+        <div class="sb-item" id="sb-docs-fp" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(99,102,241,.12);">🪪</div><span class="sb-label">Documentos</span></div>
+        <div class="sb-item" id="sb-mercado-fp" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,191,36,.12);">🛍️</div><span class="sb-label">Mercado</span></div>
+        <div class="sb-item" id="sb-contas-fp" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.12);">💳</div><span class="sb-label">A Pagar</span></div>
+
+        <div class="sb-divider"></div>
         <div class="sb-section-label">Saúde</div>
         <div class="sb-item" id="sb-consulta" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(56,189,248,.1);">🏥</div><span class="sb-label">Marcar consulta</span></div>
         <div class="sb-item" id="sb-remedio" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(167,139,250,.1);">💊</div><span class="sb-label">Horário de remédios</span></div>
@@ -2730,6 +2741,15 @@ function init(){
   });
 
   // Wire sidebar items
+  // Pastas Fixas
+  document.getElementById('sb-pauta').addEventListener('click',()=>{ closeSidebar(); openBucket('pauta'); });
+  document.getElementById('sb-consultas-fp').addEventListener('click',()=>{ closeSidebar(); openListaConsultas(); });
+  document.getElementById('sb-remedios-fp').addEventListener('click',()=>{ closeSidebar(); openListaRemedios(); });
+  document.getElementById('sb-exames-fp').addEventListener('click',()=>{ closeSidebar(); openExames(); });
+  document.getElementById('sb-docs-fp').addEventListener('click',()=>{ closeSidebar(); openDocs(); });
+  document.getElementById('sb-mercado-fp').addEventListener('click',()=>{ closeSidebar(); openMercado(); });
+  document.getElementById('sb-contas-fp').addEventListener('click',()=>{ closeSidebar(); openContas(); });
+  // Saúde
   document.getElementById('sb-consulta').addEventListener('click',()=>{ closeSidebar(); openConsultaModal(); });
   document.getElementById('sb-remedio').addEventListener('click',()=>{ closeSidebar(); openRemedioModal(); });
   document.getElementById('sb-folders').addEventListener('click',()=>{ closeSidebar(); openFolderModal(); });
@@ -2965,42 +2985,50 @@ function init(){
   });
 
   // ── Botão voltar Android (hardware back) ──
-  // Estratégia: sentinela permanente — re-empurra sempre no topo do handler.
-  // O app NUNCA sai: na home o botão simplesmente não faz nada.
-  history.replaceState({app:'agendapro',base:true},'');
-  history.pushState({app:'agendapro',sentinel:true},'');
+  // Estratégia DUPLO-SENTINELA: mantém 2 entradas extras na history.
+  // Mesmo que o Android dispare popstate 2x seguido, sempre há buffer.
+  // O app NUNCA fecha — na home o voltar não faz nada.
+  history.replaceState({app:'agendapro',depth:0},'');
+  history.pushState({app:'agendapro',depth:1},'');
+  history.pushState({app:'agendapro',depth:2},'');
 
   var _backLastTs = 0;
+  var _backBusy = false;
+
   window.addEventListener('popstate', function handleBack(e){
-    // Re-empurra sentinela IMEDIATAMENTE — primeira instrução sempre
-    history.pushState({app:'agendapro',sentinel:true},'');
+    // Re-empurra imediatamente para restaurar o buffer
+    history.pushState({app:'agendapro',depth:2},'');
 
-    // Debounce: ignora disparos em menos de 180ms (evita duplo-disparo do Android)
+    // Ignora se já está processando (evita re-entradas)
+    if(_backBusy) return;
+
+    // Debounce: 220ms — protege contra duplo-disparo do Chrome Android
     var now = Date.now();
-    if(now - _backLastTs < 180){ return; }
+    if(now - _backLastTs < 220) return;
     _backLastTs = now;
+    _backBusy = true;
 
-    // ── Função auxiliar: tenta fechar o overlay DOM mais "ao topo" ──
+    // ── Tenta fechar o overlay mais ao topo ──
     function _tryCloseTop(){
-      // 1. Sidebar
-      const sbEl=document.getElementById('sidebar');
+      // Sidebar
+      const sbEl = document.getElementById('sidebar');
       if(sbEl && sbEl.classList.contains('open')){ closeSidebar(); return true; }
-      // 2. Sub-screen overlay
-      const subScr=document.getElementById('subScreenOverlay');
+      // Sub-screen
+      const subScr = document.getElementById('subScreenOverlay');
       if(subScr && subScr.classList.contains('show')){ goSubBack(); return true; }
-      // 3. Manual overlay
-      const manualOv=document.getElementById('manualOverlay');
+      // Manual overlay
+      const manualOv = document.getElementById('manualOverlay');
       if(manualOv && manualOv.style.display==='flex'){ manualOv.style.display='none'; return true; }
-      // 4. Settings modal
-      const sModal=document.getElementById('sModalOverlay');
+      // Settings
+      const sModal = document.getElementById('sModalOverlay');
       if(sModal && sModal.classList.contains('show')){ closeSettings(); return true; }
-      // 5. Folder modal
-      const fModal=document.getElementById('fModalOverlay');
+      // Folder modal
+      const fModal = document.getElementById('fModalOverlay');
       if(fModal && fModal.classList.contains('show')){ fModal.classList.remove('show'); return true; }
-      // 6. Calendar modal
-      const calModal=document.getElementById('calModalOverlay');
+      // Calendar modal
+      const calModal = document.getElementById('calModalOverlay');
       if(calModal && calModal.classList.contains('show')){ closeCalendarModal(); return true; }
-      // 7. Todos os overlays com id conhecidos (por z-index, mais alto primeiro)
+      // Overlays com id fixo (ordem: mais ao topo primeiro)
       const namedOvs = [
         'photoFullscreenOv','photoGalleryOv',
         'consultaFormOv','remedioFormOv',
@@ -3010,28 +3038,30 @@ function init(){
         'inlineViewerOv'
       ];
       for(const oid of namedOvs){
-        const el=document.getElementById(oid);
+        const el = document.getElementById(oid);
         if(el){ el.remove(); return true; }
       }
-      // 8. Qualquer overlay dinâmico sem id (position:fixed z-index alto)
-      const dynOvs=document.querySelectorAll('body > div.modalOverlay');
-      if(dynOvs.length>0){ dynOvs[dynOvs.length-1].remove(); return true; }
-      const dynFixed=document.querySelectorAll('body > div[style*="position:fixed"][style*="z-index:9"]');
+      // Overlays dinâmicos sem id
+      const dynOvs = document.querySelectorAll('body > div.modalOverlay');
+      if(dynOvs.length > 0){ dynOvs[dynOvs.length-1].remove(); return true; }
+      const dynFixed = document.querySelectorAll('body > div[style*="position:fixed"][style*="z-index:9"]');
       for(const ov of [...dynFixed].reverse()){
-        if(ov.id) continue; // já tratado acima
+        if(ov.id) continue;
         ov.remove(); return true;
       }
       return false;
     }
 
-    if(_tryCloseTop()) return;
-
-    // Nenhum overlay — navega entre views
-    if(currentView==='day'){
-      navigateBack();
-      return;
+    if(!_tryCloseTop()){
+      // Nenhum overlay aberto — navega entre views
+      if(currentView === 'day'){
+        navigateBack();
+      }
+      // Na home: não faz nada — o app não fecha
     }
-    // Na home: não faz nada — o pushState já garantiu que o app não fecha
+
+    // Libera o lock após um tick para garantir que o DOM atualizou
+    setTimeout(function(){ _backBusy = false; }, 50);
   });
 
   // ── Pull-to-go-back (swipe down on list) ──
@@ -3718,8 +3748,8 @@ function _renderExamesOv(){
         <input type="file" id="_efFotoCamI" accept="image/*" capture="environment" style="display:none;">
         <input type="file" id="_efFotoGalI" accept="image/*" style="display:none;">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:22px;">
-          <button id="_efFotoCamBtn" type="button" style="padding:10px 4px;border-radius:11px;border:1.5px solid #0ea5e9;background:rgba(14,165,233,.15);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;"><span style="font-size:18px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span></button>
-          <button id="_efFotoGalBtn" type="button" style="padding:10px 4px;border-radius:11px;border:1.5px solid #0ea5e9;background:rgba(14,165,233,.15);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;"><span style="font-size:18px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span></button>
+          <button id="_efFotoCamBtn" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;"><span style="font-size:18px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span></button>
+          <button id="_efFotoGalBtn" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;"><span style="font-size:18px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span></button>
           <button id="_efSave" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;"><span style="font-size:18px;line-height:1;display:block;text-align:center;">✔</span><span id="_efSaveLbl" style="line-height:1;display:block;text-align:center;">Salvar</span></button>
         </div>
       </div>
@@ -5646,10 +5676,10 @@ function openConsultaModal(editId){
         <input type="file" id="_csFotoCam" accept="image/*" capture="environment" style="display:none;">
         <input type="file" id="_csFotoGal" accept="image/*" style="display:none;">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px;">
-          <button id="_csFotoCamBtn" type="button" style="padding:10px 4px;border-radius:11px;border:1.5px solid #0ea5e9;background:rgba(14,165,233,.15);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
+          <button id="_csFotoCamBtn" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
             <span style="font-size:18px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span>
           </button>
-          <button id="_csFotoGalBtn" type="button" style="padding:10px 4px;border-radius:11px;border:1.5px solid #0ea5e9;background:rgba(14,165,233,.15);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
+          <button id="_csFotoGalBtn" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
             <span style="font-size:18px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span>
           </button>
           <button id="_cSave" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
@@ -6062,10 +6092,10 @@ function openRemedioModal(editId){
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px;">
-          <button id="_rmFotoCamBtn" type="button" style="padding:10px 4px;border-radius:11px;border:1.5px solid #0ea5e9;background:rgba(14,165,233,.15);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
+          <button id="_rmFotoCamBtn" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
             <span style="font-size:18px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span>
           </button>
-          <button id="_rmFotoGalBtn" type="button" style="padding:10px 4px;border-radius:11px;border:1.5px solid #0ea5e9;background:rgba(14,165,233,.15);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
+          <button id="_rmFotoGalBtn" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
             <span style="font-size:18px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span>
           </button>
           <button id="_rmSave" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
