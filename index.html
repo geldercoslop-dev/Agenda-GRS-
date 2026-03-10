@@ -715,6 +715,7 @@
         <div class="sb-item" id="sb-folders" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,191,36,.1);">📁</div><span class="sb-label">Gerenciar pastas</span></div>
         <div class="sb-item" id="sb-feriados" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,113,133,.1);">🎉</div><span class="sb-label">Feriados</span></div>
         <div class="sb-item" id="sb-docs" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(99,102,241,.12);">🪪</div><span class="sb-label">Documentos</span></div>
+        <div class="sb-item" id="sb-mercado" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,191,36,.1);">🛍️</div><span class="sb-label">Mercado</span></div>
 
         <div class="sb-divider"></div>
         <div class="sb-section-label">Configurações</div>
@@ -821,15 +822,16 @@ function defaultState() {
 }
 
 // ── Pastas fixas do sistema (não podem ser excluídas) ──
-const SYSTEM_IDS = ['pauta','_consultas','_remedios','_contas','_exames','_compras','_docs'];
+const SYSTEM_IDS = ['pauta','_consultas','_remedios','_exames','_compras','_docs','_mercado','_contas'];
 const SYSTEM_DEFAULTS = [
   {id:'pauta',     name:'Pauta',            emoji:'📋'},
   {id:'_consultas',name:'Consultas',        emoji:'🏥'},
   {id:'_remedios', name:'Remédios',         emoji:'💊'},
-  {id:'_contas',   name:'Contas a Pagar',   emoji:'💳'},
-  {id:'_exames',   name:'Histórico de Exames', emoji:'🩺'},
+  {id:'_exames',   name:'Exames',           emoji:'🩺'},
   {id:'_compras',  name:'Lista de Compras', emoji:'🛒'},
   {id:'_docs',     name:'Documentos',       emoji:'🪪'},
+  {id:'_mercado',  name:'Mercado',          emoji:'🛍️'},
+  {id:'_contas',   name:'Contas a Pagar',   emoji:'💳'},
 ];
 
 function ensureSystemFolders(){
@@ -1231,14 +1233,7 @@ function renderFolders(){
     grid.appendChild(tile);
   });
 
-  // Divisor visual entre fixas e do usuário
-  if(sysTiles.length>0 && userTiles.length>0){
-    const div=document.createElement('div');
-    div.className='folderDivider';
-    grid.appendChild(div);
-  }
-
-  // Renderiza pastas do usuário
+  // Renderiza pastas do usuário (sem divisor, juntas)
   userTiles.forEach(id=>{
     const f=byId[id]; if(!f) return;
     const children=state.folders.filter(c=>c.parentId===id);
@@ -1259,6 +1254,7 @@ function openBucket(id, _pushCurrent){
     '_exames':    ()=>openExames(),
     '_compras':   ()=>openCompras(),
     '_docs':      ()=>openDocs(),
+    '_mercado':   ()=>openMercado(),
   };
   if(specialMap[id]){ specialMap[id](); return; }
   if (typeof _metrics !== 'undefined') _metrics.trackScreen('day');
@@ -2744,6 +2740,7 @@ function init(){
   document.getElementById('sb-contas') && document.getElementById('sb-contas').addEventListener('click',()=>{ closeSidebar(); openContas(); });
   document.getElementById('sb-exames') && document.getElementById('sb-exames').addEventListener('click',()=>{ closeSidebar(); openExames(); });
   document.getElementById('sb-compras') && document.getElementById('sb-compras').addEventListener('click',()=>{ closeSidebar(); openCompras(); });
+  document.getElementById('sb-mercado') && document.getElementById('sb-mercado').addEventListener('click',()=>{ closeSidebar(); openMercado(); });
   document.getElementById('sb-zap').addEventListener('click',()=>{ closeSidebar(); shareWhatsAppGlobal(); });
   document.getElementById('sb-backup').addEventListener('click',()=>{ closeSidebar(); doBackup(); });
   document.getElementById('sb-rWeek').addEventListener('click',()=>{ closeSidebar(); generateWeekReport(false); });
@@ -3587,7 +3584,7 @@ function _renderContasOv(){
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
       <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">💳 Contas a Pagar</span>
       <button id="_contasNew" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Nova</button>
-      <button id="_contasBack" style="background:rgba(0,80,120,.3);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-size:17px;font-weight:900;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>
+      <button id="_contasBack" style="background:rgba(0,80,120,.45);border:1px solid rgba(0,160,200,.35);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
     ${pendentes>0?`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:rgba(0,80,120,.18);border-bottom:1px solid ${BDR};flex-shrink:0;">
       <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${MUTED};">${pendentes} pendente${pendentes>1?'s':''}</span>
@@ -3703,9 +3700,9 @@ function _renderExamesOv(){
   ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
-      <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">🩺 Histórico de Exames</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">🩺 Exames</span>
       <button id="_exNew" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
-      <button id="_exBack" style="background:rgba(0,80,120,.3);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-size:17px;font-weight:900;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>
+      <button id="_exBack" style="background:rgba(0,80,120,.45);border:1px solid rgba(0,160,200,.35);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
     <div id="_exBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
       ${exames.length===0?`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;"><div style="font-size:40px;margin-bottom:12px;">🩺</div><div style="font-size:14px;font-weight:700;margin-bottom:6px;">Nenhum exame cadastrado</div><div style="font-size:12px;opacity:.7;">Toque em + Novo para cadastrar</div></div>`:exames.map((e,i)=>cardH(e,i)).join('')}
@@ -3831,7 +3828,7 @@ function _renderComprasOv(){
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
       <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">🛒 Lista de Compras</span>
       ${marcadosN>0?`<button id="_cpClearDone" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:10px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:7px 11px;cursor:pointer;flex-shrink:0;">Limpar</button>`:''}
-      <button id="_cpBack" style="background:rgba(0,80,120,.3);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-size:17px;font-weight:900;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>
+      <button id="_cpBack" style="background:rgba(0,80,120,.45);border:1px solid rgba(0,160,200,.35);border-radius:10px;color:rgba(125,211,240,1);font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
     ${totalItems>0?`<div style="padding:8px 16px;background:rgba(0,80,120,.15);border-bottom:1px solid ${BDR};flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:${MUTED};">${pendentes.length} item${pendentes.length!==1?'ns':''} restante${pendentes.length!==1?'s':''}</span>
@@ -3868,6 +3865,76 @@ function _renderComprasOv(){
     const arr=_getCompras();
     if(ck){ arr[parseInt(ck.dataset.idx)].checked=!arr[parseInt(ck.dataset.idx)].checked; _saveCompras(arr); _renderComprasOv(); }
     else if(dl){ arr.splice(parseInt(dl.dataset.idx),1); _saveCompras(arr); _renderComprasOv(); }
+  });
+}
+
+// ══ MERCADO ══
+function _getMercado(){ try{ return JSON.parse(localStorage.getItem('agendaProMax_mercado')||'[]'); }catch(e){ return []; } }
+function _saveMercado(arr){ localStorage.setItem('agendaProMax_mercado', JSON.stringify(arr)); }
+
+function openMercado(){
+  const existing=document.getElementById('mercadoOv');
+  if(existing){ existing.remove(); return; }
+  _renderMercadoOv();
+}
+
+function _renderMercadoOv(){
+  const old=document.getElementById('mercadoOv'); if(old) old.remove();
+  const items=_getMercado();
+  const marcadosN=items.filter(x=>x.checked).length;
+  const totalItems=items.length;
+  const pendentes=items.filter(x=>!x.checked);
+
+  const BG=`linear-gradient(160deg,#021824,#04355a)`;
+  const TEXT='#e8f4ff'; const MUTED='rgba(180,220,240,.55)';
+  const ACC='#7dd3f0'; const BDR='rgba(0,140,180,.18)';
+  const FIELD='rgba(0,80,120,.28)'; const ACCENT='linear-gradient(135deg,#0ea5e9,#0284c7)';
+
+  function itemRow(it,i){
+    return `<div style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(4,53,90,.45);border:1px solid ${BDR};border-radius:12px;margin-bottom:8px;">
+      <input type="checkbox" data-ci="${i}" ${it.checked?'checked':''} style="width:18px;height:18px;accent-color:#22c55e;cursor:pointer;flex-shrink:0;">
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:${it.checked?MUTED:TEXT};flex:1;${it.checked?'text-decoration:line-through;':''}">${it.nome}${it.qtd&&it.qtd!=='1'?` <span style="font-size:11px;color:${MUTED};">(${it.qtd})</span>`:''}</span>
+      <button data-di="${i}" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#f87171;font-size:13px;font-weight:900;padding:4px 9px;cursor:pointer;">✕</button>
+    </div>`;
+  }
+
+  const ov=document.createElement('div'); ov.id='mercadoOv';
+  ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
+  ov.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
+      <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">🛍️ Mercado</span>
+      ${marcadosN>0?`<button id="_mkClearDone" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:10px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:7px 11px;cursor:pointer;flex-shrink:0;">Limpar</button>`:''}
+      <button id="_mkBack" style="background:rgba(0,80,120,.45);border:1px solid rgba(0,160,200,.35);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+    </div>
+    ${totalItems>0?`<div style="padding:8px 16px;background:rgba(0,80,120,.15);border-bottom:1px solid ${BDR};flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:${MUTED};">${pendentes.length} item${pendentes.length!==1?'ns':''} restante${pendentes.length!==1?'s':''}</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:rgba(34,197,94,.7);">${marcadosN}/${totalItems} marcados</span>
+    </div>`:''}
+    <div id="_mkBody" style="flex:1;overflow-y:auto;padding:0 16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
+      ${items.length===0?`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;"><div style="font-size:40px;margin-bottom:12px;">🛍️</div><div style="font-size:14px;font-weight:700;margin-bottom:6px;">Lista vazia</div><div style="font-size:12px;opacity:.7;">Adicione itens abaixo</div></div>`:items.map((it,i)=>itemRow(it,i)).join('')}
+    </div>
+    <!-- Input rápido fixo no rodapé -->
+    <div style="padding:12px 16px;background:rgba(0,80,120,.3);border-top:1px solid ${BDR};display:flex;gap:8px;flex-shrink:0;">
+      <input id="_mkNome" type="text" maxlength="60" placeholder="Item do mercado…" style="flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;outline:none;">
+      <input id="_mkQtd" type="text" maxlength="10" placeholder="Qtd" style="width:60px;padding:10px 8px;border-radius:10px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;outline:none;text-align:center;">
+      <button id="_mkAdd" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;padding:10px 14px;cursor:pointer;">+</button>
+    </div>`;
+  document.body.appendChild(ov);
+  ov.querySelector('#_mkBack').onclick=()=>ov.remove();
+  if(ov.querySelector('#_mkClearDone')) ov.querySelector('#_mkClearDone').onclick=()=>{ _saveMercado(_getMercado().filter(x=>!x.checked)); _renderMercadoOv(); };
+  ov.querySelector('#_mkAdd').onclick=()=>{
+    const nome=ov.querySelector('#_mkNome').value.trim();
+    const qtd=ov.querySelector('#_mkQtd').value.trim()||'1';
+    if(!nome){showToast('⚠️ Informe o item!');return;}
+    const arr=_getMercado(); arr.push({id:Date.now(),nome,qtd,checked:false});
+    _saveMercado(arr); _renderMercadoOv();
+  };
+  ov.querySelector('#_mkNome').addEventListener('keydown',e=>{ if(e.key==='Enter') ov.querySelector('#_mkAdd').click(); });
+  ov.querySelector('#_mkBody').addEventListener('click',e=>{
+    const cb=e.target.closest('[data-ci]');
+    const dl=e.target.closest('[data-di]');
+    if(cb){ const arr=_getMercado(); arr[parseInt(cb.dataset.ci)].checked=cb.checked; _saveMercado(arr); _renderMercadoOv(); }
+    else if(dl){ const arr=_getMercado(); arr.splice(parseInt(dl.dataset.di),1); _saveMercado(arr); _renderMercadoOv(); }
   });
 }
 
@@ -3927,7 +3994,7 @@ function _renderDocsOv(){
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
       <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">🪪 Documentos</span>
       <button id="_docsNew" style="background:${ACCENT_SOLID};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
-      <button id="_docsBack" style="background:rgba(0,80,120,.3);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-size:17px;font-weight:900;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>
+      <button id="_docsBack" style="background:rgba(0,80,120,.45);border:1px solid rgba(0,160,200,.35);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
     <div id="_docsBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
       ${listaHTML}
@@ -4885,6 +4952,7 @@ function exportarDados() {
       try { const r=localStorage.getItem('agendaProMax_contas'); if(r) exportData._contas=JSON.parse(r); }catch(e){}
       try { const r=localStorage.getItem('agendaProMax_exames'); if(r) exportData._exames=JSON.parse(r); }catch(e){}
       try { const r=localStorage.getItem('agendaProMax_compras'); if(r) exportData._compras=JSON.parse(r); }catch(e){}
+      try { const r=localStorage.getItem('agendaProMax_mercado'); if(r) exportData._mercado=JSON.parse(r); }catch(e){}
       exportData._exportedAt = new Date().toISOString();
       exportData._appVersion  = typeof APP_DATA_VERSION !== 'undefined' ? APP_DATA_VERSION : 1;
 
@@ -4950,6 +5018,7 @@ function importarDados() {
         if (data._contas) { try{localStorage.setItem('agendaProMax_contas',JSON.stringify(data._contas));}catch(e){} delete data._contas; }
         if (data._exames) { try{localStorage.setItem('agendaProMax_exames',JSON.stringify(data._exames));}catch(e){} delete data._exames; }
         if (data._compras){ try{localStorage.setItem('agendaProMax_compras',JSON.stringify(data._compras));}catch(e){} delete data._compras; }
+        if (data._mercado){ try{localStorage.setItem('agendaProMax_mercado',JSON.stringify(data._mercado));}catch(e){} delete data._mercado; }
         delete data._exportedAt;
         delete data._appVersion;
 
@@ -5731,7 +5800,7 @@ function openListaConsultas(){
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
       <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">🏥 Consultas</span>
       <button id="_lcAdd" style="background:var(--primary,#4da3ff);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Nova</button>
-      <button id="_lcBack" style="background:rgba(0,80,120,.3);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACCENT};font-size:17px;font-weight:900;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>
+      <button id="_lcBack" style="background:rgba(0,80,120,.45);border:1px solid rgba(0,160,200,.35);border-radius:10px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">${body}</div>`;
   document.body.appendChild(ov);
@@ -6262,12 +6331,10 @@ function openListaRemedios(){
   ov.id='listaRemediosOv';
   ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:${HDR};border-bottom:1px solid ${BDR};flex-shrink:0;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <button id="_lrBack" style="background:${FIELD};border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
-        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:16px;color:${TEXT};letter-spacing:-.2px;">💊 Remédios</span>
-      </div>
-      <button id="_lrAdd" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:9px 16px;cursor:pointer;">+ Novo</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:${HDR};border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
+      <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">💊 Remédios</span>
+      <button id="_lrAdd" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
+      <button id="_lrBack" style="background:rgba(0,80,120,.45);border:1px solid rgba(0,160,200,.35);border-radius:10px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">${body}</div>`;
   document.body.appendChild(ov);
