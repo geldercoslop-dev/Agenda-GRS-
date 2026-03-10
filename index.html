@@ -83,11 +83,14 @@
       padding: 18px 14px 14px !important;
       display: flex !important;
       flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
       gap: 6px !important;
     }
     .statValue {
       font-family: 'Space Grotesk', sans-serif !important;
-      font-size: 32px !important;
+      font-size: 36px !important;
       font-weight: 900 !important;
       color: #e8f4ff !important;
       line-height: 1 !important;
@@ -264,9 +267,10 @@
 <!-- ══ SETTINGS MODAL ══ -->
 <div class="sModalOverlay" id="sModalOverlay">
   <div class="sModalBox" style="background:#111;border:1px solid rgba(234,88,12,.2);border-radius:20px;overflow:hidden;width:92%;max-width:360px;box-shadow:0 12px 40px rgba(0,0,0,.7);">
-    <div class="sModalHdr" style="background:#0d0d0d;border-bottom:1px solid rgba(234,88,12,.18);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
-      <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;letter-spacing:.3px;">⚙️ Configurações</span>
-      <button class="sCloseBtn" id="sClose" style="width:30px;height:30px;border-radius:9px;background:rgba(234,88,12,.1);border:1px solid rgba(234,88,12,.25);color:rgba(234,88,12,.8);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    <div class="sModalHdr" style="padding:12px 14px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:18px;line-height:1;">⚙️</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:#e8f4ff;letter-spacing:-.2px;flex:1;">Configurações</span>
+      <button class="sCloseBtn" id="sClose" style="width:32px;height:32px;border-radius:9px;background:rgba(0,120,160,.25);border:1px solid rgba(0,160,200,.3);color:#7dd3f0;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
     </div>
     <div id="sBody" style="padding:14px;">
 
@@ -376,6 +380,7 @@
     <div class="subScreenHdr">
       <button class="subScreenBack" id="subScreenBack">‹</button>
       <span class="subScreenTitle" id="subScreenTitle"></span>
+      <div id="subScreenActions" style="display:flex;gap:6px;margin-left:auto;"></div>
     </div>
     <div class="subScreenBody" id="subScreenBody"></div>
   </div>
@@ -578,7 +583,8 @@
 <div class="fModalOverlay" id="fModalOverlay">
   <div class="fModalBox">
     <div class="fModalHdr">
-      <span>📁 Gerenciar Pastas</span>
+      <span style="font-size:18px;line-height:1;">📁</span>
+      <span style="flex:1;">Gerenciar Pastas</span>
       <button class="sCloseBtn" id="fClose">✕</button>
     </div>
     <div id="fBody">
@@ -1322,8 +1328,7 @@ function openBucket(id, _pushCurrent){
   if(push){
     if(currentView==='home') navStack.push('home');
     else if(currentBucket) navStack.push(currentBucket);
-    // Empurra entrada no histórico do Android para cada nível de navegação
-
+    history.pushState({app:'nav'},'');
   }
   currentBucket=id; currentView='day';
   // Show day badge (always visible in header right)
@@ -3040,33 +3045,40 @@ function init(){
 
   // ── Botão voltar Android ──
   // ── Botão voltar Android ──
-  // Lógica: 1 sentinela sempre acima da base. O popstate fecha o overlay
-  // mais ao topo e reempurra a sentinela via setTimeout (safe no Android).
-  // Para navegação multi-nível (pasta→subpasta), openBucket empurra 1 entrada.
+  // O histórico espelha o navStack: 1 entrada por pasta aberta.
+  // Na home, sempre tem 1 sentinela extra para o app não fechar.
   (function(){
-    history.replaceState({app:'base'},'');
-    history.pushState({app:'top'},'');
+    history.replaceState({app:'home'},'');
+    history.pushState({app:'sentinel'},'');
 
-    window.addEventListener('popstate', function(){
-      // Reempurra sentinela depois que o browser terminar o popstate
-      setTimeout(function(){ history.pushState({app:'top'},''); }, 16);
+    window.addEventListener('popstate', function(e){
+      const st = (e.state||{}).app;
 
-      // Fecha o que estiver aberto, em ordem de prioridade
-      if(document.getElementById('sidebar')?.classList.contains('open')){ closeSidebar(); return; }
-      if(document.getElementById('subScreenOverlay')?.classList.contains('show')){ goSubBack(); return; }
+      // Fecha overlays primeiro (sem mexer no histórico de navegação)
+      if(document.getElementById('sidebar')?.classList.contains('open')){ closeSidebar(); history.pushState({app:'sentinel'},''); return; }
+      if(document.getElementById('subScreenOverlay')?.classList.contains('show')){ goSubBack(); history.pushState({app:'sentinel'},''); return; }
       const manualOv=document.getElementById('manualOverlay');
-      if(manualOv?.style.display==='flex'){ manualOv.style.display='none'; if(currentView==='home')_setFooter(true); return; }
-      if(document.getElementById('sModalOverlay')?.classList.contains('show')){ closeSettings(); return; }
-      if(document.getElementById('fModalOverlay')?.classList.contains('show')){ document.getElementById('fModalOverlay').classList.remove('show'); return; }
-      if(document.getElementById('calModalOverlay')?.classList.contains('show')){ closeCalendarModal(); return; }
+      if(manualOv?.style.display==='flex'){ manualOv.style.display='none'; if(currentView==='home')_setFooter(true); history.pushState({app:'sentinel'},''); return; }
+      if(document.getElementById('sModalOverlay')?.classList.contains('show')){ closeSettings(); history.pushState({app:'sentinel'},''); return; }
+      if(document.getElementById('fModalOverlay')?.classList.contains('show')){ document.getElementById('fModalOverlay').classList.remove('show'); history.pushState({app:'sentinel'},''); return; }
+      if(document.getElementById('calModalOverlay')?.classList.contains('show')){ closeCalendarModal(); history.pushState({app:'sentinel'},''); return; }
 
       const namedOvs=['watermarkTipOv','photoFullscreenOv','photoGalleryOv','consultaFormOv','remedioFormOv','listaConsultasOv','listaRemediosOv','historicoPacienteOv','feriadosOv','docsOv','contasOv','examesOv','mercadoOv','inlineViewerOv'];
-      for(const oid of namedOvs){ const el=document.getElementById(oid); if(el){ el.remove(); return; } }
-
+      for(const oid of namedOvs){ const el=document.getElementById(oid); if(el){ el.remove(); history.pushState({app:'sentinel'},''); return; } }
       const dynFixed=[...document.querySelectorAll('body > div[style*="position:fixed"]')].reverse();
-      for(const ov of dynFixed){ if(!ov.id){ ov.remove(); return; } }
+      for(const ov of dynFixed){ if(!ov.id){ ov.remove(); history.pushState({app:'sentinel'},''); return; } }
 
-      if(currentView==='day'){ navigateBack(); }
+      // Navegação: se tem para onde voltar, volta
+      if(currentView==='day' && navStack.length>0){
+        navigateBack();
+        // Se depois de voltar ainda está em dayView, o histórico já tem a entrada certa (do openBucket anterior)
+        // Se voltou para home, repõe sentinela
+        if(currentView==='home') history.pushState({app:'sentinel'},'');
+        return;
+      }
+
+      // Está na home ou navStack vazio — repõe sentinela (não fecha)
+      history.pushState({app:'sentinel'},'');
     });
   })();
 

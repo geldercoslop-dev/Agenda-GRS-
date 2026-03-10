@@ -638,7 +638,7 @@
     [data-theme="light"] .subScreenBox { /* same as dark */ }
     .subScreenHdr {
       display:flex; align-items:center; gap:10px;
-      padding:13px 16px 11px;
+      padding:12px 14px 10px;
       border-bottom:1px solid rgba(0,140,180,.15);
       position:sticky; top:0; z-index:2;
       background:linear-gradient(160deg,var(--bg-navy),var(--bg-navy2));
@@ -646,14 +646,14 @@
     }
     [data-theme="light"] .subScreenHdr { /* same as dark */ }
     .subScreenBack {
-      background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
-      border-radius:50%; color:#fff; font-size:14px; cursor:pointer;
-      width:28px; height:28px; display:flex; align-items:center; justify-content:center;
-      flex-shrink:0;
+      background:rgba(0,120,160,.25); border:1px solid rgba(0,160,200,.3);
+      border-radius:9px; color:#7dd3f0; font-size:18px; cursor:pointer;
+      width:32px; height:32px; display:flex; align-items:center; justify-content:center;
+      flex-shrink:0; font-weight:400;
     }
     .subScreenTitle {
       font-family:'Space Grotesk',sans-serif; font-weight:900; font-size:14px;
-      color:var(--text); letter-spacing:-.2px; flex:1;
+      color:var(--text); letter-spacing:-.2px;
     }
     [data-theme="light"] .subScreenTitle { /* same as dark */ }
     .subScreenBody { padding:14px 16px 20px; }
@@ -673,31 +673,31 @@
     }
     [data-theme="light"] .sModalBox { /* same as dark */ }
     .sModalHdr {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 16px 11px; border-bottom:1px solid rgba(0,140,180,.15);
+      display:flex; align-items:center; gap:10px;
+      padding:12px 14px; border-bottom:1px solid rgba(0,140,180,.15);
       font-family:'Space Grotesk',sans-serif; font-weight:900; font-size:14px; color:var(--text);
       letter-spacing:-.2px; position:sticky; top:0; z-index:2;
       background:linear-gradient(160deg,var(--bg-navy),var(--bg-navy2));
       border-radius:24px 24px 0 0;
     }
     [data-theme="light"] .sModalHdr { /* same as dark */ }
-    .sCloseBtn { background:rgba(255,255,255,.08); border:none; color:var(--muted); font-size:15px; width:28px; height:28px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-    [data-theme="light"] .sCloseBtn { background:rgba(0,0,0,.08); }
+    .sCloseBtn { background:rgba(0,120,160,.25); border:1px solid rgba(0,160,200,.3); color:#7dd3f0; font-size:15px; width:32px; height:32px; border-radius:9px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    [data-theme="light"] .sCloseBtn { background:rgba(0,120,160,.15); }
 
-    .sCardGrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:14px; }
+    .sCardGrid { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:12px; }
     .sCard {
       display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:8px; padding:18px 10px 14px; border-radius:16px;
-      border:1px solid rgba(14,165,233,.25); background:rgba(2,132,199,.12);
+      gap:6px; padding:13px 8px 11px; border-radius:14px;
+      border:1px solid rgba(0,160,200,.3); background:rgba(0,120,160,.15);
       cursor:pointer; transition:all .15s; text-align:center;
     }
-    [data-theme="light"] .sCard { border-color:rgba(14,165,233,.3); background:rgba(14,165,233,.08); }
-    .sCard:active { transform:scale(.95); background:rgba(2,132,199,.28); }
-    .sCardIcon { font-size:24px; line-height:1; }
-    .sCardLabel { font-size:12px; font-weight:800; color:var(--text); letter-spacing:-.1px; margin-top:2px; }
-    [data-theme="light"] .sCardLabel { /* same */ }
-    .sCardSub { font-size:10px; font-weight:600; color:rgba(125,211,252,.6); margin-top:-2px; }
-    [data-theme="light"] .sCardSub { color:rgba(2,132,199,.55); }
+    [data-theme="light"] .sCard { border-color:rgba(0,160,200,.25); background:rgba(0,120,160,.08); }
+    .sCard:active { transform:scale(.95); background:rgba(0,140,180,.25); }
+    .sCardIcon { font-size:22px; line-height:1; }
+    .sCardLabel { font-size:11px; font-weight:900; color:#c8eaf8; letter-spacing:-.1px; }
+    [data-theme="light"] .sCardLabel { color:#1e3a5f; }
+    .sCardSub { font-size:9px; font-weight:600; color:rgba(150,210,235,.5); }
+    [data-theme="light"] .sCardSub { color:rgba(30,58,95,.5); }
 
     /* Subform panel that slides in after card tap */
     .sSubform { padding:8px 14px 12px; background:rgba(0,80,120,.1); border-bottom:1px solid rgba(0,140,180,.12); }
@@ -727,8 +727,8 @@
     }
     [data-theme="light"] .fModalBox { /* same as dark */ }
     .fModalHdr {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 16px 11px; border-bottom:1px solid rgba(0,140,180,.15);
+      display:flex; align-items:center; gap:10px;
+      padding:12px 14px; border-bottom:1px solid rgba(0,140,180,.15);
       font-family:'Space Grotesk',sans-serif; font-weight:900; font-size:14px; color:var(--text);
       letter-spacing:-.2px; position:sticky; top:0; z-index:2;
       background:linear-gradient(160deg,var(--bg-navy),var(--bg-navy2));
