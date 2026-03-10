@@ -205,8 +205,8 @@
     .weekStripWrap.expanded .weekStrip { display:none; }
     /* Handle de arraste — EMBAIXO */
     .stripHandle {
-      display:flex; align-items:center; justify-content:center; gap:8px;
-      padding:8px 0 10px; cursor:pointer; flex-shrink:0;
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+      padding:8px 14px 10px; cursor:pointer; flex-shrink:0;
     }
     .stripHandle::before {
       content:''; display:none;
@@ -236,6 +236,7 @@
     }
     [data-theme="light"] .stripHandleHint { color:rgba(30,45,90,.6); }
     .weekStripWrap.expanded .stripHandleHint { display:none; }
+    .weekStripWrap.expanded #feriadosShortcut { display:none; }
 
     /* Cabeçalho do mês expandido */
     .monthHdr {

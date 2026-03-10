@@ -179,9 +179,15 @@
       <div class="monthGrid" id="monthGrid"></div>
       <!-- Handle de arraste — EMBAIXO -->
       <div class="stripHandle" id="stripHandle">
-        <span class="stripHandleArrow" id="stripHandleArrow">🔽</span>
-        <span class="stripHandleHint">arraste para ver o mês</span>
-        <span class="stripHandleArrow" id="stripHandleArrow2">🔽</span>
+        <button id="feriadosShortcut" onclick="openFeriados()" style="background:none;border:none;padding:0;margin:0;cursor:pointer;display:flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;">
+          <span style="font-size:12px;line-height:1;pointer-events:none;">🎉</span>
+          <span class="stripHandleHint" style="pointer-events:none;">feriados · clique aqui</span>
+        </button>
+        <div style="display:flex;align-items:center;gap:6px;pointer-events:none;">
+          <span class="stripHandleArrow" id="stripHandleArrow">🔽</span>
+          <span class="stripHandleHint" id="stripHandleHintText">arraste para ver o mês</span>
+          <span class="stripHandleArrow" id="stripHandleArrow2">🔽</span>
+        </div>
       </div>
     </div>
 
@@ -708,6 +714,7 @@
         <div class="sb-item" id="sb-today" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(52,211,153,.1);">📅</div><span class="sb-label">Tarefas de hoje</span></div>
         <div class="sb-item" id="sb-folders" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,191,36,.1);">📁</div><span class="sb-label">Gerenciar pastas</span></div>
         <div class="sb-item" id="sb-feriados" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,113,133,.1);">🎉</div><span class="sb-label">Feriados</span></div>
+        <div class="sb-item" id="sb-docs" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(99,102,241,.12);">🪪</div><span class="sb-label">Documentos</span></div>
 
         <div class="sb-divider"></div>
         <div class="sb-section-label">Configurações</div>
@@ -811,6 +818,28 @@ function defaultState() {
     consultas: [],   // [{id,especialidade,paciente,data,hora,obs}]
     remedios: []     // [{id,nome,paciente,dose,qtd,hora,frequencia,freqCustom,ativo}]
   };
+}
+
+// ── Pastas fixas do sistema (não podem ser excluídas) ──
+const SYSTEM_IDS = ['pauta','_consultas','_remedios','_contas','_exames','_compras','_docs'];
+const SYSTEM_DEFAULTS = [
+  {id:'pauta',     name:'Pauta',            emoji:'📋'},
+  {id:'_consultas',name:'Consultas',        emoji:'🏥'},
+  {id:'_remedios', name:'Remédios',         emoji:'💊'},
+  {id:'_contas',   name:'Contas a Pagar',   emoji:'💳'},
+  {id:'_exames',   name:'Histórico de Exames', emoji:'🩺'},
+  {id:'_compras',  name:'Lista de Compras', emoji:'🛒'},
+  {id:'_docs',     name:'Documentos',       emoji:'🪪'},
+];
+
+function ensureSystemFolders(){
+  SYSTEM_DEFAULTS.forEach(def => {
+    if(!state.folders.find(f=>f.id===def.id)){
+      state.folders.push({id:def.id, name:def.name, emoji:def.emoji, parentId:null});
+    }
+    if(!state.folderOrder.includes(def.id)) state.folderOrder.push(def.id);
+    if(!state.tasks[def.id]) state.tasks[def.id]=[];
+  });
 }
 
 function save() {
@@ -1021,8 +1050,11 @@ function initStripExpand(){
     renderMonthGrid();
   }
 
-  // Clique no handle = toggle
-  handle.addEventListener('click',()=>toggle(!expanded));
+  // Clique no handle = toggle (exceto botão feriados)
+  handle.addEventListener('click',(e)=>{
+    if(e.target.closest('#feriadosShortcut')) return;
+    toggle(!expanded);
+  });
 
   // Swipe vertical em QUALQUER lugar da tela (fora de elementos de scroll)
   let _sy=0, _sx=0, _stripActive=false;
@@ -1183,7 +1215,8 @@ function renderFolders(){
   grid.innerHTML='';
   const byId=Object.fromEntries(state.folders.map(f=>[f.id,f]));
   // Ensure pauta is in folderOrder
-  if(!state.folderOrder.includes('pauta')) state.folderOrder.unshift('pauta');
+  // Ensure all system folders are in folderOrder
+  SYSTEM_IDS.forEach(id=>{ if(!state.folderOrder.includes(id)&&state.folders.find(f=>f.id===id)) state.folderOrder.push(id); });
   const order=(state.folderOrder||[]).filter((id,i,a)=>a.indexOf(id)===i&&byId[id]);
   // Add any folders not yet in order
   state.folders.forEach(f=>{if(!order.includes(f.id))order.push(f.id);});
@@ -1201,6 +1234,16 @@ function renderFolders(){
 let navStack = []; // pilha de navegação: 'home' | bucketId string
 
 function openBucket(id, _pushCurrent){
+  // Pastas especiais abrem seus próprios modais
+  const specialMap = {
+    '_consultas': ()=>openListaConsultas(),
+    '_remedios':  ()=>openListaRemedios(),
+    '_contas':    ()=>openContas(),
+    '_exames':    ()=>openExames(),
+    '_compras':   ()=>openCompras(),
+    '_docs':      ()=>openDocs(),
+  };
+  if(specialMap[id]){ specialMap[id](); return; }
   if (typeof _metrics !== 'undefined') _metrics.trackScreen('day');
   // push current state
   const push = _pushCurrent !== false;
@@ -2426,7 +2469,7 @@ function saveEditPasta(fid){
   showToast('✅ Pasta editada!');
 }
 function confirmDelPasta(fid){
-  if(fid==='pauta'){showToast('⚠️ Pasta Pauta não pode ser excluída.');return;}
+  if(SYSTEM_IDS.includes(fid)){showToast('⚠️ Esta pasta do sistema não pode ser excluída.');return;}
   state.folders=state.folders.filter(x=>x.id!==fid);
   state.folderOrder=state.folderOrder.filter(x=>x!==fid);
   delete state.tasks[fid];
@@ -2680,6 +2723,10 @@ function init(){
   document.getElementById('sb-remedio').addEventListener('click',()=>{ closeSidebar(); openRemedioModal(); });
   document.getElementById('sb-folders').addEventListener('click',()=>{ closeSidebar(); openFolderModal(); });
   document.getElementById('sb-feriados').addEventListener('click',()=>{ closeSidebar(); openFeriados(); });
+  document.getElementById('sb-docs').addEventListener('click',()=>{ closeSidebar(); openDocs(); });
+  document.getElementById('sb-contas') && document.getElementById('sb-contas').addEventListener('click',()=>{ closeSidebar(); openContas(); });
+  document.getElementById('sb-exames') && document.getElementById('sb-exames').addEventListener('click',()=>{ closeSidebar(); openExames(); });
+  document.getElementById('sb-compras') && document.getElementById('sb-compras').addEventListener('click',()=>{ closeSidebar(); openCompras(); });
   document.getElementById('sb-zap').addEventListener('click',()=>{ closeSidebar(); shareWhatsAppGlobal(); });
   document.getElementById('sb-backup').addEventListener('click',()=>{ closeSidebar(); doBackup(); });
   document.getElementById('sb-rWeek').addEventListener('click',()=>{ closeSidebar(); generateWeekReport(false); });
@@ -2965,6 +3012,14 @@ function init(){
     // Feriados
     const ferOv = document.getElementById('feriadosOv');
     if(ferOv){ ferOv.remove(); return; }
+    const docsOv = document.getElementById('docsOv');
+    if(docsOv){ docsOv.remove(); return; }
+    const contasOv = document.getElementById('contasOv');
+    if(contasOv){ contasOv.remove(); return; }
+    const examesOv = document.getElementById('examesOv');
+    if(examesOv){ examesOv.remove(); return; }
+    const comprasOv = document.getElementById('comprasOv');
+    if(comprasOv){ comprasOv.remove(); return; }
     // Viewer de relatório/backup
     const viewerOv = document.getElementById('inlineViewerOv');
     if(viewerOv){ viewerOv.remove(); return; }
@@ -3106,6 +3161,8 @@ function init(){
   // Migrate dateTasks when week changes
   checkWeekTransition();
   migrateDataTasksToWeek();
+  // Garante pastas fixas do sistema
+  ensureSystemFolders();
 
   // Verificação diária de pendências — abre tela obrigatória se houver pendentes do dia anterior
   checkDailyPending();
@@ -3434,6 +3491,536 @@ function autoBackup(){
   } catch(e){}
 }
 
+// ══ CONTAS A PAGAR ══
+function _getContas(){ try{ return JSON.parse(localStorage.getItem('agendaProMax_contas')||'[]'); }catch(e){ return []; } }
+function _saveContas(arr){ localStorage.setItem('agendaProMax_contas', JSON.stringify(arr)); }
+
+function openContas(){
+  const existing = document.getElementById('contasOv');
+  if(existing){ existing.remove(); return; }
+  _renderContasOv();
+}
+
+function _renderContasOv(){
+  const old = document.getElementById('contasOv');
+  if(old) old.remove();
+
+  const contas = _getContas();
+  const BG='linear-gradient(160deg,#021824,#04355a)';
+  const BDR='rgba(0,140,180,.18)';
+  const FIELD='rgba(0,80,120,.28)';
+  const TEXT='#e8f4ff';
+  const MUTED='rgba(180,220,240,.5)';
+  const ACC='#7dd3f0';
+  const ACCENT='#0ea5e9';
+
+  // Ordena: pendentes primeiro, depois pagas
+  const sorted = [...contas].sort((a,b)=>{
+    if(a.paga===b.paga) return (a.vencimento||31)-(b.vencimento||31);
+    return a.paga?1:-1;
+  });
+
+  function statusColor(c){
+    if(c.paga) return 'rgba(34,197,94,.8)';
+    const hoje = new Date().getDate();
+    const diff = (c.vencimento||31) - hoje;
+    if(diff<0) return '#f87171'; // vencida
+    if(diff<=3) return '#fb923c'; // próxima
+    return '#7dd3f0';
+  }
+  function statusLabel(c){
+    if(c.paga) return '✅ Paga';
+    const hoje=new Date().getDate(), diff=(c.vencimento||31)-hoje;
+    if(diff<0) return '🔴 Vencida';
+    if(diff===0) return '🟠 Vence hoje';
+    if(diff<=3) return `🟡 Vence em ${diff}d`;
+    return `Dia ${c.vencimento||'?'}`;
+  }
+
+  function cardH(c,i){
+    return `<div style="background:rgba(0,80,120,.22);border:1px solid rgba(0,140,180,.15);border-radius:14px;padding:13px 14px;margin-bottom:9px;${c.paga?'opacity:.55;':''}">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <span style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:800;color:${TEXT};flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(c.nome)}</span>
+            ${c.fixa?'<span style="font-size:9px;font-weight:700;background:rgba(139,92,246,.2);color:#c4b5fd;border:1px solid rgba(139,92,246,.3);border-radius:5px;padding:1px 5px;flex-shrink:0;">FIXA</span>':''}
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            ${c.valor?`<span style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:${TEXT};">R$ ${escapeHtml(c.valor)}</span>`:''}
+            <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${statusColor(c)};">${statusLabel(c)}</span>
+          </div>
+          ${c.obs?`<div style="font-size:11px;color:${MUTED};margin-top:4px;">${escapeHtml(c.obs)}</div>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+          <button class="cPagar" data-idx="${i}" style="background:${c.paga?'rgba(34,197,94,.12)':'rgba(34,197,94,.2)'};border:1px solid ${c.paga?'rgba(34,197,94,.2)':'rgba(34,197,94,.4)'};border-radius:8px;color:${c.paga?'rgba(34,197,94,.5)':'#4ade80'};font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="${c.paga?'Desfazer':'Marcar paga'}">${c.paga?'↩':'✓'}</button>
+          <button class="cEdit" data-idx="${i}" style="background:rgba(0,160,200,.15);border:1px solid rgba(0,160,200,.25);border-radius:8px;color:${ACC};font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✏️</button>
+          <button class="cDel" data-idx="${i}" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#f87171;font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const pendentes = contas.filter(c=>!c.paga).length;
+  const totalPendente = contas.filter(c=>!c.paga&&c.valor).reduce((s,c)=>s+parseFloat(String(c.valor).replace(',','.'))||0,0);
+
+  const ov = document.createElement('div');
+  ov.id = 'contasOv';
+  ov.style.cssText = `position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
+  ov.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="_contasBack" style="background:rgba(0,80,120,.4);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};">💳 Contas a Pagar</span>
+      </div>
+      <button id="_contasNew" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:9px 16px;cursor:pointer;">+ Nova</button>
+    </div>
+    ${pendentes>0?`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:rgba(0,80,120,.18);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${MUTED};">${pendentes} pendente${pendentes>1?'s':''}</span>
+      ${totalPendente>0?`<span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;color:#f87171;">Total: R$ ${totalPendente.toFixed(2).replace('.',',')}</span>`:''}
+    </div>`:''}
+    <div id="_contasBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
+      ${sorted.length===0?`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;"><div style="font-size:40px;margin-bottom:12px;">💳</div><div style="font-size:14px;font-weight:700;margin-bottom:6px;">Nenhuma conta cadastrada</div><div style="font-size:12px;opacity:.7;">Toque em + Nova para cadastrar</div></div>`:sorted.map((c,i)=>cardH(c,i)).join('')}
+    </div>
+
+    <!-- Formulário -->
+    <div id="_contasForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+        <button id="_cfBack" style="background:rgba(0,80,120,.4);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
+        <span id="_cfTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};">Nova Conta</span>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Nome da Conta *</div>
+        <input id="_cfNome" type="text" maxlength="60" placeholder="Ex: Aluguel, Luz, Internet, Cartão Nubank…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;outline:none;margin-bottom:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Valor (R$)</div>
+            <input id="_cfValor" type="text" inputmode="decimal" maxlength="12" placeholder="0,00" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;outline:none;">
+          </div>
+          <div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Dia Vencimento</div>
+            <input id="_cfVenc" type="number" min="1" max="31" placeholder="Ex: 10" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;outline:none;">
+          </div>
+        </div>
+        <label style="display:flex;align-items:center;gap:12px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.22);border-radius:12px;padding:13px 14px;margin-bottom:14px;cursor:pointer;">
+          <input type="checkbox" id="_cfFixa" style="width:18px;height:18px;accent-color:#a78bfa;cursor:pointer;">
+          <div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;color:#c4b5fd;">Conta Fixa</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:rgba(196,181,253,.6);margin-top:2px;">Repete todo mês — lembrete automático</div>
+          </div>
+        </label>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Observação</div>
+        <textarea id="_cfObs" rows="2" maxlength="200" placeholder="Opcional — banco, número da conta, site…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;resize:none;line-height:1.5;margin-bottom:22px;"></textarea>
+        <button id="_cfSave" style="width:100%;padding:14px;border-radius:13px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;cursor:pointer;">✔ Salvar</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(ov);
+  let _cEditIdx=null;
+
+  function showCForm(idx){
+    _cEditIdx=idx;
+    const f=ov.querySelector('#_contasForm'); f.style.display='flex';
+    ov.querySelector('#_cfTitle').textContent = idx!==null?'Editar Conta':'Nova Conta';
+    const arr=_getContas();
+    if(idx!==null){ const c=arr[idx]; ov.querySelector('#_cfNome').value=c.nome||''; ov.querySelector('#_cfValor').value=c.valor||''; ov.querySelector('#_cfVenc').value=c.vencimento||''; ov.querySelector('#_cfFixa').checked=!!c.fixa; ov.querySelector('#_cfObs').value=c.obs||''; }
+    else { ov.querySelector('#_cfNome').value=''; ov.querySelector('#_cfValor').value=''; ov.querySelector('#_cfVenc').value=''; ov.querySelector('#_cfFixa').checked=false; ov.querySelector('#_cfObs').value=''; }
+    setTimeout(()=>ov.querySelector('#_cfNome').focus(),120);
+  }
+  ov.querySelector('#_contasBack').onclick=()=>ov.remove();
+  ov.querySelector('#_contasNew').onclick=()=>showCForm(null);
+  ov.querySelector('#_cfBack').onclick=()=>{ ov.querySelector('#_contasForm').style.display='none'; };
+  ov.querySelector('#_cfSave').onclick=()=>{
+    const nome=ov.querySelector('#_cfNome').value.trim();
+    if(!nome){showToast('⚠️ Informe o nome da conta!');return;}
+    const arr=_getContas();
+    const entry={id:Date.now(),nome,valor:ov.querySelector('#_cfValor').value.trim(),vencimento:parseInt(ov.querySelector('#_cfVenc').value)||null,fixa:ov.querySelector('#_cfFixa').checked,obs:ov.querySelector('#_cfObs').value.trim(),paga:false};
+    if(_cEditIdx!==null) arr[_cEditIdx]={...arr[_cEditIdx],...entry,paga:arr[_cEditIdx].paga};
+    else arr.push(entry);
+    _saveContas(arr); ov.querySelector('#_contasForm').style.display='none'; _renderContasOv();
+  };
+  ov.querySelector('#_contasBody').addEventListener('click',e=>{
+    const pBtn=e.target.closest('.cPagar'), eBtn=e.target.closest('.cEdit'), dBtn=e.target.closest('.cDel');
+    const arr=_getContas();
+    const sorted2=[...arr].sort((a,b)=>{if(a.paga===b.paga)return(a.vencimento||31)-(b.vencimento||31);return a.paga?1:-1;});
+    if(pBtn){ const i=parseInt(pBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id); arr[real].paga=!arr[real].paga; _saveContas(arr); _renderContasOv(); }
+    else if(eBtn){ const i=parseInt(eBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id); showCForm(real); }
+    else if(dBtn){ const i=parseInt(dBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id); if(!confirm(`Excluir "${arr[real].nome}"?`))return; arr.splice(real,1); _saveContas(arr); _renderContasOv(); }
+  });
+}
+
+// ══ HISTÓRICO DE EXAMES ══
+function _getExames(){ try{ return JSON.parse(localStorage.getItem('agendaProMax_exames')||'[]'); }catch(e){ return []; } }
+function _saveExames(arr){ localStorage.setItem('agendaProMax_exames', JSON.stringify(arr)); }
+
+function openExames(){
+  const existing=document.getElementById('examesOv');
+  if(existing){existing.remove();return;}
+  _renderExamesOv();
+}
+
+function _renderExamesOv(){
+  const old=document.getElementById('examesOv'); if(old) old.remove();
+  const exames=_getExames().sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  const BG='linear-gradient(160deg,#021824,#04355a)';
+  const BDR='rgba(0,140,180,.18)'; const FIELD='rgba(0,80,120,.28)';
+  const TEXT='#e8f4ff'; const MUTED='rgba(180,220,240,.5)'; const ACC='#7dd3f0'; const ACCENT='#0ea5e9';
+
+  function cardH(e,i){
+    const dataFmt=e.data?e.data.split('-').reverse().join('/'):'—';
+    const fotos=e.fotos||[];
+    return `<div style="background:rgba(0,80,120,.22);border:1px solid rgba(0,140,180,.15);border-radius:14px;padding:13px 14px;margin-bottom:9px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:800;color:${TEXT};margin-bottom:3px;">${escapeHtml(e.tipo||'—')}</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:${MUTED};margin-bottom:4px;">📅 ${dataFmt}${e.paciente?' · 👤 '+escapeHtml(e.paciente):''}</div>
+          ${e.resultado?`<div style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:rgba(180,220,240,.8);line-height:1.4;margin-bottom:6px;">${escapeHtml(e.resultado)}</div>`:''}
+          ${fotos.length>0?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">${fotos.map((f,fi)=>`<img src="${f}" data-exidx="${i}" data-foidx="${fi}" class="exFoto" style="width:52px;height:52px;object-fit:cover;border-radius:8px;border:1px solid rgba(0,160,200,.3);cursor:pointer;">`).join('')}</div>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+          <button class="exEdit" data-idx="${i}" style="background:rgba(0,160,200,.15);border:1px solid rgba(0,160,200,.25);border-radius:8px;color:${ACC};font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✏️</button>
+          <button class="exDel" data-idx="${i}" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#f87171;font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const ov=document.createElement('div'); ov.id='examesOv';
+  ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
+  ov.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="_exBack" style="background:rgba(0,80,120,.4);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};">🩺 Histórico de Exames</span>
+      </div>
+      <button id="_exNew" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:9px 16px;cursor:pointer;">+ Novo</button>
+    </div>
+    <div id="_exBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
+      ${exames.length===0?`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;"><div style="font-size:40px;margin-bottom:12px;">🩺</div><div style="font-size:14px;font-weight:700;margin-bottom:6px;">Nenhum exame cadastrado</div><div style="font-size:12px;opacity:.7;">Toque em + Novo para cadastrar</div></div>`:exames.map((e,i)=>cardH(e,i)).join('')}
+    </div>
+
+    <!-- Formulário -->
+    <div id="_exForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+        <button id="_efBack" style="background:rgba(0,80,120,.4);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
+        <span id="_efTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};">Novo Exame</span>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Tipo do Exame *</div>
+        <input id="_efTipo" type="text" maxlength="80" placeholder="Ex: Hemograma, Raio-X, Ultrassom, Glicemia…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;outline:none;margin-bottom:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Data</div>
+            <input id="_efData" type="date" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;">
+          </div>
+          <div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Paciente</div>
+            <input id="_efPac" type="text" maxlength="50" placeholder="Nome…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;">
+          </div>
+        </div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Resultado / Observações</div>
+        <textarea id="_efResult" rows="3" maxlength="500" placeholder="Resumo do resultado, observações do médico…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;resize:none;line-height:1.5;margin-bottom:16px;"></textarea>
+
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:8px;">📷 Fotos do Laudo / Exame</div>
+        <div id="_efFotoThumbs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
+        <input type="file" id="_efFotoCamI" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" id="_efFotoGalI" accept="image/*" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:22px;">
+          <button id="_efFotoCamBtn" type="button" style="padding:9px 4px;border-radius:11px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;"><span style="font-size:18px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span></button>
+          <button id="_efFotoGalBtn" type="button" style="padding:9px 4px;border-radius:11px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;"><span style="font-size:18px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span></button>
+          <button id="_efSave" type="button" style="padding:9px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;"><span style="font-size:18px;line-height:1;display:block;text-align:center;">✔</span><span id="_efSaveLbl" style="line-height:1;display:block;text-align:center;">Salvar</span></button>
+        </div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(ov);
+  let _eEditIdx=null, _efFotos=[];
+
+  function renderFotoThumbs(){
+    const box=ov.querySelector('#_efFotoThumbs');
+    box.innerHTML=_efFotos.map((f,i)=>
+      `<div style="position:relative;width:60px;height:60px;flex-shrink:0;">
+        <img src="${f}" style="width:60px;height:60px;object-fit:cover;border-radius:9px;border:1px solid rgba(0,160,200,.3);">
+        <button data-fi="${i}" class="efDelFoto" style="position:absolute;top:-5px;right:-5px;background:#ff3b3b;border:none;border-radius:50%;width:18px;height:18px;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
+      </div>`).join('');
+    box.querySelectorAll('.efDelFoto').forEach(b=>b.addEventListener('click',()=>{ _efFotos.splice(parseInt(b.dataset.fi),1); renderFotoThumbs(); }));
+  }
+
+  function showEForm(idx){
+    _eEditIdx=idx; _efFotos=[];
+    const f=ov.querySelector('#_exForm'); f.style.display='flex';
+    ov.querySelector('#_efTitle').textContent=idx!==null?'Editar Exame':'Novo Exame';
+    const arr=_getExames().sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+    if(idx!==null){ const e=arr[idx]; ov.querySelector('#_efTipo').value=e.tipo||''; ov.querySelector('#_efData').value=e.data||''; ov.querySelector('#_efPac').value=e.paciente||''; ov.querySelector('#_efResult').value=e.resultado||''; _efFotos=[...(e.fotos||[])]; renderFotoThumbs(); }
+    else { ov.querySelector('#_efTipo').value=''; ov.querySelector('#_efData').value=new Date().toISOString().split('T')[0]; ov.querySelector('#_efPac').value=''; ov.querySelector('#_efResult').value=''; renderFotoThumbs(); }
+    setTimeout(()=>ov.querySelector('#_efTipo').focus(),120);
+  }
+
+  function addFoto(file){ if(!file)return; resizeImage(file,900,0.8,url=>{ _efFotos.push(url); renderFotoThumbs(); }); }
+
+  ov.querySelector('#_exBack').onclick=()=>ov.remove();
+  ov.querySelector('#_exNew').onclick=()=>showEForm(null);
+  ov.querySelector('#_efBack').onclick=()=>{ ov.querySelector('#_exForm').style.display='none'; };
+  ov.querySelector('#_efFotoCamBtn').onclick=()=>ov.querySelector('#_efFotoCamI').click();
+  ov.querySelector('#_efFotoGalBtn').onclick=()=>ov.querySelector('#_efFotoGalI').click();
+  ov.querySelector('#_efFotoCamI').addEventListener('change',function(){ addFoto(this.files[0]); });
+  ov.querySelector('#_efFotoGalI').addEventListener('change',function(){ addFoto(this.files[0]); });
+  ov.querySelector('#_efSave').onclick=()=>{
+    const tipo=ov.querySelector('#_efTipo').value.trim();
+    if(!tipo){showToast('⚠️ Informe o tipo de exame!');return;}
+    const arr=_getExames();
+    const entry={id:Date.now(),tipo,data:ov.querySelector('#_efData').value,paciente:ov.querySelector('#_efPac').value.trim(),resultado:ov.querySelector('#_efResult').value.trim(),fotos:[..._efFotos]};
+    if(_eEditIdx!==null){ const sorted2=arr.sort((a,b)=>(b.data||'').localeCompare(a.data||'')); const realIdx=arr.findIndex(x=>x.id===sorted2[_eEditIdx].id); arr[realIdx]={...arr[realIdx],...entry}; }
+    else arr.push(entry);
+    _saveExames(arr); ov.querySelector('#_exForm').style.display='none'; _renderExamesOv();
+  };
+  ov.querySelector('#_exBody').addEventListener('click',e=>{
+    const eBt=e.target.closest('.exEdit'), dBt=e.target.closest('.exDel'), fBt=e.target.closest('.exFoto');
+    const arr=_getExames().sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+    if(eBt) showEForm(parseInt(eBt.dataset.idx));
+    else if(dBt){ const i=parseInt(dBt.dataset.idx); if(!confirm(`Excluir "${arr[i].tipo}"?`))return; const all=_getExames(); const ri=all.findIndex(x=>x.id===arr[i].id); all.splice(ri,1); _saveExames(all); _renderExamesOv(); }
+    else if(fBt){ const foto=arr[parseInt(fBt.dataset.exidx)]?.fotos?.[parseInt(fBt.dataset.foidx)]; if(foto){ const fov=document.createElement('div'); fov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:999999;display:flex;align-items:center;justify-content:center;padding:16px;'; fov.innerHTML=`<img src="${foto}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:10px;"><button style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:18px;cursor:pointer;">✕</button>`; fov.querySelector('button').onclick=()=>fov.remove(); fov.onclick=e2=>{if(e2.target===fov)fov.remove();}; document.body.appendChild(fov); } }
+  });
+}
+
+// ══ LISTA DE COMPRAS ══
+function _getCompras(){ try{ return JSON.parse(localStorage.getItem('agendaProMax_compras')||'[]'); }catch(e){ return []; } }
+function _saveCompras(arr){ localStorage.setItem('agendaProMax_compras', JSON.stringify(arr)); }
+
+function openCompras(){
+  const existing=document.getElementById('comprasOv');
+  if(existing){existing.remove();return;}
+  _renderComprasOv();
+}
+
+function _renderComprasOv(){
+  const old=document.getElementById('comprasOv'); if(old) old.remove();
+  const items=_getCompras();
+  const BG='linear-gradient(160deg,#021824,#04355a)';
+  const BDR='rgba(0,140,180,.18)'; const TEXT='#e8f4ff'; const MUTED='rgba(180,220,240,.5)'; const ACC='#7dd3f0';
+
+  const pendentes=items.filter(x=>!x.checked);
+  const marcados=items.filter(x=>x.checked);
+
+  function itemRow(it,i){
+    return `<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(0,140,180,.1);">
+      <button class="cpCheck" data-idx="${i}" style="flex-shrink:0;width:26px;height:26px;border-radius:7px;border:2px solid ${it.checked?'rgba(34,197,94,.5)':'rgba(0,160,200,.4)'};background:${it.checked?'rgba(34,197,94,.2)':'transparent'};cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;">${it.checked?'✓':''}</button>
+      <span style="flex:1;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;color:${it.checked?MUTED:TEXT};${it.checked?'text-decoration:line-through;':''}">${escapeHtml(it.nome)}</span>
+      ${it.qtd?`<span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${MUTED};flex-shrink:0;">${escapeHtml(it.qtd)}</span>`:''}
+      <button class="cpDel" data-idx="${i}" style="flex-shrink:0;background:none;border:none;color:rgba(248,113,113,.5);font-size:16px;cursor:pointer;padding:4px;">✕</button>
+    </div>`;
+  }
+
+  const totalItems=items.length, marcadosN=marcados.length;
+
+  const ov=document.createElement('div'); ov.id='comprasOv';
+  ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
+  ov.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="_cpBack" style="background:rgba(0,80,120,.4);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};">🛒 Lista de Compras</span>
+      </div>
+      ${marcadosN>0?`<button id="_cpClearDone" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:10px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:7px 11px;cursor:pointer;">Limpar marcados</button>`:''}
+    </div>
+    ${totalItems>0?`<div style="padding:8px 16px;background:rgba(0,80,120,.15);border-bottom:1px solid ${BDR};flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:${MUTED};">${pendentes.length} item${pendentes.length!==1?'ns':''} restante${pendentes.length!==1?'s':''}</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:rgba(34,197,94,.7);">${marcadosN}/${totalItems} marcados</span>
+    </div>`:''}
+    <div id="_cpBody" style="flex:1;overflow-y:auto;padding:0 16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
+      ${items.length===0?`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;"><div style="font-size:40px;margin-bottom:12px;">🛒</div><div style="font-size:14px;font-weight:700;margin-bottom:6px;">Lista vazia</div><div style="font-size:12px;opacity:.7;">Adicione itens abaixo</div></div>`:items.map((it,i)=>itemRow(it,i)).join('')}
+    </div>
+
+    <!-- Input rápido fixo no rodapé -->
+    <div style="padding:12px 16px;background:rgba(0,80,120,.3);border-top:1px solid ${BDR};display:flex;gap:8px;flex-shrink:0;">
+      <input id="_cpInput" type="text" maxlength="80" placeholder="Adicionar item…" style="flex:1;padding:11px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:rgba(0,80,120,.28);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;outline:none;">
+      <input id="_cpQtd" type="text" maxlength="10" placeholder="Qtd" style="width:60px;padding:11px 8px;border-radius:12px;border:1.5px solid rgba(0,140,180,.2);background:rgba(0,80,120,.18);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;outline:none;text-align:center;">
+      <button id="_cpAdd" style="background:#0ea5e9;border:none;border-radius:12px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;padding:0 16px;cursor:pointer;flex-shrink:0;">+</button>
+    </div>`;
+
+  document.body.appendChild(ov);
+
+  function addItem(){
+    const nome=ov.querySelector('#_cpInput').value.trim();
+    if(!nome)return;
+    const qtd=ov.querySelector('#_cpQtd').value.trim();
+    const arr=_getCompras(); arr.push({id:Date.now(),nome,qtd,checked:false});
+    _saveCompras(arr); _renderComprasOv();
+  }
+
+  ov.querySelector('#_cpBack').onclick=()=>ov.remove();
+  ov.querySelector('#_cpAdd').onclick=addItem;
+  ov.querySelector('#_cpInput').addEventListener('keydown',e=>{if(e.key==='Enter')addItem();});
+  if(ov.querySelector('#_cpClearDone')) ov.querySelector('#_cpClearDone').onclick=()=>{ _saveCompras(_getCompras().filter(x=>!x.checked)); _renderComprasOv(); };
+
+  ov.querySelector('#_cpBody').addEventListener('click',e=>{
+    const ck=e.target.closest('.cpCheck'), dl=e.target.closest('.cpDel');
+    const arr=_getCompras();
+    if(ck){ arr[parseInt(ck.dataset.idx)].checked=!arr[parseInt(ck.dataset.idx)].checked; _saveCompras(arr); _renderComprasOv(); }
+    else if(dl){ arr.splice(parseInt(dl.dataset.idx),1); _saveCompras(arr); _renderComprasOv(); }
+  });
+}
+
+// ══ DOCUMENTOS ══
+function _getDocs(){ try{ return JSON.parse(localStorage.getItem('agendaProMax_docs')||'[]'); }catch(e){ return []; } }
+function _saveDocs(arr){ localStorage.setItem('agendaProMax_docs', JSON.stringify(arr)); }
+
+function openDocs(){
+  const existing = document.getElementById('docsOv');
+  if(existing){ existing.remove(); return; }
+  _renderDocsOv();
+}
+
+function _renderDocsOv(){
+  const old = document.getElementById('docsOv');
+  if(old) old.remove();
+
+  const docs = _getDocs();
+  const BG   = 'linear-gradient(160deg,#021824,#04355a)';
+  const BDR  = 'rgba(0,140,180,.18)';
+  const FIELD= 'rgba(0,80,120,.28)';
+  const TEXT = '#e8f4ff';
+  const MUTED= 'rgba(180,220,240,.5)';
+  const ACC  = '#7dd3f0';
+  const ACCENT_SOLID = '#0ea5e9';
+
+  // ── Cartões da lista ──
+  function cardHTML(d, i){
+    return `
+    <div class="docCard" data-idx="${i}" style="background:rgba(0,80,120,.22);border:1px solid rgba(0,140,180,.15);border-radius:14px;padding:14px 15px;margin-bottom:10px;position:relative;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;">${escapeHtml(d.nome||'—')}</div>
+          <div class="docNum" style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:900;color:${TEXT};letter-spacing:.04em;word-break:break-all;cursor:pointer;user-select:all;" title="Toque para selecionar">${escapeHtml(d.numero||'—')}</div>
+          ${d.obs ? `<div style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:${MUTED};margin-top:5px;line-height:1.4;">${escapeHtml(d.obs)}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button class="docEdit" data-idx="${i}" style="background:rgba(0,160,200,.15);border:1px solid rgba(0,160,200,.25);border-radius:8px;color:${ACC};font-size:14px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Editar">✏️</button>
+          <button class="docDel" data-idx="${i}" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#f87171;font-size:14px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Excluir">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const listaHTML = docs.length === 0
+    ? `<div style="text-align:center;padding:48px 20px 32px;color:${MUTED};font-family:'Space Grotesk',sans-serif;">
+        <div style="font-size:40px;margin-bottom:12px;">🪪</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:6px;">Nenhum documento salvo</div>
+        <div style="font-size:12px;opacity:.7;">Toque em <b>+ Novo</b> para cadastrar</div>
+       </div>`
+    : docs.map((d,i)=>cardHTML(d,i)).join('');
+
+  const ov = document.createElement('div');
+  ov.id = 'docsOv';
+  ov.style.cssText = `position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
+  ov.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="_docsBack" style="background:rgba(0,80,120,.4);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};letter-spacing:-.2px;">🪪 Documentos</span>
+      </div>
+      <button id="_docsNew" style="background:${ACCENT_SOLID};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:9px 16px;cursor:pointer;">+ Novo</button>
+    </div>
+    <div id="_docsBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
+      ${listaHTML}
+    </div>
+
+    <!-- ── Formulário (oculto) ── -->
+    <div id="_docsForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button id="_docsFormBack" style="background:rgba(0,80,120,.4);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
+          <span id="_docsFormTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};">Novo Documento</span>
+        </div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
+
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Nome do Documento *</div>
+        <input id="_dNome" type="text" maxlength="60"
+          placeholder="Ex: Senha Wi-Fi, Cartão SUS, Email, CPF, RG…"
+          style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:rgba(0,80,120,.28);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;outline:none;margin-bottom:16px;">
+
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Número / Código *</div>
+        <input id="_dNum" type="text" maxlength="120"
+          placeholder="Ex: 000.000.000-00, 192.168.0.1, senha123..."
+          style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:rgba(0,80,120,.28);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;outline:none;letter-spacing:.04em;margin-bottom:16px;">
+
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Observação</div>
+        <textarea id="_dObs" rows="3" maxlength="300"
+          placeholder="Opcional — Ex: vence em dez/2027, banco Itaú, conta corrente..."
+          style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:rgba(0,80,120,.28);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:500;outline:none;resize:none;line-height:1.5;margin-bottom:22px;"></textarea>
+
+        <button id="_dSave" style="width:100%;padding:14px;border-radius:13px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:-.2px;">✔ Salvar</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(ov);
+
+  // ── Navegação ──
+  let _editIdx = null;
+
+  function showForm(editIdx){
+    _editIdx = editIdx;
+    const form = ov.querySelector('#_docsForm');
+    form.style.display = 'flex';
+    const docs2 = _getDocs();
+    if(editIdx !== null){
+      const d = docs2[editIdx];
+      ov.querySelector('#_docsFormTitle').textContent = 'Editar Documento';
+      ov.querySelector('#_dNome').value = d.nome || '';
+      ov.querySelector('#_dNum').value  = d.numero || '';
+      ov.querySelector('#_dObs').value  = d.obs || '';
+    } else {
+      ov.querySelector('#_docsFormTitle').textContent = 'Novo Documento';
+      ov.querySelector('#_dNome').value = '';
+      ov.querySelector('#_dNum').value  = '';
+      ov.querySelector('#_dObs').value  = '';
+    }
+    setTimeout(()=>ov.querySelector('#_dNome').focus(), 120);
+  }
+
+  function hideForm(){
+    ov.querySelector('#_docsForm').style.display = 'none';
+    _editIdx = null;
+  }
+
+  ov.querySelector('#_docsBack').onclick    = () => ov.remove();
+  ov.querySelector('#_docsNew').onclick     = () => showForm(null);
+  ov.querySelector('#_docsFormBack').onclick= () => hideForm();
+
+  // Salvar
+  ov.querySelector('#_dSave').onclick = () => {
+    const nome   = ov.querySelector('#_dNome').value.trim();
+    const numero = ov.querySelector('#_dNum').value.trim();
+    const obs    = ov.querySelector('#_dObs').value.trim();
+    if(!nome || !numero){ showToast('⚠️ Preencha nome e número!'); return; }
+    const arr = _getDocs();
+    const entry = { id: Date.now(), nome, numero, obs };
+    if(_editIdx !== null) arr[_editIdx] = {...arr[_editIdx], ...entry};
+    else arr.push(entry);
+    _saveDocs(arr);
+    hideForm();
+    _renderDocsOv(); // re-render lista
+  };
+
+  // Editar / Excluir via delegação
+  ov.querySelector('#_docsBody').addEventListener('click', e => {
+    const editBtn = e.target.closest('.docEdit');
+    const delBtn  = e.target.closest('.docDel');
+    if(editBtn){ showForm(parseInt(editBtn.dataset.idx)); return; }
+    if(delBtn){
+      const idx = parseInt(delBtn.dataset.idx);
+      const arr = _getDocs();
+      const nome = arr[idx]?.nome || 'este documento';
+      if(!confirm(`Excluir "${nome}"?`)) return;
+      arr.splice(idx,1); _saveDocs(arr); _renderDocsOv();
+      return;
+    }
+  });
+}
+
+// helper
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
 // ══ FERIADOS ══
 function openFeriados(){
   const existing = document.getElementById('feriadosOv');
@@ -3638,7 +4225,7 @@ function populateFolderSelect(containerId, mode){
         document.getElementById('fEditForm').classList.remove('hidden');
         document.getElementById('fInputEditName').focus();
       } else if(mode==='del'){
-        if(f.id==='pauta'){showToast('⚠️ A pasta Pauta não pode ser excluída.');return;}
+        if(SYSTEM_IDS.includes(f.id)){showToast('⚠️ Esta pasta do sistema não pode ser excluída.');return;}
         const ov2=document.createElement('div');
         ov2.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:99998;display:flex;align-items:center;justify-content:center;padding:24px';
         ov2.innerHTML=`<div style="background:var(--bg1);border:1px solid var(--cardBorder);border-radius:20px;padding:26px 22px;max-width:300px;width:100%;font-family:Plus Jakarta Sans,sans-serif;text-align:center">
@@ -3790,7 +4377,7 @@ function initFolderModal(){
     openSubScreen('🗑️ Excluir — Qual pasta?',
       buildFolderPickHtml('_spickDel', true),
       ()=>initFolderPickHandlers('_spickDel', (f)=>{
-        if(f.id==='pauta'){showToast('⚠️ A pasta Pauta não pode ser excluída.');return;}
+        if(SYSTEM_IDS.includes(f.id)){showToast('⚠️ Esta pasta do sistema não pode ser excluída.');return;}
         openSubScreen('🗑️ Confirmar exclusão',
           `<div style="text-align:center;padding:8px 0 20px">
              <div style="font-size:40px;margin-bottom:12px">🗑️</div>
@@ -4284,6 +4871,13 @@ function exportarDados() {
         const rawPhotos = localStorage.getItem('agendaProMax_photos');
         if (rawPhotos) exportData._photos = JSON.parse(rawPhotos);
       } catch(e) {}
+      try {
+        const rawDocs = localStorage.getItem('agendaProMax_docs');
+        if (rawDocs) exportData._docs = JSON.parse(rawDocs);
+      } catch(e) {}
+      try { const r=localStorage.getItem('agendaProMax_contas'); if(r) exportData._contas=JSON.parse(r); }catch(e){}
+      try { const r=localStorage.getItem('agendaProMax_exames'); if(r) exportData._exames=JSON.parse(r); }catch(e){}
+      try { const r=localStorage.getItem('agendaProMax_compras'); if(r) exportData._compras=JSON.parse(r); }catch(e){}
       exportData._exportedAt = new Date().toISOString();
       exportData._appVersion  = typeof APP_DATA_VERSION !== 'undefined' ? APP_DATA_VERSION : 1;
 
@@ -4341,6 +4935,14 @@ function importarDados() {
           } catch(e) {}
           delete data._photos;
         }
+        // Restaurar documentos
+        if (data._docs) {
+          try { localStorage.setItem('agendaProMax_docs', JSON.stringify(data._docs)); }catch(e){}
+          delete data._docs;
+        }
+        if (data._contas) { try{localStorage.setItem('agendaProMax_contas',JSON.stringify(data._contas));}catch(e){} delete data._contas; }
+        if (data._exames) { try{localStorage.setItem('agendaProMax_exames',JSON.stringify(data._exames));}catch(e){} delete data._exames; }
+        if (data._compras){ try{localStorage.setItem('agendaProMax_compras',JSON.stringify(data._compras));}catch(e){} delete data._compras; }
         delete data._exportedAt;
         delete data._appVersion;
 
