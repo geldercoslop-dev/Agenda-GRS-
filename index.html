@@ -1328,6 +1328,8 @@ function openBucket(id, _pushCurrent){
   if(push){
     if(currentView==='home') navStack.push('home');
     else if(currentBucket) navStack.push(currentBucket);
+    // Sincroniza o history do browser com a profundidade de navegação do app
+    if(typeof window._navPush === 'function') window._navPush();
   }
   currentBucket=id; currentView='day';
   // Show day badge (always visible in header right)
@@ -3044,35 +3046,106 @@ function init(){
 
   // ── Botão voltar Android ──
   (function(){
-    function reporSentinela(){ setTimeout(function(){ history.pushState({app:'sentinel'},''); }, 0); }
+    // Cada vez que abrimos uma tela/pasta, empurramos 1 entry no history.
+    // Cada vez que fechamos, o popstate é disparado naturalmente — 1:1.
+    // Isso garante que o número de "voltar" disponíveis sempre bate com a profundidade real.
 
+    // Entry base: nunca será consumida pelo app (representa "sair do app")
     history.replaceState({app:'base'},'');
-    history.pushState({app:'sentinel'},'');
+    // Entry inicial: representa a tela Home
+    history.pushState({app:'screen', depth:0},'');
 
-    window.addEventListener('popstate', function(){
-      // Overlays — fecha e repõe sentinela
-      if(document.getElementById('sidebar')?.classList.contains('open')){ closeSidebar(); reporSentinela(); return; }
-      if(document.getElementById('subScreenOverlay')?.classList.contains('show')){ goSubBack(); reporSentinela(); return; }
+    // Contador de profundidade para rastrear quantas entries do history o app controla
+    let _histDepth = 1; // começa em 1 (a entry da home)
+
+    // Empurra uma nova entry no history (chame ao abrir qualquer tela/pasta/overlay)
+    window._navPush = function(){
+      _histDepth++;
+      history.pushState({app:'screen', depth:_histDepth},'');
+    };
+
+    // Remove uma entry (chame ao fechar tela sem ação do usuário, ex: botão X de modal)
+    window._navPop = function(){
+      if(_histDepth > 1){
+        _histDepth--;
+        history.go(-1);
+      }
+    };
+
+    window.addEventListener('popstate', function(e){
+      // Ao receber popstate, decrementamos a profundidade
+      if(_histDepth > 1) _histDepth--;
+
+      // Overlays — fecha e empurra de volta para manter o stack correto
+      if(document.getElementById('sidebar')?.classList.contains('open')){
+        closeSidebar();
+        // Repõe a entry que foi consumida pelo popstate
+        _histDepth++;
+        history.pushState({app:'screen', depth:_histDepth},'');
+        return;
+      }
+      if(document.getElementById('subScreenOverlay')?.classList.contains('show')){
+        goSubBack();
+        _histDepth++;
+        history.pushState({app:'screen', depth:_histDepth},'');
+        return;
+      }
       const manualOv=document.getElementById('manualOverlay');
-      if(manualOv?.style.display==='flex'){ manualOv.style.display='none'; if(currentView==='home')_setFooter(true); reporSentinela(); return; }
-      if(document.getElementById('sModalOverlay')?.classList.contains('show')){ closeSettings(); reporSentinela(); return; }
-      if(document.getElementById('fModalOverlay')?.classList.contains('show')){ document.getElementById('fModalOverlay').classList.remove('show'); reporSentinela(); return; }
-      if(document.getElementById('calModalOverlay')?.classList.contains('show')){ closeCalendarModal(); reporSentinela(); return; }
-
-      const namedOvs=['watermarkTipOv','photoFullscreenOv','photoGalleryOv','consultaFormOv','remedioFormOv','listaConsultasOv','listaRemediosOv','historicoPacienteOv','feriadosOv','docsOv','contasOv','examesOv','mercadoOv','inlineViewerOv'];
-      for(const oid of namedOvs){ const el=document.getElementById(oid); if(el){ el.remove(); reporSentinela(); return; } }
-      const dynFixed=[...document.querySelectorAll('body > div[style*="position:fixed"]')].reverse();
-      for(const ov of dynFixed){ if(!ov.id){ ov.remove(); reporSentinela(); return; } }
-
-      // Navegação entre pastas
-      if(currentView==='day'){
-        navigateBack();
-        reporSentinela();
+      if(manualOv?.style.display==='flex'){
+        manualOv.style.display='none';
+        if(currentView==='home')_setFooter(true);
+        _histDepth++;
+        history.pushState({app:'screen', depth:_histDepth},'');
+        return;
+      }
+      if(document.getElementById('sModalOverlay')?.classList.contains('show')){
+        closeSettings();
+        _histDepth++;
+        history.pushState({app:'screen', depth:_histDepth},'');
+        return;
+      }
+      if(document.getElementById('fModalOverlay')?.classList.contains('show')){
+        document.getElementById('fModalOverlay').classList.remove('show');
+        _histDepth++;
+        history.pushState({app:'screen', depth:_histDepth},'');
+        return;
+      }
+      if(document.getElementById('calModalOverlay')?.classList.contains('show')){
+        closeCalendarModal();
+        _histDepth++;
+        history.pushState({app:'screen', depth:_histDepth},'');
         return;
       }
 
-      // Home — só repõe
-      reporSentinela();
+      const namedOvs=['watermarkTipOv','photoFullscreenOv','photoGalleryOv','consultaFormOv','remedioFormOv','listaConsultasOv','listaRemediosOv','historicoPacienteOv','feriadosOv','docsOv','contasOv','examesOv','mercadoOv','inlineViewerOv'];
+      for(const oid of namedOvs){
+        const el=document.getElementById(oid);
+        if(el){
+          el.remove();
+          _histDepth++;
+          history.pushState({app:'screen', depth:_histDepth},'');
+          return;
+        }
+      }
+      const dynFixed=[...document.querySelectorAll('body > div[style*="position:fixed"]')].reverse();
+      for(const ov of dynFixed){
+        if(!ov.id){
+          ov.remove();
+          _histDepth++;
+          history.pushState({app:'screen', depth:_histDepth},'');
+          return;
+        }
+      }
+
+      // Navegação entre pastas — o popstate JÁ consumiu 1 entry, não repõe
+      if(currentView==='day'){
+        navigateBack();
+        // Após voltar, o _histDepth já foi decrementado acima — não repõe
+        return;
+      }
+
+      // Home — já decrementamos acima. Se chegou aqui na home, o próximo
+      // "voltar" vai consumir o 'base' state e sair do app normalmente.
     });
   })();
 
@@ -3608,10 +3681,15 @@ function _renderContasOv(){
   ov.id = 'contasOv';
   ov.style.cssText = `position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
-      <span style="font-size:18px;line-height:1;flex-shrink:0;margin-right:2px;">💳</span><span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:${TEXT};">A Pagar</span>
-      <button id="_contasNew" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Nova</button>
-      <button id="_contasBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 12px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <span style="font-size:28px;line-height:1;display:block;">💳</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};line-height:1;">A Pagar</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button id="_contasNew" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;">+ Nova</button>
+        <button id="_contasBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;">Fechar</button>
+      </div>
     </div>
     ${pendentes>0?`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:rgba(0,80,120,.18);border-bottom:1px solid ${BDR};flex-shrink:0;">
       <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${MUTED};">${pendentes} pendente${pendentes>1?'s':''}</span>
@@ -3727,10 +3805,15 @@ function _renderExamesOv(){
   const ov=document.createElement('div'); ov.id='examesOv';
   ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
-      <span style="font-size:18px;line-height:1;flex-shrink:0;margin-right:2px;">🩺</span><span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:${TEXT};">Exames</span>
-      <button id="_exNew" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
-      <button id="_exBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 12px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <span style="font-size:28px;line-height:1;display:block;">🩺</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};line-height:1;">Exames</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button id="_exNew" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;">+ Novo</button>
+        <button id="_exBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;">Fechar</button>
+      </div>
     </div>
     <div id="_exBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
       ${exames.length===0?`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;"><div style="font-size:40px;margin-bottom:12px;">🩺</div><div style="font-size:14px;font-weight:700;margin-bottom:6px;">Nenhum exame cadastrado</div><div style="font-size:12px;opacity:.7;">Toque em + Novo para cadastrar</div></div>`:exames.map((e,i)=>cardH(e,i)).join('')}
@@ -3930,10 +4013,15 @@ function _renderMercadoOv(){
   const ov=document.createElement('div'); ov.id='mercadoOv';
   ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
-      <span style="font-size:18px;line-height:1;flex-shrink:0;margin-right:2px;">🛍️</span><span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:${TEXT};">Mercado</span>
-      ${marcadosN>0?`<button id="_mkClearDone" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:10px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:7px 11px;cursor:pointer;flex-shrink:0;">Limpar</button>`:''}
-      <button id="_mkBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 12px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <span style="font-size:28px;line-height:1;display:block;">🛍️</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};line-height:1;">Mercado</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        ${marcadosN>0?`<button id="_mkClearDone" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:10px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:7px 11px;cursor:pointer;">Limpar</button>`:''}
+        <button id="_mkBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;">Fechar</button>
+      </div>
     </div>
     ${totalItems>0?`<div style="padding:8px 16px;background:rgba(0,80,120,.15);border-bottom:1px solid ${BDR};flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:${MUTED};">${pendentes.length} item${pendentes.length!==1?'ns':''} restante${pendentes.length!==1?'s':''}</span>
@@ -4021,10 +4109,15 @@ function _renderDocsOv(){
   ov.id = 'docsOv';
   ov.style.cssText = `position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
-      <span style="font-size:18px;line-height:1;flex-shrink:0;margin-right:2px;">🪪</span><span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:${TEXT};">Documentos</span>
-      <button id="_docsNew" style="background:${ACCENT_SOLID};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
-      <button id="_docsBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 12px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <span style="font-size:28px;line-height:1;display:block;">🪪</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};line-height:1;">Documentos</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button id="_docsNew" style="background:${ACCENT_SOLID};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;">+ Novo</button>
+        <button id="_docsBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;">Fechar</button>
+      </div>
     </div>
     <div id="_docsBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
       ${listaHTML}
@@ -5930,10 +6023,15 @@ function openListaConsultas(){
   ov.id='listaConsultasOv';
   ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
-      <span style="font-size:18px;line-height:1;flex-shrink:0;margin-right:2px;">🏥</span><span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:${TEXT};">Consultas</span>
-      <button id="_lcAdd" style="background:var(--primary,#4da3ff);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Nova</button>
-      <button id="_lcBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 12px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <span style="font-size:28px;line-height:1;display:block;">🏥</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};line-height:1;">Consultas</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button id="_lcAdd" style="background:var(--primary,#4da3ff);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;">+ Nova</button>
+        <button id="_lcBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;">Fechar</button>
+      </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">${body}</div>`;
   document.body.appendChild(ov);
@@ -6465,10 +6563,15 @@ function openListaRemedios(){
   ov.id='listaRemediosOv';
   ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:${HDR};border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
-      <span style="font-size:18px;line-height:1;flex-shrink:0;margin-right:2px;">💊</span><span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:${TEXT};">Remédios</span>
-      <button id="_lrAdd" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
-      <button id="_lrBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 12px;background:${HDR};border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <span style="font-size:28px;line-height:1;display:block;">💊</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};line-height:1;">Remédios</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button id="_lrAdd" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;">+ Novo</button>
+        <button id="_lrBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;">Fechar</button>
+      </div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">${body}</div>`;
   document.body.appendChild(ov);
