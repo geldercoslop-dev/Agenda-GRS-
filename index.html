@@ -697,7 +697,6 @@
 
         <div class="sb-section-label">📌 Pastas Fixas</div>
         <div class="sb-item" id="sb-pauta" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,113,133,.12);">📋</div><span class="sb-label">Pauta</span></div>
-        <div class="sb-item" id="sb-exames-fp" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(52,211,153,.12);">🩺</div><span class="sb-label">Exames</span></div>
         <div class="sb-item" id="sb-docs-fp" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(99,102,241,.12);">🪪</div><span class="sb-label">Documentos</span></div>
         <div class="sb-item" id="sb-mercado-fp" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,191,36,.12);">🛍️</div><span class="sb-label">Mercado</span></div>
         <div class="sb-item" id="sb-contas-fp" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.12);">💳</div><span class="sb-label">A Pagar</span></div>
@@ -2738,38 +2737,37 @@ function init(){
 
   // Wire sidebar items
   // Pastas Fixas
-  document.getElementById('sb-pauta').addEventListener('click',()=>{ closeSidebar(); openBucket('pauta'); });
-  document.getElementById('sb-consultas-fp').addEventListener('click',()=>{ closeSidebar(); openListaConsultas(); });
-  document.getElementById('sb-remedios-fp').addEventListener('click',()=>{ closeSidebar(); openListaRemedios(); });
-  document.getElementById('sb-exames-fp').addEventListener('click',()=>{ closeSidebar(); openExames(); });
-  document.getElementById('sb-docs-fp').addEventListener('click',()=>{ closeSidebar(); openDocs(); });
-  document.getElementById('sb-mercado-fp').addEventListener('click',()=>{ closeSidebar(); openMercado(); });
-  document.getElementById('sb-contas-fp').addEventListener('click',()=>{ closeSidebar(); openContas(); });
+  document.getElementById('sb-pauta')?.addEventListener('click',()=>{ closeSidebar(); openBucket('pauta'); });
+  document.getElementById('sb-consultas-fp')?.addEventListener('click',()=>{ closeSidebar(); openListaConsultas(); });
+  document.getElementById('sb-remedios-fp')?.addEventListener('click',()=>{ closeSidebar(); openListaRemedios(); });
+  document.getElementById('sb-exames-fp')?.addEventListener('click',()=>{ closeSidebar(); openExames(); });
+  document.getElementById('sb-docs-fp')?.addEventListener('click',()=>{ closeSidebar(); openDocs(); });
+  document.getElementById('sb-mercado-fp')?.addEventListener('click',()=>{ closeSidebar(); openMercado(); });
+  document.getElementById('sb-contas-fp')?.addEventListener('click',()=>{ closeSidebar(); openContas(); });
   // Saúde
-  // Saúde
-  document.getElementById('sb-consulta').addEventListener('click',()=>{ closeSidebar(); openConsultaModal(); });
-  document.getElementById('sb-remedio').addEventListener('click',()=>{ closeSidebar(); openRemedioModal(); });
-  document.getElementById('sb-exames-s').addEventListener('click',()=>{ closeSidebar(); openExames(); });
-  document.getElementById('sb-folders').addEventListener('click',()=>{ closeSidebar(); openFolderModal(); });
-  document.getElementById('sb-feriados').addEventListener('click',()=>{ closeSidebar(); openFeriados(); });
-  document.getElementById('sb-docs').addEventListener('click',()=>{ closeSidebar(); openDocs(); });
-  document.getElementById('sb-contas') && document.getElementById('sb-contas').addEventListener('click',()=>{ closeSidebar(); openContas(); });
-  document.getElementById('sb-exames') && document.getElementById('sb-exames').addEventListener('click',()=>{ closeSidebar(); openExames(); });
-  document.getElementById('sb-mercado') && document.getElementById('sb-mercado').addEventListener('click',()=>{ closeSidebar(); openMercado(); });
-  document.getElementById('sb-zap').addEventListener('click',()=>{ closeSidebar(); shareWhatsAppGlobal(); });
-  document.getElementById('sb-backup').addEventListener('click',()=>{ closeSidebar(); doBackup(); });
-  document.getElementById('sb-rWeek').addEventListener('click',()=>{ closeSidebar(); generateWeekReport(false); });
-  document.getElementById('sb-rAll').addEventListener('click',()=>{ closeSidebar(); generateWeekReport(true); });
-  document.getElementById('sb-rConsultas').addEventListener('click',()=>{ closeSidebar(); generateConsultasReport(); });
-  document.getElementById('sb-rRemedios').addEventListener('click',()=>{ closeSidebar(); generateRemediosReport(); });
-  document.getElementById('sb-theme').addEventListener('click',()=>{ closeSidebar(); toggleTheme(); });
-  document.getElementById('sb-today').addEventListener('click',()=>{
+  document.getElementById('sb-consulta')?.addEventListener('click',()=>{ closeSidebar(); openConsultaModal(); });
+  document.getElementById('sb-remedio')?.addEventListener('click',()=>{ closeSidebar(); openRemedioModal(); });
+  document.getElementById('sb-exames-s')?.addEventListener('click',()=>{ closeSidebar(); openExames(); });
+  document.getElementById('sb-folders')?.addEventListener('click',()=>{ closeSidebar(); openFolderModal(); });
+  document.getElementById('sb-feriados')?.addEventListener('click',()=>{ closeSidebar(); openFeriados(); });
+  document.getElementById('sb-docs')?.addEventListener('click',()=>{ closeSidebar(); openDocs(); });
+  document.getElementById('sb-contas')?.addEventListener('click',()=>{ closeSidebar(); openContas(); });
+  document.getElementById('sb-exames')?.addEventListener('click',()=>{ closeSidebar(); openExames(); });
+  document.getElementById('sb-mercado')?.addEventListener('click',()=>{ closeSidebar(); openMercado(); });
+  document.getElementById('sb-zap')?.addEventListener('click',()=>{ closeSidebar(); shareWhatsAppGlobal(); });
+  document.getElementById('sb-backup')?.addEventListener('click',()=>{ closeSidebar(); doBackup(); });
+  document.getElementById('sb-rWeek')?.addEventListener('click',()=>{ closeSidebar(); generateWeekReport(false); });
+  document.getElementById('sb-rAll')?.addEventListener('click',()=>{ closeSidebar(); generateWeekReport(true); });
+  document.getElementById('sb-rConsultas')?.addEventListener('click',()=>{ closeSidebar(); generateConsultasReport(); });
+  document.getElementById('sb-rRemedios')?.addEventListener('click',()=>{ closeSidebar(); generateRemediosReport(); });
+  document.getElementById('sb-theme')?.addEventListener('click',()=>{ closeSidebar(); toggleTheme(); });
+  document.getElementById('sb-today')?.addEventListener('click',()=>{
     closeSidebar();
     const today=new Date(); const wkStart=parseLocalDate(state.weekStartISO);
     const diff=Math.floor((today-wkStart)/86400000);
     if(diff>=0&&diff<8) openBucket(DAYS[diff].id);
   });
-  document.getElementById('sb-settings').addEventListener('click',()=>{ closeSidebar(); openSettings(); });
+  document.getElementById('sb-settings')?.addEventListener('click',()=>{ closeSidebar(); openSettings(); });
   document.getElementById('sb-sync')?.addEventListener('click',()=>{ closeSidebar(); abrirPainelSync(); });
 
   // Sync theme icon in sidebar
