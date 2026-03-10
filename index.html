@@ -1112,11 +1112,12 @@ function _initTouchDragGlobal(){
   if(_touchDragGlobalAdded) return;
   _touchDragGlobalAdded=true;
 
+  // touchmove no document: só age se drag ativo, não bloqueia scroll
   document.addEventListener('touchmove',(e)=>{
     if(!touchDragId||!touchDragClone) return;
+    // Só bloqueia scroll quando drag realmente está ativo
     e.preventDefault();
     const t=e.touches[0];
-    // Move o clone seguindo o dedo com offset natural
     touchDragClone.style.left=(t.clientX-touchDragOffsetX)+'px';
     touchDragClone.style.top=(t.clientY-touchDragOffsetY)+'px';
 
@@ -1131,7 +1132,6 @@ function _initTouchDragGlobal(){
       if(fi>=0&&ti>=0&&fi!==ti){
         [state.folderOrder[fi],state.folderOrder[ti]]=[state.folderOrder[ti],state.folderOrder[fi]];
         save(); renderFolders();
-        // Após re-render, aplica animação nos tiles trocados e some o tile arrastado
         document.querySelectorAll('.folderTile').forEach(el=>{
           el.classList.add('reordering');
           setTimeout(()=>el.classList.remove('reordering'),300);
@@ -1143,11 +1143,18 @@ function _initTouchDragGlobal(){
   },{passive:false});
 
   document.addEventListener('touchend',()=>{
-    if(!touchDragClone) return;
-    touchDragClone.remove(); touchDragClone=null;
-    if(touchDragEl){ touchDragEl.style.opacity=''; touchDragEl.style.visibility=''; }
-    touchDragId=null; touchDragEl=null;
+    _cancelTouchDrag();
   },{passive:true});
+
+  document.addEventListener('touchcancel',()=>{
+    _cancelTouchDrag();
+  },{passive:true});
+}
+
+function _cancelTouchDrag(){
+  if(touchDragClone){ touchDragClone.remove(); touchDragClone=null; }
+  if(touchDragEl){ touchDragEl.style.opacity=''; touchDragEl.style.visibility=''; }
+  touchDragId=null; touchDragEl=null;
 }
 
 function makeTile(f, isSub, children){
@@ -1181,9 +1188,11 @@ function makeTile(f, isSub, children){
   });
 
   // ── Touch drag: toque e segura para arrastar ──
+  let _lpStartX=0, _lpStartY=0;
   el.addEventListener('touchstart',(e)=>{
     moved=false;
     const t=e.touches[0];
+    _lpStartX=t.clientX; _lpStartY=t.clientY;
     longPressTimer=setTimeout(()=>{
       touchDragId=f.id;
       touchDragEl=el;
@@ -1216,7 +1225,21 @@ function makeTile(f, isSub, children){
       // Some o original imediatamente
       el.style.opacity='0';
       el.style.visibility='hidden';
-    },220);
+    },350);
+  },{passive:true});
+
+  // Cancela long press se mover antes de ativar
+  el.addEventListener('touchmove',(e)=>{
+    moved=true;
+    if(longPressTimer){
+      const t=e.touches[0];
+      const dx=Math.abs(t.clientX-_lpStartX), dy=Math.abs(t.clientY-_lpStartY);
+      if(dx>8||dy>8){ clearTimeout(longPressTimer); longPressTimer=null; }
+    }
+  },{passive:true});
+
+  el.addEventListener('touchend',()=>{
+    if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}
   },{passive:true});
 
   return el;
@@ -2885,7 +2908,7 @@ function init(){
     `, ()=>{
       const el = document.getElementById('inputUserName2');
       if(el){ el.value = state.userName||''; }
-    }, ()=>openSettings());
+    }, ()=>null);
   });
   document.getElementById('rowPhoto').addEventListener('click',()=>{
     // Fecha settings temporariamente, abre galeria, reabre após retorno
@@ -2897,6 +2920,7 @@ function init(){
   document.getElementById('rowWmark').addEventListener('click',()=>{
     // Show elegant tip modal then open picker
     const tip = document.createElement('div');
+    tip.id = 'watermarkTipOv';
     tip.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:24px;';
     const isLight = document.body.getAttribute('data-theme')==='light';
     tip.innerHTML = `<div style="background:${'linear-gradient(160deg,#021824,#04355a)'};border:1px solid ${'rgba(0,160,200,.2)'};border-radius:20px;padding:28px 22px;max-width:300px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5);">
@@ -3005,9 +3029,9 @@ function init(){
     // Re-empurha TRÊS sentinelas imediatamente — app nunca vai fechar
     _pushSentinel();
 
-    // Debounce: 180ms só para evitar duplo-disparo físico do botão
+    // Debounce: 350ms para evitar duplo-disparo físico do botão
     var now = Date.now();
-    if(now - _backLastTs < 180) return;
+    if(now - _backLastTs < 350) return;
     _backLastTs = now;
 
     // ── Fecha o overlay mais ao topo, ou navega ──
@@ -3025,6 +3049,7 @@ function init(){
       const calModal = document.getElementById('calModalOverlay');
       if(calModal && calModal.classList.contains('show')){ closeCalendarModal(); return true; }
       const namedOvs = [
+        'watermarkTipOv',
         'photoFullscreenOv','photoGalleryOv',
         'consultaFormOv','remedioFormOv',
         'listaConsultasOv','listaRemediosOv',
@@ -5372,7 +5397,7 @@ function openStats(fromSettings) {
     </div>`;
 
   closeSettings();
-  openSubScreen('📊 Estatísticas', html, null, fromSettings ? () => openSettings() : null);
+  openSubScreen('📊 Estatísticas', html, null, null);
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -5464,7 +5489,7 @@ function verificarIntegridade() {
     </div>`;
 
   closeSettings();
-  openSubScreen('🔍 Integridade dos Dados', html, null, () => openSettings());
+  openSubScreen('🔍 Integridade dos Dados', html, null, null);
 }
 
 // ══════════════════════════════════════════════════════════════════
