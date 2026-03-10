@@ -1112,38 +1112,66 @@ function _initTouchDragGlobal(){
   if(_touchDragGlobalAdded) return;
   _touchDragGlobalAdded=true;
 
-  // touchmove no document: só age se drag ativo, não bloqueia scroll
+  let _lastSwapId=null; // evita trocar o mesmo par repetidamente
+
   document.addEventListener('touchmove',(e)=>{
     if(!touchDragId||!touchDragClone) return;
-    // Só bloqueia scroll quando drag realmente está ativo
     e.preventDefault();
     const t=e.touches[0];
+
+    // Move o clone com o dedo
     touchDragClone.style.left=(t.clientX-touchDragOffsetX)+'px';
     touchDragClone.style.top=(t.clientY-touchDragOffsetY)+'px';
 
-    // Detecta qual tile está sob o dedo
-    touchDragClone.style.display='none';
+    // Detecta tile sob o dedo (esconde clone momentaneamente)
+    touchDragClone.style.visibility='hidden';
     const under=document.elementFromPoint(t.clientX,t.clientY);
-    touchDragClone.style.display='';
+    touchDragClone.style.visibility='';
 
-    const target=under&&under.closest('.folderTile');
-    if(target&&target.dataset.id&&target.dataset.id!==touchDragId){
-      const fi=state.folderOrder.indexOf(touchDragId),ti=state.folderOrder.indexOf(target.dataset.id);
+    const target=under&&under.closest('.folderTile[data-id]');
+    const targetId=target&&target.dataset.id;
+
+    if(target && targetId && targetId!==touchDragId && targetId!==_lastSwapId){
+      _lastSwapId=targetId;
+      const fi=state.folderOrder.indexOf(touchDragId);
+      const ti=state.folderOrder.indexOf(targetId);
       if(fi>=0&&ti>=0&&fi!==ti){
+        // Troca na ordem
         [state.folderOrder[fi],state.folderOrder[ti]]=[state.folderOrder[ti],state.folderOrder[fi]];
-        save(); renderFolders();
-        document.querySelectorAll('.folderTile').forEach(el=>{
-          el.classList.add('reordering');
-          setTimeout(()=>el.classList.remove('reordering'),300);
-        });
-        const newEl=document.querySelector(`.folderTile[data-id="${touchDragId}"]`);
-        if(newEl){ newEl.style.opacity='0'; newEl.style.visibility='hidden'; touchDragEl=newEl; }
+        // Troca os tiles no DOM sem re-renderizar (evita chilique)
+        const grid=document.getElementById('folderGrid');
+        const tiles=[...grid.querySelectorAll('.folderTile[data-id]')];
+        const elA=tiles.find(x=>x.dataset.id===touchDragId);
+        const elB=tiles.find(x=>x.dataset.id===targetId);
+        if(elA&&elB){
+          const nextA=elA.nextSibling;
+          const nextB=elB.nextSibling;
+          if(nextA===elB){ grid.insertBefore(elB,elA); }
+          else if(nextB===elA){ grid.insertBefore(elA,elB); }
+          else {
+            const ph=document.createComment('');
+            grid.insertBefore(ph,elA);
+            grid.insertBefore(elA,nextB||null);
+            grid.insertBefore(elB,ph);
+            ph.remove();
+          }
+          // Animação suave no tile que foi empurrado
+          elB.classList.add('reordering');
+          setTimeout(()=>elB.classList.remove('reordering'),280);
+          // Mantém o tile arrastado invisível
+          if(touchDragEl){ touchDragEl.style.opacity='0'; touchDragEl.style.visibility='hidden'; }
+        }
       }
+    } else if(!targetId || targetId===touchDragId){
+      _lastSwapId=null; // reseta quando o dedo está sobre espaço vazio
     }
   },{passive:false});
 
   document.addEventListener('touchend',()=>{
-    _cancelTouchDrag();
+    if(touchDragClone){
+      save(); // só salva no fim
+      _cancelTouchDrag();
+    }
   },{passive:true});
 
   document.addEventListener('touchcancel',()=>{
@@ -2918,7 +2946,7 @@ function init(){
     setTimeout(()=>fp.click(), 80);
   });
   document.getElementById('rowWmark').addEventListener('click',()=>{
-    // Show elegant tip modal then open picker
+    closeSettings();
     const tip = document.createElement('div');
     tip.id = 'watermarkTipOv';
     tip.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:24px;';
@@ -2935,7 +2963,6 @@ function init(){
     </div>`;
     document.body.appendChild(tip);
     tip.querySelector('#_tipCancel').onclick = ()=>tip.remove();
-    // _tipOk handled above
     tip.querySelector('#_tipRemove').onclick = ()=>{
       tip.remove();
       state.watermarkPhoto = null;
@@ -3012,69 +3039,58 @@ function init(){
     if(typeof currentView!=='undefined' && currentView==='home') _setFooter(true);
   });
 
-  // ── Botão voltar Android (hardware back) ──
-  // Mantém TRÊS sentinelas. Sempre re-empurha ao receber popstate.
-  // App nunca fecha — na home o voltar não faz nada.
-  function _pushSentinel(){
-    history.pushState({app:'agendapro',s:1},'');
-    history.pushState({app:'agendapro',s:2},'');
-    history.pushState({app:'agendapro',s:3},'');
-  }
-  history.replaceState({app:'agendapro',s:0},'');
-  _pushSentinel();
+  // ── Botão voltar Android ──
+  // 1 sentinela: sempre reposta ao voltar. App nunca fecha.
+  history.replaceState({app:'agendapro'},'');
+  history.pushState({app:'agendapro',sentinel:true},'');
 
-  var _backLastTs = 0;
+  window.addEventListener('popstate', function(e){
+    // Reposta a sentinela imediatamente
+    history.pushState({app:'agendapro',sentinel:true},'');
 
-  window.addEventListener('popstate', function handleBack(e){
-    // Re-empurha TRÊS sentinelas imediatamente — app nunca vai fechar
-    _pushSentinel();
+    // Fecha o overlay mais ao topo
+    const sbEl = document.getElementById('sidebar');
+    if(sbEl && sbEl.classList.contains('open')){ closeSidebar(); return; }
 
-    // Debounce: 350ms para evitar duplo-disparo físico do botão
-    var now = Date.now();
-    if(now - _backLastTs < 350) return;
-    _backLastTs = now;
+    const subScr = document.getElementById('subScreenOverlay');
+    if(subScr && subScr.classList.contains('show')){ goSubBack(); return; }
 
-    // ── Fecha o overlay mais ao topo, ou navega ──
-    function _tryCloseTop(){
-      const sbEl = document.getElementById('sidebar');
-      if(sbEl && sbEl.classList.contains('open')){ closeSidebar(); return true; }
-      const subScr = document.getElementById('subScreenOverlay');
-      if(subScr && subScr.classList.contains('show')){ goSubBack(); return true; }
-      const manualOv = document.getElementById('manualOverlay');
-      if(manualOv && manualOv.style.display==='flex'){ manualOv.style.display='none'; return true; }
-      const sModal = document.getElementById('sModalOverlay');
-      if(sModal && sModal.classList.contains('show')){ closeSettings(); return true; }
-      const fModal = document.getElementById('fModalOverlay');
-      if(fModal && fModal.classList.contains('show')){ fModal.classList.remove('show'); return true; }
-      const calModal = document.getElementById('calModalOverlay');
-      if(calModal && calModal.classList.contains('show')){ closeCalendarModal(); return true; }
-      const namedOvs = [
-        'watermarkTipOv',
-        'photoFullscreenOv','photoGalleryOv',
-        'consultaFormOv','remedioFormOv',
-        'listaConsultasOv','listaRemediosOv',
-        'historicoPacienteOv','feriadosOv',
-        'docsOv','contasOv','examesOv','mercadoOv',
-        'inlineViewerOv'
-      ];
-      for(const oid of namedOvs){
-        const el = document.getElementById(oid);
-        if(el){ el.remove(); return true; }
-      }
-      const dynOvs = document.querySelectorAll('body > div.modalOverlay');
-      if(dynOvs.length > 0){ dynOvs[dynOvs.length-1].remove(); return true; }
-      const dynFixed = document.querySelectorAll('body > div[style*="position:fixed"][style*="z-index:9"]');
-      for(const ov of [...dynFixed].reverse()){
-        if(ov.id) continue;
-        ov.remove(); return true;
-      }
-      return false;
+    const manualOv = document.getElementById('manualOverlay');
+    if(manualOv && manualOv.style.display==='flex'){ manualOv.style.display='none'; if(currentView==='home')_setFooter(true); return; }
+
+    const sModal = document.getElementById('sModalOverlay');
+    if(sModal && sModal.classList.contains('show')){ closeSettings(); return; }
+
+    const fModal = document.getElementById('fModalOverlay');
+    if(fModal && fModal.classList.contains('show')){ fModal.classList.remove('show'); return; }
+
+    const calModal = document.getElementById('calModalOverlay');
+    if(calModal && calModal.classList.contains('show')){ closeCalendarModal(); return; }
+
+    // Overlays com ID fixo
+    const namedOvs = [
+      'watermarkTipOv',
+      'photoFullscreenOv','photoGalleryOv',
+      'consultaFormOv','remedioFormOv',
+      'listaConsultasOv','listaRemediosOv',
+      'historicoPacienteOv','feriadosOv',
+      'docsOv','contasOv','examesOv','mercadoOv',
+      'inlineViewerOv'
+    ];
+    for(const oid of namedOvs){
+      const el = document.getElementById(oid);
+      if(el){ el.remove(); return; }
     }
 
-    if(!_tryCloseTop()){
-      if(currentView === 'day') navigateBack();
-      // Na home: não faz nada — os 3 sentinelas garantem que o app não fecha
+    // Qualquer overlay dinâmico sem ID no topo do body
+    const dynFixed = document.querySelectorAll('body > div[style*="position:fixed"]');
+    for(const ov of [...dynFixed].reverse()){
+      if(ov.id) continue;
+      ov.remove(); return;
     }
+
+    // Navegar para trás na view
+    if(currentView === 'day'){ navigateBack(); return; }
   });
 
   // ── Pull-to-go-back (swipe down on list) ──
