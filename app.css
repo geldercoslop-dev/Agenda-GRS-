@@ -48,10 +48,9 @@
     /* ══ HEADER ══ */
     .hdr {
       padding: 10px 14px 8px; display: flex; align-items: center; gap: 12px;
-      border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0;
+      border-bottom: none; flex-shrink: 0;
       background: var(--bg0);
       transition: background 0.4s;
-      box-shadow: 0 8px 0 rgba(255,255,255,.10), 0 1px 0 rgba(255,255,255,.18), inset 0 -1px 0 rgba(255,255,255,.08);
     }
     [data-theme="light"] 
     [data-theme="light"] .hdr {
@@ -404,7 +403,7 @@
       color:rgba(251,146,60,.5); padding:8px 14px 3px;
     }
     .sb-item {
-      display:flex; align-items:center; gap:9px;
+      display:flex; align-items:center; gap:7px;
       padding:5px 14px; cursor:pointer;
       transition:background .15s; position:relative;
     }

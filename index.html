@@ -640,7 +640,6 @@
     <div class="sidebar" id="sidebar">
       <div class="sb-header">
         <span class="sb-title">⚡ Central de Comando</span>
-        <button class="sb-close" onclick="closeSidebar()">✕</button>
       </div>
             <div class="sb-body">
         <div class="sb-section-label">Saúde</div>
@@ -691,7 +690,7 @@
           <span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;z-index:2;filter:drop-shadow(0 0 4px rgba(255,255,255,.8));">⚡</span>
         </div>
       </div>
-      <span class="progressPct" id="progressPct" style="min-width:28px;text-align:right;margin-right:16px;">0%</span>
+      <span class="progressPct" id="progressPct" style="min-width:28px;text-align:right;flex:1;">0%</span>
       <button id="sidebarFab" style="
         flex-shrink:0;
         width:42px;height:42px;border-radius:14px;
@@ -702,6 +701,7 @@
         display:flex;align-items:center;justify-content:center;
         transition:transform .15s;
         -webkit-tap-highlight-color:transparent;
+        margin-left:4px;
       ">☰</button>
     </div>
 
