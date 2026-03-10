@@ -199,7 +199,7 @@
     /* Quando expandido, mostra grade 7-col do mês */
     .monthGrid {
       display:none; grid-template-columns:repeat(7,1fr); gap:3px;
-      padding:4px 8px 20px;
+      padding:4px 8px 8px;
     }
     .weekStripWrap.expanded .monthGrid { display:grid; }
     .weekStripWrap.expanded .weekStrip { display:none; }
@@ -294,7 +294,7 @@
     .view.show { display:flex; }
 
     /* Home */
-    .homeBody { padding:14px 14px 64px; display:flex; flex-direction:column; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; }
+    .homeBody { padding:6px 14px 64px; display:flex; flex-direction:column; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; }
     .sectionTitle { font-size:clamp(10px,2.8vw,12px); font-weight:900; letter-spacing:1px; text-transform:uppercase; color:var(--text-white); margin-bottom:12px; padding-left:2px; margin-top:18px; }
     [data-theme="light"] .sectionTitle { color:var(--surface-2); font-weight:900; }
     .folderGrid { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:24px; }
@@ -357,14 +357,14 @@
     /* ══ BOTTOM BAR ══ */
     /* ══ SIDEBAR RETRÁTIL ══ */
     .sidebarOverlay {
-      display:none; position:fixed; inset:0; z-index:9998;
+      display:none; position:fixed; inset:0; z-index:800;
       background:rgba(0,0,0,.55); backdrop-filter:blur(2px);
       opacity:0; transition:opacity .28s ease;
     }
     .sidebarOverlay.open { display:block; opacity:1; }
 
     .sidebar {
-      position:fixed; top:0; left:-270px; bottom:0; width:260px; z-index:9999;
+      position:fixed; top:0; left:-270px; bottom:0; width:260px; z-index:801;
       background:var(--bg2);
       border-right:1px solid rgba(251,146,60,.18);
       box-shadow:4px 0 40px rgba(0,0,0,.6);
@@ -417,7 +417,7 @@
       border:1px solid rgba(255,255,255,.06);
     }
     .sb-label {
-      font-family:'Space Grotesk',sans-serif; font-size:13px;
+      font-family:'Space Grotesk',sans-serif; font-size:11px;
       font-weight:700; color:rgba(255,255,255,.75); flex:1;
     }
     .sb-divider { height:1px; background:rgba(251,146,60,.15); margin:3px 0; }
