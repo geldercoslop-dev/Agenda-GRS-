@@ -1105,6 +1105,50 @@ function updateProgress(){
 // ══ FOLDERS ══
 let dragState=null;
 let touchDragId=null, touchDragEl=null, touchDragClone=null;
+let touchDragOffsetX=0, touchDragOffsetY=0;
+let _touchDragGlobalAdded=false;
+
+function _initTouchDragGlobal(){
+  if(_touchDragGlobalAdded) return;
+  _touchDragGlobalAdded=true;
+
+  document.addEventListener('touchmove',(e)=>{
+    if(!touchDragId||!touchDragClone) return;
+    e.preventDefault();
+    const t=e.touches[0];
+    // Move o clone seguindo o dedo com offset natural
+    touchDragClone.style.left=(t.clientX-touchDragOffsetX)+'px';
+    touchDragClone.style.top=(t.clientY-touchDragOffsetY)+'px';
+
+    // Detecta qual tile está sob o dedo
+    touchDragClone.style.display='none';
+    const under=document.elementFromPoint(t.clientX,t.clientY);
+    touchDragClone.style.display='';
+
+    const target=under&&under.closest('.folderTile');
+    if(target&&target.dataset.id&&target.dataset.id!==touchDragId){
+      const fi=state.folderOrder.indexOf(touchDragId),ti=state.folderOrder.indexOf(target.dataset.id);
+      if(fi>=0&&ti>=0&&fi!==ti){
+        [state.folderOrder[fi],state.folderOrder[ti]]=[state.folderOrder[ti],state.folderOrder[fi]];
+        save(); renderFolders();
+        // Após re-render, aplica animação nos tiles trocados e some o tile arrastado
+        document.querySelectorAll('.folderTile').forEach(el=>{
+          el.classList.add('reordering');
+          setTimeout(()=>el.classList.remove('reordering'),300);
+        });
+        const newEl=document.querySelector(`.folderTile[data-id="${touchDragId}"]`);
+        if(newEl){ newEl.style.opacity='0'; newEl.style.visibility='hidden'; touchDragEl=newEl; }
+      }
+    }
+  },{passive:false});
+
+  document.addEventListener('touchend',()=>{
+    if(!touchDragClone) return;
+    touchDragClone.remove(); touchDragClone=null;
+    if(touchDragEl){ touchDragEl.style.opacity=''; touchDragEl.style.visibility=''; }
+    touchDragId=null; touchDragEl=null;
+  },{passive:true});
+}
 
 function makeTile(f, isSub, children){
   const el=document.createElement('div');
@@ -1136,7 +1180,7 @@ function makeTile(f, isSub, children){
     }
   });
 
-  // ── Touch drag: clone flutua com o dedo, original some ──
+  // ── Touch drag: toque e segura para arrastar ──
   el.addEventListener('touchstart',(e)=>{
     moved=false;
     const t=e.touches[0];
@@ -1146,6 +1190,8 @@ function makeTile(f, isSub, children){
 
       // Dimensões e posição do tile original
       const rect=el.getBoundingClientRect();
+      touchDragOffsetX=t.clientX-rect.left;
+      touchDragOffsetY=t.clientY-rect.top;
 
       // Clone visual que vai seguir o dedo
       touchDragClone=el.cloneNode(true);
@@ -1159,61 +1205,19 @@ function makeTile(f, isSub, children){
         pointer-events:none;
         border-radius:16px;
         box-shadow:0 12px 40px rgba(0,0,0,.5);
-        transform:scale(1.08);
-        transition:transform .15s;
+        transform:scale(1.12);
+        transition:transform .12s;
         opacity:1;
         background:var(--card);
-        border:1px solid rgba(0,160,200,.35);
+        border:2px solid rgba(0,200,230,.5);
       `;
       document.body.appendChild(touchDragClone);
 
-      // Some o original (invisível mas mantém o espaço)
+      // Some o original imediatamente
       el.style.opacity='0';
       el.style.visibility='hidden';
-
-      showToast('✋ Arraste para reordenar');
-    },400);
+    },220);
   },{passive:true});
-
-  el.addEventListener('touchmove',(e)=>{
-    moved=true;
-    if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}
-    if(!touchDragId||!touchDragClone) return;
-    e.preventDefault();
-
-    const t=e.touches[0];
-    const rect=touchDragClone.getBoundingClientRect();
-
-    // Move o clone com o dedo (centralizado)
-    touchDragClone.style.left=(t.clientX - rect.width/2)+'px';
-    touchDragClone.style.top=(t.clientY - rect.height/2)+'px';
-
-    // Detecta qual tile está sob o dedo
-    touchDragClone.style.display='none';
-    const under=document.elementFromPoint(t.clientX,t.clientY);
-    touchDragClone.style.display='';
-
-    const target=under&&under.closest('.folderTile');
-    if(target&&target.dataset.id&&target.dataset.id!==touchDragId){
-      const fi=state.folderOrder.indexOf(touchDragId),ti=state.folderOrder.indexOf(target.dataset.id);
-      if(fi>=0&&ti>=0&&fi!==ti){
-        [state.folderOrder[fi],state.folderOrder[ti]]=[state.folderOrder[ti],state.folderOrder[fi]];
-        save(); renderFolders();
-        // Após re-render, some o novo tile original e reassign
-        const newEl=document.querySelector(`.folderTile[data-id="${touchDragId}"]`);
-        if(newEl){ newEl.style.opacity='0'; newEl.style.visibility='hidden'; touchDragEl=newEl; }
-      }
-    }
-  },{passive:false});
-
-  el.addEventListener('touchend',()=>{
-    if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}
-    // Remove clone
-    if(touchDragClone){ touchDragClone.remove(); touchDragClone=null; }
-    // Restaura original
-    if(touchDragEl){ touchDragEl.style.opacity=''; touchDragEl.style.visibility=''; }
-    touchDragId=null; touchDragEl=null;
-  });
 
   return el;
 }
@@ -2525,8 +2529,13 @@ function _hideSubScreen(){
 function closeSubScreen(){ goSubBack(); }
 function goSubBack(){
   const exiting = _subStack.pop();
-  if(_subStack.length>0){ _renderSubScreen(); }
-  else { _hideSubScreen(); if(exiting&&exiting.exitFn) setTimeout(exiting.exitFn,80); }
+  if(_subStack.length>0){
+    _renderSubScreen();
+    // exitFn NÃO é chamado ao navegar entre telas internas — só na saída total
+  } else {
+    _hideSubScreen();
+    if(exiting&&exiting.exitFn) setTimeout(exiting.exitFn,80);
+  }
 }
 function closeAllSubScreens(){
   const first = _subStack[0]||null;
@@ -2980,23 +2989,28 @@ function init(){
   });
 
   // ── Botão voltar Android (hardware back) ──
-  // Duplo sentinela — app nunca fecha. Cada pressão volta UMA tela.
-  history.replaceState({app:'agendapro',depth:0},'');
-  history.pushState({app:'agendapro',depth:1},'');
-  history.pushState({app:'agendapro',depth:2},'');
+  // Mantém TRÊS sentinelas. Sempre re-empurha ao receber popstate.
+  // App nunca fecha — na home o voltar não faz nada.
+  function _pushSentinel(){
+    history.pushState({app:'agendapro',s:1},'');
+    history.pushState({app:'agendapro',s:2},'');
+    history.pushState({app:'agendapro',s:3},'');
+  }
+  history.replaceState({app:'agendapro',s:0},'');
+  _pushSentinel();
 
   var _backLastTs = 0;
 
   window.addEventListener('popstate', function handleBack(e){
-    // Restaura sentinela imediatamente
-    history.pushState({app:'agendapro',depth:2},'');
+    // Re-empurha TRÊS sentinelas imediatamente — app nunca vai fechar
+    _pushSentinel();
 
-    // Debounce leve — só evita duplo-disparo acidental (<150ms)
+    // Debounce: 180ms só para evitar duplo-disparo físico do botão
     var now = Date.now();
-    if(now - _backLastTs < 150) return;
+    if(now - _backLastTs < 180) return;
     _backLastTs = now;
 
-    // ── Tenta fechar o overlay mais ao topo ──
+    // ── Fecha o overlay mais ao topo, ou navega ──
     function _tryCloseTop(){
       const sbEl = document.getElementById('sidebar');
       if(sbEl && sbEl.classList.contains('open')){ closeSidebar(); return true; }
@@ -3033,11 +3047,8 @@ function init(){
     }
 
     if(!_tryCloseTop()){
-      // Nenhum overlay — navega: pasta → home
-      if(currentView === 'day'){
-        navigateBack();
-      }
-      // Na home não faz nada — app não fecha
+      if(currentView === 'day') navigateBack();
+      // Na home: não faz nada — os 3 sentinelas garantem que o app não fecha
     }
   });
 
@@ -3181,6 +3192,7 @@ function init(){
   renderWeekStrip();
   updateProgress();
   initStripExpand();
+  _initTouchDragGlobal();
   setInterval(updateHeader, 60000);
 }
 
@@ -4399,7 +4411,7 @@ function initFolderModal(){
     openSubScreen('➕ Nova pasta',
       document.getElementById('fSubNova').innerHTML,
       ()=>{ initEmojiPickerIn(document.getElementById('subScreenBody')); },
-      ()=>openFolderModal());
+      null);
   });
 
   // ─ Nova subpasta (tela 1: escolher pasta-pai)
@@ -4412,11 +4424,11 @@ function initFolderModal(){
         openSubScreen('📝 Nome da subpasta',
           `<div style="font-size:13px;font-weight:700;color:rgba(180,220,240,.6);margin-bottom:14px;">Dentro de: <b style="color:#a5b4fc">${f.emoji||'📁'} ${f.name}</b></div>
            <input class="sInput" id="_subInputName" type="text" placeholder="Nome da subpasta..." style="margin-bottom:12px;">
-           <button onclick="saveSubpasta('${f.id}')" style="display:block;width:100%;padding:11px;border-radius:12px;border:none;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;">✔ Criar subpasta</button>`,
-          ()=>{ }, // usuário clica para digitar
-          null); // voltar vai para tela anterior (pilha)
+           <button onclick="saveSubpasta('${f.id}')" style="display:block;width:100%;padding:11px;border-radius:12px;border:none;background:linear-gradient(135deg,#0a7a9a,#0db8c8);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;">✔ Criar subpasta</button>`,
+          ()=>{ },
+          null);
       }),
-      ()=>openFolderModal());
+      null);
   });
 
   // ─ Editar pasta (tela 1: escolher pasta)
@@ -4428,11 +4440,11 @@ function initFolderModal(){
         openSubScreen('✏️ Editar: '+f.name,
           `<input class="sInput" id="_editName" type="text" value="${f.name}" style="margin-bottom:10px;">
            <input class="sInput" id="_editEmoji" type="text" value="${f.emoji||'📁'}" placeholder="Emoji..." style="margin-bottom:14px;">
-           <button onclick="saveEditPasta('${f.id}')" style="display:block;width:100%;padding:11px;border-radius:12px;border:none;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;">✔ Salvar</button>`,
-          ()=>{ }, // usuário clica para digitar
+           <button onclick="saveEditPasta('${f.id}')" style="display:block;width:100%;padding:11px;border-radius:12px;border:none;background:linear-gradient(135deg,#0a7a9a,#0db8c8);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;">✔ Salvar</button>`,
+          ()=>{ },
           null);
       }),
-      ()=>openFolderModal());
+      null);
   });
 
   // ─ Excluir pasta (tela 1: escolher pasta)
@@ -4453,7 +4465,7 @@ function initFolderModal(){
              </div>
            </div>`, null, null);
       }),
-      ()=>openFolderModal());
+      null);
   });
 
   // Emoji picker
