@@ -296,7 +296,7 @@
     .view.show { display:flex; }
 
     /* Home */
-    .homeBody { padding:16px 14px 64px; display:flex; flex-direction:column; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; }
+    .homeBody { padding:20px 14px 64px; display:flex; flex-direction:column; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; }
     .sectionTitle { font-size:clamp(10px,2.8vw,12px); font-weight:900; letter-spacing:1px; text-transform:uppercase; color:var(--text-white); margin-bottom:12px; padding-left:2px; margin-top:18px; }
     [data-theme="light"] .sectionTitle { color:var(--surface-2); font-weight:900; }
     .folderGrid {
@@ -315,7 +315,14 @@
       display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
       gap: 0; padding: 8px 2px 8px; cursor: pointer; user-select: none;
       position: relative; min-height: 72px; border-radius: 16px;
-      transition: transform .15s, background .15s;
+      transition: transform .18s cubic-bezier(.34,1.56,.64,1), background .15s, opacity .15s;
+    }
+    @keyframes tileSwap {
+      0% { transform: scale(.82); opacity:.5; }
+      100% { transform: scale(1); opacity:1; }
+    }
+    .folderTile.reordering {
+      animation: tileSwap .28s cubic-bezier(.34,1.56,.64,1);
     }
     .folderTile:hover, .folderTile:focus {
       background: rgba(255,255,255,.06);
@@ -728,38 +735,27 @@
       border-radius:24px 24px 0 0;
     }
     [data-theme="light"] .fModalHdr { /* same as dark */ }
-    .fActionCards { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:12px; }
+    .fActionCards { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:14px; }
     .fCard {
       display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:7px; padding:14px 10px 12px; border-radius:16px;
-      cursor:pointer; transition:transform .1s, box-shadow .1s, border-bottom .1s;
-      text-align:center; position:relative; overflow:hidden;
-      background:linear-gradient(160deg,var(--blue),var(--blue-dark));
-      border-top:1px solid rgba(255,255,255,.35);
-      border-left:1px solid rgba(255,255,255,.2);
-      border-right:1px solid rgba(0,0,0,.1);
-      border-bottom:3px solid var(--color-blue-deep);
-      box-shadow:0 5px 0 var(--color-blue-deeper),0 7px 14px rgba(37,99,235,.4),inset 0 1px 0 rgba(255,255,255,.22);
+      gap:8px; padding:18px 10px 14px; border-radius:16px;
+      cursor:pointer; transition:all .15s; text-align:center; position:relative; overflow:hidden;
+      border:1px solid rgba(14,165,233,.3); background:rgba(2,132,199,.15);
     }
-    .fCard::before {
-      content:''; position:absolute; top:0; left:0; right:0;
-      height:45%; border-radius:16px 16px 50% 50%;
-      background:linear-gradient(180deg,rgba(255,255,255,.25) 0%,rgba(255,255,255,0) 100%);
-      pointer-events:none;
-    }
-    .fCard:nth-child(1) { background:linear-gradient(160deg,var(--blue),var(--blue-dark)); border-bottom:3px solid var(--color-blue-deep); box-shadow:0 5px 0 var(--color-blue-deeper),0 7px 14px rgba(37,99,235,.4),inset 0 1px 0 rgba(255,255,255,.22); }
-    .fCard:nth-child(2) { background:linear-gradient(160deg,var(--fcard2-a),var(--fcard2-b)); border-bottom:3px solid var(--fcard2-c); box-shadow:0 5px 0 var(--fcard2-d),0 7px 14px rgba(124,58,237,.4),inset 0 1px 0 rgba(255,255,255,.22); }
-    .fCard:nth-child(3) { background:linear-gradient(160deg,var(--fcard3-a),var(--fcard3-b)); border-bottom:3px solid var(--fcard3-c); box-shadow:0 5px 0 var(--fcard3-d),0 7px 14px rgba(217,119,6,.4),inset 0 1px 0 rgba(255,255,255,.22); }
-    .fCard:nth-child(4) { background:linear-gradient(160deg,var(--color-salmon),var(--red)); border-bottom:3px solid rgba(127,29,29,1); box-shadow:0 5px 0 rgba(69,10,10,1),0 7px 14px rgba(220,38,38,.4),inset 0 1px 0 rgba(255,255,255,.22); }
-    .fCard:active { transform:translateY(4px); box-shadow:0 1px 0 rgba(0,0,0,.3),0 2px 5px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.15); border-bottom:1px solid rgba(0,0,0,.2); }
-    .fCardIcon { font-size:26px; line-height:1; position:relative; z-index:1; filter:drop-shadow(0 2px 3px rgba(0,0,0,.3)); }
-    .fCardLabel { font-size:12px; font-weight:900; color:#fff; letter-spacing:-.1px; text-shadow:0 1px 3px rgba(0,0,0,.3); position:relative; z-index:1; }
-    [data-theme="light"] .fCardLabel { color:#fff; }
-    .fCardSub { font-size:11px; font-weight:600; color:rgba(255,255,255,.7); position:relative; z-index:1; }
-    [data-theme="light"] .fCardSub { color:rgba(255,255,255,.7); }
-    .fCard.danger { background:linear-gradient(160deg,var(--color-salmon),var(--red)); border-bottom:3px solid rgba(127,29,29,1); box-shadow:0 5px 0 rgba(69,10,10,1),0 7px 14px rgba(220,38,38,.4),inset 0 1px 0 rgba(255,255,255,.22); }
-    .fCard.danger:active { transform:translateY(4px); border-bottom:1px solid rgba(127,29,29,1); }
-    .fCard.danger .fCardLabel { color:#fff; }
+    .fCard::before { display:none; }
+    .fCard:nth-child(1) { border-color:rgba(14,165,233,.35); background:rgba(2,132,199,.18); }
+    .fCard:nth-child(2) { border-color:rgba(99,102,241,.35); background:rgba(79,70,229,.15); }
+    .fCard:nth-child(3) { border-color:rgba(251,146,60,.35); background:rgba(217,119,6,.15); }
+    .fCard:nth-child(4) { border-color:rgba(239,68,68,.4); background:rgba(185,28,28,.2); }
+    .fCard:active { transform:scale(.95); opacity:.85; }
+    .fCardIcon { font-size:28px; line-height:1; }
+    .fCardLabel { font-size:12px; font-weight:900; color:#e8f4ff; letter-spacing:-.1px; }
+    [data-theme="light"] .fCardLabel { color:#1e3a5f; }
+    .fCardSub { font-size:10px; font-weight:600; color:rgba(180,220,240,.55); }
+    [data-theme="light"] .fCardSub { color:rgba(30,58,95,.5); }
+    .fCard.danger { border-color:rgba(239,68,68,.4); background:rgba(185,28,28,.2); }
+    .fCard.danger:active { transform:scale(.95); }
+    .fCard.danger .fCardLabel { color:#fca5a5; }
     .fRow { display:flex; align-items:center; gap:12px; padding:11px 16px; cursor:pointer; border-bottom:1px solid rgba(0,140,180,.12); transition:background .12s; }
     [data-theme="light"] .fRow { /* same */ }
     .fRow:active { background:rgba(255,255,255,.05); }
