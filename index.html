@@ -72,37 +72,33 @@
     /* ══ StatCards — paleta relatório semanal ══ */
     .statGrid {
       display: grid !important;
-      grid-template-columns: 1fr 1fr 1fr !important;
+      grid-template-columns: 1fr 1fr !important;
       gap: 10px !important;
       margin-bottom: 4px !important;
     }
     .statCard {
       background: rgba(4,53,90,.45) !important;
       border: 1px solid rgba(0,140,180,.18) !important;
-      border-radius: 16px !important;
-      padding: 16px 8px 14px !important;
+      border-radius: 14px !important;
+      padding: 18px 14px 14px !important;
       display: flex !important;
       flex-direction: column !important;
-      align-items: center !important;
-      justify-content: center !important;
       gap: 6px !important;
-      text-align: center !important;
     }
     .statValue {
       font-family: 'Space Grotesk', sans-serif !important;
-      font-size: 28px !important;
+      font-size: 32px !important;
       font-weight: 900 !important;
       color: #e8f4ff !important;
       line-height: 1 !important;
     }
     .statLabel {
       font-family: 'Space Grotesk', sans-serif !important;
-      font-size: 9px !important;
+      font-size: 10px !important;
       font-weight: 800 !important;
       color: rgba(180,220,240,.55) !important;
       text-transform: uppercase !important;
-      letter-spacing: .5px !important;
-      line-height: 1.3 !important;
+      letter-spacing: .6px !important;
     }
   </style>
 
@@ -140,16 +136,24 @@
       </div>
     </div>
 
-    <!-- ══ PROGRESS BAR ══ -->
-    <div id="progressRow" style="display:flex;align-items:stretch;gap:12px;margin:22px 12px 0; padding-bottom:6px;">
-      <div class="progressWrap" id="progressWrap" style="flex:1;">
-        <span class="progressLabel">Progresso</span>
-        <div class="progressTrack">
-          <div class="progressFill" id="progressFill" style="width:0%">
-            <span style="position:absolute;left:6px;top:50%;transform:translateY(-50%);font-size:14px;line-height:1;z-index:2;filter:drop-shadow(0 0 4px rgba(255,255,255,.8));">⚡</span>
-          </div>
-        </div>
-        <span class="progressPct" id="progressPct">0%</span>
+    <!-- ══ TOP SEARCH BAR (Google-style) ══ -->
+    <div id="topSearchBar" style="margin:10px 14px 4px;">
+      <div id="topSearchInput" onclick="openSearch()" style="
+        display:flex;align-items:center;gap:10px;
+        background:rgba(255,255,255,0.06);
+        border:1px solid rgba(255,255,255,0.10);
+        border-radius:999px;
+        padding:9px 16px 9px 14px;
+        cursor:pointer;
+        transition:background .15s, border-color .15s;
+        -webkit-tap-highlight-color:transparent;
+      ">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;opacity:.45;">
+          <circle cx="11" cy="11" r="8" stroke="#7dd3f0" stroke-width="2.2"/>
+          <path d="M16.5 16.5 L21 21" stroke="#7dd3f0" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;color:rgba(180,220,240,0.45);flex:1;letter-spacing:.1px;">Buscar tarefas, consultas, remédios…</span>
+        <span style="font-size:10px;font-weight:800;color:rgba(180,220,240,0.22);font-family:'Space Grotesk',sans-serif;letter-spacing:.8px;flex-shrink:0;">GRS</span>
       </div>
     </div>
 
@@ -192,7 +196,7 @@
     <div class="view" id="dayView">
       <div class="pullIndicator" id="pullIndicator">↑ Soltar para voltar</div>
       <!-- Subpastas dentro da pasta atual -->
-      <div id="quickSubBtn" style="display:none;"></div>      <div id="subFolderArea" style="display:none;grid-template-columns:repeat(4,1fr);gap:10px 8px;padding:14px 14px 4px;justify-items:center;border-bottom:1px solid var(--line);"></div>
+      <div id="quickSubBtn" style="display:none;padding:8px 14px 0;"><button onclick="quickCreateSubfolder()" style="width:100%;padding:9px 14px;border-radius:13px;border:1px dashed rgba(167,139,250,.45);background:rgba(167,139,250,.08);color:#a78bfa;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center;"><span style="font-size:16px;">📂</span><span>+ Nova subpasta aqui</span></button></div>      <div id="subFolderArea" style="display:none;grid-template-columns:repeat(4,1fr);gap:10px 8px;padding:14px 14px 4px;justify-items:center;border-bottom:1px solid var(--line);"></div>
       <div class="listArea" id="listArea"></div>
       <div class="inputBar">
         <button class="dayFabBtn" id="dayZapSendBtn">
@@ -252,10 +256,10 @@
 
 <!-- ══ SETTINGS MODAL ══ -->
 <div class="sModalOverlay" id="sModalOverlay">
-  <div class="sModalBox" style="background:#111;border:1px solid rgba(0,140,180,.2);border-radius:20px;overflow:hidden;width:92%;max-width:360px;box-shadow:0 12px 40px rgba(0,0,0,.7);">
-    <div class="sModalHdr" style="background:rgba(2,24,36,.95);border-bottom:1px solid rgba(0,140,180,.15);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
-      <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;letter-spacing:.3px;">⚙️ Configurações</span>
-      <button class="sCloseBtn" id="sClose" style="width:30px;height:30px;border-radius:9px;background:rgba(0,80,120,.3);border:1px solid rgba(0,140,180,.25);color:#7dd3f0;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+  <div class="sModalBox" style="background:#111;border:1px solid rgba(234,88,12,.2);border-radius:20px;overflow:hidden;width:92%;max-width:360px;box-shadow:0 12px 40px rgba(0,0,0,.7);">
+    <div class="sModalHdr" style="background:#0d0d0d;border-bottom:1px solid rgba(234,88,12,.18);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#f97316;letter-spacing:.3px;">⚙️ Configurações</span>
+      <button class="sCloseBtn" id="sClose" style="width:30px;height:30px;border-radius:9px;background:rgba(234,88,12,.1);border:1px solid rgba(234,88,12,.25);color:rgba(234,88,12,.8);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
     </div>
     <div id="sBody" style="padding:14px;">
 
@@ -649,9 +653,24 @@
       </div>
     </div>
 
-    <!-- ══ FAB HAMBURGER ══ -->
-    <button class="searchFab" id="searchBtn" aria-label="Pesquisar">🔍</button>
-    <button class="sidebarFab" id="sidebarFab">☰</button>
+    <!-- ══ FOOTER PROGRESS BAR ══ -->
+    <div id="progressRow" style="
+      position:fixed;bottom:0;left:0;right:0;z-index:9997;
+      padding:8px 18px 14px;
+      background:rgba(4,12,26,0.94);
+      border-top:1px solid rgba(0,140,180,0.15);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+      display:flex;align-items:center;gap:8px;
+    ">
+      <span class="progressLabel" style="font-size:9px;">PROGRESSO</span>
+      <div class="progressTrack" style="flex:1;">
+        <div class="progressFill" id="progressFill" style="width:0%">
+          <span style="position:absolute;left:6px;top:50%;transform:translateY(-50%);font-size:12px;line-height:1;z-index:2;filter:drop-shadow(0 0 4px rgba(255,255,255,.8));">⚡</span>
+        </div>
+      </div>
+      <span class="progressPct" id="progressPct">0%</span>
+    </div>
 
 <script>
 // ══ CONSTANTS ══
@@ -1095,8 +1114,6 @@ function openBucket(id, _pushCurrent){
     else if(currentBucket) navStack.push(currentBucket);
   }
   currentBucket=id; currentView='day';
-  // Reforça sentinela para cada nível de navegação
-  setTimeout(()=>{ history.pushState({app:'agendapro',sentinel:true,bucket:id},''); }, 10);
   // Show day badge (always visible in header right)
   const badge=document.getElementById('dayBadge');
   const folder=state.folders.find(f=>f.id===id);
@@ -1172,12 +1189,12 @@ function goHome(){
   renderFolders();
 }
 
-// Lupa apenas na home
+// Barra de busca apenas na home
 function atualizarLupa(tela){
-  const lupa=document.getElementById('searchBtn');
-  if(!lupa) return;
-  if(tela==='home'){ lupa.style.display='flex'; lupa.style.opacity='1'; lupa.style.pointerEvents='auto'; }
-  else { lupa.style.display='none'; }
+  const tsb=document.getElementById('topSearchBar');
+  if(!tsb) return;
+  if(tela==='home'){ tsb.style.display='block'; }
+  else { tsb.style.display='none'; }
 }
 
 function navigateBack(){
@@ -1200,14 +1217,14 @@ function renderDayView(){
   if(photos.length>0){
     const photoRow=document.createElement('div');
     photoRow.className='taskRow';
-    photoRow.style.cssText='cursor:pointer;background:rgba(99,102,241,.09);border:1px solid rgba(99,102,241,.22);border-radius:10px;justify-content:space-between;gap:0;padding:7px 14px;flex-shrink:0;margin-bottom:6px;margin-top:2px;';
+    photoRow.style.cssText='cursor:pointer;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:14px;justify-content:center;gap:0;padding:10px 16px;flex-shrink:0;margin-bottom:4px;';
     const _pCount=photos.length;
     photoRow.innerHTML=
-      '<div style="display:flex;align-items:center;gap:8px;">'+
-        '<span style="font-size:15px;line-height:1;">🖼️</span>'+
-        '<span style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:12px;letter-spacing:-.1px;color:#a5b4fc;">Galeria da pasta</span>'+
-      '</div>'+
-      (_pCount>0?'<span style="background:rgba(99,102,241,.22);color:#a5b4fc;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;">'+_pCount+'</span>':'');
+      '<div style="display:flex;align-items:center;gap:10px;">'+
+        '<span style="font-size:20px;line-height:1;">🖼️</span>'+
+        '<span style="font-family:Space Grotesk,sans-serif;font-weight:800;font-size:13px;letter-spacing:-.2px;color:#818cf8;">Ver galeria da pasta</span>'+
+        (_pCount>0?'<span style="background:rgba(99,102,241,.18);color:#818cf8;font-size:11px;font-weight:800;padding:2px 8px;border-radius:20px;margin-left:4px;">'+_pCount+'</span>':'')+
+      '</div>';
     photoRow.addEventListener('click',()=>openBucketPhotoGallery(currentBucket));
     listArea.appendChild(photoRow);
   }
@@ -1789,8 +1806,8 @@ function showFormatChoice(titulo, subtitulo, cb){
     headerSub   = subtitulo || 'Como você quer visualizar?';
   }
 
-  // ── Botões lado a lado, mesmo tamanho ──
-  const BTN_BASE = `flex:1;padding:11px 6px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;-webkit-tap-highlight-color:transparent;`;
+  // ── Estilo único para TODOS os botões de ação ──
+  const BTN = `padding:13px 16px;border-radius:12px;border:1px solid rgba(0,140,180,.22);background:rgba(0,80,120,.32);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:14px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:12px;-webkit-tap-highlight-color:transparent;`;
 
   box.innerHTML=`
     <div style="display:flex;flex-direction:column;align-items:center;padding:8px 0 16px;border-bottom:1px solid rgba(0,140,180,.14);margin-bottom:16px;">
@@ -1798,11 +1815,17 @@ function showFormatChoice(titulo, subtitulo, cb){
       <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:900;color:#e8f4ff;letter-spacing:-.3px;">${headerTitle}</div>
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(180,220,240,.6);margin-top:5px;">${headerSub}</div>
     </div>
-    <div style="display:flex;gap:10px;margin-bottom:10px;">
-      <button id="_fHtml" style="${BTN_BASE}"><span style="font-size:18px;">🖥️</span><span>Ver na tela</span></button>
-      <button id="_fPdf" style="${BTN_BASE}"><span style="font-size:18px;">📄</span><span>Salvar PDF</span></button>
-    </div>
-    <button id="_fCancel" style="padding:11px 16px;border-radius:12px;border:none;background:transparent;color:rgba(180,220,240,.4);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;width:100%;margin-top:2px;">Cancelar</button>`;
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button id="_fHtml" style="${BTN}">
+        <span style="font-size:18px;line-height:1;">🖥️</span>
+        <span>Ver na tela</span>
+      </button>
+      <button id="_fPdf" style="${BTN}">
+        <span style="font-size:18px;line-height:1;">📄</span>
+        <span>Salvar como PDF</span>
+      </button>
+      <button id="_fCancel" style="padding:11px 16px;border-radius:12px;border:none;background:transparent;color:rgba(180,220,240,.4);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;width:100%;margin-top:2px;">Cancelar</button>
+    </div>`;
 
   box.querySelector('#_fHtml').addEventListener('click',()=>{close();cb('html');});
   box.querySelector('#_fPdf').addEventListener('click',()=>{close();cb('pdf');});
@@ -2538,7 +2561,7 @@ function init(){
 
   window.openSidebar=openSidebar;
   window.closeSidebar=closeSidebar;
-  document.getElementById('sidebarFab').addEventListener('click', ()=>{
+  document.getElementById('sidebarFab')?.addEventListener('click', ()=>{
     const sb = document.getElementById('sidebar');
     if(sb.classList.contains('open')) closeSidebar();
     else openSidebar();
@@ -2617,12 +2640,12 @@ function init(){
     const cRow=document.createElement('div');
     cRow.style.cssText='display:flex;gap:10px;margin-bottom:10px;';
     const bCam=document.createElement('button');
-    bCam.style.cssText='flex:1;padding:12px 8px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;';
-    bCam.innerHTML='<span style="font-size:18px;">📸</span> Câmera';
+    bCam.style.cssText='flex:1;padding:14px 10px;border-radius:14px;border:1.5px solid rgba(255,255,255,.15);background:var(--primary,rgba(77,163,255,.15));color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;';
+    bCam.innerHTML='<span style="font-size:22px;">📸</span>Tirar foto';
     bCam.addEventListener('click',()=>{ cClose(); document.getElementById('dayPhotoInputCam').click(); });
     const bGal=document.createElement('button');
-    bGal.style.cssText='flex:1;padding:12px 8px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;';
-    bGal.innerHTML='<span style="font-size:18px;">🖼️</span> Galeria';
+    bGal.style.cssText='flex:1;padding:14px 10px;border-radius:14px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;';
+    bGal.innerHTML='<span style="font-size:22px;">🖼️</span>Galeria';
     bGal.addEventListener('click',()=>{ cClose(); document.getElementById('dayPhotoInput').click(); });
     const bCan=document.createElement('button');
     bCan.style.cssText='width:100%;padding:11px 16px;border-radius:14px;border:none;background:transparent;color:rgba(180,220,240,.45);font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;cursor:pointer;';
@@ -2659,6 +2682,7 @@ function init(){
     if(e.target===document.getElementById('subScreenOverlay')) goSubBack();
   });
   document.getElementById('sSave').addEventListener('click',saveSettings);
+  document.getElementById('sClose').addEventListener('click', closeSettings);
   document.getElementById('sModalOverlay').addEventListener('click',(e)=>{if(e.target===document.getElementById('sModalOverlay'))closeSettings();});
   document.getElementById('rowName').addEventListener('click',()=>{
     closeSettings();
@@ -2721,14 +2745,15 @@ function init(){
   // ── Novos cards de dados
   document.getElementById('rowExport')    ?.addEventListener('click', exportarDados);
   document.getElementById('rowImport')    ?.addEventListener('click', importarDados);
-  document.getElementById('rowStats')     ?.addEventListener('click', openStats);
+  document.getElementById('rowStats')     ?.addEventListener('click', ()=>openStats(true));
   document.getElementById('rowIntegrity') ?.addEventListener('click', verificarIntegridade);
   // ── Botão de pesquisa no header
   document.getElementById('searchBtn')?.addEventListener('click', openSearch);
+  document.getElementById('topSearchInput')?.addEventListener('click', openSearch);
   // ── Sidebar novos itens
   document.getElementById('sb-searchPaciente')?.addEventListener('click',()=>{ closeSidebar(); openHistoricoPaciente(); });
   document.getElementById('sb-alertaRemedio')?.addEventListener('click',()=>{ closeSidebar(); ativarNotificacoesRemedios(); });
-  document.getElementById('sb-stats') ?.addEventListener('click', openStats);
+  document.getElementById('sb-stats') ?.addEventListener('click', ()=>openStats(false));
   // Handler reutilizável para foto de perfil
   function handleProfileFile(e){
     const f=e.target.files[0];
@@ -2771,21 +2796,14 @@ function init(){
   // ── Botão voltar Android (hardware back) ──
   // Técnica: substitui o estado atual e sempre empurra um novo sentinela.
   // Quando popstate dispara, temos certeza que foi o botão voltar.
-  // Empurra 2 sentinelas para suportar múltiplos níveis de navegação sem sair do app
-  function pushSentinel(){
-    history.pushState({app:'agendapro',sentinel:true,ts:Date.now()},'');
-    history.pushState({app:'agendapro',sentinel:true,ts:Date.now()+1},'');
-  }
+  function pushSentinel(){ history.pushState({app:'agendapro',sentinel:true},''); }
   history.replaceState({app:'agendapro',base:true},'');
   pushSentinel();
 
   window.addEventListener('popstate', function handleBack(e){
-    // Recoloca sentinelas imediatamente após cada popstate — mantém buffer robusto
+    // Sempre que popstate disparar, voltamos a fazer pushState imediatamente
+    // para manter a sentinela pronta para a próxima vez
     setTimeout(pushSentinel, 0);
-
-    // ── PRIORIDADE 1: fecha a lupa de busca se estiver aberta ──
-    const srchOv=document.getElementById('searchOverlay');
-    if(srchOv && srchOv.style.display==='flex'){ closeSearch(); return; }
 
     // Fecha sidebar se estiver aberto
     const sbEl=document.getElementById('sidebar');
@@ -3983,8 +4001,6 @@ function openSearch() {
   overlay.style.display = 'flex';
   input.value = '';
   document.getElementById('searchResults').innerHTML = '<p class="searchEmpty">Digite para pesquisar…</p>';
-  // Empurra estado extra para que o botão VOLTAR do celular feche a busca
-  history.pushState({app:'agendapro',search:true},'');
   setTimeout(() => input.focus(), 100);
 }
 
@@ -4018,20 +4034,6 @@ function _runSearch(query) {
 
   const results = [];
 
-  // Calcular data ISO de cada dayId da semana atual
-  function _bucketDateISO(bid) {
-    const wkISO = state.weekStartISO || (typeof getSunday === 'function' ? getSunday() : null);
-    if (!wkISO) return '';
-    const dayIdx = (typeof DAYS !== 'undefined') ? DAYS.findIndex(d => d.id === bid) : -1;
-    if (dayIdx < 0) return '';
-    const base = parseLocalDate(wkISO);
-    base.setDate(base.getDate() + dayIdx);
-    const y = base.getFullYear();
-    const m = String(base.getMonth()+1).padStart(2,'0');
-    const d = String(base.getDate()).padStart(2,'0');
-    return `${y}-${m}-${d}`;
-  }
-
   // Tarefas (semana atual + dateTasks + pastas)
   const allBuckets = [...Object.keys(state.tasks || {})];
   allBuckets.forEach(bid => {
@@ -4039,10 +4041,9 @@ function _runSearch(query) {
     const folder = state.folders.find(f => f.id === bid);
     const day    = typeof DAYS !== 'undefined' ? DAYS.find(d => d.id === bid) : null;
     const label  = folder ? `${folder.emoji||'📁'} ${folder.name}` : (day ? day.label : bid);
-    const sk = day ? _bucketDateISO(bid) : '';
     arr.forEach(t => {
       if (t.text.toLowerCase().includes(q)) {
-        results.push({ type:'task', icon:'✅', typeLabel:'Tarefa', text:t.text, sub:label, sortKey:sk, action:()=>{ closeSearch(); openBucket(bid); } });
+        results.push({ type:'task', icon:'✅', typeLabel:'Tarefa', text:t.text, sub:label, sortKey:'', action:()=>{ closeSearch(); openBucket(bid); } });
       }
     });
   });
@@ -4086,13 +4087,12 @@ function _runSearch(query) {
     }
   });
 
-  // Ordenar por data ascendente: mais próxima (hoje ou futura) primeiro
-  // Tarefas sem data vão para o fim
-  const todayISO = new Date().toISOString().split('T')[0];
+  // Ordenar por data (mais próxima primeiro)
   results.sort((a, b) => {
-    const ka = a.sortKey || '9999-99-99';
-    const kb = b.sortKey || '9999-99-99';
-    return ka.localeCompare(kb);
+    if(!a.sortKey && !b.sortKey) return 0;
+    if(!a.sortKey) return 1;
+    if(!b.sortKey) return -1;
+    return a.sortKey.localeCompare(b.sortKey);
   });
 
   if (results.length === 0) {
@@ -4149,7 +4149,7 @@ function _runSearch(query) {
 // ══════════════════════════════════════════════════════════════════
 // ══ TELA DE ESTATÍSTICAS ══
 // ══════════════════════════════════════════════════════════════════
-function openStats() {
+function openStats(fromSettings) {
   const m = (typeof _metrics !== 'undefined') ? _metrics.get() : {};
 
   // Calcular estatísticas reais do state
@@ -4179,59 +4179,53 @@ function openStats() {
     <div style="padding:4px 0 12px;font-family:'Plus Jakarta Sans',sans-serif;">
       <div class="statGrid">
         <div class="statCard">
-          <span style="font-size:20px;line-height:1;margin-bottom:2px;">📝</span>
-          <span class="statValue" style="color:#7dd3f0;">${totalTasks}</span>
-          <span class="statLabel">Tarefas</span>
+          <span class="statValue">${totalTasks}</span>
+          <span class="statLabel">📝 Tarefas</span>
         </div>
         <div class="statCard">
-          <span style="font-size:20px;line-height:1;margin-bottom:2px;">✅</span>
-          <span class="statValue" style="color:#4ade80;">${pct}%</span>
-          <span class="statLabel">Concluídas</span>
+          <span class="statValue">${pct}%</span>
+          <span class="statLabel">✅ Concluídas</span>
         </div>
         <div class="statCard">
-          <span style="font-size:20px;line-height:1;margin-bottom:2px;">📁</span>
-          <span class="statValue" style="color:#fbbf24;">${totalFolders}</span>
-          <span class="statLabel">Pastas</span>
+          <span class="statValue">${totalConsultas}</span>
+          <span class="statLabel">🏥 Consultas</span>
         </div>
         <div class="statCard">
-          <span style="font-size:20px;line-height:1;margin-bottom:2px;">🏥</span>
-          <span class="statValue" style="color:#f87171;">${totalConsultas}</span>
-          <span class="statLabel">Consultas</span>
+          <span class="statValue">${totalRemedios}</span>
+          <span class="statLabel">💊 Remédios</span>
         </div>
         <div class="statCard">
-          <span style="font-size:20px;line-height:1;margin-bottom:2px;">💊</span>
-          <span class="statValue" style="color:#c4b5fd;">${totalRemedios}</span>
-          <span class="statLabel">Remédios</span>
+          <span class="statValue">${totalFolders}</span>
+          <span class="statLabel">📁 Pastas</span>
         </div>
         <div class="statCard">
-          <span style="font-size:20px;line-height:1;margin-bottom:2px;">🚀</span>
-          <span class="statValue" style="color:#fb923c;">${m.openCount || 1}</span>
-          <span class="statLabel">Aberturas</span>
+          <span class="statValue">${m.openCount || 1}</span>
+          <span class="statLabel">🚀 Aberturas</span>
         </div>
       </div>
-      <div style="margin-top:14px;background:rgba(4,53,90,.35);border:1px solid rgba(0,140,180,.18);border-radius:16px;overflow:hidden;">
-        <div style="padding:12px 16px 10px;border-bottom:1px solid rgba(0,140,180,.12);">
-          <span style="font-size:10px;font-weight:900;color:rgba(180,220,240,.55);text-transform:uppercase;letter-spacing:.6px;font-family:'Space Grotesk',sans-serif;">Uso do App</span>
+      <div style="margin-top:16px;background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.18);border-radius:14px;padding:16px 18px;">
+        <div style="font-size:10px;font-weight:900;color:rgba(180,220,240,.55);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;font-family:'Space Grotesk',sans-serif;">Uso do App</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          ${[
+            ['Primeira utilização', m.firstOpen ? new Date(m.firstOpen).toLocaleDateString('pt-BR') : '—'],
+            ['Última abertura',     m.lastOpen  ? new Date(m.lastOpen).toLocaleDateString('pt-BR')  : '—'],
+            ['Tempo de uso',        tempoLabel],
+            ['Criadas via app',     m.tasksCreated || 0],
+          ].map(([l,v]) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,140,180,.1);padding-bottom:8px;">
+              <span style="font-size:13px;font-weight:600;color:rgba(180,220,240,.7);font-family:'Plus Jakarta Sans',sans-serif;">${l}</span>
+              <span style="font-size:13px;font-weight:800;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;">${v}</span>
+            </div>
+          `).join('')}
         </div>
-        ${[
-          ['📅 Primeira utilização', m.firstOpen ? new Date(m.firstOpen).toLocaleDateString('pt-BR') : '—'],
-          ['🕒 Última abertura',     m.lastOpen  ? new Date(m.lastOpen).toLocaleDateString('pt-BR')  : '—'],
-          ['⏱️ Tempo de uso',        tempoLabel],
-          ['✏️ Criadas via app',     m.tasksCreated || 0],
-        ].map(([l,v],i,arr) => `
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 16px;${i<arr.length-1?'border-bottom:1px solid rgba(0,140,180,.09);':''}">
-            <span style="font-size:12px;font-weight:600;color:rgba(180,220,240,.65);font-family:'Plus Jakarta Sans',sans-serif;">${l}</span>
-            <span style="font-size:13px;font-weight:800;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;">${v}</span>
-          </div>
-        `).join('')}
       </div>
-      <div style="margin-top:14px;font-size:11px;font-weight:600;color:rgba(180,220,240,.3);text-align:center;font-family:'Space Grotesk',sans-serif;">
+      <div style="margin-top:12px;font-size:11px;font-weight:600;color:rgba(180,220,240,.35);text-align:center;line-height:1.5;font-family:'Space Grotesk',sans-serif;">
         🔒 Todos os dados são locais. Nada é enviado.
       </div>
     </div>`;
 
   closeSettings();
-  openSubScreen('📊 Estatísticas', html, null, () => openSettings());
+  openSubScreen('📊 Estatísticas', html, null, fromSettings ? () => openSettings() : null);
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -4619,54 +4613,38 @@ function openConsultaModal(editId){
         </div>
         <div style="${LBL}">Observação</div>
         <input id="_cObs" style="${iS}" placeholder="Opcional..." value="${editing?editing.obs||'':''}">
-        <div style="${LBL}">📷 Foto (opcional)</div>
-        <div id="_csFotoRow" style="display:none;align-items:center;gap:8px;margin-bottom:6px;">
-          <div id="_csFotoThumb" style="width:40px;height:40px;border-radius:8px;overflow:hidden;border:2px solid ${ACCENT};flex-shrink:0;"><img id="_csFotoImg" style="width:100%;height:100%;object-fit:cover;" src=""></div>
-          <span style="font-size:11px;font-weight:600;color:${ACCENT};flex:1;">Foto selecionada</span>
-          <button id="_csFotoRemove" type="button" style="padding:5px 8px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
+        <div style="${LBL}">📷 Foto da Receita / Pedido (opcional)</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;">
+          <button id="_csFotoBtn" type="button" style="padding:9px 14px;border-radius:10px;border:1px dashed ${BDR};background:${FIELD};color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex:1;">📷 Tirar / Escolher Foto</button>
+          <div id="_csFotoThumb" style="display:none;width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid ${ACCENT};flex-shrink:0;"><img id="_csFotoImg" style="width:100%;height:100%;object-fit:cover;" src=""></div>
+          <button id="_csFotoRemove" type="button" style="display:none;padding:6px 10px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
         </div>
-        <input type="file" id="_csFotoInput" accept="image/*" style="display:none;">
-        <input type="file" id="_csFotoInputCam" accept="image/*" capture="environment" style="display:none;">
-        <!-- 3 botões em 1 linha -->
-        <div style="display:flex;gap:8px;">
-          <button id="_csFotoCam" type="button" style="flex:1;padding:11px 4px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;">
-            <span style="font-size:17px;line-height:1;">📸</span><span>Câmera</span>
-          </button>
-          <button id="_csFotoGal" type="button" style="flex:1;padding:11px 4px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;">
-            <span style="font-size:17px;line-height:1;">🖼️</span><span>Galeria</span>
-          </button>
-          <button id="_cSave" style="flex:2;padding:11px 4px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;">
-            <span style="font-size:17px;line-height:1;">✔</span><span>${editing?'Salvar':'Agendar'}</span>
-          </button>
-        </div>
+        <input type="file" id="_csFotoInput" accept="image/*" capture="environment" style="display:none;">
+        <button id="_cSave" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:14px;cursor:pointer;letter-spacing:.2px;">✔ ${editing?'Salvar Alterações':'Agendar Consulta'}</button>
       </div>
     </div>`;
   document.body.appendChild(ov);
   if(!editing) ov.querySelector('#_cData').value=new Date().toISOString().split('T')[0];
   ov.querySelector('#_cClose').onclick=()=>ov.remove();
 
-  // Foto consulta — 2 botões: câmera e galeria
+  // Foto consulta
   let _csFotoData=null;
-  const _showFotoConsulta=(dataUrl)=>{
-    _csFotoData=dataUrl;
-    ov.querySelector('#_csFotoImg').src=dataUrl;
-    ov.querySelector('#_csFotoRow').style.display='flex';
-  };
-  if(editing&&editing.foto){ _showFotoConsulta(editing.foto); }
-  ov.querySelector('#_csFotoCam').onclick=()=>ov.querySelector('#_csFotoInputCam').click();
-  ov.querySelector('#_csFotoGal').onclick=()=>ov.querySelector('#_csFotoInput').click();
-  [['#_csFotoInput',''],['#_csFotoInputCam','']].forEach(([sel])=>{
-    ov.querySelector(sel).addEventListener('change',function(){
-      const file=this.files[0]; if(!file) return;
-      resizeImage(file,800,0.75,(dataUrl)=>{ _showFotoConsulta(dataUrl); });
-      this.value='';
+  if(editing&&editing.foto){ _csFotoData=editing.foto; ov.querySelector('#_csFotoImg').src=editing.foto; ov.querySelector('#_csFotoThumb').style.display='block'; ov.querySelector('#_csFotoRemove').style.display='block'; }
+  ov.querySelector('#_csFotoBtn').onclick=()=>ov.querySelector('#_csFotoInput').click();
+  ov.querySelector('#_csFotoInput').addEventListener('change',function(){
+    const file=this.files[0]; if(!file) return;
+    resizeImage(file,800,0.75,(dataUrl)=>{
+      _csFotoData=dataUrl;
+      ov.querySelector('#_csFotoImg').src=dataUrl;
+      ov.querySelector('#_csFotoThumb').style.display='block';
+      ov.querySelector('#_csFotoRemove').style.display='block';
     });
   });
   ov.querySelector('#_csFotoRemove').onclick=()=>{
     _csFotoData=null;
-    ov.querySelector('#_csFotoRow').style.display='none';
+    ov.querySelector('#_csFotoThumb').style.display='none';
+    ov.querySelector('#_csFotoRemove').style.display='none';
     ov.querySelector('#_csFotoInput').value='';
-    ov.querySelector('#_csFotoInputCam').value='';
   };
   ov.addEventListener('click',(e)=>{if(e.target===ov)ov.remove();});
   ov.querySelector('#_cSave').onclick=()=>{
@@ -4744,11 +4722,11 @@ function openListaConsultas(){
         <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;color:${isPast?MUTED:TEXT};flex:1;min-width:0;">${fmtConsultaLabel(c)}</div>
         <span style="font-size:12px;font-weight:900;color:#00c48a;font-family:'Space Grotesk',sans-serif;margin-left:8px;flex-shrink:0;">${c.hora}</span>
       </div>
-      <div style="padding:8px 14px;display:flex;gap:6px;align-items:center;">
-        <button onclick="event.stopPropagation();_abrirMiniRelatorio('${c.id}')" style="flex:1;background:rgba(77,163,255,.15);border:1px solid rgba(77,163,255,.3);border-radius:8px;color:var(--primary,#4da3ff);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:7px 4px;cursor:pointer;white-space:nowrap;text-align:center;">📋 Detalhes</button>
-        <button onclick="event.stopPropagation();compartilharConsultaWhatsApp('${c.id}')" style="flex:1;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:8px;color:#25d366;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:7px 4px;cursor:pointer;white-space:nowrap;text-align:center;">📤 Zap</button>
-        <button onclick="event.stopPropagation();editConsulta('${c.id}')" style="flex:1;background:${FIELD};border:1px solid ${FBDR};border-radius:8px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:7px 4px;cursor:pointer;white-space:nowrap;text-align:center;">✏️ Editar</button>
-        <button onclick="event.stopPropagation();deleteConsulta('${c.id}')" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:7px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;">✕</button>
+      <div style="padding:8px 14px;display:flex;gap:6px;flex-wrap:wrap;">
+        <button onclick="event.stopPropagation();_abrirMiniRelatorio('${c.id}')" style="background:rgba(77,163,255,.15);border:1px solid rgba(77,163,255,.3);border-radius:8px;color:var(--primary,#4da3ff);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">📋 Detalhes</button>
+        <button onclick="event.stopPropagation();compartilharConsultaWhatsApp('${c.id}')" style="background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:8px;color:#25d366;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">📤 Zap</button>
+        <button onclick="event.stopPropagation();editConsulta('${c.id}')" style="background:${FIELD};border:1px solid ${FBDR};border-radius:8px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✏️ Editar</button>
+        <button onclick="event.stopPropagation();deleteConsulta('${c.id}')" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✕</button>
       </div>
     </div>`;
   }
@@ -5030,12 +5008,12 @@ function openRemedioModal(editId){
         <div style="${FGRP}">
           <div style="${LBL}">Frequência *</div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-            <label id="_lbl8" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:1px solid rgba(0,140,180,.22);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;color:rgba(180,220,240,.75);background:rgba(0,80,120,.28);text-align:center;transition:all .15s;">
-              <span style="font-size:14px;line-height:1;">⏰</span><input type="radio" name="rmFreq" value="8" style="display:none;" ${editing&&editing.frequencia===8?'checked':''}>8 em 8h</label>
-            <label id="_lbl12" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:1px solid rgba(0,140,180,.22);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;color:rgba(180,220,240,.75);background:rgba(0,80,120,.28);text-align:center;transition:all .15s;">
-              <span style="font-size:16px;line-height:1;">🕛</span><input type="radio" name="rmFreq" value="12" style="display:none;" ${editing&&editing.frequencia===12?'checked':''}>12 em 12h</label>
-            <label id="_lblCustom" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:1px solid rgba(0,140,180,.22);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;color:rgba(180,220,240,.75);background:rgba(0,80,120,.28);text-align:center;transition:all .15s;">
-              <span style="font-size:16px;line-height:1;">✏️</span><input type="radio" name="rmFreq" value="custom" style="display:none;" ${editing&&editing.frequencia!==8&&editing.frequencia!==12?'checked':''}>Personalizar</label>
+            <label id="_lbl8" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${MUTED};background:${FIELD};text-align:center;">
+              <input type="radio" name="rmFreq" value="8" style="display:none;" ${editing&&editing.frequencia===8?'checked':''}> 8 em 8h</label>
+            <label id="_lbl12" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${MUTED};background:${FIELD};text-align:center;">
+              <input type="radio" name="rmFreq" value="12" style="display:none;" ${editing&&editing.frequencia===12?'checked':''}> 12 em 12h</label>
+            <label id="_lblCustom" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${MUTED};background:${FIELD};text-align:center;">
+              <input type="radio" name="rmFreq" value="custom" style="display:none;" ${editing&&editing.frequencia!==8&&editing.frequencia!==12?'checked':''}> Personalizar</label>
           </div>
           <div id="_rmFreqCustomDiv" style="display:none;margin-top:10px;">
             <div style="${LBL}">A cada quantas horas?</div>
@@ -5046,29 +5024,18 @@ function openRemedioModal(editId){
         <!-- Preview -->
         <div id="_rmPreview" style="margin-bottom:16px;"></div>
 
-        <!-- Foto + Salvar — 3 botões na mesma linha horizontal -->
+        <!-- Foto -->
         <div style="${FGRP}">
-          <div style="${LBL}">📷 Foto (opcional)</div>
-          <div id="_rmFotoRow" style="display:none;align-items:center;gap:8px;margin-bottom:6px;">
-            <div id="_rmFotoThumb" style="width:40px;height:40px;border-radius:8px;overflow:hidden;border:2px solid ${ACCENT};flex-shrink:0;"><img id="_rmFotoImg" style="width:100%;height:100%;object-fit:cover;" src=""></div>
-            <span style="font-size:11px;font-weight:600;color:${ACCENT};flex:1;">Foto selecionada</span>
-            <button id="_rmFotoRemove" type="button" style="padding:5px 8px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
+          <div style="${LBL}">📷 Foto da Receita / Caixa (opcional)</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button id="_rmFotoBtn" type="button" style="padding:11px 14px;border-radius:10px;border:1px dashed ${BDR};background:${FIELD};color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex:1;">📷 Tirar / Escolher Foto</button>
+            <div id="_rmFotoThumb" style="display:none;width:48px;height:48px;border-radius:10px;overflow:hidden;border:2px solid ${ACCENT};flex-shrink:0;"><img id="_rmFotoImg" style="width:100%;height:100%;object-fit:cover;" src=""></div>
+            <button id="_rmFotoRemove" type="button" style="display:none;padding:6px 10px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
           </div>
-          <input type="file" id="_rmFotoInput" accept="image/*" style="display:none;">
-          <input type="file" id="_rmFotoInputCam" accept="image/*" capture="environment" style="display:none;">
-          <!-- 3 botões em 1 linha -->
-          <div style="display:flex;gap:8px;">
-            <button id="_rmFotoCam" type="button" style="flex:1;padding:11px 4px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;">
-              <span style="font-size:17px;line-height:1;">📸</span><span>Câmera</span>
-            </button>
-            <button id="_rmFotoGal" type="button" style="flex:1;padding:11px 4px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;">
-              <span style="font-size:17px;line-height:1;">🖼️</span><span>Galeria</span>
-            </button>
-            <button id="_rmSave" style="flex:2;padding:11px 4px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;">
-              <span style="font-size:17px;line-height:1;">✔</span><span>${editing?'Salvar':'Adicionar'}</span>
-            </button>
-          </div>
+          <input type="file" id="_rmFotoInput" accept="image/*" capture="environment" style="display:none;">
         </div>
+
+        <button id="_rmSave" style="width:100%;padding:15px;border-radius:14px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;cursor:pointer;letter-spacing:.2px;">✔ ${editing?'Salvar Alterações':'Adicionar Remédio'}</button>
       </div>
     </div>`;
   document.body.appendChild(ov);
@@ -5078,10 +5045,9 @@ function openRemedioModal(editId){
   function updateRadioStyle(){
     ov.querySelectorAll('label:has(input[name="rmFreq"])').forEach(lbl=>{
       const radio=lbl.querySelector('input[name="rmFreq"]');
-      lbl.style.background=radio.checked?'linear-gradient(135deg,#0ea5e9,#0284c7)':'rgba(0,80,120,.28)';
-      lbl.style.borderColor=radio.checked?'transparent':'rgba(0,140,180,.22)';
-      lbl.style.color=radio.checked?'#fff':'rgba(180,220,240,.75)';
-      lbl.style.transform=radio.checked?'scale(1.03)':'scale(1)';
+      lbl.style.borderColor=radio.checked?'rgba(0,160,200,.7)':'rgba(0,140,180,.18)';
+      lbl.style.background=radio.checked?'rgba(0,80,120,.55)':'rgba(0,80,120,.28)';
+      lbl.style.color=radio.checked?'#7dd3f0':'rgba(180,220,240,.7)';
     });
     const checked=ov.querySelector('input[name="rmFreq"]:checked');
     ov.querySelector('#_rmFreqCustomDiv').style.display=(checked&&checked.value==='custom')?'block':'none';
@@ -5137,28 +5103,24 @@ function openRemedioModal(editId){
   ov.querySelector('#_rmClose').onclick=()=>ov.remove();
   ov.addEventListener('click',(e)=>{if(e.target===ov)ov.remove();});
 
-  // Foto da receita — 2 botões: câmera e galeria
+  // Foto da receita
   let _rmFotoData=null;
-  const _showFotoRemedio=(dataUrl)=>{
-    _rmFotoData=dataUrl;
-    ov.querySelector('#_rmFotoImg').src=dataUrl;
-    ov.querySelector('#_rmFotoRow').style.display='flex';
-  };
-  if(editing&&editing.foto){ _showFotoRemedio(editing.foto); }
-  ov.querySelector('#_rmFotoCam').onclick=()=>ov.querySelector('#_rmFotoInputCam').click();
-  ov.querySelector('#_rmFotoGal').onclick=()=>ov.querySelector('#_rmFotoInput').click();
-  ['#_rmFotoInput','#_rmFotoInputCam'].forEach(sel=>{
-    ov.querySelector(sel).addEventListener('change',function(){
-      const file=this.files[0]; if(!file) return;
-      resizeImage(file,800,0.75,(dataUrl)=>{ _showFotoRemedio(dataUrl); });
-      this.value='';
+  if(editing&&editing.foto){ _rmFotoData=editing.foto; const fi=ov.querySelector('#_rmFotoImg'); fi.src=editing.foto; ov.querySelector('#_rmFotoThumb').style.display='block'; ov.querySelector('#_rmFotoRemove').style.display='block'; }
+  ov.querySelector('#_rmFotoBtn').onclick=()=>ov.querySelector('#_rmFotoInput').click();
+  ov.querySelector('#_rmFotoInput').addEventListener('change',function(){
+    const file=this.files[0]; if(!file) return;
+    resizeImage(file,800,0.75,(dataUrl)=>{
+      _rmFotoData=dataUrl;
+      ov.querySelector('#_rmFotoImg').src=dataUrl;
+      ov.querySelector('#_rmFotoThumb').style.display='block';
+      ov.querySelector('#_rmFotoRemove').style.display='block';
     });
   });
   ov.querySelector('#_rmFotoRemove').onclick=()=>{
     _rmFotoData=null;
-    ov.querySelector('#_rmFotoRow').style.display='none';
+    ov.querySelector('#_rmFotoThumb').style.display='none';
+    ov.querySelector('#_rmFotoRemove').style.display='none';
     ov.querySelector('#_rmFotoInput').value='';
-    ov.querySelector('#_rmFotoInputCam').value='';
   };
 
   ov.querySelector('#_rmSave').onclick=()=>{
@@ -5293,10 +5255,10 @@ function openListaRemedios(){
         <div style="font-size:12px;font-weight:700;color:${TEXT};margin-bottom:4px;">👤 ${escHtml(r.paciente)}</div>
         <div style="font-size:11px;font-weight:600;color:${MUTED};margin-bottom:2px;">📅 ${dataFmt} ${r.hora} → ${dataFim}</div>
         <div style="font-size:11px;font-weight:600;color:${MUTED};margin-bottom:8px;">${r.dias} dias · ${total} usos</div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <button onclick="compartilharRemedioWhatsApp('${r.id}')" style="flex:1;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:8px;color:#25d366;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:7px 4px;cursor:pointer;white-space:nowrap;text-align:center;">📤 Zap</button>
-          <button onclick="editRemedio('${r.id}')" style="flex:1;background:${FIELD};border:1px solid ${FBDR};border-radius:8px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:7px 4px;cursor:pointer;white-space:nowrap;text-align:center;">✏️ Editar</button>
-          <button onclick="deleteRemedio('${r.id}')" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:7px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;">✕</button>
+        <div style="display:flex;gap:6px;">
+          <button onclick="compartilharRemedioWhatsApp('${r.id}')" style="background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);border-radius:8px;color:#25d366;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">📤 Zap</button>
+          <button onclick="editRemedio('${r.id}')" style="background:${FIELD};border:1px solid ${FBDR};border-radius:8px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✏️ Editar</button>
+          <button onclick="deleteRemedio('${r.id}')" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;">✕</button>
         </div>
       </div>
     </div>`;
@@ -5580,7 +5542,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a1020;color:#e2e8f
 .stat-n{font-size:16px;font-weight:900;color:#7dd3f0;line-height:1;display:block;}
 .stat-l{font-size:8px;font-weight:800;color:rgba(180,220,240,.55);text-transform:uppercase;letter-spacing:.5px;text-align:center;}
 .sec{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;padding:8px 12px;border-radius:8px;}
-.sec.cards{color:#a78bfa;background:rgba(167,139,250,.1);border-left:3px solid #a78bfa;}
+.sec.cards{color:#7dd3f0;background:rgba(0,140,180,.08);border-left:3px solid rgba(0,140,180,.4);}
 .sec.fut{color:#818cf8;background:rgba(129,140,248,.1);border-left:3px solid #818cf8;}
 .sec.past{color:#475569;background:rgba(71,85,105,.08);border-left:3px solid #334155;}
 @media print{body{background:#fff;color:#0f172a;padding:10px}
@@ -5626,41 +5588,43 @@ function openHistoricoPaciente(){
   const ACCENT='#7dd3f0';
   const BDR='rgba(0,140,180,.18)';
   const FIELD='rgba(0,80,120,.28)';
+  const HBDR='rgba(0,80,120,.25)';
 
   const ov=document.createElement('div');
   ov.id='historicoPacienteOv';
   ov.style.cssText=`position:fixed;inset:0;z-index:99998;background:${bg};display:flex;flex-direction:column;overflow:hidden;`;
 
+  // Coleta todos os pacientes únicos
   const remedios=state.remedios||[];
   const consultas=state.consultas||[];
-  const totalCards=consultas.length+remedios.length;
+  const pacSet=new Set();
+  remedios.forEach(r=>r.paciente&&pacSet.add(r.paciente.trim()));
+  consultas.forEach(c=>c.paciente&&pacSet.add(c.paciente.trim()));
+  const pacientes=[...pacSet].sort();
 
-  // Gera os cards de um array de itens filtrados
-  function renderCards(filtro){
-    const termo=(filtro||'').toLowerCase().trim();
-    const consFilt=consultas.filter(c=>{
-      if(!termo) return true;
-      return [c.especialidade,c.medico,c.paciente,c.local,c.obs].filter(Boolean).join(' ').toLowerCase().includes(termo);
-    });
-    const remFilt=remedios.filter(r=>{
-      if(!termo) return true;
-      return [r.nome,r.dose,r.paciente].filter(Boolean).join(' ').toLowerCase().includes(termo);
-    });
+  function renderResultados(filtro){
+    const termo=filtro.toLowerCase().trim();
+    // Ordenar por data
+    const remFilt=remedios.filter(r=>r.paciente&&r.paciente.toLowerCase().includes(termo))
+      .sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+    const consFilt=consultas.filter(c=>c.paciente&&c.paciente.toLowerCase().includes(termo))
+      .sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
 
-    // Juntar e ordenar por data ascendente
-    const allItems=[
-      ...consFilt.map(c=>({...c,_tipo:'consulta'})),
-      ...remFilt.map(r=>({...r,_tipo:'remedio'}))
+    // Juntar tudo numa lista única ordenada por data
+    const allItems = [
+      ...consFilt.map(c=>({...c, _tipo:'consulta'})),
+      ...remFilt.map(r=>({...r, _tipo:'remedio'}))
     ].sort((a,b)=>((a.data||'9999')+(a.hora||'')).localeCompare((b.data||'9999')+(b.hora||'')));
 
     if(allItems.length===0){
-      return `<div style="text-align:center;padding:40px 20px;color:${MUTED};font-size:13px;font-family:'Space Grotesk',sans-serif;">Nenhum resultado encontrado</div>`;
+      return '<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.4);font-size:14px;">Nenhum resultado encontrado</div>';
     }
 
-    return allItems.map(item=>{
+    return allItems.map(item => {
       const df=item.data?item.data.split('-').reverse().join('/'):'—';
       if(item._tipo==='consulta'){
         return `<div style="background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.2);border-radius:16px;padding:16px;margin-bottom:12px;">
+          <!-- Header do card -->
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
             <div style="display:flex;align-items:center;gap:8px;">
               <span style="font-size:18px;line-height:1;">🏥</span>
@@ -5669,8 +5633,9 @@ function openHistoricoPaciente(){
                 <div style="font-size:10px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;">Consulta</div>
               </div>
             </div>
-            <span style="font-size:12px;font-weight:900;color:#00c48a;font-family:'Space Grotesk',sans-serif;background:rgba(0,196,138,.1);border:1px solid rgba(0,196,138,.25);border-radius:8px;padding:4px 10px;flex-shrink:0;">${df}${item.hora?' · '+item.hora:''}</span>
+            <span style="font-size:12px;font-weight:900;color:#00c48a;font-family:'Space Grotesk',sans-serif;background:rgba(0,196,138,.1);border:1px solid rgba(0,196,138,.25);border-radius:8px;padding:4px 10px;">${df}${item.hora?' · '+item.hora:''}</span>
           </div>
+          <!-- Grid de dados -->
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
             <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;">
               <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Paciente</div>
@@ -5679,8 +5644,8 @@ function openHistoricoPaciente(){
             ${item.medico?`<div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;">
               <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Médico</div>
               <div style="font-size:13px;font-weight:700;color:${TEXT};">👨‍⚕️ ${escHtml(item.medico)}</div>
-            </div>`:'<div></div>'}
-            ${item.local?`<div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;grid-column:span 2;">
+            </div>`:''}
+            ${item.local?`<div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;${!item.medico?'grid-column:span 2;':''}">
               <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Local</div>
               <div style="font-size:12px;font-weight:600;color:rgba(232,244,255,.75);">📍 ${escHtml(item.local)}</div>
             </div>`:''}
@@ -5704,7 +5669,7 @@ function openHistoricoPaciente(){
                 <div style="font-size:10px;font-weight:800;color:rgba(167,139,250,.6);text-transform:uppercase;letter-spacing:.5px;">Remédio · ${freqL}</div>
               </div>
             </div>
-            <span style="font-size:12px;font-weight:900;color:#a78bfa;font-family:'Space Grotesk',sans-serif;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);border-radius:8px;padding:4px 10px;flex-shrink:0;">${item.hora||'—'}</span>
+            <span style="font-size:12px;font-weight:900;color:#a78bfa;font-family:'Space Grotesk',sans-serif;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);border-radius:8px;padding:4px 10px;">${item.hora||'—'}</span>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
             <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;">
@@ -5725,30 +5690,28 @@ function openHistoricoPaciente(){
     }).join('');
   }
 
-  // Todos os cards ao abrir (sem filtro)
-  const allCardsHTML = renderCards('');
+  // Chips de pacientes
+  const chipsHTML=pacientes.map(p=>`<button class="pac-chip" data-pac="${escHtml(p)}" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s;">${escHtml(p)}</button>`).join('');
 
   ov.innerHTML=`
-    <!-- Header -->
-    <div style="display:flex;align-items:center;gap:12px;padding:18px 18px 16px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};flex-shrink:0;">
+    <!-- Header: ícone esquerda + título + botão fechar direita -->
+    <div style="display:flex;align-items:center;gap:12px;padding:16px 18px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};flex-shrink:0;">
       <span style="font-size:22px;line-height:1;flex-shrink:0;">🔍</span>
       <div style="flex:1;min-width:0;">
         <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:${TEXT};">Pesquisar Paciente</div>
-        <div style="font-size:11px;font-weight:600;color:${MUTED};">${totalCards} registro${totalCards!==1?'s':''} cadastrado${totalCards!==1?'s':''}</div>
+        <div style="font-size:11px;font-weight:600;color:${MUTED};">${pacientes.length} paciente${pacientes.length!==1?'s':''} cadastrado${pacientes.length!==1?'s':''}</div>
       </div>
       <button id="hpClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:10px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
     </div>
-    <!-- Campo de busca com respiro -->
-    <div style="padding:16px 18px 14px;flex-shrink:0;">
-      <div style="position:relative;">
-        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;">🔍</span>
-        <input id="hpSearch" type="text" placeholder="Filtrar por nome, especialidade..." autocomplete="off"
-          style="width:100%;padding:12px 16px 12px 42px;border-radius:14px;border:1px solid ${BDR};background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;outline:none;box-sizing:border-box;">
-      </div>
+    <!-- Campo de busca -->
+    <div style="padding:14px 18px 8px;flex-shrink:0;">
+      <input id="hpSearch" type="text" placeholder="Digite o nome do paciente..." autocomplete="off"
+        style="width:100%;padding:12px 16px;border-radius:14px;border:1px solid ${BDR};background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;outline:none;box-sizing:border-box;">
+      ${pacientes.length>0?`<div style="display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;">${chipsHTML}</div>`:''}
     </div>
-    <!-- Cards com respiro no topo -->
-    <div id="hpResults" style="flex:1;overflow-y:auto;padding:4px 18px 24px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
-      ${allCardsHTML}
+    <!-- Resultados -->
+    <div id="hpResults" style="flex:1;overflow-y:auto;padding:4px 18px 24px;">
+      <div style="text-align:center;padding:48px 20px;color:${MUTED};font-size:13px;font-family:'Space Grotesk',sans-serif;">Digite um nome para pesquisar</div>
     </div>`;
 
   document.body.appendChild(ov);
@@ -5759,11 +5722,301 @@ function openHistoricoPaciente(){
   ov.querySelector('#hpClose').onclick=()=>ov.remove();
 
   inp.addEventListener('input',()=>{
-    resultsDiv.innerHTML=renderCards(inp.value);
+    const v=inp.value.trim();
+    if(v.length<1){
+      resultsDiv.innerHTML=`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-size:13px;font-family:'Space Grotesk',sans-serif;">Digite um nome para pesquisar</div>`;
+      return;
+    }
+    resultsDiv.innerHTML=renderResultados(v);
   });
+
+  // Chips clicáveis
+  ov.querySelectorAll('.pac-chip').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      ov.querySelectorAll('.pac-chip').forEach(b=>{ b.style.background=FIELD; b.style.borderColor='rgba(0,140,180,.25)'; });
+      btn.style.background='rgba(0,140,180,.25)';
+      btn.style.borderColor='rgba(0,160,200,.5)';
+      inp.value=btn.dataset.pac;
+      inp.dispatchEvent(new Event('input'));
+    });
+  });
+
+  setTimeout(()=>inp.focus(),150);
 }
 
 
+
+
+  // ══════════════════════════════════════════════════════════════════
+  // PWA CORE — Service Worker · Online/Offline · Install · Prefetch
+  // ══════════════════════════════════════════════════════════════════
+
+  // ── 1. BANNER DE ATUALIZAÇÃO DO SW ─────────────────────────────
+  // Aparece quando uma nova versão é detectada.
+  // Não recarrega automaticamente — usuário decide quando atualizar.
+  (function _swUpdateBanner() {
+    const BANNER_ID = '_swUpdateBanner';
+
+    function _showUpdateBanner() {
+      if (document.getElementById(BANNER_ID)) return;
+      const banner = document.createElement('div');
+      banner.id = BANNER_ID;
+      banner.setAttribute('role', 'alert');
+      banner.setAttribute('aria-live', 'polite');
+      banner.style.cssText = [
+        'position:fixed', 'bottom:80px', 'left:50%',
+        'transform:translateX(-50%) translateY(20px)',
+        'z-index:99998', 'background:rgba(10,25,47,.97)',
+        'border:1px solid rgba(99,102,241,.45)',
+        'border-radius:16px', 'padding:13px 18px',
+        'display:flex', 'align-items:center', 'gap:12px',
+        'max-width:320px', 'width:calc(100vw - 32px)',
+        'box-shadow:0 8px 32px rgba(0,0,0,.5)',
+        'opacity:0', 'transition:opacity .25s, transform .25s',
+        'font-family:Plus Jakarta Sans,sans-serif',
+      ].join(';');
+      banner.innerHTML = [
+        '<span style="font-size:20px;flex-shrink:0">🔄</span>',
+        '<span style="flex:1;font-size:13px;font-weight:700;color:#e8f4ff;line-height:1.4">',
+          'Nova versão disponível',
+        '</span>',
+        '<button id="_swUpdateBtn" style="',
+          'padding:8px 14px;border-radius:10px;border:none;',
+          'background:linear-gradient(135deg,#4f46e5,#6366f1);',
+          'color:#fff;font-family:Plus Jakarta Sans,sans-serif;',
+          'font-size:12px;font-weight:800;cursor:pointer;',
+          'white-space:nowrap;flex-shrink:0;',
+          '-webkit-tap-highlight-color:transparent;',
+        '">Atualizar</button>',
+        '<button id="_swUpdateDismiss" style="',
+          'padding:6px;border:none;background:transparent;',
+          'color:rgba(165,180,252,.5);cursor:pointer;',
+          'font-size:16px;line-height:1;flex-shrink:0;',
+          '-webkit-tap-highlight-color:transparent;',
+        '">✕</button>',
+      ].join('');
+      document.body.appendChild(banner);
+      requestAnimationFrame(() => {
+        banner.style.opacity = '1';
+        banner.style.transform = 'translateX(-50%) translateY(0)';
+      });
+      banner.querySelector('#_swUpdateBtn').addEventListener('click', () => {
+        banner.style.opacity = '0';
+        banner.style.transform = 'translateX(-50%) translateY(20px)';
+        setTimeout(() => {
+          if (banner.parentNode) banner.remove();
+          window.location.reload();
+        }, 250);
+      });
+      banner.querySelector('#_swUpdateDismiss').addEventListener('click', () => {
+        banner.style.opacity = '0';
+        banner.style.transform = 'translateX(-50%) translateY(20px)';
+        setTimeout(() => { if (banner.parentNode) banner.remove(); }, 280);
+      });
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js', {
+        updateViaCache: 'none'
+      }).then((reg) => {
+
+        reg.update().catch(() => {});
+        setInterval(() => reg.update().catch(() => {}), 60000);
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') reg.update().catch(() => {});
+        });
+
+        // SW manda SW_UPDATED após activate + clients.claim()
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data?.type === 'SW_UPDATED') {
+            // Se há campo sendo editado, mostrar banner em vez de recarregar
+            const editing = document.querySelector('[contenteditable="true"]');
+            if (editing) {
+              _showUpdateBanner();
+            } else {
+              window.location.reload();
+            }
+          }
+        });
+
+        // Se o SW foi instalado (waiting) enquanto o app estava aberto
+        if (reg.waiting) _showUpdateBanner();
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing;
+          if (!nw) return;
+          nw.addEventListener('statechange', () => {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+              _showUpdateBanner();
+            }
+          });
+        });
+
+        agendarNotificacoesRemedios().catch(() => {});
+
+      }).catch((err) => console.warn('[SW] Erro de registro:', err.message));
+    }
+  })();
+
+  // ── 2. BANNER OFFLINE / ONLINE ──────────────────────────────────
+  (function _offlineBanner() {
+    const BANNER_ID = '_offlineBanner';
+    let _reconnectTimer = null;
+
+    function _show() {
+      if (document.getElementById(BANNER_ID)) return;
+      const banner = document.createElement('div');
+      banner.id = BANNER_ID;
+      banner.setAttribute('role', 'status');
+      banner.setAttribute('aria-live', 'polite');
+      banner.style.cssText = [
+        'position:fixed', 'top:0', 'left:0', 'right:0',
+        'z-index:99997',
+        'background:linear-gradient(90deg,rgba(30,15,5,.97),rgba(50,25,5,.97))',
+        'border-bottom:1px solid rgba(245,158,11,.35)',
+        'padding:9px 16px',
+        'display:flex', 'align-items:center', 'gap:10px',
+        'font-family:Plus Jakarta Sans,sans-serif',
+        'transform:translateY(-100%)',
+        'transition:transform .3s ease',
+      ].join(';');
+      banner.innerHTML = [
+        '<span style="font-size:16px;flex-shrink:0">📵</span>',
+        '<span style="flex:1;font-size:12px;font-weight:700;color:#fcd34d;line-height:1.3">',
+          'Modo offline — dados salvos localmente',
+        '</span>',
+        '<span id="_offlineDot" style="',
+          'width:8px;height:8px;border-radius:50%;',
+          'background:#f59e0b;flex-shrink:0;',
+          'animation:_offlinePulse 1.4s ease-in-out infinite;',
+        '"></span>',
+      ].join('');
+      document.body.appendChild(banner);
+      // injetar @keyframes uma vez
+      if (!document.getElementById('_offlineKF')) {
+        const s = document.createElement('style');
+        s.id = '_offlineKF';
+        s.textContent = '@keyframes _offlinePulse{0%,100%{opacity:1}50%{opacity:.25}}';
+        document.head.appendChild(s);
+      }
+      requestAnimationFrame(() => { banner.style.transform = 'translateY(0)'; });
+    }
+
+    function _hide() {
+      const banner = document.getElementById(BANNER_ID);
+      if (!banner) return;
+      banner.style.transform = 'translateY(-100%)';
+      setTimeout(() => { if (banner.parentNode) banner.remove(); }, 320);
+    }
+
+    window.addEventListener('online',  () => { _hide();  showToast('✅ Conexão restaurada'); });
+    window.addEventListener('offline', () => { _show(); });
+
+    if (!navigator.onLine) _show();
+  })();
+
+  // ── 3. BOTÃO DE INSTALAÇÃO PWA ──────────────────────────────────
+  (function _installPrompt() {
+    let _deferred = null;
+    const BTN_ID = '_pwaInstallBtn';
+
+    // Não exibir se já está instalado (standalone ou fullscreen)
+    const isInstalled = window.matchMedia('(display-mode: standalone)').matches
+      || window.matchMedia('(display-mode: fullscreen)').matches
+      || navigator.standalone === true;
+
+    if (isInstalled) return;
+
+    function _showInstallBtn() {
+      if (document.getElementById(BTN_ID)) return;
+      const btn = document.createElement('button');
+      btn.id = BTN_ID;
+      btn.setAttribute('aria-label', 'Instalar aplicativo');
+      btn.style.cssText = [
+        'position:fixed', 'bottom:80px', 'right:16px',
+        'z-index:99996',
+        'background:linear-gradient(135deg,rgba(10,25,47,.97),rgba(20,40,80,.97))',
+        'border:1px solid rgba(99,102,241,.4)',
+        'border-radius:14px', 'padding:10px 16px',
+        'display:flex', 'align-items:center', 'gap:8px',
+        'cursor:pointer',
+        'font-family:Plus Jakarta Sans,sans-serif',
+        'font-size:13px', 'font-weight:800', 'color:#a5b4fc',
+        'box-shadow:0 4px 20px rgba(0,0,0,.4)',
+        'opacity:0', 'transform:scale(.9)',
+        'transition:opacity .2s, transform .2s',
+        '-webkit-tap-highlight-color:transparent',
+      ].join(';');
+      btn.innerHTML = '<span style="font-size:17px">📲</span> Instalar app';
+      document.body.appendChild(btn);
+      requestAnimationFrame(() => {
+        btn.style.opacity = '1';
+        btn.style.transform = 'scale(1)';
+      });
+
+      btn.addEventListener('click', async () => {
+        if (!_deferred) return;
+        btn.style.opacity = '0';
+        btn.style.transform = 'scale(.9)';
+        setTimeout(() => { if (btn.parentNode) btn.remove(); }, 200);
+        _deferred.prompt();
+        const { outcome } = await _deferred.userChoice;
+        if (outcome === 'accepted') showToast('✅ App instalado!');
+        _deferred = null;
+      });
+
+      // Remover automaticamente após 10 segundos se não clicar
+      setTimeout(() => {
+        if (!document.getElementById(BTN_ID)) return;
+        btn.style.opacity = '0';
+        btn.style.transform = 'scale(.9) translateY(10px)';
+        setTimeout(() => { if (btn.parentNode) btn.remove(); }, 300);
+      }, 10000);
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      _deferred = e;
+      // Atrasa um pouco para não aparecer no primeiro segundo
+      setTimeout(_showInstallBtn, 3000);
+    });
+
+    window.addEventListener('appinstalled', () => {
+      _deferred = null;
+      const btn = document.getElementById(BTN_ID);
+      if (btn) btn.remove();
+      showToast('✅ Agenda Pro Max instalada!');
+    });
+  })();
+
+  // ── 4. PREFETCH INTELIGENTE ──────────────────────────────────────
+  // Roda após a carga inicial para pré-cachear assets secundários.
+  // Usa requestIdleCallback para não competir com o LCP.
+  (function _prefetch() {
+    const ASSETS = [
+      './offline.html',
+      './icons/leo-192.png',
+      './icons/leo-512.png',
+      './manifest.json',
+    ];
+    function _run() {
+      if (!('caches' in window)) return;
+      caches.open('agenda-static-agenda-2025-03').then((cache) => {
+        ASSETS.forEach((url) => {
+          cache.match(url).then((hit) => {
+            if (!hit) fetch(url, { priority: 'low' }).catch(() => {});
+          });
+        });
+      }).catch(() => {});
+    }
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(_run, { timeout: 4000 });
+    } else {
+      setTimeout(_run, 2500);
+    }
+  })();
+
+// ══ COMPARTILHAR POR WHATSAPP ══
 function compartilharPacienteWhatsApp(paciente) {
   const remedios=(state.remedios||[]).filter(r=>r.paciente===paciente);
   const consultas=(state.consultas||[]).filter(c=>c.paciente===paciente);
@@ -5896,19 +6149,14 @@ async function abrirPainelNotificacoes() {
     <div style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${permColor};">Status: ${permLabel}</div>`;
   box.appendChild(hdr);
 
-  // Container de botões — grade 2 colunas
+  // Container de botões compacto
   const btnContainer=document.createElement('div');
-  btnContainer.style.cssText='display:flex;flex-direction:column;gap:10px;';
+  btnContainer.style.cssText='display:flex;flex-direction:column;gap:8px;';
 
-  const ROW1=document.createElement('div');
-  ROW1.style.cssText='display:flex;gap:10px;';
-  const ROW2=document.createElement('div');
-  ROW2.style.cssText='display:flex;gap:10px;';
-
-  const btnStyle='flex:1;padding:14px 6px;border-radius:14px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:Space Grotesk,sans-serif;font-weight:900;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:opacity .15s;';
+  const btnStyle='width:100%;padding:10px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(77,163,255,.12);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:700;font-size:14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:opacity .15s;';
 
   const b1=document.createElement('button'); b1.style.cssText=btnStyle;
-  b1.innerHTML='<span style="font-size:20px;">🔔</span>Ativar tudo';
+  b1.innerHTML='<span style="font-size:15px;">🔔</span> Ativar tudo';
   b1.addEventListener('click',async()=>{
     close();
     await agendarNotificacoesRemedios();
@@ -5917,7 +6165,7 @@ async function abrirPainelNotificacoes() {
   });
 
   const b2=document.createElement('button'); b2.style.cssText=btnStyle;
-  b2.innerHTML='<span style="font-size:20px;">💊</span>Só remédios';
+  b2.innerHTML='<span style="font-size:15px;">💊</span> Só remédios';
   b2.addEventListener('click',async()=>{
     close();
     await agendarNotificacoesRemedios();
@@ -5925,7 +6173,7 @@ async function abrirPainelNotificacoes() {
   });
 
   const b3=document.createElement('button'); b3.style.cssText=btnStyle;
-  b3.innerHTML='<span style="font-size:20px;">🏥</span>Só consultas';
+  b3.innerHTML='<span style="font-size:15px;">🏥</span> Só consultas';
   b3.addEventListener('click',async()=>{
     close();
     await agendarNotificacoesConsultas();
@@ -5937,9 +6185,7 @@ async function abrirPainelNotificacoes() {
   bCancel.textContent='Fechar';
   bCancel.addEventListener('click',close);
 
-  ROW1.appendChild(b1); ROW1.appendChild(b2);
-  ROW2.appendChild(b3);
-  btnContainer.appendChild(ROW1); btnContainer.appendChild(ROW2); btnContainer.appendChild(bCancel);
+  btnContainer.appendChild(b1); btnContainer.appendChild(b2); btnContainer.appendChild(b3); btnContainer.appendChild(bCancel);
   box.appendChild(btnContainer);
 }
 
@@ -5956,17 +6202,17 @@ function quickCreateSubfolder() {
 
   // ── Header igual ao de Configurações ──
   const hdr = document.createElement('div');
-  hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:14px 18px 12px;border-bottom:1px solid rgba(0,140,180,.18);';
+  hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:16px 18px 14px;border-bottom:1px solid rgba(140,100,50,.25);';
   hdr.innerHTML = `
     <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;display:flex;align-items:center;gap:8px;">
-      📂 Nova subpasta em <span style="color:#7dd3f0;">${parentFolder.emoji||'📁'} ${parentFolder.name}</span>
+      📂 Nova subpasta em <span style="color:#6d28d9;">${parentFolder.emoji||'📁'} ${parentFolder.name}</span>
     </span>
-    <button id="_qsClose" style="background:rgba(0,80,120,.3);border:1px solid rgba(0,140,180,.25);width:30px;height:30px;border-radius:50%;font-size:14px;cursor:pointer;color:#7dd3f0;font-weight:900;display:flex;align-items:center;justify-content:center;">✕</button>`;
+    <button id="_qsClose" style="background:rgba(60,30,0,.1);border:none;width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer;color:#5c3d1e;font-weight:900;display:flex;align-items:center;justify-content:center;">✕</button>`;
   box.appendChild(hdr);
 
   // ── Body ──
   const body = document.createElement('div');
-  body.style.cssText = 'padding:14px 16px 18px;';
+  body.style.cssText = 'padding:16px 18px 20px;';
 
   // Grid de emojis + botão +
   const emojiRow = document.createElement('div');
@@ -5975,10 +6221,10 @@ function quickCreateSubfolder() {
   emojis.forEach(e=>{
     const btn = document.createElement('button');
     btn.textContent = e;
-    btn.style.cssText = 'font-size:20px;background:rgba(0,80,120,.2);border:1px solid rgba(0,140,180,.2);border-radius:10px;padding:7px;cursor:pointer;transition:all .15s;';
+    btn.style.cssText = 'font-size:22px;background:rgba(255,255,255,.55);border:1.5px solid rgba(140,100,50,.25);border-radius:12px;padding:6px 9px;cursor:pointer;transition:all .15s;';
     btn.addEventListener('click',()=>{
-      emojiRow.querySelectorAll('button').forEach(b=>{ b.style.outline='none'; b.style.background='rgba(0,80,120,.2)'; });
-      btn.style.outline='2px solid #0ea5e9'; btn.style.background='rgba(14,165,233,.2)';
+      emojiRow.querySelectorAll('button').forEach(b=>{ b.style.outline='none'; b.style.background='rgba(255,255,255,.55)'; });
+      btn.style.outline='2.5px solid #6d28d9'; btn.style.background='rgba(109,40,217,.12)';
       window._qsPickedEmoji=e;
     });
     emojiRow.appendChild(btn);
@@ -5986,7 +6232,7 @@ function quickCreateSubfolder() {
   // Botão + para abrir emoji nativo do celular
   const plusBtn = document.createElement('button');
   plusBtn.title='Mais emojis';
-  plusBtn.style.cssText='font-size:16px;background:rgba(0,80,120,.2);border:1.5px dashed rgba(0,140,180,.35);border-radius:10px;padding:7px 10px;cursor:pointer;color:#7dd3f0;font-weight:900;';
+  plusBtn.style.cssText='font-size:18px;background:rgba(255,255,255,.55);border:1.5px dashed rgba(140,100,50,.4);border-radius:12px;padding:6px 11px;cursor:pointer;color:#7c4a1e;font-weight:900;';
   plusBtn.innerHTML='<span style="font-size:13px;font-family:Space Grotesk,sans-serif;font-weight:900;">+</span>';
   const hiddenEmoji=document.createElement('input');
   hiddenEmoji.type='text'; hiddenEmoji.style.cssText='position:absolute;opacity:0;width:0;height:0;';
@@ -5998,8 +6244,8 @@ function quickCreateSubfolder() {
     if(chars.length>0){
       const picked=chars[0];
       window._qsPickedEmoji=picked;
-      emojiRow.querySelectorAll('button:not(:last-child)').forEach(b=>{ b.style.outline='none'; b.style.background='rgba(0,80,120,.2)'; });
-      plusBtn.style.outline='2px solid #0ea5e9';
+      emojiRow.querySelectorAll('button:not(:last-child)').forEach(b=>{ b.style.outline='none'; b.style.background='rgba(255,255,255,.55)'; });
+      plusBtn.style.outline='2.5px solid #6d28d9';
       plusBtn.textContent=picked;
     }
     hiddenEmoji.value='';
@@ -6012,13 +6258,13 @@ function quickCreateSubfolder() {
   // Input nome — estilo igual ao sInput de configurações
   const inp = document.createElement('input');
   inp.type='text'; inp.placeholder='Nome da subpasta...';
-  inp.style.cssText='width:100%;padding:11px 14px;border-radius:12px;border:1px solid rgba(0,140,180,.2);background:rgba(0,80,120,.25);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-size:14px;font-weight:700;outline:none;box-sizing:border-box;margin-bottom:12px;';
+  inp.style.cssText='width:100%;padding:13px 15px;border-radius:14px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-size:14px;font-weight:700;outline:none;box-sizing:border-box;margin-bottom:14px;';
   body.appendChild(inp);
 
   // Botão Criar — estilo igual ao sSaveBtn
   const saveBtn = document.createElement('button');
   saveBtn.textContent='✔ Criar subpasta';
-  saveBtn.style.cssText='width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:Space Grotesk,sans-serif;font-size:14px;font-weight:900;cursor:pointer;letter-spacing:.2px;';
+  saveBtn.style.cssText='width:100%;padding:14px;border-radius:16px;border:none;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;font-family:Space Grotesk,sans-serif;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:.3px;';
   body.appendChild(saveBtn);
   box.appendChild(body);
 
