@@ -707,6 +707,7 @@
         <div class="sb-section-label">Organização</div>
         <div class="sb-item" id="sb-today" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(52,211,153,.1);">📅</div><span class="sb-label">Tarefas de hoje</span></div>
         <div class="sb-item" id="sb-folders" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,191,36,.1);">📁</div><span class="sb-label">Gerenciar pastas</span></div>
+        <div class="sb-item" id="sb-feriados" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,113,133,.1);">🎉</div><span class="sb-label">Feriados</span></div>
 
         <div class="sb-divider"></div>
         <div class="sb-section-label">Configurações</div>
@@ -2678,6 +2679,7 @@ function init(){
   document.getElementById('sb-consulta').addEventListener('click',()=>{ closeSidebar(); openConsultaModal(); });
   document.getElementById('sb-remedio').addEventListener('click',()=>{ closeSidebar(); openRemedioModal(); });
   document.getElementById('sb-folders').addEventListener('click',()=>{ closeSidebar(); openFolderModal(); });
+  document.getElementById('sb-feriados').addEventListener('click',()=>{ closeSidebar(); openFeriados(); });
   document.getElementById('sb-zap').addEventListener('click',()=>{ closeSidebar(); shareWhatsAppGlobal(); });
   document.getElementById('sb-backup').addEventListener('click',()=>{ closeSidebar(); doBackup(); });
   document.getElementById('sb-rWeek').addEventListener('click',()=>{ closeSidebar(); generateWeekReport(false); });
@@ -2960,6 +2962,9 @@ function init(){
     if(rLista){ rLista.remove(); return; }
     const hpOv = document.getElementById('historicoPacienteOv');
     if(hpOv){ hpOv.remove(); return; }
+    // Feriados
+    const ferOv = document.getElementById('feriadosOv');
+    if(ferOv){ ferOv.remove(); return; }
     // Viewer de relatório/backup
     const viewerOv = document.getElementById('inlineViewerOv');
     if(viewerOv){ viewerOv.remove(); return; }
@@ -3427,6 +3432,161 @@ function autoBackup(){
     while(bkKeys.length>4){ localStorage.removeItem(bkKeys.shift()); }
     showToast('💾 Backup automático salvo!');
   } catch(e){}
+}
+
+// ══ FERIADOS ══
+function openFeriados(){
+  const existing = document.getElementById('feriadosOv');
+  if(existing){ existing.remove(); return; }
+
+  // ── Calcula Páscoa (algoritmo anônimo) ──
+  function calcPascoa(ano){
+    const a=ano%19, b=Math.floor(ano/100), c=ano%100;
+    const d=Math.floor(b/4), e=b%4, f=Math.floor((b+8)/25);
+    const g=Math.floor((b-f+1)/3), h=(19*a+b-d-g+15)%30;
+    const i=Math.floor(c/4), k=c%4;
+    const l=(32+2*e+2*i-h-k)%7;
+    const m=Math.floor((a+11*h+22*l)/451);
+    const mes=Math.floor((h+l-7*m+114)/31); // 1-indexed
+    const dia=((h+l-7*m+114)%31)+1;
+    return new Date(ano, mes-1, dia);
+  }
+
+  // ── Monta lista de feriados do ano ──
+  function getFeriados(ano){
+    const p = calcPascoa(ano);
+    const addDays = (d,n)=>{ const r=new Date(d); r.setDate(r.getDate()+n); return r; };
+    const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+    const iso = d => `${ano}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+    const carnaval = addDays(p,-47);
+    const sextaSanta = addDays(p,-2);
+    const corpusChristi = addDays(p,60);
+
+    const lista = [
+      // Fixos
+      { iso:`${ano}-01-01`, nome:'Ano Novo',                  emoji:'🎆' },
+      { iso:iso(carnaval),  nome:'Carnaval',                  emoji:'🎭' },
+      { iso:iso(addDays(carnaval,1)), nome:'Segunda de Carnaval', emoji:'🎭' },
+      { iso:`${ano}-03-04`, nome:'Quarta de Cinzas',          emoji:'✝️', fixo:false, custom: iso(addDays(p,-45)) },
+      { iso:iso(sextaSanta),nome:'Sexta-feira Santa',         emoji:'✝️' },
+      { iso:iso(p),         nome:'Páscoa',                    emoji:'🐣' },
+      { iso:`${ano}-04-21`, nome:'Tiradentes',                emoji:'🇧🇷' },
+      { iso:`${ano}-05-01`, nome:'Dia do Trabalho',           emoji:'👷' },
+      { iso:`${ano}-05-11`, nome:'Dia das Mães',              emoji:'💐', tipo:'comemorativo' },
+      { iso:iso(corpusChristi), nome:'Corpus Christi',        emoji:'✝️' },
+      { iso:`${ano}-06-12`, nome:'Dia dos Namorados',         emoji:'❤️', tipo:'comemorativo' },
+      { iso:`${ano}-07-13`, nome:'Dia dos Pais',              emoji:'👔', tipo:'comemorativo',
+        // Segundo domingo de agosto
+        custom: (()=>{ const d=new Date(ano,7,1); let dom=d.getDay(); let first=dom===0?1:8-dom; return `${ano}-08-${String(first+7).padStart(2,'0')}`; })()
+      },
+      { iso:`${ano}-09-07`, nome:'Independência do Brasil',   emoji:'🇧🇷' },
+      { iso:`${ano}-10-12`, nome:'Nossa Sra. Aparecida',      emoji:'🙏' },
+      { iso:`${ano}-10-28`, nome:'Dia do Servidor Público',   emoji:'📋', tipo:'opcional' },
+      { iso:`${ano}-11-02`, nome:'Finados',                   emoji:'🕯️' },
+      { iso:`${ano}-11-15`, nome:'Proclamação da República',  emoji:'🇧🇷' },
+      { iso:`${ano}-11-20`, nome:'Consciência Negra',         emoji:'✊' },
+      { iso:`${ano}-12-24`, nome:'Véspera de Natal',          emoji:'🎄', tipo:'opcional' },
+      { iso:`${ano}-12-25`, nome:'Natal',                     emoji:'🎅' },
+      { iso:`${ano}-12-31`, nome:'Véspera de Ano Novo',       emoji:'🎆', tipo:'opcional' },
+    ];
+
+    // Dia das Mães = 2º domingo de maio
+    const maes = (()=>{
+      const d=new Date(ano,4,1); let dom=d.getDay();
+      let first=dom===0?1:8-dom; return `${ano}-05-${String(first+7).padStart(2,'0')}`;
+    })();
+    // Dia dos Pais = 2º domingo de agosto
+    const pais = (()=>{
+      const d=new Date(ano,7,1); let dom=d.getDay();
+      let first=dom===0?1:8-dom; return `${ano}-08-${String(first+7).padStart(2,'0')}`;
+    })();
+
+    // Substitui datas comemorativas pelos domingos corretos
+    const result = lista.map(f => {
+      if(f.nome==='Dia das Mães') return {...f, iso: maes};
+      if(f.nome==='Dia dos Pais') return {...f, iso: pais};
+      if(f.nome==='Quarta de Cinzas') return {...f, iso: iso(addDays(p,-45))};
+      return f;
+    });
+
+    // Ordena por data
+    result.sort((a,b)=>a.iso.localeCompare(b.iso));
+
+    return result.map(f => ({...f, fmt: fmt(new Date(f.iso+'T12:00:00'))}));
+  }
+
+  const hoje = new Date();
+  const hojeISO = hoje.toISOString().split('T')[0];
+  const ano = hoje.getFullYear();
+  const feriados = getFeriados(ano).filter(f => f.iso >= hojeISO);
+
+  const DIAS_PT = ['dom','seg','ter','qua','qui','sex','sáb'];
+  const MESES_PT = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+
+  // Agrupa por mês
+  const porMes = {};
+  feriados.forEach(f => {
+    const d = new Date(f.iso+'T12:00:00');
+    const mes = d.getMonth();
+    if(!porMes[mes]) porMes[mes] = [];
+    porMes[mes].push({...f, diaSemana: DIAS_PT[d.getDay()]});
+  });
+
+  // Tipo badge
+  function tipoBadge(f){
+    if(f.tipo==='comemorativo') return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(251,191,36,.15);color:rgba(251,191,36,.9);border:1px solid rgba(251,191,36,.25);border-radius:5px;padding:1px 5px;margin-left:6px;">Comemorativo</span>';
+    if(f.tipo==='opcional') return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(148,163,184,.1);color:rgba(180,220,240,.55);border:1px solid rgba(148,163,184,.2);border-radius:5px;padding:1px 5px;margin-left:6px;">Facultativo</span>';
+    return '';
+  }
+
+  let html = '';
+  const mesesOrdem = Object.keys(porMes).map(Number).sort((a,b)=>a-b);
+
+  if(mesesOrdem.length === 0){
+    html = '<div style="text-align:center;padding:40px 20px;color:rgba(180,220,240,.4);font-family:Space Grotesk,sans-serif;font-size:14px;">Nenhum feriado restante neste ano 🎉</div>';
+  } else {
+    mesesOrdem.forEach(mes => {
+      html += `<div style="margin-bottom:6px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;color:rgba(125,211,240,.55);text-transform:uppercase;padding:14px 0 8px 2px;">${MESES_PT[mes]}</div>`;
+      porMes[mes].forEach((f,i) => {
+        const isHoje = f.iso === hojeISO;
+        const rowBg = isHoje ? 'background:rgba(0,160,200,.12);border:1px solid rgba(0,200,220,.22);' : (i%2===0 ? 'background:rgba(0,80,120,.18);' : 'background:rgba(0,80,120,.10);');
+        html += `<div style="${rowBg}border-radius:10px;padding:10px 13px;margin-bottom:5px;display:flex;align-items:center;gap:11px;">
+          <div style="flex-shrink:0;min-width:46px;text-align:center;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:900;color:${isHoje?'#7dd3f0':'#e8f4ff'};line-height:1;">${f.fmt.split('/')[0]}</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:600;color:rgba(180,220,240,.5);text-transform:uppercase;letter-spacing:.04em;">${f.diaSemana}</div>
+          </div>
+          <div style="flex-shrink:0;font-size:20px;line-height:1;">${f.emoji}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:${isHoje?'#7dd3f0':'#e8f4ff'};line-height:1.3;">${f.nome}${tipoBadge(f)}</div>
+            ${isHoje?'<div style="font-family:Space Grotesk,sans-serif;font-size:10px;color:rgba(125,211,240,.7);font-weight:600;margin-top:2px;">Hoje!</div>':''}
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    });
+  }
+
+  const ov = document.createElement('div');
+  ov.id = 'feriadosOv';
+  ov.style.cssText = 'position:fixed;inset:0;background:linear-gradient(160deg,#021824,#04355a);z-index:99997;display:flex;flex-direction:column;';
+  ov.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid rgba(0,140,180,.2);flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="_ferBack" style="background:rgba(0,80,120,.4);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:#e8f4ff;letter-spacing:-.2px;">🎉 Feriados ${ano}</span>
+      </div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;color:rgba(180,220,240,.45);">${feriados.length} restantes</div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:14px 16px 24px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
+      ${html}
+      <div style="margin-top:18px;padding:12px 14px;background:rgba(0,80,120,.15);border:1px solid rgba(0,140,180,.12);border-radius:10px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:rgba(180,220,240,.35);line-height:1.6;text-align:center;">Feriados nacionais · Páscoa e datas móveis calculados automaticamente · Inclui comemorativos e facultativos</div>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+  ov.querySelector('#_ferBack').onclick = () => ov.remove();
 }
 
 // ══ FOLDER MODAL ══
@@ -4796,16 +4956,16 @@ function openConsultaModal(editId){
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,10,20,.82);z-index:99993;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;';
   ov.innerHTML=`
     <div style="background:${BG};border:1px solid ${FBDR};border-radius:20px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.65);overflow:hidden;margin:auto;">
-      <!-- Header igual ao page-hdr do relatório -->
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:22px;line-height:1;">🏥</span>
-          <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:${TEXT};letter-spacing:-.2px;">${editing?'Editar':'Nova'} Consulta</span>
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:18px;line-height:1;">🏥</span>
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;color:${TEXT};letter-spacing:-.2px;">${editing?'Editar':'Nova'} Consulta</span>
         </div>
-        <button id="_cClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:9px;color:${ACCENT};width:32px;height:32px;cursor:pointer;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
+        <button id="_cClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:8px;color:${ACCENT};width:28px;height:28px;cursor:pointer;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
       </div>
       <!-- Campos -->
-      <div style="padding:16px 18px 20px;">
+      <div style="padding:14px 16px 18px;">
         <div style="${LBL}">Especialidade *</div>
         <input id="_cEspec" style="${iS}" placeholder="Ex: Cardiologista, Dentista..." value="${editing?editing.especialidade:''}">
         <div style="${LBL}">Médico / Clínica</div>
@@ -4820,19 +4980,19 @@ function openConsultaModal(editId){
         </div>
         <div style="${LBL}">Observação</div>
         <input id="_cObs" style="${iS}" placeholder="Opcional..." value="${editing?editing.obs||'':''}">
-        <div style="${LBL}">📷 Foto da Receita / Pedido (opcional)</div>
+        <div style="margin-top:14px;margin-bottom:8px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(180,220,240,.55);">📷 Foto da Receita / Pedido (opcional)</div>
         <div id="_csFotoThumb" style="display:none;margin-bottom:8px;width:100%;text-align:center;"><img id="_csFotoImg" style="max-height:100px;border-radius:10px;border:2px solid ${ACCENT};" src=""></div>
         <input type="file" id="_csFotoCam" accept="image/*" capture="environment" style="display:none;">
         <input type="file" id="_csFotoGal" accept="image/*" style="display:none;">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px;">
-          <button id="_csFotoCamBtn" type="button" style="padding:12px 4px;border-radius:12px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;">
-            <span style="font-size:20px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span>
+          <button id="_csFotoCamBtn" type="button" style="padding:9px 4px;border-radius:11px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;">
+            <span style="font-size:18px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span>
           </button>
-          <button id="_csFotoGalBtn" type="button" style="padding:12px 4px;border-radius:12px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;">
-            <span style="font-size:20px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span>
+          <button id="_csFotoGalBtn" type="button" style="padding:9px 4px;border-radius:11px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;">
+            <span style="font-size:18px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span>
           </button>
-          <button id="_cSave" type="button" style="padding:12px 4px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;">
-            <span style="font-size:20px;line-height:1;display:block;text-align:center;">✔</span><span style="line-height:1;display:block;text-align:center;">${editing?'Salvar':'Agendar'}</span>
+          <button id="_cSave" type="button" style="padding:9px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;">
+            <span style="font-size:18px;line-height:1;display:block;text-align:center;">✔</span><span style="line-height:1;display:block;text-align:center;">${editing?'Salvar':'Agendar'}</span>
           </button>
         </div>
       </div>
@@ -5152,12 +5312,12 @@ function openRemedioModal(editId){
   ov.innerHTML=`
     <div style="background:${BG};border:1px solid ${FBDR};border-radius:20px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.65);overflow:hidden;margin:auto;">
       <!-- Header -->
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:${HDR};border-bottom:1px solid ${HBDR};">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:22px;line-height:1;">💊</span>
-          <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:${TEXT};letter-spacing:-.2px;">${editing?'Editar':'Novo'} Remédio</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:${HDR};border-bottom:1px solid ${HBDR};">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:18px;line-height:1;">💊</span>
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;color:${TEXT};letter-spacing:-.2px;">${editing?'Editar':'Novo'} Remédio</span>
         </div>
-        <button id="_rmClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:9px;color:${ACCENT};width:32px;height:32px;cursor:pointer;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>
+        <button id="_rmClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:8px;color:${ACCENT};width:28px;height:28px;cursor:pointer;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>
       </div>
       <!-- Campos -->
       <div style="padding:18px 18px 22px;">
@@ -5236,21 +5396,21 @@ function openRemedioModal(editId){
 
         <!-- Foto -->
         <div style="${FGRP}">
-          <div style="${LBL}">📷 Foto da Receita / Caixa (opcional)</div>
+          <div style="margin-top:14px;margin-bottom:8px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(180,220,240,.55);">📷 Foto da Receita / Caixa (opcional)</div>
           <div id="_rmFotoThumb" style="display:none;margin-bottom:8px;width:100%;text-align:center;"><img id="_rmFotoImg" style="max-height:100px;border-radius:10px;border:2px solid ${ACCENT};" src=""></div>
           <input type="file" id="_rmFotoCam" accept="image/*" capture="environment" style="display:none;">
           <input type="file" id="_rmFotoGal" accept="image/*" style="display:none;">
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px;">
-          <button id="_rmFotoCamBtn" type="button" style="padding:12px 4px;border-radius:12px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;">
-            <span style="font-size:20px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span>
+          <button id="_rmFotoCamBtn" type="button" style="padding:9px 4px;border-radius:11px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;">
+            <span style="font-size:18px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span>
           </button>
-          <button id="_rmFotoGalBtn" type="button" style="padding:12px 4px;border-radius:12px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;">
-            <span style="font-size:20px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span>
+          <button id="_rmFotoGalBtn" type="button" style="padding:9px 4px;border-radius:11px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;">
+            <span style="font-size:18px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span>
           </button>
-          <button id="_rmSave" type="button" style="padding:12px 4px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;">
-            <span style="font-size:20px;line-height:1;display:block;text-align:center;">✔</span><span style="line-height:1;display:block;text-align:center;">${editing?'Salvar':'Adicionar'}</span>
+          <button id="_rmSave" type="button" style="padding:9px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;">
+            <span style="font-size:18px;line-height:1;display:block;text-align:center;">✔</span><span style="line-height:1;display:block;text-align:center;">${editing?'Salvar':'Adicionar'}</span>
           </button>
         </div>
       </div>
