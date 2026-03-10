@@ -822,13 +822,12 @@ function defaultState() {
 }
 
 // ── Pastas fixas do sistema (não podem ser excluídas) ──
-const SYSTEM_IDS = ['pauta','_consultas','_remedios','_exames','_compras','_docs','_mercado','_contas'];
+const SYSTEM_IDS = ['pauta','_consultas','_remedios','_exames','_docs','_mercado','_contas'];
 const SYSTEM_DEFAULTS = [
   {id:'pauta',     name:'Pauta',            emoji:'📋'},
   {id:'_consultas',name:'Consultas',        emoji:'🏥'},
   {id:'_remedios', name:'Remédios',         emoji:'💊'},
   {id:'_exames',   name:'Exames',           emoji:'🩺'},
-  {id:'_compras',  name:'Lista de Compras', emoji:'🛒'},
   {id:'_docs',     name:'Documentos',       emoji:'🪪'},
   {id:'_mercado',  name:'Mercado',          emoji:'🛍️'},
   {id:'_contas',   name:'Contas a Pagar',   emoji:'💳'},
@@ -1252,7 +1251,6 @@ function openBucket(id, _pushCurrent){
     '_remedios':  ()=>openListaRemedios(),
     '_contas':    ()=>openContas(),
     '_exames':    ()=>openExames(),
-    '_compras':   ()=>openCompras(),
     '_docs':      ()=>openDocs(),
     '_mercado':   ()=>openMercado(),
   };
@@ -2739,7 +2737,6 @@ function init(){
   document.getElementById('sb-docs').addEventListener('click',()=>{ closeSidebar(); openDocs(); });
   document.getElementById('sb-contas') && document.getElementById('sb-contas').addEventListener('click',()=>{ closeSidebar(); openContas(); });
   document.getElementById('sb-exames') && document.getElementById('sb-exames').addEventListener('click',()=>{ closeSidebar(); openExames(); });
-  document.getElementById('sb-compras') && document.getElementById('sb-compras').addEventListener('click',()=>{ closeSidebar(); openCompras(); });
   document.getElementById('sb-mercado') && document.getElementById('sb-mercado').addEventListener('click',()=>{ closeSidebar(); openMercado(); });
   document.getElementById('sb-zap').addEventListener('click',()=>{ closeSidebar(); shareWhatsAppGlobal(); });
   document.getElementById('sb-backup').addEventListener('click',()=>{ closeSidebar(); doBackup(); });
@@ -2968,87 +2965,73 @@ function init(){
   });
 
   // ── Botão voltar Android (hardware back) ──
-  // Estratégia: 1 sentinela + debounce de 400ms para evitar duplo-disparo
+  // Estratégia: sentinela permanente — re-empurra sempre no topo do handler.
+  // O app NUNCA sai: na home o botão simplesmente não faz nada.
   history.replaceState({app:'agendapro',base:true},'');
   history.pushState({app:'agendapro',sentinel:true},'');
 
   var _backLastTs = 0;
   window.addEventListener('popstate', function handleBack(e){
-    // Re-empurra sentinela IMEDIATAMENTE — deve ser a primeira instrução
+    // Re-empurra sentinela IMEDIATAMENTE — primeira instrução sempre
     history.pushState({app:'agendapro',sentinel:true},'');
 
-    // Debounce: ignora disparos em menos de 400 ms
+    // Debounce: ignora disparos em menos de 180ms (evita duplo-disparo do Android)
     var now = Date.now();
-    if(now - _backLastTs < 400){ return; }
+    if(now - _backLastTs < 180){ return; }
     _backLastTs = now;
 
-    // Fecha sidebar se estiver aberto
-    const sbEl=document.getElementById('sidebar');
-    if(sbEl && sbEl.classList.contains('open')){ closeSidebar(); return; }
+    // ── Função auxiliar: tenta fechar o overlay DOM mais "ao topo" ──
+    function _tryCloseTop(){
+      // 1. Sidebar
+      const sbEl=document.getElementById('sidebar');
+      if(sbEl && sbEl.classList.contains('open')){ closeSidebar(); return true; }
+      // 2. Sub-screen overlay
+      const subScr=document.getElementById('subScreenOverlay');
+      if(subScr && subScr.classList.contains('show')){ goSubBack(); return true; }
+      // 3. Manual overlay
+      const manualOv=document.getElementById('manualOverlay');
+      if(manualOv && manualOv.style.display==='flex'){ manualOv.style.display='none'; return true; }
+      // 4. Settings modal
+      const sModal=document.getElementById('sModalOverlay');
+      if(sModal && sModal.classList.contains('show')){ closeSettings(); return true; }
+      // 5. Folder modal
+      const fModal=document.getElementById('fModalOverlay');
+      if(fModal && fModal.classList.contains('show')){ fModal.classList.remove('show'); return true; }
+      // 6. Calendar modal
+      const calModal=document.getElementById('calModalOverlay');
+      if(calModal && calModal.classList.contains('show')){ closeCalendarModal(); return true; }
+      // 7. Todos os overlays com id conhecidos (por z-index, mais alto primeiro)
+      const namedOvs = [
+        'photoFullscreenOv','photoGalleryOv',
+        'consultaFormOv','remedioFormOv',
+        'listaConsultasOv','listaRemediosOv',
+        'historicoPacienteOv','feriadosOv',
+        'docsOv','contasOv','examesOv','mercadoOv',
+        'inlineViewerOv'
+      ];
+      for(const oid of namedOvs){
+        const el=document.getElementById(oid);
+        if(el){ el.remove(); return true; }
+      }
+      // 8. Qualquer overlay dinâmico sem id (position:fixed z-index alto)
+      const dynOvs=document.querySelectorAll('body > div.modalOverlay');
+      if(dynOvs.length>0){ dynOvs[dynOvs.length-1].remove(); return true; }
+      const dynFixed=document.querySelectorAll('body > div[style*="position:fixed"][style*="z-index:9"]');
+      for(const ov of [...dynFixed].reverse()){
+        if(ov.id) continue; // já tratado acima
+        ov.remove(); return true;
+      }
+      return false;
+    }
 
-    // Fecha o que estiver aberto
-    const subScr=document.getElementById('subScreenOverlay');
-    if(subScr && subScr.classList.contains('show')){ goSubBack(); return; }
-    const manualOv=document.getElementById('manualOverlay');
-    if(manualOv && manualOv.style.display==='flex'){
-      manualOv.style.display='none'; return;
-    }
-    const sModal=document.getElementById('sModalOverlay');
-    if(sModal && sModal.classList.contains('show')){
-      closeSettings(); return;
-    }
-    const fModal=document.getElementById('fModalOverlay');
-    if(fModal && fModal.classList.contains('show')){
-      fModal.classList.remove('show'); return;
-    }
-    const calModal=document.getElementById('calModalOverlay');
-    if(calModal && calModal.classList.contains('show')){
-      closeCalendarModal(); return;
-    }
-    // Foto em fullscreen → fecha e volta para galeria
-    const fsOv = document.getElementById('photoFullscreenOv');
-    if(fsOv){ fsOv.remove(); return; }
-    // Galeria de fotos → fecha e volta para pasta/dia
-    const galOv = document.getElementById('photoGalleryOv');
-    if(galOv){ galOv.remove(); return; }
-    // Formulários de consulta/remédio
-    const cForm = document.getElementById('consultaFormOv');
-    if(cForm){ cForm.remove(); return; }
-    const rForm = document.getElementById('remedioFormOv');
-    if(rForm){ rForm.remove(); return; }
-    // Listas de consulta/remédio
-    const cLista = document.getElementById('listaConsultasOv');
-    if(cLista){ cLista.remove(); return; }
-    const rLista = document.getElementById('listaRemediosOv');
-    if(rLista){ rLista.remove(); return; }
-    const hpOv = document.getElementById('historicoPacienteOv');
-    if(hpOv){ hpOv.remove(); return; }
-    // Feriados
-    const ferOv = document.getElementById('feriadosOv');
-    if(ferOv){ ferOv.remove(); return; }
-    const docsOv = document.getElementById('docsOv');
-    if(docsOv){ docsOv.remove(); return; }
-    const contasOv = document.getElementById('contasOv');
-    if(contasOv){ contasOv.remove(); return; }
-    const examesOv = document.getElementById('examesOv');
-    if(examesOv){ examesOv.remove(); return; }
-    const comprasOv = document.getElementById('comprasOv');
-    if(comprasOv){ comprasOv.remove(); return; }
-    // Viewer de relatório/backup
-    const viewerOv = document.getElementById('inlineViewerOv');
-    if(viewerOv){ viewerOv.remove(); return; }
-    // Fecha qualquer outro overlay dinâmico (modais criados em JS)
-    const dynOvs=document.querySelectorAll('body > div.modalOverlay');
-    if(dynOvs.length>0){ dynOvs[dynOvs.length-1].remove(); return; }
-    const dynFixed=document.querySelectorAll('body > div[style*="position:fixed"][style*="z-index:9"]');
-    for(const ov of dynFixed){
-      if(ov.id) continue;
-      ov.remove(); return;
-    }
+    if(_tryCloseTop()) return;
+
+    // Nenhum overlay — navega entre views
     if(currentView==='day'){
       navigateBack();
+      return;
     }
-    // Na home: não faz nada (não sai do app — o pushSentinel já recolocou o estado)
+    // Na home: não faz nada — o pushState já garantiu que o app não fecha
   });
 
   // ── Pull-to-go-back (swipe down on list) ──
@@ -3584,7 +3567,7 @@ function _renderContasOv(){
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
       <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">💳 Contas a Pagar</span>
       <button id="_contasNew" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Nova</button>
-      <button id="_contasBack" style="background:rgba(0,80,120,.45);border:1px solid rgba(0,160,200,.35);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+      <button id="_contasBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
     ${pendentes>0?`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:rgba(0,80,120,.18);border-bottom:1px solid ${BDR};flex-shrink:0;">
       <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${MUTED};">${pendentes} pendente${pendentes>1?'s':''}</span>
@@ -3702,7 +3685,7 @@ function _renderExamesOv(){
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
       <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">🩺 Exames</span>
       <button id="_exNew" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
-      <button id="_exBack" style="background:rgba(0,80,120,.45);border:1px solid rgba(0,160,200,.35);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+      <button id="_exBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
     <div id="_exBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
       ${exames.length===0?`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;"><div style="font-size:40px;margin-bottom:12px;">🩺</div><div style="font-size:14px;font-weight:700;margin-bottom:6px;">Nenhum exame cadastrado</div><div style="font-size:12px;opacity:.7;">Toque em + Novo para cadastrar</div></div>`:exames.map((e,i)=>cardH(e,i)).join('')}
@@ -3828,7 +3811,7 @@ function _renderComprasOv(){
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
       <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">🛒 Lista de Compras</span>
       ${marcadosN>0?`<button id="_cpClearDone" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:10px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:7px 11px;cursor:pointer;flex-shrink:0;">Limpar</button>`:''}
-      <button id="_cpBack" style="background:rgba(0,80,120,.45);border:1px solid rgba(0,160,200,.35);border-radius:10px;color:rgba(125,211,240,1);font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+      <button id="_cpBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
     ${totalItems>0?`<div style="padding:8px 16px;background:rgba(0,80,120,.15);border-bottom:1px solid ${BDR};flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:${MUTED};">${pendentes.length} item${pendentes.length!==1?'ns':''} restante${pendentes.length!==1?'s':''}</span>
@@ -3904,7 +3887,7 @@ function _renderMercadoOv(){
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
       <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">🛍️ Mercado</span>
       ${marcadosN>0?`<button id="_mkClearDone" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:10px;color:#f87171;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:7px 11px;cursor:pointer;flex-shrink:0;">Limpar</button>`:''}
-      <button id="_mkBack" style="background:rgba(0,80,120,.45);border:1px solid rgba(0,160,200,.35);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+      <button id="_mkBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
     ${totalItems>0?`<div style="padding:8px 16px;background:rgba(0,80,120,.15);border-bottom:1px solid ${BDR};flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:${MUTED};">${pendentes.length} item${pendentes.length!==1?'ns':''} restante${pendentes.length!==1?'s':''}</span>
@@ -3994,7 +3977,7 @@ function _renderDocsOv(){
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
       <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">🪪 Documentos</span>
       <button id="_docsNew" style="background:${ACCENT_SOLID};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
-      <button id="_docsBack" style="background:rgba(0,80,120,.45);border:1px solid rgba(0,160,200,.35);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+      <button id="_docsBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
     <div id="_docsBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
       ${listaHTML}
@@ -5800,7 +5783,7 @@ function openListaConsultas(){
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
       <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">🏥 Consultas</span>
       <button id="_lcAdd" style="background:var(--primary,#4da3ff);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Nova</button>
-      <button id="_lcBack" style="background:rgba(0,80,120,.45);border:1px solid rgba(0,160,200,.35);border-radius:10px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+      <button id="_lcBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">${body}</div>`;
   document.body.appendChild(ov);
@@ -6334,7 +6317,7 @@ function openListaRemedios(){
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:${HDR};border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
       <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">💊 Remédios</span>
       <button id="_lrAdd" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
-      <button id="_lrBack" style="background:rgba(0,80,120,.45);border:1px solid rgba(0,160,200,.35);border-radius:10px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+      <button id="_lrBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">${body}</div>`;
   document.body.appendChild(ov);
