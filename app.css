@@ -193,6 +193,7 @@
       max-height: 120px; /* semana + handle embaixo */
       position: relative;
       margin-top: 10px;
+      margin-bottom: 6px; /* respiro entre calendário e handle */
     }
     .weekStripWrap.expanded { max-height: 400px; }
     .weekStrip { display:grid; grid-template-columns:repeat(8,1fr); gap:3px; padding:10px 8px 2px; }
@@ -206,7 +207,7 @@
     /* Handle de arraste — EMBAIXO */
     .stripHandle {
       display:flex; align-items:center; justify-content:space-between; gap:8px;
-      padding:8px 14px 10px; cursor:pointer; flex-shrink:0;
+      padding:10px 14px 12px; cursor:pointer; flex-shrink:0;
     }
     .stripHandle::before {
       content:''; display:none;
@@ -295,13 +296,13 @@
     .view.show { display:flex; }
 
     /* Home */
-    .homeBody { padding:14px 14px 64px; display:flex; flex-direction:column; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; }
+    .homeBody { padding:16px 14px 64px; display:flex; flex-direction:column; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; }
     .sectionTitle { font-size:clamp(10px,2.8vw,12px); font-weight:900; letter-spacing:1px; text-transform:uppercase; color:var(--text-white); margin-bottom:12px; padding-left:2px; margin-top:18px; }
     [data-theme="light"] .sectionTitle { color:var(--surface-2); font-weight:900; }
     .folderGrid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      gap: 6px 0;
+      gap: 10px 0;
       margin-bottom: 24px;
       padding: 0;
       place-items: start center;
@@ -313,7 +314,7 @@
       border: none; background: transparent;
       display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
       gap: 0; padding: 8px 2px 8px; cursor: pointer; user-select: none;
-      position: relative; min-height: 68px; border-radius: 16px;
+      position: relative; min-height: 72px; border-radius: 16px;
       transition: transform .15s, background .15s;
     }
     .folderTile:hover, .folderTile:focus {
@@ -336,7 +337,7 @@
       box-shadow: 0 4px 14px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.18);
       backdrop-filter: blur(10px);
       transition: box-shadow .15s, border-color .15s;
-      margin-bottom: 5px;
+      margin-bottom: 7px;
       flex-shrink: 0;
     }
     /* Gloss no topo da bolinha */
@@ -379,7 +380,7 @@
     .sidebarOverlay.open { display:block; opacity:1; }
 
     .sidebar {
-      position:fixed; top:0; left:-270px; bottom:0; width:260px; z-index:9999;
+      position:fixed; top:0; left:-310px; bottom:0; width:300px; z-index:9999;
       background:var(--bg2);
       border-right:1px solid rgba(251,146,60,.18);
       box-shadow:4px 0 40px rgba(0,0,0,.6);
