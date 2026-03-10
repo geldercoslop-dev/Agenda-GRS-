@@ -830,7 +830,7 @@ const SYSTEM_DEFAULTS = [
   {id:'_exames',   name:'Exames',           emoji:'🩺'},
   {id:'_docs',     name:'Documentos',       emoji:'🪪'},
   {id:'_mercado',  name:'Mercado',          emoji:'🛍️'},
-  {id:'_contas',   name:'Contas a Pagar',   emoji:'💳'},
+  {id:'_contas',   name:'A Pagar',   emoji:'💳'},
 ];
 
 function ensureSystemFolders(){
@@ -3565,7 +3565,7 @@ function _renderContasOv(){
   ov.style.cssText = `position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
-      <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">💳 Contas a Pagar</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;">💳 A Pagar</span>
       <button id="_contasNew" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Nova</button>
       <button id="_contasBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
@@ -3718,9 +3718,9 @@ function _renderExamesOv(){
         <input type="file" id="_efFotoCamI" accept="image/*" capture="environment" style="display:none;">
         <input type="file" id="_efFotoGalI" accept="image/*" style="display:none;">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:22px;">
-          <button id="_efFotoCamBtn" type="button" style="padding:9px 4px;border-radius:11px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;"><span style="font-size:18px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span></button>
-          <button id="_efFotoGalBtn" type="button" style="padding:9px 4px;border-radius:11px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;"><span style="font-size:18px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span></button>
-          <button id="_efSave" type="button" style="padding:9px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;"><span style="font-size:18px;line-height:1;display:block;text-align:center;">✔</span><span id="_efSaveLbl" style="line-height:1;display:block;text-align:center;">Salvar</span></button>
+          <button id="_efFotoCamBtn" type="button" style="padding:10px 4px;border-radius:11px;border:1.5px solid #0ea5e9;background:rgba(14,165,233,.15);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;"><span style="font-size:18px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span></button>
+          <button id="_efFotoGalBtn" type="button" style="padding:10px 4px;border-radius:11px;border:1.5px solid #0ea5e9;background:rgba(14,165,233,.15);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;"><span style="font-size:18px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span></button>
+          <button id="_efSave" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;"><span style="font-size:18px;line-height:1;display:block;text-align:center;">✔</span><span id="_efSaveLbl" style="line-height:1;display:block;text-align:center;">Salvar</span></button>
         </div>
       </div>
     </div>`;
@@ -5646,13 +5646,13 @@ function openConsultaModal(editId){
         <input type="file" id="_csFotoCam" accept="image/*" capture="environment" style="display:none;">
         <input type="file" id="_csFotoGal" accept="image/*" style="display:none;">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px;">
-          <button id="_csFotoCamBtn" type="button" style="padding:9px 4px;border-radius:11px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;">
+          <button id="_csFotoCamBtn" type="button" style="padding:10px 4px;border-radius:11px;border:1.5px solid #0ea5e9;background:rgba(14,165,233,.15);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
             <span style="font-size:18px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span>
           </button>
-          <button id="_csFotoGalBtn" type="button" style="padding:9px 4px;border-radius:11px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;">
+          <button id="_csFotoGalBtn" type="button" style="padding:10px 4px;border-radius:11px;border:1.5px solid #0ea5e9;background:rgba(14,165,233,.15);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
             <span style="font-size:18px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span>
           </button>
-          <button id="_cSave" type="button" style="padding:9px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;">
+          <button id="_cSave" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
             <span style="font-size:18px;line-height:1;display:block;text-align:center;">✔</span><span style="line-height:1;display:block;text-align:center;">${editing?'Salvar':'Agendar'}</span>
           </button>
         </div>
@@ -6062,13 +6062,13 @@ function openRemedioModal(editId){
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px;">
-          <button id="_rmFotoCamBtn" type="button" style="padding:9px 4px;border-radius:11px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;">
+          <button id="_rmFotoCamBtn" type="button" style="padding:10px 4px;border-radius:11px;border:1.5px solid #0ea5e9;background:rgba(14,165,233,.15);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
             <span style="font-size:18px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span>
           </button>
-          <button id="_rmFotoGalBtn" type="button" style="padding:9px 4px;border-radius:11px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;">
+          <button id="_rmFotoGalBtn" type="button" style="padding:10px 4px;border-radius:11px;border:1.5px solid #0ea5e9;background:rgba(14,165,233,.15);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
             <span style="font-size:18px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span>
           </button>
-          <button id="_rmSave" type="button" style="padding:9px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;">
+          <button id="_rmSave" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
             <span style="font-size:18px;line-height:1;display:block;text-align:center;">✔</span><span style="line-height:1;display:block;text-align:center;">${editing?'Salvar':'Adicionar'}</span>
           </button>
         </div>
