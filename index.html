@@ -140,7 +140,7 @@
     </div>
 
     <!-- ══ TOP SEARCH BAR (Google-style) ══ -->
-    <div id="topSearchBar" style="margin:10px 14px 6px;">
+    <div id="topSearchBar" style="margin:6px 14px 14px;">
       <div id="topSearchInput" onclick="openSearch()" style="
         display:flex;align-items:center;gap:10px;
         background:rgba(255,255,255,.09);
@@ -163,7 +163,7 @@
     </div>
 
     <!-- ══ WEEK STRIP — expansível ══ -->
-    <div id="weekStripCard" style="margin:4px 14px 6px;background:rgba(8,20,40,.6);border:1px solid rgba(255,255,255,.07);border-radius:20px;overflow:hidden;">
+    <div id="weekStripCard" style="margin:0 14px 14px;background:rgba(8,20,40,.6);border:1px solid rgba(255,255,255,.07);border-radius:20px;overflow:hidden;">
     <div class="weekStripWrap" id="weekStripWrap">
       <!-- Linha semanal (padrão) -->
       <div class="weekStrip" id="weekStrip"></div>
@@ -200,7 +200,7 @@
     <!-- ══ HOME VIEW ══ -->
     <div class="view show" id="homeView">
       <div class="homeBody">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.28);padding:10px 6px 10px;">Acesso Rápido</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.28);padding:10px 6px 12px;">Acesso Rápido</div>
         <div class="folderGrid" id="folderGrid"></div>
       </div>
     </div>
@@ -739,13 +739,12 @@
     <!-- ══ FOOTER PROGRESS BAR ══ -->
     <div id="progressRow" style="
       position:fixed;bottom:0;left:0;right:0;z-index:9997;
-      padding:6px 14px 14px 14px;
+      padding:10px 14px 18px 14px;
       background:linear-gradient(to top, rgba(5,14,31,.97) 60%, transparent 100%);
     ">
-      <!-- Linha única: label + barra + % + botão + léo -->
       <div style="display:flex;align-items:flex-end;gap:10px;">
 
-        <!-- Coluna esquerda: PROGRESSO label + barra -->
+        <!-- Coluna: label PROGRESSO + barra -->
         <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0;">
           <span style="font-size:8px;font-weight:900;letter-spacing:1.2px;color:rgba(180,220,255,.45);text-transform:uppercase;">Progresso</span>
           <div style="display:flex;align-items:center;gap:7px;">
@@ -771,18 +770,12 @@
           -webkit-tap-highlight-color:transparent;
         ">☰</button>
 
-        <!-- Léo — flutua acima do footer -->
-        <div style="flex-shrink:0;position:relative;width:72px;display:flex;flex-direction:column;align-items:center;">
-          <!-- Seta + texto "aperte menu" -->
-          <div style="position:absolute;top:-28px;right:72px;white-space:nowrap;display:flex;flex-direction:column;align-items:flex-end;gap:1px;pointer-events:none;">
-            <span style="font-size:9px;font-weight:900;color:rgba(249,115,22,.95);font-family:'Space Grotesk',sans-serif;letter-spacing:.3px;">aperte menu</span>
-            <span style="font-size:18px;line-height:1;transform:rotate(30deg) scaleX(-1);display:inline-block;">↩️</span>
-          </div>
-          <!-- Léo saindo por cima -->
+        <!-- Léo — sem texto, sem seta -->
+        <div style="flex-shrink:0;width:72px;display:flex;align-items:flex-end;justify-content:center;">
           <img id="leoFooterAvatar" src="" alt="Leo" style="
             width:88px;height:88px;
             object-fit:contain;object-position:bottom;
-            margin-bottom:-14px;
+            margin-bottom:-18px;
             filter:drop-shadow(0 -2px 12px rgba(0,0,0,.5));
             image-rendering:-webkit-optimize-contrast;
           ">
@@ -1305,25 +1298,73 @@ function renderFolders(){
   state.folders.forEach(f=>{if(!order.includes(f.id))order.push(f.id);});
   const topLevel=order.filter(id=>byId[id]&&!byId[id].parentId);
 
-  // Separa: fixas primeiro, depois usuário
-  const sysTiles = topLevel.filter(id => SYSTEM_IDS.includes(id));
-  const userTiles = topLevel.filter(id => !SYSTEM_IDS.includes(id));
+  // Mostra as 7 primeiras + botão "+" como 8º item (grid 4×2)
+  const visible = topLevel.slice(0, 7);
 
-  // Renderiza pastas fixas (sempre no topo)
-  sysTiles.forEach(id=>{
+  visible.forEach(id=>{
     const f=byId[id]; if(!f) return;
     const children=state.folders.filter(c=>c.parentId===id);
-    const tile=makeTile(f, false, children);
+    grid.appendChild(makeTile(f, false, children));
+  });
+
+  // Botão "+" — 8ª célula
+  const plusBtn = document.createElement('div');
+  plusBtn.className = 'folderTile';
+  plusBtn.innerHTML = `
+    <div class="fi-wrap" style="background:rgba(249,115,22,.12);border:2px dashed rgba(249,115,22,.55);">
+      <div class="fi" style="font-size:26px;font-weight:900;color:rgba(249,115,22,.9);line-height:1;">+</div>
+    </div>
+    <div class="fl" style="color:rgba(249,115,22,.75);">Mais</div>
+  `;
+  plusBtn.addEventListener('click', openTodasPastas);
+  grid.appendChild(plusBtn);
+}
+
+// ══ MODAL: TODAS AS PASTAS ══
+function openTodasPastas(){
+  const {ov, box, close} = _modalBase();
+  ov.id = 'todasPastasOv';
+
+  // Header fixo
+  const hdr = document.createElement('div');
+  hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:16px 18px 14px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;';
+  hdr.innerHTML = `
+    <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;">📁 Todas as Pastas</span>
+    <button id="_tpClose" style="background:rgba(255,255,255,.08);border:none;width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer;color:#e8f4ff;display:flex;align-items:center;justify-content:center;">✕</button>`;
+  box.appendChild(hdr);
+
+  // Área scrollável
+  const scroll = document.createElement('div');
+  scroll.style.cssText = 'overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;flex:1;min-height:0;padding:12px 14px 20px;';
+
+  // Grid de todas as pastas
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:16px 6px;place-items:start center;';
+
+  const byId = Object.fromEntries(state.folders.map(f=>[f.id,f]));
+  const order = (state.folderOrder||[]).filter((id,i,a)=>a.indexOf(id)===i&&byId[id]);
+  state.folders.forEach(f=>{if(!order.includes(f.id))order.push(f.id);});
+  const topLevel = order.filter(id=>byId[id]&&!byId[id].parentId);
+
+  topLevel.forEach(id=>{
+    const f = byId[id]; if(!f) return;
+    const tile = document.createElement('div');
+    tile.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;width:100%;max-width:76px;';
+    tile.innerHTML = `
+      <div style="width:58px;height:58px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;margin-bottom:5px;">
+        <span style="font-size:28px;line-height:1;">${f.emoji||'📁'}</span>
+      </div>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:800;color:rgba(255,255,255,.85);text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px;">${f.name}</span>
+    `;
+    tile.addEventListener('click', ()=>{ close(); openBucket(id); });
     grid.appendChild(tile);
   });
 
-  // Renderiza pastas do usuário (sem divisor, juntas)
-  userTiles.forEach(id=>{
-    const f=byId[id]; if(!f) return;
-    const children=state.folders.filter(c=>c.parentId===id);
-    const tile=makeTile(f, false, children);
-    grid.appendChild(tile);
-  });
+  scroll.appendChild(grid);
+  box.appendChild(scroll);
+  // Garante que box usa flex-direction:column para scroll funcionar
+  box.style.cssText = (box.style.cssText||'') + 'display:flex;flex-direction:column;max-height:82vh;';
+  document.getElementById('_tpClose').addEventListener('click', close);
 }
 
 // ══ OPEN / CLOSE BUCKET ══
