@@ -1038,15 +1038,19 @@ function renderMonthGrid(){
     const dayId=getWeekDayId(key);
     const hasDT=state.dateTasks&&state.dateTasks[key]&&state.dateTasks[key].length>0;
     const hasWT=dayId&&(state.tasks[dayId]||[]).length>0;
-    cell.className='mCell'+(isToday?' mToday':'')+(hasDT||hasWT?' mHasTask':'');
+    const hasTasks=hasDT||hasWT;
+    cell.className='mCell'+(isToday?' mToday':'')+(hasTasks?' mHasTask':'');
     cell.textContent=d;
     cell.addEventListener('click',()=>{
-      if(dayId){ openBucket(dayId); }
-      else { openQuickAddTask(key, d, m, y); }
+      // Se for dia da semana atual, abre bucket direto
+      if(dayId){ openBucket(dayId); return; }
+      // Se tem dateTasks, abre a lista de tarefas da data
+      openQuickAddTask(key, d, m, y);
     });
     grid.appendChild(cell);
   }
 }
+
 
 // Toggle expansão do weekStrip via handle
 function initStripExpand(){
@@ -3057,7 +3061,6 @@ function init(){
 
     // Contador de profundidade para rastrear quantas entries do history o app controla
     let _histDepth = 1; // começa em 1 (a entry da home)
-    let _suppressNextPop = false; // flag para ignorar o popstate causado pelo _navPop
 
     // Empurra uma nova entry no history (chame ao abrir qualquer tela/pasta/overlay)
     window._navPush = function(){
@@ -3066,18 +3069,19 @@ function init(){
     };
 
     // Fecha overlay pelo botão visual (não pelo Android back).
-    // Precisa consumir a entry do history sem acionar ação de navegação.
+    // NÃO usa history.go(-1) + suppressNextPop — isso é assíncrono e frágil.
+    // Em vez disso: apenas decrementa o depth. O popstate NÃO será disparado.
+    // O botão visual já fechou o overlay antes de chamar _navPop.
     window._navPop = function(){
       if(_histDepth > 1){
-        _suppressNextPop = true;
         _histDepth--;
-        history.go(-1); // vai disparar popstate, mas _suppressNextPop vai ignorar
+        // Substitui a entry atual para manter o stack sincronizado
+        history.replaceState({app:'screen', depth:_histDepth},'');
       }
     };
 
     window.addEventListener('popstate', function(e){
-      // Se foi acionado por _navPop (botão visual), ignora — o overlay já foi fechado
-      if(_suppressNextPop){ _suppressNextPop=false; return; }
+      // popstate só chega aqui pelo botão Android (nunca pelo botão visual agora)
 
       // Ao receber popstate, decrementamos a profundidade
       if(_histDepth > 1) _histDepth--;
@@ -3123,13 +3127,16 @@ function init(){
         return;
       }
 
+      // Overlays abertos com _navPush: o popstate já consumiu a entry deles.
+      // NÃO re-empurra entry — apenas fecha o overlay.
+      // Se re-empurrar, cria depth fantasma: o próximo "voltar" não faz nada e o
+      // seguinte sai do app (o bug clássico galeria → pasta → sai do app).
       const namedOvs=['watermarkTipOv','photoFullscreenOv','photoGalleryOv','consultaFormOv','remedioFormOv','listaConsultasOv','listaRemediosOv','historicoPacienteOv','feriadosOv','docsOv','contasOv','examesOv','mercadoOv','inlineViewerOv'];
       for(const oid of namedOvs){
         const el=document.getElementById(oid);
         if(el){
           el.remove();
-          _histDepth++;
-          history.pushState({app:'screen', depth:_histDepth},'');
+          // NÃO faz _histDepth++ nem pushState aqui.
           return;
         }
       }
@@ -3137,8 +3144,7 @@ function init(){
       for(const ov of dynFixed){
         if(!ov.id){
           ov.remove();
-          _histDepth++;
-          history.pushState({app:'screen', depth:_histDepth},'');
+          // NÃO faz _histDepth++ nem pushState aqui.
           return;
         }
       }
@@ -4895,8 +4901,50 @@ function openQuickAddTask(key, d, m, y){
   const input = document.getElementById('quickAddInput');
   label.textContent = '📅 ' + d + ' de ' + MESES_PT[m] + ' ' + y;
   input.value = '';
+
+  // Mostrar tarefas existentes desta data
+  let taskListEl = document.getElementById('quickAddTaskList');
+  if(!taskListEl){
+    taskListEl = document.createElement('div');
+    taskListEl.id = 'quickAddTaskList';
+    taskListEl.style.cssText = 'margin-bottom:12px;max-height:200px;overflow-y:auto;';
+    input.parentNode.insertBefore(taskListEl, input);
+  }
+  const existingTasks = (state.dateTasks && state.dateTasks[key]) ? state.dateTasks[key] : [];
+  if(existingTasks.length > 0){
+    taskListEl.style.display='block';
+    taskListEl.innerHTML = existingTasks.map((t,i)=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.06);border-radius:10px;margin-bottom:6px;">
+        <span onclick="toggleDateTask('${key}',${i})" style="cursor:pointer;font-size:16px;">${t.done?'✅':'⬜'}</span>
+        <span style="flex:1;font-family:'Space Grotesk',sans-serif;font-size:13px;color:${t.done?'rgba(255,255,255,.4)':'#fff'};text-decoration:${t.done?'line-through':''};font-weight:600;">${t.text}</span>
+        <span onclick="removeDateTask('${key}',${i})" style="cursor:pointer;color:rgba(255,80,80,.7);font-size:14px;">✕</span>
+      </div>`).join('');
+  } else {
+    taskListEl.style.display='none';
+    taskListEl.innerHTML='';
+  }
+
   overlay.style.display = 'flex';
   setTimeout(()=>input.focus(), 150);
+}
+
+function toggleDateTask(key, idx){
+  if(!state.dateTasks||!state.dateTasks[key]) return;
+  state.dateTasks[key][idx].done = !state.dateTasks[key][idx].done;
+  save();
+  const parts=key.split('-');
+  openQuickAddTask(key, parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+  renderMonthGrid(); updateProgress();
+}
+
+function removeDateTask(key, idx){
+  if(!state.dateTasks||!state.dateTasks[key]) return;
+  state.dateTasks[key].splice(idx,1);
+  if(state.dateTasks[key].length===0) delete state.dateTasks[key];
+  save();
+  const parts=key.split('-');
+  openQuickAddTask(key, parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+  renderMonthGrid(); updateProgress();
 }
 
 function _doQuickAdd(){
