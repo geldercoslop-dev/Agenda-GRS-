@@ -14,8 +14,8 @@ const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./icons/leo-192.png",
-  "./icons/leo-512.png"
+  "./leo-192.png",
+  "./leo-512.png"
 ];
 
 // ══════════════════════════════════════════════════════
@@ -197,8 +197,8 @@ self.addEventListener("message", (event) => {
           isConsulta ? `🏥 ${item.nome}` : `💊 ${item.nome}`,
           {
             body: `${item.hora}${item.paciente ? " — " + item.paciente : ""}${item.dose ? " · " + item.dose : ""}`,
-            icon: "./icons/leo-192.png",
-            badge: "./icons/leo-192.png",
+            icon: "./leo-192.png",
+            badge: "./leo-192.png",
             tag: item.id,
             requireInteraction: true,
             vibrate: [200, 100, 200],

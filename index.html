@@ -20,9 +20,9 @@
 
   <!-- ═══ Manifest e Ícones ═══ -->
   <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon" href="./icons/leo-192.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="./icons/leo-192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="./icons/leo-512.png">
+  <link rel="apple-touch-icon" href="./leo-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./leo-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="./leo-512.png">
 
   <!-- ═══ Fontes ═══ -->
   <link rel="dns-prefetch" href="https://fonts.googleapis.com">
@@ -34,7 +34,7 @@
   <!-- ═══ Preload de assets críticos ═══ -->
   <link rel="preload" href="./variables.css" as="style">
   <link rel="preload" href="./app.css" as="style">
-  <link rel="preload" href="./icons/leo-192.png" as="image">
+  <link rel="preload" href="./leo-192.png" as="image">
 
   <!-- ═══ Critical CSS inline — previne FOUC antes dos CSS externos carregarem ═══ -->
   <style>
@@ -111,9 +111,9 @@
   <!-- Módulo de sincronização Supabase (offline-first, opt-in) -->
   <script src="./sync.js"></script>
   <!-- Módulos de arquitetura separados -->
-  <script src="./js/agenda.js" defer></script>
-  <script src="./js/notificacoes.js" defer></script>
-  <script src="./js/ui.js" defer></script>
+  <script src="./agenda.js" defer></script>
+  <script src="./notificacoes.js" defer></script>
+  <script src="./ui.js" defer></script>
 </head>
 <body>
 <div class="screen">
@@ -5641,8 +5641,8 @@ async function notificarTarefa(texto, delaySecs = 0) {
       navigator.serviceWorker.ready.then(reg => {
         reg.showNotification('📋 Agenda Pro Max', {
           body: texto,
-          icon: './icons/leo-192.png',
-          badge: './icons/leo-192.png',
+          icon: './leo-192.png',
+          badge: './leo-192.png',
           tag: 'tarefa-' + Date.now(),
           vibrate: [150, 80, 150],
         });
@@ -7296,8 +7296,8 @@ function openHistoricoPaciente(){
   (function _prefetch() {
     const ASSETS = [
       './offline.html',
-      './icons/leo-192.png',
-      './icons/leo-512.png',
+      './leo-192.png',
+      './leo-512.png',
       './manifest.json',
     ];
     function _run() {
