@@ -196,7 +196,7 @@
       margin-bottom: 0;
     }
     .weekStripWrap.expanded { max-height: 400px; }
-    .weekStrip { display:grid; grid-template-columns:repeat(8,1fr); gap:3px; padding:10px 8px 2px; }
+    .weekStrip { display:grid; grid-template-columns:repeat(8,1fr); gap:3px; padding:12px 8px 6px; }
     /* Quando expandido, mostra grade 7-col do mês */
     .monthGrid {
       display:none; grid-template-columns:repeat(7,1fr); gap:3px;
@@ -218,10 +218,10 @@
       pointer-events:none; white-space:nowrap;
     }
     .stripHandleArrow {
-      font-size:14px; line-height:1; pointer-events:none;
+      font-size:22px; line-height:1; pointer-events:none;
       animation: bounceDown 1.4s ease-in-out infinite;
       display:inline-block;
-      opacity:.85;
+      opacity:.75;
     }
     .weekStripWrap.expanded .stripHandleArrow { transform: rotate(180deg); animation:none; }
     @keyframes bounceDown {
@@ -262,25 +262,31 @@
       color:rgba(255,255,255,.4); padding:2px 0;
     }
     [data-theme="light"] .monthDayName { color:rgba(67,56,202,.45); }
-    /* Células do mês */
+    /* Células do mês — mesmo formato do calendário fechado */
     .mCell {
-      aspect-ratio:1; display:flex; align-items:center; justify-content:center;
-      border-radius:9px; font-family:'Space Grotesk',sans-serif; font-size:clamp(11px,3.2vw,13px);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:3px; padding:6px 2px;
+      border-radius:10px; font-family:'Space Grotesk',sans-serif; font-size:clamp(11px,3.2vw,14px);
       font-weight:700; cursor:pointer; color:rgba(255,255,255,.7); position:relative;
       transition:background .1s;
     }
     [data-theme="light"] .mCell { color:rgba(10,15,60,.8); font-weight:700; }
-    .mCell.mToday { background:transparent; color:#f97316; border:1.5px solid rgba(249,115,22,.8); font-weight:800; border-radius:7px; }
+    .mCell.mToday {
+      background:transparent; color:#f97316;
+      border:1.5px solid rgba(249,115,22,.85);
+      box-shadow:0 0 5px rgba(249,115,22,.25);
+      font-weight:800; border-radius:9px;
+    }
     .mCell.mActive { background:rgba(0,120,180,.25); color:var(--text); }
     [data-theme="light"] .mCell.mActive { background:rgba(99,102,241,.15); }
     .mCell.mEmpty { cursor:default; pointer-events:none; }
     .mCell.mHasTask::after {
-      content:''; position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
-      width:3px; height:3px; border-radius:50%; background:rgba(249,115,22,.8);
+      content:''; display:block;
+      width:4px; height:4px; border-radius:50%; background:rgba(249,115,22,.85);
     }
     .mCell.mToday.mHasTask::after { background:rgba(255,255,255,.7); }
 
-    .wDay { display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 3px; border-radius:13px; cursor:pointer; transition:background .12s; }
+    .wDay { display:flex; flex-direction:column; align-items:center; gap:7px; padding:8px 3px; border-radius:13px; cursor:pointer; transition:background .12s; }
     .wDay .wdName { font-family:'Space Grotesk',sans-serif; font-size:clamp(9px,2.4vw,11px); font-weight:900; letter-spacing:.5px; text-transform:uppercase; color:rgba(255,255,255,.75); }
     [data-theme="light"] .wDay .wdName { color:var(--surface-2); font-weight:900; }
     .wDay.active .wdName { color:var(--purple); }
