@@ -3679,6 +3679,7 @@ function _renderContasOv(){
 
   const ov = document.createElement('div');
   ov.id = 'contasOv';
+  if(typeof window._navPush === 'function') window._navPush();
   ov.style.cssText = `position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
@@ -3798,6 +3799,7 @@ function _renderExamesOv(){
   }
 
   const ov=document.createElement('div'); ov.id='examesOv';
+  if(typeof window._navPush === 'function') window._navPush();
   ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
@@ -4001,6 +4003,7 @@ function _renderMercadoOv(){
   }
 
   const ov=document.createElement('div'); ov.id='mercadoOv';
+  if(typeof window._navPush === 'function') window._navPush();
   ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
@@ -4092,6 +4095,7 @@ function _renderDocsOv(){
 
   const ov = document.createElement('div');
   ov.id = 'docsOv';
+  if(typeof window._navPush === 'function') window._navPush();
   ov.style.cssText = `position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
@@ -4336,6 +4340,7 @@ function openFeriados(){
 
   const ov = document.createElement('div');
   ov.id = 'feriadosOv';
+  if(typeof window._navPush === 'function') window._navPush();
   ov.style.cssText = 'position:fixed;inset:0;background:linear-gradient(160deg,#021824,#04355a);z-index:99997;display:flex;flex-direction:column;';
   ov.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid rgba(0,140,180,.2);flex-shrink:0;gap:8px;">
@@ -4440,6 +4445,8 @@ function openBucketPhotoGallery(bucketId){
   const photos=(state.bucketPhotos||{})[bucketId]||[];
   if(!photos.length){showToast('Nenhuma imagem nesta pasta.');return;}
 
+  // Empurra entry no history para o botão voltar Android funcionar
+  if(typeof window._navPush === 'function') window._navPush();
 
   const ov=document.createElement('div');
   ov.id='photoGalleryOv'; // ID fixo — o botão voltar detecta e fecha corretamente
@@ -6001,6 +6008,7 @@ function openListaConsultas(){
 
   const ov=document.createElement('div');
   ov.id='listaConsultasOv';
+  if(typeof window._navPush === 'function') window._navPush();
   ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
@@ -6536,6 +6544,7 @@ function openListaRemedios(){
 
   const ov=document.createElement('div');
   ov.id='listaRemediosOv';
+  if(typeof window._navPush === 'function') window._navPush();
   ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
   ov.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:${HDR};border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
@@ -6846,6 +6855,7 @@ function openHistoricoPaciente(){
 
   const ov=document.createElement('div');
   ov.id='historicoPacienteOv';
+  if(typeof window._navPush === 'function') window._navPush();
   ov.style.cssText=`position:fixed;inset:0;z-index:99998;background:${bg};display:flex;flex-direction:column;overflow:hidden;`;
 
   // Coleta todos os pacientes únicos
@@ -6949,11 +6959,11 @@ function openHistoricoPaciente(){
 
   ov.innerHTML=`
     <!-- Header: ícone esquerda + título + botão fechar direita -->
-    <div style="display:flex;align-items:center;gap:12px;padding:16px 18px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};flex-shrink:0;">
-      <span style="font-size:22px;line-height:1;flex-shrink:0;">🔍</span>
+    <div style="display:flex;align-items:center;gap:14px;padding:20px 18px 18px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <span style="font-size:28px;line-height:1;flex-shrink:0;">🔍</span>
       <div style="flex:1;min-width:0;">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:${TEXT};">Pesquisar Paciente</div>
-        <div style="font-size:11px;font-weight:600;color:${MUTED};">${pacientes.length} paciente${pacientes.length!==1?'s':''} cadastrado${pacientes.length!==1?'s':''}</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:900;color:${TEXT};margin-bottom:4px;">Pesquisar Paciente</div>
+        <div style="font-size:12px;font-weight:600;color:${MUTED};">${pacientes.length} paciente${pacientes.length!==1?'s':''} cadastrado${pacientes.length!==1?'s':''}</div>
       </div>
       <button id="hpClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:10px;color:${ACCENT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
     </div>
