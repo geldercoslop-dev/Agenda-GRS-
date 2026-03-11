@@ -163,7 +163,7 @@
     </div>
 
     <!-- ══ WEEK STRIP — expansível ══ -->
-    <div id="weekStripCard" style="margin:0 14px 14px;background:rgba(8,20,40,.6);border:1px solid rgba(255,255,255,.07);border-radius:20px;overflow:hidden;">
+    <div id="weekStripCard" style="margin:0 14px 8px;background:transparent;border:none;border-radius:20px;overflow:hidden;">
     <div class="weekStripWrap" id="weekStripWrap">
       <!-- Linha semanal (padrão) -->
       <div class="weekStrip" id="weekStrip"></div>
@@ -184,22 +184,18 @@
       <div class="monthGrid" id="monthGrid"></div>
       <!-- Handle de arraste — EMBAIXO -->
       <div class="stripHandle" id="stripHandle">
-        <div style="display:flex;align-items:center;gap:6px;pointer-events:none;margin:0 auto;">
-          <span class="stripHandleArrow" id="stripHandleArrow" style="font-size:10px;color:rgba(249,115,22,.75);font-weight:900;">▾</span>
+        <button id="feriadosShortcut" onclick="openFeriados()" style="background:none;border:none;padding:0;margin:0;cursor:pointer;display:flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;">
+          <span style="font-size:12px;line-height:1;pointer-events:none;">🎉</span>
+          <span class="stripHandleHint" style="pointer-events:none;color:rgba(255,255,255,.55);font-size:10px;">Feriados · Clique Aqui</span>
+        </button>
+        <div style="display:flex;align-items:center;gap:6px;pointer-events:none;">
+          <span class="stripHandleArrow" id="stripHandleArrow" style="color:rgba(249,115,22,.75);font-weight:900;">▾</span>
           <span class="stripHandleHint" id="stripHandleHintText">Arraste Para Ver o Mês</span>
-          <span class="stripHandleArrow" id="stripHandleArrow2" style="font-size:10px;color:rgba(249,115,22,.75);font-weight:900;">▾</span>
+          <span class="stripHandleArrow" id="stripHandleArrow2" style="color:rgba(249,115,22,.75);font-weight:900;">▾</span>
         </div>
       </div>
     </div>
     </div><!-- fim card calendário -->
-
-    <!-- Feriados — abaixo do calendário -->
-    <div id="feriadosBar" style="margin:-6px 14px 0;padding:8px 14px;display:flex;align-items:center;gap:6px;">
-      <button id="feriadosShortcut" onclick="openFeriados()" style="background:none;border:none;padding:0;margin:0;cursor:pointer;display:flex;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent;">
-        <span style="font-size:13px;line-height:1;pointer-events:none;">🎉</span>
-        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.6);pointer-events:none;letter-spacing:.2px;">Feriados · Clique Aqui</span>
-      </button>
-    </div>
 
     <!-- ══ HOME VIEW ══ -->
     <div class="view show" id="homeView">
@@ -748,12 +744,12 @@
     <!-- ══ FOOTER PROGRESS BAR ══ -->
     <div id="progressRow" style="
       position:fixed;bottom:0;left:0;right:0;z-index:9997;
-      padding:12px 14px 24px 14px;
+      padding:8px 14px 14px 14px;
       background:linear-gradient(to top, rgba(5,14,31,.97) 60%, transparent 100%);
     ">
       <div style="display:flex;align-items:center;gap:10px;">
 
-        <!-- Coluna: label PROGRESSO + barra com margens laterais -->
+        <!-- Coluna: label PROGRESSO + barra -->
         <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;">
           <span style="font-size:8px;font-weight:900;letter-spacing:1.2px;color:rgba(180,220,255,.45);text-transform:uppercase;padding-left:8px;">Progresso</span>
           <div style="display:flex;align-items:center;gap:7px;padding:0 8px;">
@@ -779,13 +775,13 @@
           -webkit-tap-highlight-color:transparent;
         ">☰</button>
 
-        <!-- Léo — sai por baixo da tela -->
-        <div style="flex-shrink:0;width:80px;display:flex;align-items:flex-end;justify-content:center;margin-left:6px;align-self:flex-end;">
+        <!-- Léo — robusto, sai por baixo -->
+        <div style="flex-shrink:0;width:86px;display:flex;align-items:flex-end;justify-content:center;align-self:flex-end;margin-left:4px;">
           <img id="leoFooterAvatar" src="" alt="Leo" style="
-            width:100px;height:100px;
+            width:116px;height:116px;
             object-fit:contain;object-position:bottom;
-            margin-bottom:-24px;
-            filter:drop-shadow(0 -2px 12px rgba(0,0,0,.5));
+            margin-bottom:-14px;
+            filter:drop-shadow(0 -2px 14px rgba(0,0,0,.6));
             image-rendering:-webkit-optimize-contrast;
           ">
         </div>
@@ -1087,31 +1083,39 @@ function initStripExpand(){
     toggle(!expanded);
   });
 
-  // Swipe vertical APENAS sobre o card do calendário (sem conflito com pastas)
-  const card = document.getElementById('weekStripCard');
-  if(!card) return;
+  // Toque fora do card fecha o calendário expandido
+  document.addEventListener('click',(e)=>{
+    if(!expanded) return;
+    const card = document.getElementById('weekStripCard');
+    if(card && !card.contains(e.target)) toggle(false);
+  },{passive:true});
 
+  // Swipe em qualquer lugar da tela (exceto lista de tarefas e modais)
   let _sy=0, _sx=0, _active=false;
-  const THRESHOLD = 50; // menos sensível
+  const THRESHOLD = 55;
 
-  card.addEventListener('touchstart',(e)=>{
+  document.addEventListener('touchstart',(e)=>{
+    // Não ativa dentro de modais, sidebar, listas scrolláveis já com scroll
+    if(e.target.closest('#sidebar, .fModalOverlay, .sModalOverlay, [style*="position:fixed"]')) return;
+    const scrollable = e.target.closest('.listArea, .homeBody');
+    if(scrollable && scrollable.scrollTop > 10) return;
     _sy = e.touches[0].clientY;
     _sx = e.touches[0].clientX;
     _active = true;
   },{passive:true});
 
-  card.addEventListener('touchmove',(e)=>{
+  document.addEventListener('touchmove',(e)=>{
     if(!_active) return;
     const dy = e.touches[0].clientY - _sy;
     const dx = e.touches[0].clientX - _sx;
     if(Math.abs(dy) < THRESHOLD) return;
-    if(Math.abs(dx) > Math.abs(dy) * 0.8) return; // muito horizontal
+    if(Math.abs(dx) > Math.abs(dy) * 0.7) return; // horizontal demais
     _active = false;
-    if(dy > 0 && !expanded) toggle(true);
-    else if(dy < 0 && expanded) toggle(false);
+    if(dy > 0 && !expanded) toggle(true);       // arrasta pra baixo → abre
+    else if(dy < 0 && expanded) toggle(false);  // arrasta pra cima → fecha
   },{passive:true});
 
-  card.addEventListener('touchend',()=>{ _active=false; },{passive:true});
+  document.addEventListener('touchend',()=>{ _active=false; },{passive:true});
 }
 
 // ══ PROGRESS ══
@@ -1520,7 +1524,6 @@ function openBucket(id, _pushCurrent){
   document.getElementById('progressRow').classList.add('hidden');
   document.getElementById('weekStripWrap').classList.add('hidden');
   document.getElementById('weekStripCard')?.classList.add('hidden');
-  document.getElementById('feriadosBar')?.classList.add('hidden');
   // Fechar expansão ao entrar no dayView
   const _sw=document.getElementById('weekStripWrap');
   if(_sw) _sw.classList.remove('expanded');
@@ -1569,7 +1572,6 @@ function goHome(){
   document.getElementById('progressRow').classList.remove('hidden');
   document.getElementById('weekStripWrap').classList.remove('hidden');
   document.getElementById('weekStripCard')?.classList.remove('hidden');
-  document.getElementById('feriadosBar')?.classList.remove('hidden');
   document.getElementById('bottomBar').classList.remove('hidden');
   const _fab2=document.getElementById('sidebarFab');
   if(_fab2){ _fab2.style.opacity='1'; _fab2.style.pointerEvents='auto'; _fab2.style.transform='scale(1)'; _fab2.style.bottom='22px'; }
@@ -2737,10 +2739,11 @@ function _setFooter(visible){
   if(!row) return;
   if(visible){ row.classList.remove('hidden'); }
   else { row.classList.add('hidden'); }
-  // topSearchBar e weekStripCard seguem o footer (só aparecem na home)
+  // topSearchBar e weekStripCard APENAS na home
   const tsb=document.getElementById('topSearchBar');
   const wsc=document.getElementById('weekStripCard');
-  if(visible){
+  const isHome = (currentView === 'home');
+  if(visible && isHome){
     if(tsb) tsb.style.display='block';
     if(wsc) wsc.classList.remove('hidden');
   } else {
@@ -5389,245 +5392,186 @@ function _runSearch(query) {
   const q = (query || '').trim().toLowerCase();
   const container = document.getElementById('searchResults');
   if (!q) {
-    container.innerHTML = '<p class="searchEmpty">Digite para pesquisar…</p>';
+    container.innerHTML = '<div class="searchEmpty"><span>🔍</span>Digite para pesquisar…</div>';
     return;
   }
 
-  const results = [];
+  // ── Coleta resultados por categoria ──
+  const cats = {
+    tarefas:   { label:'Tarefas',   items:[] },
+    calendario: { label:'Calendário', items:[] },
+    pastas:    { label:'Pastas',    items:[] },
+    consultas: { label:'Consultas', items:[] },
+    remedios:  { label:'Remédios',  items:[] },
+    exames:    { label:'Exames',    items:[] },
+    docs:      { label:'Documentos',items:[] },
+    contas:    { label:'A Pagar',   items:[] },
+    mercado:   { label:'Mercado',   items:[] },
+  };
 
-  // Tarefas (semana atual + dateTasks + pastas)
-  const allBuckets = [...Object.keys(state.tasks || {})];
-  allBuckets.forEach(bid => {
+  // Tarefas de pastas/semana
+  Object.keys(state.tasks || {}).forEach(bid => {
     const arr = state.tasks[bid] || [];
     const folder = state.folders.find(f => f.id === bid);
-    const day    = typeof DAYS !== 'undefined' ? DAYS.find(d => d.id === bid) : null;
-    const label  = folder ? `${folder.emoji||'📁'} ${folder.name}` : (day ? day.label : bid);
+    const day = DAYS.find(d => d.id === bid);
+    const where = folder ? `${folder.emoji||'📁'} ${folder.name}` : (day ? day.name : bid);
     arr.forEach(t => {
       if (t.text.toLowerCase().includes(q)) {
-        results.push({ type:'task', icon:'✅', typeLabel:'Tarefa', text:t.text, sub:label, sortKey:'', action:()=>{ closeSearch(); openBucket(bid); } });
+        cats.tarefas.items.push({
+          icon:'✅', iconCls:'task',
+          title: t.text, sub: where,
+          action:()=>{ closeSearch(); openBucket(bid); }
+        });
       }
     });
   });
-  // dateTasks
+
+  // Tarefas do calendário (dateTasks)
   Object.entries(state.dateTasks || {}).forEach(([dk, arr]) => {
     (arr||[]).forEach(t => {
       if (t.text.toLowerCase().includes(q)) {
-        results.push({ type:'task', icon:'📅', typeLabel:'Tarefa (calendário)', text:t.text, sub:dk.split('-').reverse().join('/'), sortKey:dk, action:()=>{ closeSearch(); } });
+        const df = dk.split('-').reverse().join('/');
+        cats.calendario.items.push({
+          icon:'📅', iconCls:'cal',
+          title: t.text, sub: df,
+          badge: df, badgeCls:'blue',
+          action:()=>{ closeSearch(); }
+        });
       }
     });
   });
-  // Consultas — com todos os dados
-  (state.consultas || []).forEach(c => {
-    const searchable = [c.especialidade, c.medico, c.paciente, c.local, c.obs].filter(Boolean).join(' ');
-    if (searchable.toLowerCase().includes(q)) {
+
+  // Pastas
+  (state.folders||[]).forEach(f => {
+    if ((f.name||'').toLowerCase().includes(q)) {
+      cats.pastas.items.push({
+        icon: f.emoji||'📁', iconCls:'folder',
+        title: f.name,
+        sub: f.parentId ? 'subpasta' : 'pasta principal',
+        action:()=>{ closeSearch(); openBucket(f.id); }
+      });
+    }
+  });
+
+  // Consultas
+  (state.consultas||[]).forEach(c => {
+    const src = [c.especialidade,c.medico,c.paciente,c.local,c.obs].filter(Boolean).join(' ');
+    if (src.toLowerCase().includes(q)) {
       const df = c.data ? c.data.split('-').reverse().join('/') : '';
-      results.push({
-        type:'consulta', icon:'🏥', typeLabel:'Consulta',
-        text: c.especialidade || 'Consulta',
-        paciente: c.paciente||'', medico: c.medico||'', local: c.local||'',
-        hora: c.hora||'', data: df, obs: c.obs||'',
-        sub: `${c.paciente||''}${df?' | '+df:''}${c.hora?' às '+c.hora:''}`,
-        sortKey: (c.data||'9999')+(c.hora||''),
+      const sub = [c.paciente, c.medico, c.local].filter(Boolean).join(' · ');
+      cats.consultas.items.push({
+        icon:'🏥', iconCls:'med',
+        title: c.especialidade||'Consulta',
+        sub: sub||'',
+        badge: df + (c.hora ? ' · '+c.hora : ''), badgeCls:'',
         action:()=>{ closeSearch(); _abrirMiniRelatorio(c.id); }
       });
     }
   });
-  // Remédios
-  (state.remedios || []).forEach(r => {
-    const searchable = [r.nome, r.dose, r.paciente].filter(Boolean).join(' ');
-    if (searchable.toLowerCase().includes(q)) {
-      const df = r.data ? r.data.split('-').reverse().join('/') : '';
-      results.push({
-        type:'remedio', icon:'💊', typeLabel:'Remédio',
-        text: r.nome || 'Remédio', paciente: r.paciente||'', dose: r.dose||'',
-        hora: r.hora||'', data: df,
-        sub: r.paciente||'',
-        sortKey: (r.data||'9999')+(r.hora||''),
-        action:()=>{ closeSearch(); openListaRemedios(); }
-      });
-    }
-  });
 
-  // Documentos
-  (_getDocs ? _getDocs() : []).forEach(d => {
-    const searchable = [d.nome, d.numero, d.obs].filter(Boolean).join(' ');
-    if (searchable.toLowerCase().includes(q)) {
-      results.push({
-        type:'doc', icon:'🪪', typeLabel:'Documento',
-        text: d.nome || 'Documento',
-        sub: d.numero ? `Nº ${d.numero}` : '',
-        sortKey:'',
-        action:()=>{ closeSearch(); openDocs(); }
+  // Remédios
+  (state.remedios||[]).forEach(r => {
+    const src = [r.nome,r.dose,r.paciente].filter(Boolean).join(' ');
+    if (src.toLowerCase().includes(q)) {
+      cats.remedios.items.push({
+        icon:'💊', iconCls:'drug',
+        title: r.nome||'Remédio',
+        sub: [r.paciente, r.dose].filter(Boolean).join(' · '),
+        badge: r.hora||'', badgeCls:'purple',
+        action:()=>{ closeSearch(); openListaRemedios(); }
       });
     }
   });
 
   // Exames
   (_getExames ? _getExames() : []).forEach(e => {
-    const searchable = [e.tipo, e.paciente, e.obs, e.resultado].filter(Boolean).join(' ');
-    if (searchable.toLowerCase().includes(q)) {
+    const src = [e.tipo,e.paciente,e.obs,e.resultado].filter(Boolean).join(' ');
+    if (src.toLowerCase().includes(q)) {
       const df = e.data ? e.data.split('-').reverse().join('/') : '';
-      results.push({
-        type:'exame', icon:'🩺', typeLabel:'Exame',
-        text: e.tipo || 'Exame',
-        sub: `${e.paciente||''}${df?' | '+df:''}`,
-        sortKey: e.data||'',
+      cats.exames.items.push({
+        icon:'🩺', iconCls:'med',
+        title: e.tipo||'Exame',
+        sub: [e.paciente, df].filter(Boolean).join(' · '),
+        badge: df, badgeCls:'',
         action:()=>{ closeSearch(); openExames(); }
       });
     }
   });
 
-  // A Pagar (Contas)
-  (_getContas ? _getContas() : []).forEach(c => {
-    const searchable = [c.nome, c.obs, c.valor].filter(Boolean).join(' ');
-    if (searchable.toLowerCase().includes(q)) {
-      results.push({
-        type:'conta', icon:'💳', typeLabel:'A Pagar',
-        text: c.nome || 'Conta',
-        sub: c.valor ? `R$ ${c.valor}` : '',
-        sortKey:'',
-        action:()=>{ closeSearch(); openContas(); }
+  // Documentos
+  (_getDocs ? _getDocs() : []).forEach(d => {
+    const src = [d.nome,d.numero,d.obs].filter(Boolean).join(' ');
+    if (src.toLowerCase().includes(q)) {
+      cats.docs.items.push({
+        icon:'🪪', iconCls:'',
+        title: d.nome||'Documento',
+        sub: d.numero ? `Nº ${d.numero}` : '',
+        action:()=>{ closeSearch(); openDocs(); }
       });
     }
   });
 
-  // Pastas (nome das pastas)
-  (state.folders || []).forEach(f => {
-    if ((f.name||'').toLowerCase().includes(q)) {
-      results.push({
-        type:'pasta', icon: f.emoji||'📁', typeLabel:'Pasta',
-        text: f.name,
-        sub: f.parentId ? ('subpasta') : '',
-        sortKey:'',
-        action:()=>{ closeSearch(); openBucket(f.id); }
+  // Contas
+  (_getContas ? _getContas() : []).forEach(c => {
+    const src = [c.nome,c.obs,c.valor].filter(Boolean).join(' ');
+    if (src.toLowerCase().includes(q)) {
+      cats.contas.items.push({
+        icon:'💳', iconCls:'',
+        title: c.nome||'Conta',
+        sub: c.valor ? `R$ ${c.valor}` : '',
+        action:()=>{ closeSearch(); openContas(); }
       });
     }
   });
 
   // Mercado
   (_getMercado ? _getMercado() : []).forEach(m => {
-    const searchable = [m.nome, m.qtd].filter(Boolean).join(' ');
-    if (searchable.toLowerCase().includes(q)) {
-      results.push({
-        type:'mercado', icon:'🛍️', typeLabel:'Mercado',
-        text: m.nome || 'Item',
+    const src = [m.nome,m.qtd].filter(Boolean).join(' ');
+    if (src.toLowerCase().includes(q)) {
+      cats.mercado.items.push({
+        icon:'🛍️', iconCls:'',
+        title: m.nome||'Item',
         sub: m.qtd ? `Qtd: ${m.qtd}` : '',
-        sortKey:'',
         action:()=>{ closeSearch(); openMercado(); }
       });
     }
   });
-  results.sort((a, b) => {
-    if(!a.sortKey && !b.sortKey) return 0;
-    if(!a.sortKey) return 1;
-    if(!b.sortKey) return -1;
-    return a.sortKey.localeCompare(b.sortKey);
-  });
 
-  if (results.length === 0) {
-    container.innerHTML = `<p class="searchEmpty">Nenhum resultado para "<strong>${_escHtml(q)}</strong>"</p>`;
+  // ── Verifica se há resultados ──
+  const totalItems = Object.values(cats).reduce((s,c)=>s+c.items.length,0);
+  if (totalItems === 0) {
+    container.innerHTML = `<div class="searchEmpty"><span>🔍</span>Nenhum resultado para <strong>"${_escHtml(q)}"</strong></div>`;
     return;
   }
 
-  // Renderizar cards horizontais com todos os dados
-  container.innerHTML = results.slice(0, 40).map((r, i) => {
-    if (r.type === 'consulta') {
-      return `<div class="searchItem searchItemCard" data-idx="${i}" style="cursor:pointer;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <span style="font-size:20px;line-height:1;">🏥</span>
-          <div style="flex:1;min-width:0;">
-            <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}</div>
-            <div class="searchItemType" style="margin:0;">Consulta</div>
-          </div>
-          ${r.data ? `<span style="font-size:11px;font-weight:800;color:#00c48a;flex-shrink:0;">${r.data}${r.hora?' · '+r.hora:''}</span>` : ''}
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          ${r.paciente ? `<span style="background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:#7dd3f0;">👤 ${_escHtml(r.paciente)}</span>` : ''}
-          ${r.medico ? `<span style="background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:4px 9px;font-size:11px;font-weight:600;color:rgba(232,244,255,.6);">👨‍⚕️ ${_escHtml(r.medico)}</span>` : ''}
-          ${r.local ? `<span style="background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:4px 9px;font-size:11px;font-weight:600;color:rgba(232,244,255,.6);">📍 ${_escHtml(r.local)}</span>` : ''}
-          ${r.obs ? `<span style="background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:4px 9px;font-size:11px;font-weight:600;color:rgba(232,244,255,.5);">📝 ${_escHtml(r.obs)}</span>` : ''}
-        </div>
-      </div>`;
-    }
-    if (r.type === 'remedio') {
-      return `<div class="searchItem searchItemCard" data-idx="${i}" style="cursor:pointer;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <span style="font-size:20px;line-height:1;">💊</span>
-          <div style="flex:1;min-width:0;">
-            <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}${r.dose?` <span style="font-size:11px;font-weight:500;color:rgba(165,180,252,.6);">${_escHtml(r.dose)}</span>`:''}  </div>
-            <div class="searchItemType" style="margin:0;">Remédio</div>
-          </div>
-          ${r.data ? `<span style="font-size:11px;font-weight:800;color:#a78bfa;flex-shrink:0;">${r.data}${r.hora?' · '+r.hora:''}</span>` : ''}
-        </div>
-        ${r.paciente ? `<div style="display:flex;flex-wrap:wrap;gap:6px;"><span style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:#c4b5fd;">👤 ${_escHtml(r.paciente)}</span></div>` : ''}
-      </div>`;
-    }
-    if (r.type === 'doc') {
-      return `<div class="searchItem searchItemCard" data-idx="${i}" style="cursor:pointer;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:20px;line-height:1;">🪪</span>
-          <div style="flex:1;min-width:0;">
-            <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}</div>
-            <div class="searchItemType" style="margin:0;">Documento${r.sub?' · '+_escHtml(r.sub):''}</div>
-          </div>
-        </div>
-      </div>`;
-    }
-    if (r.type === 'exame') {
-      return `<div class="searchItem searchItemCard" data-idx="${i}" style="cursor:pointer;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:20px;line-height:1;">🩺</span>
-          <div style="flex:1;min-width:0;">
-            <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}</div>
-            <div class="searchItemType" style="margin:0;">Exame${r.sub?' · '+_escHtml(r.sub):''}</div>
-          </div>
-          ${r.sortKey ? `<span style="font-size:11px;font-weight:800;color:#34d399;flex-shrink:0;">${r.sortKey.split('-').reverse().join('/')}</span>` : ''}
-        </div>
-      </div>`;
-    }
-    if (r.type === 'conta') {
-      return `<div class="searchItem searchItemCard" data-idx="${i}" style="cursor:pointer;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:20px;line-height:1;">💳</span>
-          <div style="flex:1;min-width:0;">
-            <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}</div>
-            <div class="searchItemType" style="margin:0;">A Pagar${r.sub?' · '+_escHtml(r.sub):''}</div>
-          </div>
-        </div>
-      </div>`;
-    }
-    if (r.type === 'mercado') {
-      return `<div class="searchItem searchItemCard" data-idx="${i}" style="cursor:pointer;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:20px;line-height:1;">🛍️</span>
-          <div style="flex:1;min-width:0;">
-            <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}</div>
-            <div class="searchItemType" style="margin:0;">Mercado${r.sub?' · '+_escHtml(r.sub):''}</div>
-          </div>
-        </div>
-      </div>`;
-    }
-    if (r.type === 'pasta') {
-      return `<div class="searchItem searchItemCard" data-idx="${i}" style="cursor:pointer;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:22px;line-height:1;">${_escHtml(r.icon)}</span>
-          <div style="flex:1;min-width:0;">
-            <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}</div>
-            <div class="searchItemType" style="margin:0;">Pasta${r.sub?' · '+_escHtml(r.sub):''}</div>
-          </div>
-        </div>
-      </div>`;
-    }
-    // Tarefas
-    return `<div class="searchItem" data-idx="${i}">
-      <div class="searchItemType">${_escHtml(r.typeLabel)}</div>
-      <div class="searchItemText">${r.icon} ${_highlight(r.text, query)}</div>
-      ${r.sub ? `<div class="searchItemSub">${_escHtml(r.sub)}</div>` : ''}
-    </div>`;
-  }).join('');
+  // ── Renderiza agrupado por categoria ──
+  const allActions = [];
+  let html = '';
 
-  container.querySelectorAll('.searchItem').forEach((el, i) => {
-    el.addEventListener('click', () => results[i].action());
+  Object.values(cats).forEach(cat => {
+    if (cat.items.length === 0) return;
+    html += `<div class="srCat">${_escHtml(cat.label)}</div>`;
+    cat.items.forEach(item => {
+      const idx = allActions.length;
+      allActions.push(item.action);
+      const badgeHtml = item.badge
+        ? `<div class="srBadge"><span class="srDate ${item.badgeCls||''}">${_escHtml(item.badge)}</span><span class="srChevron">›</span></div>`
+        : `<span class="srChevron">›</span>`;
+      html += `<div class="searchItem" data-idx="${idx}">
+        <div class="srIcon ${item.iconCls||''}">${item.icon}</div>
+        <div class="srBody">
+          <div class="srTitle">${_highlight(item.title, query)}</div>
+          ${item.sub ? `<div class="srSub">${_escHtml(item.sub)}</div>` : ''}
+        </div>
+        ${badgeHtml}
+      </div>`;
+    });
+  });
+
+  container.innerHTML = html;
+  container.querySelectorAll('.searchItem').forEach(el => {
+    const idx = parseInt(el.dataset.idx);
+    el.addEventListener('click', () => allActions[idx]());
   });
 }
 
