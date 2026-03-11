@@ -8,10 +8,10 @@
   --primary:      #4da3ff;   /* azul principal — botões e destaques */
 
   /* ── Backgrounds ─────────────────────────────────────── */
-  --bg0:          #0a0a0a;   /* fundo principal — preto quase puro */
-  --bg1:          #111111;   /* cards, modais */
-  --bg2:          #0f0f0f;   /* sidebar */
-  --card:         #161616;   /* card interno */
+  --bg0:          #0d1b35;   /* fundo principal — azul marinho */
+  --bg1:          #122040;   /* cards, modais */
+  --bg2:          #091526;   /* sidebar */
+  --card:         #0f1c38;   /* card interno */
   --cardBorder:   rgba(255,255,255,.08);
 
   /* ── Accent: laranja ─────────────────────────────────── */
@@ -33,9 +33,9 @@
   --aurora-3:     #fb923c;
 
   /* Progress bar track */
-  --sky-top:      #2a2a2a;
-  --sky-mid:      #1f1f1f;
-  --sky-bot:      #161616;
+  --sky-top:      #0e1f3c;
+  --sky-mid:      #0a1830;
+  --sky-bot:      #050e1f;
 }
 
 /* ── Tema claro: azul navy no header + fundo lavanda/periwinkle ── */

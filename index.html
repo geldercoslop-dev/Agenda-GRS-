@@ -289,11 +289,6 @@
           <span class="sCardLabel">Foto de perfil</span>
           <span class="sCardSub">Altere aqui</span>
         </div>
-        <div class="sCard" id="rowWmark">
-          <span class="sCardIcon">💧</span>
-          <span class="sCardLabel">Marca d'água</span>
-          <span class="sCardSub">Altere aqui</span>
-        </div>
         <div class="sCard" id="rowStats" style="cursor:pointer;">
           <span class="sCardIcon">📊</span>
           <span class="sCardLabel">Estatísticas</span>
@@ -319,8 +314,6 @@
 
       <!-- Subform Foto de perfil — abre galeria diretamente -->
       <input type="file" id="fileProfile" accept="image/*" style="width:0;height:0;opacity:0;position:absolute;">
-      <!-- Subform Marca d'água -->
-      <input type="file" id="fileWmark" accept="image/*" style="width:0;height:0;opacity:0;position:absolute;">
       <!-- Input importar JSON -->
       <input type="file" id="fileImportJson" accept=".json,application/json" style="width:0;height:0;opacity:0;position:absolute;">
 
@@ -745,39 +738,52 @@
     <!-- ══ FOOTER PROGRESS BAR ══ -->
     <div id="progressRow" style="
       position:fixed;bottom:0;left:0;right:0;z-index:9997;
-      padding:10px 20px 20px 16px;
-      background:transparent;
-      display:flex;align-items:center;gap:14px;
+      padding:8px 14px 16px 14px;
+      background:linear-gradient(to top, rgba(5,14,31,.95) 0%, rgba(5,14,31,.7) 70%, transparent 100%);
+      display:flex;flex-direction:column;gap:4px;
     ">
-      <!-- Center group: label + bar + pct -->
-      <div style="display:flex;align-items:center;gap:6px;flex:1;">
-        <span class="progressLabel" style="font-size:9px;">PROGRESSO</span>
-        <div style="
-          width:160px;height:12px;
-          border-radius:99px;
-          background:rgba(255,255,255,.1);
-          box-shadow:inset 0 1px 3px rgba(0,0,0,.4);
-          padding:2px;position:relative;overflow:visible;
-        ">
-          <div class="progressFill" id="progressFill" style="width:0%">
-            <span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;z-index:2;filter:drop-shadow(0 0 4px rgba(255,255,255,.8));">⚡</span>
+      <!-- Linha 1: label PROGRESSO -->
+      <span class="progressLabel" style="font-size:9px;font-weight:800;letter-spacing:.8px;color:rgba(180,220,255,.5);padding-left:2px;">PROGRESSO</span>
+      <!-- Linha 2: barra + % | botão | léo -->
+      <div style="display:flex;align-items:center;gap:0;">
+        <!-- Barra + porcentagem -->
+        <div style="display:flex;align-items:center;gap:6px;flex:1;">
+          <div style="
+            flex:1;height:12px;
+            border-radius:99px;
+            background:rgba(255,255,255,.1);
+            box-shadow:inset 0 1px 3px rgba(0,0,0,.4);
+            padding:2px;position:relative;overflow:visible;
+          ">
+            <div class="progressFill" id="progressFill" style="width:0%">
+              <span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;z-index:2;filter:drop-shadow(0 0 4px rgba(255,255,255,.8));">⚡</span>
+            </div>
           </div>
+          <span class="progressPct" id="progressPct" style="min-width:28px;text-align:left;font-size:11px;font-weight:800;color:rgba(249,115,22,.9);">0%</span>
         </div>
-        <span class="progressPct" id="progressPct" style="min-width:28px;text-align:left;">0%</span>
+        <!-- Espaço + Botão menu -->
+        <button id="sidebarFab" style="
+          flex-shrink:0;
+          width:44px;height:44px;border-radius:14px;
+          background:linear-gradient(135deg,#f97316,#ea580c);
+          border:none;
+          box-shadow:0 4px 14px rgba(234,88,12,0.55);
+          color:#fff;font-size:20px;cursor:pointer;
+          display:flex;align-items:center;justify-content:center;
+          transition:transform .15s;
+          -webkit-tap-highlight-color:transparent;
+          margin-left:12px;
+        ">☰</button>
+        <!-- Léo avatar -->
+        <img id="leoFooterAvatar" src="" alt="Leo" style="
+          width:50px;height:50px;
+          object-fit:contain;object-position:bottom;
+          flex-shrink:0;
+          margin-left:10px;
+          filter:drop-shadow(0 2px 8px rgba(0,0,0,.6));
+          image-rendering:-webkit-optimize-contrast;
+        ">
       </div>
-      <!-- Menu button with right breathing -->
-      <button id="sidebarFab" style="
-        flex-shrink:0;
-        width:44px;height:44px;border-radius:14px;
-        background:linear-gradient(135deg,#f97316,#ea580c);
-        border:none;
-        box-shadow:0 4px 14px rgba(234,88,12,0.55);
-        color:#fff;font-size:20px;cursor:pointer;
-        display:flex;align-items:center;justify-content:center;
-        transition:transform .15s;
-        -webkit-tap-highlight-color:transparent;
-        margin-right:2px;
-      ">☰</button>
     </div>
 
 <script>
@@ -1404,7 +1410,7 @@ function goHome(){
   const _fab2=document.getElementById('sidebarFab');
   if(_fab2){ _fab2.style.opacity='1'; _fab2.style.pointerEvents='auto'; _fab2.style.transform='scale(1)'; _fab2.style.bottom='22px'; }
   // Mostrar watermark na home
-  const _wm2=document.getElementById('watermarkWrap'); if(_wm2 && state.watermarkPhoto) _wm2.style.visibility='visible';
+  // watermarkWrap oculto permanentemente (Léo agora só no footer)
   const sub=document.getElementById('subFolderArea');
   if(sub){sub.innerHTML='';sub.style.display='none';}
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('show'));
@@ -2804,9 +2810,14 @@ function init(){
   if(state.profilePhoto) document.getElementById('profileImg').src=state.profilePhoto;
   if(state.watermarkPhoto){
     applyWatermarkPhoto(state.watermarkPhoto);
-  } else {
-    document.getElementById('watermarkWrap').style.display='none';
   }
+  // Léo fixo no footer (não editável pelo usuário)
+  const _leoFooter = document.getElementById('leoFooterAvatar');
+  const _leoOriginal = document.getElementById('watermarkImg');
+  if(_leoFooter && _leoOriginal) _leoFooter.src = _leoOriginal.src;
+  // Ocultar watermark flutuante (Léo agora só no footer)
+  const _wmWrap = document.getElementById('watermarkWrap');
+  if(_wmWrap) _wmWrap.style.display = 'none';
 
   window.openSidebar=openSidebar;
   window.closeSidebar=closeSidebar;
@@ -2966,41 +2977,6 @@ function init(){
     fp.value = '';
     setTimeout(()=>fp.click(), 80);
   });
-  document.getElementById('rowWmark').addEventListener('click',()=>{
-    closeSettings();
-    const tip = document.createElement('div');
-    tip.id = 'watermarkTipOv';
-    tip.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:24px;';
-    const isLight = document.body.getAttribute('data-theme')==='light';
-    tip.innerHTML = `<div style="background:${'linear-gradient(160deg,#021824,#04355a)'};border:1px solid ${'rgba(0,160,200,.2)'};border-radius:20px;padding:28px 22px;max-width:300px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5);">
-      <div style="font-size:38px;margin-bottom:14px">💧</div>
-      <div style="font-size:17px;font-weight:900;color:${isLight?'#2a1a08':'#e8f4ff'};margin-bottom:10px;letter-spacing:-.2px;">Marca d'água</div>
-      <div style="font-size:13px;font-weight:600;color:${isLight?'rgba(50,30,10,.7)':'rgba(180,220,240,.8)'};line-height:1.6;margin-bottom:22px;">Olá, para melhor resultado, use uma foto com fundo removido, ficará excelente, mas se quiser pode optar por uma foto normal também.</div>
-      <div style="display:flex;gap:10px;margin-bottom:10px;">
-        <button id="_tipCancel" style="flex:1;padding:12px;border-radius:12px;border:1px solid ${isLight?'rgba(140,100,50,.4)':'rgba(255,255,255,.15)'};background:transparent;color:${isLight?'#2a1a08':'rgba(255,255,255,.8)'};font-weight:700;font-size:13px;cursor:pointer;font-family:'Space Grotesk',sans-serif;">Cancelar</button>
-        <button id="_tipOk" style="flex:1;padding:12px;border-radius:12px;border:1px solid ${isLight?'rgba(140,100,50,.4)':'rgba(255,255,255,.18)'};background:rgba(255,255,255,.09);color:#e8f4ff;font-weight:800;font-size:13px;cursor:pointer;font-family:'Space Grotesk',sans-serif;">Escolher foto</button>
-      </div>
-      <button id="_tipRemove" style="width:100%;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:rgba(255,255,255,.75);font-weight:800;font-size:13px;cursor:pointer;font-family:'Space Grotesk',sans-serif;">🚫 Não usar marca d'água</button>
-    </div>`;
-    document.body.appendChild(tip);
-    tip.querySelector('#_tipCancel').onclick = ()=>tip.remove();
-    tip.querySelector('#_tipRemove').onclick = ()=>{
-      tip.remove();
-      state.watermarkPhoto = null;
-      const wWrap = document.getElementById('watermarkWrap');
-      const wImg = document.getElementById('watermarkImg');
-      if(wImg){ wImg.src=''; }
-      if(wWrap){ wWrap.style.display='none'; }
-      save();
-      showToast('🚫 Marca d\'água removida!');
-    };
-    tip.querySelector('#_tipOk').onclick = ()=>{
-      tip.remove();
-      const fw = document.getElementById('fileWmark');
-      fw.value='';
-      fw.click();
-    };
-  });
   document.getElementById('rowManual').addEventListener('click',()=>{
     closeSettings();
     _setFooter(false);
@@ -3043,14 +3019,6 @@ function init(){
     });
   });
   document.getElementById('fileProfile').addEventListener('change', handleProfileFile);
-  document.getElementById('fileWmark').addEventListener('change',(e)=>{
-    const f=e.target.files[0]; if(!f) return;
-    resizeImage(f,400,0.85,(data)=>{
-      state.watermarkPhoto=data;
-      applyWatermarkPhoto(data);
-      pendingWmark=data;
-      save();
-      showToast('✅ Marca d\'água atualizada!');
     });
   });
 
