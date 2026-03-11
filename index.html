@@ -169,9 +169,9 @@
       <div class="weekStrip" id="weekStrip"></div>
       <!-- Cabeçalho do mês expandido -->
       <div class="monthHdr">
-        <button id="monthPrev" style="background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.3);border-radius:10px;color:rgba(251,146,60,1);font-size:22px;font-weight:900;cursor:pointer;padding:4px 14px;line-height:1;flex-shrink:0;animation:bounceLeft 1.4s ease-in-out infinite;display:inline-block;">‹</button>
+        <button id="monthPrev" style="background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.22);border-radius:8px;color:rgba(251,146,60,.85);font-size:14px;font-weight:700;cursor:pointer;padding:3px 10px;line-height:1;flex-shrink:0;animation:bounceLeft 1.4s ease-in-out infinite;display:inline-block;">‹</button>
         <span class="monthHdrLabel" id="monthHdrLabel"></span>
-        <button id="monthNext" style="background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.3);border-radius:10px;color:rgba(251,146,60,1);font-size:22px;font-weight:900;cursor:pointer;padding:4px 14px;line-height:1;flex-shrink:0;animation:bounceRight 1.4s ease-in-out infinite;display:inline-block;">›</button>
+        <button id="monthNext" style="background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.22);border-radius:8px;color:rgba(251,146,60,.85);font-size:14px;font-weight:700;cursor:pointer;padding:3px 10px;line-height:1;flex-shrink:0;animation:bounceRight 1.4s ease-in-out infinite;display:inline-block;">›</button>
       </div>
       <!-- Nomes dos dias do mês -->
       <div class="monthDayNames" id="monthDayNames">
@@ -186,11 +186,11 @@
       <div class="stripHandle" id="stripHandle">
         <button id="feriadosShortcut" onclick="openFeriados()" style="background:none;border:none;padding:0;margin:0;cursor:pointer;display:flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;">
           <span style="font-size:12px;line-height:1;pointer-events:none;">🎉</span>
-          <span class="stripHandleHint" style="pointer-events:none;color:rgba(255,255,255,.55);font-size:10px;">Feriados · Clique Aqui</span>
+          <span class="stripHandleHint" style="pointer-events:none;">Feriado · clique aqui</span>
         </button>
         <div style="display:flex;align-items:center;gap:6px;pointer-events:none;">
           <span class="stripHandleArrow" id="stripHandleArrow" style="color:rgba(249,115,22,.75);font-weight:900;">▾</span>
-          <span class="stripHandleHint" id="stripHandleHintText">Arraste Para Ver o Mês</span>
+          <span class="stripHandleHint" id="stripHandleHintText">Arraste para ver o mês</span>
           <span class="stripHandleArrow" id="stripHandleArrow2" style="color:rgba(249,115,22,.75);font-weight:900;">▾</span>
         </div>
       </div>
@@ -200,7 +200,7 @@
     <!-- ══ HOME VIEW ══ -->
     <div class="view show" id="homeView">
       <div class="homeBody">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.28);padding:16px 6px 12px;">Acesso Rápido</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.28);padding:16px 6px 12px;display:none;">Acesso Rápido</div>
         <div class="folderGrid" id="folderGrid"></div>
       </div>
     </div>
@@ -326,26 +326,27 @@
 <!-- ══ PESQUISA GLOBAL ══ -->
 <div id="searchOverlay" style="
   position:fixed;inset:0;z-index:9500;
-  background:rgba(0,0,0,.55);
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  background:rgba(0,0,0,.65);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   display:none;flex-direction:column;
   align-items:center;
   justify-content:flex-start;
-  padding:80px 18px 0;
+  padding:70px 16px 0;
 ">
   <div style="
-    width:100%;max-width:400px;
-    background:linear-gradient(160deg,#021824,#04355a);
-    border:1px solid rgba(0,160,200,.2);
-    border-radius:22px;
-    box-shadow:0 20px 60px rgba(0,0,0,.55);
+    width:100%;max-width:420px;
+    background:linear-gradient(160deg,#031a2c 0%,#042d4a 100%);
+    border:1px solid rgba(0,180,230,.18);
+    border-radius:24px;
+    box-shadow:0 24px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(0,180,230,.06);
     overflow:hidden;
   ">
     <!-- Input row -->
     <div style="
       display:flex;align-items:center;gap:10px;
       padding:14px 16px;
-      border-bottom:1px solid rgba(0,140,180,.18);
+      border-bottom:1px solid rgba(0,160,200,.14);
+      background:rgba(0,0,0,.15);
     ">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;opacity:.55;">
         <circle cx="11" cy="11" r="8" stroke="rgba(125,211,240,.8)" stroke-width="2.2"/>
@@ -360,14 +361,14 @@
         ">
       <button id="searchClose" style="
         border:none;background:rgba(255,255,255,.08);color:rgba(180,220,240,.7);
-        width:26px;height:26px;border-radius:50%;
+        width:28px;height:28px;border-radius:50%;
         font-size:13px;cursor:pointer;line-height:1;
         display:flex;align-items:center;justify-content:center;
         -webkit-tap-highlight-color:transparent;flex-shrink:0;
       ">✕</button>
     </div>
     <!-- Results -->
-    <div id="searchResults" style="max-height:55vh;overflow-y:auto;padding:10px 0;color:#e8f4ff;"></div>
+    <div id="searchResults" style="max-height:62vh;overflow-y:auto;padding:6px 0 8px;color:#e8f4ff;"></div>
   </div>
 </div>
 
@@ -709,6 +710,7 @@
         <div class="sb-item" id="sb-docs-fp" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(99,102,241,.12);">🪪</div><span class="sb-label">Documentos</span></div>
         <div class="sb-item" id="sb-mercado-fp" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,191,36,.12);">🛍️</div><span class="sb-label">Mercado</span></div>
         <div class="sb-item" id="sb-contas-fp" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.12);">💳</div><span class="sb-label">A Pagar</span></div>
+        <div class="sb-item" id="sb-receber-fp" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(34,197,94,.12);">💰</div><span class="sb-label">A Receber</span></div>
 
         <div class="sb-divider"></div>
         <div class="sb-section-label">Saúde</div>
@@ -724,6 +726,8 @@
         <div class="sb-section-label">Relatórios</div>
         <div class="sb-item" id="sb-rWeek" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.1);">📅</div><span class="sb-label">Relatório da semana</span></div>
         <div class="sb-item" id="sb-rAll" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.08);">📋</div><span class="sb-label">Relatório de pendências</span></div>
+        <div class="sb-item" id="sb-rPagar" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.12);">💳</div><span class="sb-label">Rel. Contas a Pagar</span></div>
+        <div class="sb-item" id="sb-rReceber" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(34,197,94,.12);">💰</div><span class="sb-label">Rel. Contas a Receber</span></div>
         <div class="sb-item" id="sb-stats" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(34,197,94,.1);">📊</div><span class="sb-label">Estatísticas</span></div>
         <div class="sb-item" id="sb-zap" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(37,211,102,.1);"><svg style="width:18px;height:18px" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M22.58 9.4A9.3 9.3 0 0016.02 7C11.14 7 7.17 10.97 7.17 15.85c0 1.56.41 3.08 1.19 4.42L7.1 25l4.84-1.27a9.35 9.35 0 004.08.93h.003c4.87 0 8.84-3.97 8.84-8.85a8.8 8.8 0 00-2.25-5.41zm-6.56 13.6h-.003a7.76 7.76 0 01-3.96-1.08l-.28-.17-2.92.77.78-2.85-.19-.29a7.73 7.73 0 01-1.18-4.13c0-4.28 3.48-7.76 7.77-7.76a7.7 7.7 0 017.76 7.77c0 4.28-3.49 7.76-7.77 7.76zm4.26-5.82c-.23-.12-1.38-.68-1.6-.76-.21-.08-.37-.12-.52.12-.16.23-.6.76-.74.92-.13.15-.27.17-.5.06-.23-.12-.97-.36-1.85-1.14-.68-.6-1.14-1.35-1.27-1.58-.13-.23-.01-.35.1-.47.1-.1.23-.27.35-.4.11-.14.15-.23.23-.38.07-.15.04-.28-.02-.4-.06-.12-.52-1.26-.72-1.72-.18-.45-.38-.39-.52-.4h-.44c-.16 0-.41.06-.62.29-.21.23-.82.8-.82 1.95s.84 2.26.96 2.42c.12.15 1.65 2.52 4 3.54.56.24 1 .39 1.34.49.56.18 1.07.16 1.48.1.45-.07 1.38-.57 1.58-1.11.19-.54.19-1.01.13-1.11-.06-.1-.21-.16-.44-.27z" fill="white"/></svg></div><span class="sb-label">Relatório para WhatsApp</span></div>
 
@@ -744,7 +748,7 @@
     <!-- ══ FOOTER PROGRESS BAR ══ -->
     <div id="progressRow" style="
       position:fixed;bottom:0;left:0;right:0;z-index:9997;
-      padding:8px 14px 14px 14px;
+      padding:4px 14px 8px 14px;
       background:linear-gradient(to top, rgba(5,14,31,.97) 60%, transparent 100%);
     ">
       <div style="display:flex;align-items:center;gap:10px;">
@@ -776,9 +780,9 @@
         ">☰</button>
 
         <!-- Léo — robusto, sai por baixo -->
-        <div style="flex-shrink:0;width:86px;display:flex;align-items:flex-end;justify-content:center;align-self:flex-end;margin-left:4px;">
+        <div style="flex-shrink:0;width:100px;display:flex;align-items:flex-end;justify-content:center;align-self:flex-end;margin-left:4px;">
           <img id="leoFooterAvatar" src="" alt="Leo" style="
-            width:116px;height:116px;
+            width:136px;height:136px;
             object-fit:contain;object-position:bottom;
             margin-bottom:-14px;
             filter:drop-shadow(0 -2px 14px rgba(0,0,0,.6));
@@ -844,7 +848,7 @@ function defaultState() {
 }
 
 // ── Pastas fixas do sistema (não podem ser excluídas) ──
-const SYSTEM_IDS = ['pauta','_consultas','_remedios','_exames','_docs','_mercado','_contas'];
+const SYSTEM_IDS = ['pauta','_consultas','_remedios','_exames','_docs','_mercado','_contas','_receber'];
 const SYSTEM_DEFAULTS = [
   {id:'pauta',     name:'Pauta',            emoji:'📋'},
   {id:'_consultas',name:'Consultas',        emoji:'🏥'},
@@ -853,6 +857,7 @@ const SYSTEM_DEFAULTS = [
   {id:'_docs',     name:'Documentos',       emoji:'🪪'},
   {id:'_mercado',  name:'Mercado',          emoji:'🛍️'},
   {id:'_contas',   name:'A Pagar',   emoji:'💳'},
+  {id:'_receber',  name:'A Receber', emoji:'💰'},
 ];
 
 function ensureSystemFolders(){
@@ -1441,46 +1446,165 @@ function openTodasPastas(){
   const hdr = document.createElement('div');
   hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:16px 18px 14px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;';
   hdr.innerHTML = `
-    <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;">📁 Todas as Pastas</span>
+    <div>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;">📁 Todas as Pastas</span>
+      <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;font-family:'Plus Jakarta Sans',sans-serif;">Segure e arraste para reordenar</div>
+    </div>
     <button id="_tpClose" style="background:rgba(255,255,255,.08);border:none;width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer;color:#e8f4ff;display:flex;align-items:center;justify-content:center;">✕</button>`;
   box.appendChild(hdr);
 
   // Área scrollável
   const scroll = document.createElement('div');
-  scroll.style.cssText = 'overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;flex:1;min-height:0;padding:12px 14px 20px;';
+  scroll.style.cssText = 'overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;flex:1;min-height:0;padding:14px 14px 24px;';
 
   // Grid de todas as pastas
   const grid = document.createElement('div');
-  grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:16px 6px;place-items:start center;';
+  grid.id = '_tpGrid';
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:18px 6px;place-items:start center;';
 
   const byId = Object.fromEntries(state.folders.map(f=>[f.id,f]));
   const order = (state.folderOrder||[]).filter((id,i,a)=>a.indexOf(id)===i&&byId[id]);
   state.folders.forEach(f=>{if(!order.includes(f.id))order.push(f.id);});
   const topLevel = order.filter(id=>byId[id]&&!byId[id].parentId);
 
-  topLevel.forEach(id=>{
-    const f = byId[id]; if(!f) return;
+  // State for touch drag within modal
+  let _modalDragId = null;
+  let _modalDragEl = null;
+  let _modalDragClone = null;
+  let _modalDragOX = 0, _modalDragOY = 0;
+  let _modalLastSwap = null;
+
+  function _buildModalTile(id){
+    const f = byId[id]; if(!f) return null;
     const tile = document.createElement('div');
-    tile.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;width:100%;max-width:76px;';
+    tile.dataset.id = id;
+    tile.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;width:100%;max-width:76px;transition:opacity .15s,transform .18s;user-select:none;';
     tile.innerHTML = `
-      <div style="width:58px;height:58px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;margin-bottom:5px;">
+      <div style="width:58px;height:58px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;margin-bottom:6px;transition:transform .15s;">
         <span style="font-size:28px;line-height:1;">${f.emoji||'📁'}</span>
       </div>
       <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:800;color:rgba(255,255,255,.85);text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px;">${f.name}</span>
     `;
+
+    // Click to open
     tile.addEventListener('click', ()=>{
-      // Remove o overlay sem contar como entrada de histórico adicional
-      // (o openBucket vai fazer o próprio _navPush)
+      if(_modalDragId) return; // don't open during drag
       ov.remove();
       openBucket(id);
     });
-    grid.appendChild(tile);
-  });
+
+    // Desktop drag
+    tile.draggable = true;
+    tile.addEventListener('dragstart',(e)=>{ _modalDragId=id; e.dataTransfer.effectAllowed='move'; tile.style.opacity='0.35'; });
+    tile.addEventListener('dragend',()=>{ tile.style.opacity=''; _modalDragId=null; save(); });
+    tile.addEventListener('dragover',(e)=>e.preventDefault());
+    tile.addEventListener('drop',(e)=>{
+      e.preventDefault();
+      if(_modalDragId && _modalDragId!==id){
+        const fi=state.folderOrder.indexOf(_modalDragId), ti=state.folderOrder.indexOf(id);
+        if(fi>=0&&ti>=0) [state.folderOrder[fi],state.folderOrder[ti]]=[state.folderOrder[ti],state.folderOrder[fi]];
+        save(); renderFolders();
+        // Re-render modal grid
+        const tiles=[...grid.querySelectorAll('[data-id]')];
+        const elA=tiles.find(x=>x.dataset.id===_modalDragId);
+        const elB=tiles.find(x=>x.dataset.id===id);
+        if(elA&&elB){
+          const nextB=elB.nextSibling;
+          grid.insertBefore(elA,nextB||null);
+        }
+      }
+    });
+
+    // Touch drag — long press
+    let _pressTimer = null;
+    tile.addEventListener('touchstart',(e)=>{
+      _pressTimer = setTimeout(()=>{
+        _modalDragId = id;
+        _modalDragEl = tile;
+        tile.style.opacity = '0';
+        tile.style.visibility = 'hidden';
+
+        const t = e.touches[0];
+        const rect = tile.getBoundingClientRect();
+        _modalDragOX = t.clientX - rect.left - rect.width/2;
+        _modalDragOY = t.clientY - rect.top - rect.height/2;
+
+        // Create clone
+        _modalDragClone = tile.cloneNode(true);
+        _modalDragClone.style.cssText = `position:fixed;z-index:99999;pointer-events:none;opacity:.9;
+          transform:scale(1.08);left:${t.clientX-_modalDragOX-29}px;top:${t.clientY-_modalDragOY-40}px;
+          width:58px;transition:none;filter:drop-shadow(0 8px 20px rgba(0,0,0,.5));`;
+        document.body.appendChild(_modalDragClone);
+
+        if(navigator.vibrate) navigator.vibrate(40);
+      }, 380);
+    },{passive:true});
+    tile.addEventListener('touchend',()=>{
+      clearTimeout(_pressTimer);
+      if(_modalDragClone){ _modalDragClone.remove(); _modalDragClone=null; }
+      if(_modalDragEl){ _modalDragEl.style.opacity=''; _modalDragEl.style.visibility=''; }
+      _modalDragId=null; _modalDragEl=null; _modalLastSwap=null;
+      save(); renderFolders();
+    },{passive:true});
+    tile.addEventListener('touchcancel',()=>{
+      clearTimeout(_pressTimer);
+      if(_modalDragClone){ _modalDragClone.remove(); _modalDragClone=null; }
+      if(_modalDragEl){ _modalDragEl.style.opacity=''; _modalDragEl.style.visibility=''; }
+      _modalDragId=null; _modalDragEl=null; _modalLastSwap=null;
+    },{passive:true});
+
+    return tile;
+  }
+
+  // Touch move on scroll area
+  scroll.addEventListener('touchmove',(e)=>{
+    if(!_modalDragId||!_modalDragClone) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const t = e.touches[0];
+    _modalDragClone.style.left=(t.clientX-_modalDragOX-29)+'px';
+    _modalDragClone.style.top=(t.clientY-_modalDragOY-40)+'px';
+
+    _modalDragClone.style.visibility='hidden';
+    const under=document.elementFromPoint(t.clientX,t.clientY);
+    _modalDragClone.style.visibility='';
+
+    const target=under&&under.closest('[data-id]');
+    const targetId=target&&target.dataset.id;
+
+    if(target&&targetId&&targetId!==_modalDragId&&targetId!==_modalLastSwap){
+      _modalLastSwap=targetId;
+      const fi=state.folderOrder.indexOf(_modalDragId);
+      const ti=state.folderOrder.indexOf(targetId);
+      if(fi>=0&&ti>=0&&fi!==ti){
+        [state.folderOrder[fi],state.folderOrder[ti]]=[state.folderOrder[ti],state.folderOrder[fi]];
+        const tiles=[...grid.querySelectorAll('[data-id]')];
+        const elA=tiles.find(x=>x.dataset.id===_modalDragId);
+        const elB=tiles.find(x=>x.dataset.id===targetId);
+        if(elA&&elB){
+          const nextA=elA.nextSibling, nextB=elB.nextSibling;
+          if(nextA===elB){ grid.insertBefore(elB,elA); }
+          else if(nextB===elA){ grid.insertBefore(elA,elB); }
+          else {
+            const ph=document.createComment('');
+            grid.insertBefore(ph,elA);
+            grid.insertBefore(elA,nextB||null);
+            grid.insertBefore(elB,ph);
+            ph.remove();
+          }
+          elB.style.transform='scale(1.05)';
+          setTimeout(()=>{ if(elB) elB.style.transform=''; },250);
+          if(_modalDragEl){ _modalDragEl.style.opacity='0'; _modalDragEl.style.visibility='hidden'; }
+        }
+      }
+    } else if(!targetId||targetId===_modalDragId){ _modalLastSwap=null; }
+  },{passive:false});
+
+  topLevel.forEach(id=>{ const t=_buildModalTile(id); if(t) grid.appendChild(t); });
 
   scroll.appendChild(grid);
   box.appendChild(scroll);
-  // Garante que box usa flex-direction:column para scroll funcionar
-  box.style.cssText = (box.style.cssText||'') + 'display:flex;flex-direction:column;max-height:82vh;';
+  box.style.cssText = (box.style.cssText||'') + 'display:flex;flex-direction:column;max-height:84vh;';
   document.getElementById('_tpClose').addEventListener('click', close);
 }
 
@@ -1493,6 +1617,7 @@ function openBucket(id, _pushCurrent){
     '_consultas': ()=>openListaConsultas(),
     '_remedios':  ()=>openListaRemedios(),
     '_contas':    ()=>openContas(),
+    '_receber':   ()=>openReceber(),
     '_exames':    ()=>openExames(),
     '_docs':      ()=>openDocs(),
     '_mercado':   ()=>openMercado(),
@@ -2471,6 +2596,14 @@ function showReportChoice(){
         <span style="font-size:16px;">🔍</span>
         <span>Pesquisar por Paciente</span>
       </button>
+      <button id="_rPagar" style="padding:9px 11px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:9px;">
+        <span style="font-size:16px;">💳</span>
+        <span>Contas a Pagar</span>
+      </button>
+      <button id="_rReceber" style="padding:9px 11px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:9px;">
+        <span style="font-size:16px;">💰</span>
+        <span>Contas a Receber</span>
+      </button>
       <button id="_rNotif" style="padding:9px 11px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:9px;">
         <span style="font-size:16px;">🔔</span>
         <span>Ativar Alertas de Remédio</span>
@@ -2482,6 +2615,8 @@ function showReportChoice(){
   box.querySelector('#_rConsultas').addEventListener('click',()=>{close();generateConsultasReport();});
   box.querySelector('#_rRemedios').addEventListener('click',()=>{close();generateRemediosReport();});
   box.querySelector('#_rHistorico').addEventListener('click',()=>{close();openHistoricoPaciente();});
+  box.querySelector('#_rPagar').addEventListener('click',()=>{close();generateContasPagarReport();});
+  box.querySelector('#_rReceber').addEventListener('click',()=>{close();generateContasReceberReport();});
   box.querySelector('#_rNotif').addEventListener('click',()=>{close();ativarNotificacoesRemedios();});
   box.querySelector('#_rCancel').addEventListener('click',close);
 }
@@ -3003,6 +3138,7 @@ function init(){
   document.getElementById('sb-docs-fp')?.addEventListener('click',()=>{ closeSidebar(); openDocs(); });
   document.getElementById('sb-mercado-fp')?.addEventListener('click',()=>{ closeSidebar(); openMercado(); });
   document.getElementById('sb-contas-fp')?.addEventListener('click',()=>{ closeSidebar(); openContas(); });
+  document.getElementById('sb-receber-fp')?.addEventListener('click',()=>{ closeSidebar(); openReceber(); });
   // Saúde
   document.getElementById('sb-consulta')?.addEventListener('click',()=>{ closeSidebar(); openConsultaModal(); });
   document.getElementById('sb-remedio')?.addEventListener('click',()=>{ closeSidebar(); openRemedioModal(); });
@@ -3017,6 +3153,8 @@ function init(){
   document.getElementById('sb-backup')?.addEventListener('click',()=>{ closeSidebar(); doBackup(); });
   document.getElementById('sb-rWeek')?.addEventListener('click',()=>{ closeSidebar(); generateWeekReport(false); });
   document.getElementById('sb-rAll')?.addEventListener('click',()=>{ closeSidebar(); generateWeekReport(true); });
+  document.getElementById('sb-rPagar')?.addEventListener('click',()=>{ closeSidebar(); generateContasPagarReport(); });
+  document.getElementById('sb-rReceber')?.addEventListener('click',()=>{ closeSidebar(); generateContasReceberReport(); });
   document.getElementById('sb-rConsultas')?.addEventListener('click',()=>{ closeSidebar(); generateConsultasReport(); });
   document.getElementById('sb-rRemedios')?.addEventListener('click',()=>{ closeSidebar(); generateRemediosReport(); });
   document.getElementById('sb-theme')?.addEventListener('click',()=>{ closeSidebar(); toggleTheme(); });
@@ -3276,7 +3414,7 @@ function init(){
       // NÃO re-empurra entry — apenas fecha o overlay.
       // Se re-empurrar, cria depth fantasma: o próximo "voltar" não faz nada e o
       // seguinte sai do app (o bug clássico galeria → pasta → sai do app).
-      const namedOvs=['pastasFrenteOv','todasPastasOv','watermarkTipOv','photoFullscreenOv','photoGalleryOv','consultaFormOv','remedioFormOv','listaConsultasOv','listaRemediosOv','historicoPacienteOv','feriadosOv','docsOv','contasOv','examesOv','mercadoOv','inlineViewerOv'];
+      const namedOvs=['pastasFrenteOv','todasPastasOv','watermarkTipOv','photoFullscreenOv','photoGalleryOv','consultaFormOv','remedioFormOv','listaConsultasOv','listaRemediosOv','historicoPacienteOv','feriadosOv','docsOv','contasOv','receberOv','examesOv','mercadoOv','inlineViewerOv'];
       for(const oid of namedOvs){
         const el=document.getElementById(oid);
         if(el){
@@ -3918,7 +4056,289 @@ function _renderContasOv(){
   });
 }
 
-// ══ HISTÓRICO DE EXAMES ══
+// ══ A RECEBER ══
+function _getReceber(){ try{ return JSON.parse(localStorage.getItem('agendaProMax_receber')||'[]'); }catch(e){ return []; } }
+function _saveReceber(arr){ localStorage.setItem('agendaProMax_receber', JSON.stringify(arr)); }
+
+function openReceber(){
+  const existing = document.getElementById('receberOv');
+  if(existing){ existing.remove(); return; }
+  _renderReceberOv();
+}
+
+function _renderReceberOv(){
+  const old = document.getElementById('receberOv');
+  if(old) old.remove();
+
+  const receber = _getReceber();
+  const BG='linear-gradient(160deg,#021824,#04355a)';
+  const BDR='rgba(0,140,180,.18)';
+  const FIELD='rgba(0,80,120,.28)';
+  const TEXT='#e8f4ff';
+  const MUTED='rgba(180,220,240,.5)';
+  const ACC='#7dd3f0';
+  const ACCENT='#0ea5e9';
+
+  // Ordena: pendentes primeiro por vencimento, depois recebidos
+  const sorted = [...receber].sort((a,b)=>{
+    if(a.recebido===b.recebido) return (a.vencimento||'9999-12-31').localeCompare(b.vencimento||'9999-12-31');
+    return a.recebido?1:-1;
+  });
+
+  function statusColor(c){
+    if(c.recebido) return 'rgba(34,197,94,.8)';
+    if(!c.vencimento) return '#7dd3f0';
+    const hoje=new Date().toISOString().split('T')[0];
+    if(c.vencimento<hoje) return '#f87171';
+    const diff=Math.round((new Date(c.vencimento)-new Date())/86400000);
+    if(diff<=3) return '#fb923c';
+    return '#7dd3f0';
+  }
+  function statusLabel(c){
+    if(c.recebido) return '✅ Recebido';
+    if(!c.vencimento) return '📅 Sem vencto';
+    const hoje=new Date().toISOString().split('T')[0];
+    if(c.vencimento<hoje) return '🔴 Vencido';
+    const diff=Math.round((new Date(c.vencimento)-new Date())/86400000);
+    if(diff===0) return '🟠 Vence hoje';
+    if(diff<=3) return `🟡 Vence em ${diff}d`;
+    return `📅 ${c.vencimento.split('-').reverse().join('/')}`;
+  }
+
+  function cardH(c,i){
+    const qtdBadge = c.qtd&&c.qtd>1
+      ? `<span style="font-size:9px;font-weight:700;background:rgba(0,160,200,.18);color:${ACC};border:1px solid rgba(0,160,200,.3);border-radius:5px;padding:1px 5px;margin-left:5px;">${c.qtd}×</span>` : '';
+    const parcelasInfo = c.parcelas&&c.parcelas.length>1
+      ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">${c.parcelas.map((p,pi)=>`<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:${p.recebido?'rgba(34,197,94,.18)':'rgba(0,80,120,.35)'};border:1px solid ${p.recebido?'rgba(34,197,94,.35)':'rgba(0,140,180,.2)'};color:${p.recebido?'#4ade80':TEXT};cursor:pointer;" class="rParc" data-cidx="${i}" data-pidx="${pi}">${pi+1}/${c.parcelas.length} · R$${p.valor} · ${p.vencimento?p.vencimento.split('-').reverse().slice(0,2).join('/'):'?'}${p.recebido?' ✓':''}</span>`).join('')}</div>` : '';
+    return `<div style="background:rgba(0,80,120,.22);border:1px solid rgba(0,140,180,.15);border-radius:14px;padding:13px 14px;margin-bottom:9px;${c.recebido&&!c.parcelas?.length?'opacity:.55;':''}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <span style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:800;color:${TEXT};flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(c.nome)}${qtdBadge}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            ${c.valor?`<span style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:${TEXT};">R$ ${escapeHtml(c.valor)}</span>`:''}
+            <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${statusColor(c)};">${statusLabel(c)}</span>
+          </div>
+          ${c.obs?`<div style="font-size:11px;color:${MUTED};margin-top:4px;">${escapeHtml(c.obs)}</div>`:''}
+          ${parcelasInfo}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+          ${(!c.parcelas||c.parcelas.length<=1)?`<button class="rReceber" data-idx="${i}" style="background:${c.recebido?'rgba(34,197,94,.12)':'rgba(34,197,94,.2)'};border:1px solid ${c.recebido?'rgba(34,197,94,.2)':'rgba(34,197,94,.4)'};border-radius:8px;color:${c.recebido?'rgba(34,197,94,.5)':'#4ade80'};font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="${c.recebido?'Desfazer':'Marcar recebido'}">${c.recebido?'↩':'✓'}</button>`:''}
+          <button class="rEdit" data-idx="${i}" style="background:rgba(0,160,200,.15);border:1px solid rgba(0,160,200,.25);border-radius:8px;color:${ACC};font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✏️</button>
+          <button class="rDel" data-idx="${i}" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#f87171;font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const pendentes = receber.filter(c=>!c.recebido).length;
+  const totalPendente = receber.filter(c=>!c.recebido&&c.valor).reduce((s,c)=>{
+    if(c.parcelas&&c.parcelas.length>1) return s + c.parcelas.filter(p=>!p.recebido).reduce((ps,p)=>ps+(parseFloat(String(p.valor).replace(',','.'))||0),0);
+    return s+(parseFloat(String(c.valor).replace(',','.'))||0);
+  },0);
+
+  const ov = document.createElement('div');
+  ov.id = 'receberOv';
+  if(typeof window._navPush === 'function') window._navPush();
+  ov.style.cssText = `position:fixed;inset:0;background:${BG};z-index:99997;display:flex;flex-direction:column;`;
+  ov.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
+      <span style="font-size:24px;line-height:1;flex-shrink:0;margin-right:8px;display:flex;align-items:center;">💰</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:${TEXT};display:flex;align-items:center;">A Receber</span>
+      <button id="_recNew" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
+      <button id="_recBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+    </div>
+    ${pendentes>0?`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:rgba(0,80,120,.18);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${MUTED};">${pendentes} pendente${pendentes>1?'s':''}</span>
+      ${totalPendente>0?`<span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;color:#4ade80;">Total: R$ ${totalPendente.toFixed(2).replace('.',',')}</span>`:''}
+    </div>`:''}
+    <div id="_recBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
+      ${sorted.length===0?`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;"><div style="font-size:40px;margin-bottom:12px;">💰</div><div style="font-size:14px;font-weight:700;margin-bottom:6px;">Nenhum lançamento</div><div style="font-size:12px;opacity:.7;">Toque em + Novo para cadastrar</div></div>`:sorted.map((c,i)=>cardH(c,i)).join('')}
+    </div>
+
+    <!-- Formulário -->
+    <div id="_recForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+        <button id="_rfBack" style="background:rgba(0,80,120,.4);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
+        <span id="_rfTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};">Novo Lançamento</span>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Nome / Descrição *</div>
+        <input id="_rfNome" type="text" maxlength="60" placeholder="Ex: Mensalidade João, Serviço Empresa X…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;outline:none;margin-bottom:14px;">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Valor (R$) *</div>
+            <input id="_rfValor" type="text" inputmode="decimal" maxlength="12" placeholder="0,00" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;outline:none;">
+          </div>
+          <div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Qtd Parcelas</div>
+            <input id="_rfQtd" type="number" min="1" max="99" value="1" placeholder="1" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;outline:none;">
+          </div>
+          <div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">1º Vencto</div>
+            <input id="_rfVenc" type="date" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;">
+          </div>
+        </div>
+
+        <!-- Preview parcelas (aparece quando qtd > 1) -->
+        <div id="_rfParcelasPreview" style="display:none;margin-bottom:14px;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:8px;">✏️ Confirmar / Ajustar Parcelas</div>
+          <div id="_rfParcelasLista" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Observação</div>
+        <textarea id="_rfObs" rows="2" maxlength="200" placeholder="Opcional — cliente, contrato, referência…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;resize:none;line-height:1.5;margin-bottom:22px;"></textarea>
+        <button id="_rfSave" style="width:100%;padding:14px;border-radius:13px;border:none;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;cursor:pointer;">✔ Salvar</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(ov);
+  let _rEditIdx = null;
+  let _rfParcelasTemp = []; // array editável de parcelas
+
+  function buildParcelasTemp(){
+    const qtd = parseInt(ov.querySelector('#_rfQtd').value)||1;
+    const valorTotal = parseFloat(String(ov.querySelector('#_rfValor').value).replace(',','.'))||0;
+    const venc1 = ov.querySelector('#_rfVenc').value; // 'YYYY-MM-DD'
+    const valorParcela = qtd>0?(valorTotal/qtd).toFixed(2):'0.00';
+
+    _rfParcelasTemp = Array.from({length:qtd},(_,i)=>{
+      const existing = _rfParcelasTemp[i];
+      if(existing) return existing; // mantém edições manuais
+      let data = '';
+      if(venc1){
+        const d = new Date(venc1+'T12:00:00');
+        d.setDate(d.getDate()+(i*30));
+        data = d.toISOString().split('T')[0];
+      }
+      return { valor: valorParcela.replace('.',','), vencimento: data, recebido: false };
+    });
+    // Ajusta se qtd diminuiu
+    _rfParcelasTemp = _rfParcelasTemp.slice(0,qtd);
+  }
+
+  function renderParcelasPreview(){
+    const qtd = parseInt(ov.querySelector('#_rfQtd').value)||1;
+    const preview = ov.querySelector('#_rfParcelasPreview');
+    const lista = ov.querySelector('#_rfParcelasLista');
+    if(qtd<=1){ preview.style.display='none'; return; }
+    buildParcelasTemp();
+    preview.style.display='block';
+    lista.innerHTML = _rfParcelasTemp.map((p,i)=>`
+      <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;align-items:center;background:rgba(0,80,120,.3);border:1px solid rgba(0,140,180,.2);border-radius:10px;padding:9px 12px;">
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${MUTED};min-width:28px;">${i+1}/${qtd}</span>
+        <input type="text" inputmode="decimal" class="rfPVal" data-pi="${i}" value="${p.valor}" placeholder="0,00" style="padding:8px 10px;border-radius:8px;border:1.5px solid rgba(0,140,180,.22);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;outline:none;width:100%;box-sizing:border-box;">
+        <input type="date" class="rfPDat" data-pi="${i}" value="${p.vencimento}" style="padding:8px 10px;border-radius:8px;border:1.5px solid rgba(0,140,180,.22);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;width:100%;box-sizing:border-box;">
+      </div>`).join('');
+    lista.querySelectorAll('.rfPVal').forEach(inp=>inp.addEventListener('change',()=>{ _rfParcelasTemp[parseInt(inp.dataset.pi)].valor=inp.value; }));
+    lista.querySelectorAll('.rfPDat').forEach(inp=>inp.addEventListener('change',()=>{ _rfParcelasTemp[parseInt(inp.dataset.pi)].vencimento=inp.value; }));
+  }
+
+  function showRForm(idx){
+    _rEditIdx = idx;
+    _rfParcelasTemp = [];
+    const f = ov.querySelector('#_recForm'); f.style.display='flex';
+    ov.querySelector('#_rfTitle').textContent = idx!==null?'Editar Lançamento':'Novo Lançamento';
+    const arr = _getReceber();
+    if(idx!==null){
+      const c = arr[idx];
+      ov.querySelector('#_rfNome').value = c.nome||'';
+      ov.querySelector('#_rfObs').value = c.obs||'';
+      if(c.parcelas&&c.parcelas.length>1){
+        ov.querySelector('#_rfQtd').value = c.parcelas.length;
+        ov.querySelector('#_rfValor').value = c.valor||'';
+        ov.querySelector('#_rfVenc').value = c.parcelas[0]?.vencimento||'';
+        _rfParcelasTemp = c.parcelas.map(p=>({...p}));
+        renderParcelasPreview();
+        // Re-aplica valores salvos
+        setTimeout(()=>{
+          ov.querySelectorAll('.rfPVal').forEach((inp,i)=>{ inp.value=_rfParcelasTemp[i].valor; });
+          ov.querySelectorAll('.rfPDat').forEach((inp,i)=>{ inp.value=_rfParcelasTemp[i].vencimento; });
+        },50);
+      } else {
+        ov.querySelector('#_rfQtd').value = 1;
+        ov.querySelector('#_rfValor').value = c.valor||'';
+        ov.querySelector('#_rfVenc').value = c.vencimento||'';
+        ov.querySelector('#_rfParcelasPreview').style.display='none';
+      }
+    } else {
+      ov.querySelector('#_rfNome').value='';
+      ov.querySelector('#_rfValor').value='';
+      ov.querySelector('#_rfQtd').value=1;
+      ov.querySelector('#_rfVenc').value='';
+      ov.querySelector('#_rfObs').value='';
+      ov.querySelector('#_rfParcelasPreview').style.display='none';
+    }
+    setTimeout(()=>ov.querySelector('#_rfNome').focus(),120);
+  }
+
+  // Auto-atualiza preview ao mudar qtd/valor/venc1
+  ['_rfQtd','_rfValor','_rfVenc'].forEach(id=>{
+    ov.querySelector('#'+id).addEventListener('change', ()=>{
+      _rfParcelasTemp=[]; // reseta para recalcular
+      renderParcelasPreview();
+    });
+  });
+
+  ov.querySelector('#_recBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
+  ov.querySelector('#_recNew').onclick=()=>showRForm(null);
+  ov.querySelector('#_rfBack').onclick=()=>{ ov.querySelector('#_recForm').style.display='none'; };
+
+  ov.querySelector('#_rfSave').onclick=()=>{
+    const nome = ov.querySelector('#_rfNome').value.trim();
+    if(!nome){ showToast('⚠️ Informe o nome!'); return; }
+    const valor = ov.querySelector('#_rfValor').value.trim();
+    if(!valor){ showToast('⚠️ Informe o valor!'); return; }
+    const qtd = parseInt(ov.querySelector('#_rfQtd').value)||1;
+    const venc = ov.querySelector('#_rfVenc').value;
+    const obs = ov.querySelector('#_rfObs').value.trim();
+    const arr = _getReceber();
+
+    let entry;
+    if(qtd>1){
+      // Garante que _rfParcelasTemp está populado com os valores atuais do DOM
+      ov.querySelectorAll('.rfPVal').forEach((inp,i)=>{ if(_rfParcelasTemp[i]) _rfParcelasTemp[i].valor=inp.value; });
+      ov.querySelectorAll('.rfPDat').forEach((inp,i)=>{ if(_rfParcelasTemp[i]) _rfParcelasTemp[i].vencimento=inp.value; });
+      if(!_rfParcelasTemp.length) buildParcelasTemp();
+      entry = { id:_rEditIdx!==null?arr[_rEditIdx].id:Date.now(), nome, valor, obs, parcelas:[..._rfParcelasTemp], recebido:false, vencimento: _rfParcelasTemp[0]?.vencimento||venc };
+    } else {
+      entry = { id:_rEditIdx!==null?arr[_rEditIdx].id:Date.now(), nome, valor, vencimento:venc, obs, recebido:false, parcelas:[] };
+    }
+
+    if(_rEditIdx!==null) arr[_rEditIdx]={...arr[_rEditIdx],...entry, recebido:arr[_rEditIdx].recebido};
+    else arr.push(entry);
+    _saveReceber(arr);
+    ov.querySelector('#_recForm').style.display='none';
+    _renderReceberOv();
+  };
+
+  ov.querySelector('#_recBody').addEventListener('click',e=>{
+    const rBtn=e.target.closest('.rReceber'), eBtn=e.target.closest('.rEdit'), dBtn=e.target.closest('.rDel'), pBtn=e.target.closest('.rParc');
+    const arr=_getReceber();
+    const sorted2=[...arr].sort((a,b)=>{if(a.recebido===b.recebido)return(a.vencimento||'9999-12-31').localeCompare(b.vencimento||'9999-12-31');return a.recebido?1:-1;});
+    if(rBtn){
+      const i=parseInt(rBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id);
+      arr[real].recebido=!arr[real].recebido; _saveReceber(arr); _renderReceberOv();
+    } else if(pBtn){
+      const ci=parseInt(pBtn.dataset.cidx), pi=parseInt(pBtn.dataset.pidx);
+      const real=arr.findIndex(x=>x.id===sorted2[ci].id);
+      if(real>=0&&arr[real].parcelas[pi]){
+        arr[real].parcelas[pi].recebido=!arr[real].parcelas[pi].recebido;
+        arr[real].recebido=arr[real].parcelas.every(p=>p.recebido);
+        _saveReceber(arr); _renderReceberOv();
+      }
+    } else if(eBtn){
+      const i=parseInt(eBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id);
+      showRForm(real);
+    } else if(dBtn){
+      const i=parseInt(dBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id);
+      if(!confirm(`Excluir "${arr[real].nome}"?`))return;
+      arr.splice(real,1); _saveReceber(arr); _renderReceberOv();
+    }
+  });
+}
 function _getExames(){ try{ return JSON.parse(localStorage.getItem('agendaProMax_exames')||'[]'); }catch(e){ return []; } }
 function _saveExames(arr){ localStorage.setItem('agendaProMax_exames', JSON.stringify(arr)); }
 
@@ -4362,6 +4782,9 @@ function _renderDocsOv(){
 function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ══ FERIADOS ══
+// Cidade selecionada (persiste via localStorage)
+window._feriadosCidade = window._feriadosCidade || localStorage.getItem('feriadosCidade') || 'linhares';
+
 function openFeriados(){
   const existing = document.getElementById('feriadosOv');
   if(existing){ existing.remove(); return; }
@@ -4374,84 +4797,210 @@ function openFeriados(){
     const i=Math.floor(c/4), k=c%4;
     const l=(32+2*e+2*i-h-k)%7;
     const m=Math.floor((a+11*h+22*l)/451);
-    const mes=Math.floor((h+l-7*m+114)/31); // 1-indexed
+    const mes=Math.floor((h+l-7*m+114)/31);
     const dia=((h+l-7*m+114)%31)+1;
     return new Date(ano, mes-1, dia);
   }
 
+  // ── Feriados municipais por cidade ──
+  function getMunicipais(ano, cidade, iso, addDays, p){
+    const cc = addDays(p, 60); // Corpus Christi
+    const sf = addDays(p, -2); // Sexta Santa
+    const cx = addDays(p, -47); // Carnaval (seg)
+    const cz = addDays(p, -45); // Cinzas
+    const nspPascoa = addDays(p, 8); // Nossa Sra da Penha (2ª dom após Páscoa = segunda após)
+    // Nossa Sra. da Penha: segunda-feira 8 dias após o domingo de Páscoa
+    const nspData = (()=>{ const d=new Date(p); d.setDate(d.getDate()+8); if(d.getDay()!==1){d.setDate(d.getDate()+(8-d.getDay())%7);} return d; })();
+
+    const map = {
+      linhares: [
+        { iso:`${ano}-01-20`, nome:'São Sebastião — Padroeiro de Linhares',      emoji:'🏹' },
+        { iso:`${ano}-06-13`, nome:'Santo Antônio',                               emoji:'⛪' },
+        { iso:`${ano}-09-08`, nome:'Aniversário de Linhares',                     emoji:'🎂' },
+        { iso:`${ano}-11-30`, nome:'São Lourenço (distritos)',                    emoji:'🕯️' },
+      ],
+      aracruz: [
+        { iso:`${ano}-04-03`, nome:'Aniversário de Aracruz',                      emoji:'🎂' },
+        { iso:iso(sf),        nome:'Sexta-feira da Paixão',                       emoji:'✝️' },
+        { iso:iso(cc),        nome:'Corpus Christi',                              emoji:'✝️' },
+        { iso:`${ano}-06-24`, nome:'São João Batista — Padroeiro de Aracruz',    emoji:'⛪' },
+      ],
+      'sao-mateus': [
+        { iso:`${ano}-09-21`, nome:'Aniversário de São Mateus',                   emoji:'🎂' },
+        { iso:`${ano}-12-27`, nome:'São Benedito',                                emoji:'⛪' },
+      ],
+      vitoria: [
+        { iso:iso(nspData),   nome:'Nossa Sra. da Penha',                         emoji:'🙏' },
+        { iso:`${ano}-05-23`, nome:'Colonização do Solo (municipal)',              emoji:'🌿' },
+        { iso:`${ano}-09-08`, nome:'Nossa Sra. da Vitória — Aniversário',        emoji:'🎂' },
+      ],
+      cariacica: [
+        { iso:iso(cc),        nome:'Corpus Christi',                              emoji:'✝️' },
+        { iso:`${ano}-06-24`, nome:'São João Batista — Aniversário de Cariacica', emoji:'🎂' },
+      ],
+      viana: [
+        { iso:iso(cz),        nome:'Quarta-feira de Cinzas',                      emoji:'✝️' },
+        { iso:`${ano}-04-08`, nome:'Nossa Sra. da Penha',                         emoji:'🙏' },
+        { iso:iso(cc),        nome:'Corpus Christi',                              emoji:'✝️' },
+        { iso:`${ano}-07-23`, nome:'Aniversário de Viana',                        emoji:'🎂' },
+        { iso:`${ano}-12-08`, nome:'Nossa Sra. da Conceição — Padroeira',        emoji:'👑' },
+      ],
+      guarapari: [
+        { iso:`${ano}-06-29`, nome:'São Pedro — Padroeiro',                       emoji:'⛪' },
+        { iso:`${ano}-09-19`, nome:'Aniversário de Guarapari',                    emoji:'🎂' },
+        { iso:`${ano}-11-20`, nome:'Consciência Negra (municipal)',                emoji:'✊' },
+        { iso:`${ano}-12-08`, nome:'Nossa Sra. da Conceição — Padroeira',        emoji:'👑' },
+      ],
+      'joao-neiva': [
+        { iso:`${ano}-04-28`, nome:'Nossa Sra. da Penha',                         emoji:'🙏' },
+        { iso:`${ano}-05-11`, nome:'Aniversário de João Neiva',                   emoji:'🎂' },
+      ],
+      ibiracu: [
+        { iso:iso(sf),        nome:'Sexta-feira da Paixão',                       emoji:'✝️' },
+        { iso:iso(cc),        nome:'Corpus Christi',                              emoji:'✝️' },
+        { iso:`${ano}-09-11`, nome:'Aniversário de Ibiraçu',                      emoji:'🎂' },
+        { iso:`${ano}-11-21`, nome:'Nossa Sra. da Saúde — Padroeira',            emoji:'🙏' },
+      ],
+      colatina: [
+        { iso:iso(cc),        nome:'Corpus Christi',                              emoji:'✝️' },
+        { iso:iso(addDays(cc,-11)), nome:'Sagrado Coração de Jesus',              emoji:'❤️' },
+        { iso:`${ano}-08-22`, nome:'Fundação de Colatina',                        emoji:'🎂' },
+      ],
+      marilandia: [
+        // Marilândia: feriados municipais não cadastrados em fontes oficiais verificadas
+        // Data de fundação: 30 de março
+        { iso:`${ano}-03-30`, nome:'Aniversário de Marilândia',                   emoji:'🎂' },
+        { iso:`${ano}-06-13`, nome:'Santo Antônio — Padroeiro',                  emoji:'⛪' },
+      ],
+    };
+    return (map[cidade] || []);
+  }
+
   // ── Monta lista de feriados do ano ──
-  function getFeriados(ano){
+  function getFeriados(ano, cidade){
     const p = calcPascoa(ano);
     const addDays = (d,n)=>{ const r=new Date(d); r.setDate(r.getDate()+n); return r; };
     const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
     const iso = d => `${ano}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
-    const carnaval = addDays(p,-47);
-    const sextaSanta = addDays(p,-2);
-    const corpusChristi = addDays(p,60);
+    const carnaval      = addDays(p, -47);
+    const sextaSanta    = addDays(p,  -2);
+    const corpusChristi = addDays(p,  60);
+    // Nossa Sra. da Penha ES: segunda-feira 8 dias após Páscoa
+    const nspES = (()=>{ const d=new Date(p); d.setDate(d.getDate()+8); return d; })();
+
+    const _segDom = (mes0) => {
+      const d=new Date(ano,mes0,1); const dow=d.getDay();
+      const first=dow===0?1:8-dow;
+      return `${ano}-${String(mes0+1).padStart(2,'0')}-${String(first+7).padStart(2,'0')}`;
+    };
+    const maes = _segDom(4);
+    const pais = _segDom(7);
+
+    const municipais = getMunicipais(ano, cidade, iso, addDays, p).map(f=>({...f, tipo:'municipal'}));
 
     const lista = [
-      // Fixos
-      { iso:`${ano}-01-01`, nome:'Ano Novo',                  emoji:'🎆' },
-      { iso:iso(carnaval),  nome:'Carnaval',                  emoji:'🎭' },
-      { iso:iso(addDays(carnaval,1)), nome:'Segunda de Carnaval', emoji:'🎭' },
-      { iso:`${ano}-03-04`, nome:'Quarta de Cinzas',          emoji:'✝️', fixo:false, custom: iso(addDays(p,-45)) },
-      { iso:iso(sextaSanta),nome:'Sexta-feira Santa',         emoji:'✝️' },
-      { iso:iso(p),         nome:'Páscoa',                    emoji:'🐣' },
-      { iso:`${ano}-04-21`, nome:'Tiradentes',                emoji:'🇧🇷' },
-      { iso:`${ano}-05-01`, nome:'Dia do Trabalho',           emoji:'👷' },
-      { iso:`${ano}-05-11`, nome:'Dia das Mães',              emoji:'💐', tipo:'comemorativo' },
-      { iso:iso(corpusChristi), nome:'Corpus Christi',        emoji:'✝️' },
-      { iso:`${ano}-06-12`, nome:'Dia dos Namorados',         emoji:'❤️', tipo:'comemorativo' },
-      { iso:`${ano}-07-13`, nome:'Dia dos Pais',              emoji:'👔', tipo:'comemorativo',
-        // Segundo domingo de agosto
-        custom: (()=>{ const d=new Date(ano,7,1); let dom=d.getDay(); let first=dom===0?1:8-dom; return `${ano}-08-${String(first+7).padStart(2,'0')}`; })()
-      },
-      { iso:`${ano}-09-07`, nome:'Independência do Brasil',   emoji:'🇧🇷' },
-      { iso:`${ano}-10-12`, nome:'Nossa Sra. Aparecida',      emoji:'🙏' },
-      { iso:`${ano}-10-28`, nome:'Dia do Servidor Público',   emoji:'📋', tipo:'opcional' },
-      { iso:`${ano}-11-02`, nome:'Finados',                   emoji:'🕯️' },
-      { iso:`${ano}-11-15`, nome:'Proclamação da República',  emoji:'🇧🇷' },
-      { iso:`${ano}-11-20`, nome:'Consciência Negra',         emoji:'✊' },
-      { iso:`${ano}-12-24`, nome:'Véspera de Natal',          emoji:'🎄', tipo:'opcional' },
-      { iso:`${ano}-12-25`, nome:'Natal',                     emoji:'🎅' },
-      { iso:`${ano}-12-31`, nome:'Véspera de Ano Novo',       emoji:'🎆', tipo:'opcional' },
+      // ══ NACIONAIS ══
+      { iso:`${ano}-01-01`, nome:'Confraternização Universal (Ano Novo)',   emoji:'🎆',  tipo:'nacional'    },
+      { iso:iso(carnaval),  nome:'Carnaval — segunda-feira',                emoji:'🎭',  tipo:'facultativo' },
+      { iso:iso(addDays(carnaval,1)), nome:'Carnaval — terça-feira',        emoji:'🎭',  tipo:'facultativo' },
+      { iso:iso(addDays(p,-45)),      nome:'Quarta-feira de Cinzas (meio-dia)', emoji:'✝️', tipo:'facultativo' },
+      { iso:iso(sextaSanta),nome:'Paixão de Cristo (Sexta-feira Santa)',    emoji:'✝️',  tipo:'nacional'    },
+      { iso:iso(p),         nome:'Páscoa',                                  emoji:'🐣',  tipo:'nacional'    },
+      { iso:`${ano}-04-21`, nome:'Tiradentes',                              emoji:'⛓️', tipo:'nacional'    },
+      { iso:`${ano}-05-01`, nome:'Dia do Trabalho',                         emoji:'👷',  tipo:'nacional'    },
+      { iso:iso(corpusChristi), nome:'Corpus Christi',                      emoji:'✝️',  tipo:'facultativo' },
+      { iso:`${ano}-09-07`, nome:'Independência do Brasil',                 emoji:'🇧🇷', tipo:'nacional'    },
+      { iso:`${ano}-10-12`, nome:'Nossa Sra. Aparecida',                    emoji:'🙏',  tipo:'nacional'    },
+      { iso:`${ano}-10-28`, nome:'Dia do Servidor Público',                 emoji:'📋',  tipo:'facultativo' },
+      { iso:`${ano}-11-02`, nome:'Finados',                                 emoji:'🕯️', tipo:'nacional'    },
+      { iso:`${ano}-11-15`, nome:'Proclamação da República',                emoji:'🇧🇷', tipo:'nacional'    },
+      { iso:`${ano}-11-20`, nome:'Consciência Negra',                       emoji:'✊',  tipo:'nacional'    },
+      { iso:`${ano}-12-24`, nome:'Véspera de Natal',                        emoji:'🎄',  tipo:'facultativo' },
+      { iso:`${ano}-12-25`, nome:'Natal',                                   emoji:'🎅',  tipo:'nacional'    },
+      { iso:`${ano}-12-31`, nome:'Véspera de Ano Novo',                     emoji:'🎆',  tipo:'facultativo' },
+      // ══ COMEMORATIVOS ══
+      { iso:maes,           nome:'Dia das Mães',                            emoji:'💐',  tipo:'comemorativo'},
+      { iso:`${ano}-06-12`, nome:'Dia dos Namorados',                       emoji:'❤️', tipo:'comemorativo'},
+      { iso:pais,           nome:'Dia dos Pais',                            emoji:'👔',  tipo:'comemorativo'},
+      { iso:`${ano}-10-15`, nome:'Dia dos Professores',                     emoji:'📚',  tipo:'comemorativo'},
+      // ══ ESTADUAIS — ESPÍRITO SANTO ══
+      { iso:iso(nspES),     nome:'Nossa Sra. da Penha (Padroeira do ES)',   emoji:'🙏',  tipo:'estadual'    },
+      { iso:`${ano}-05-23`, nome:'Colonização do Espírito Santo',           emoji:'🌿',  tipo:'estadual'    },
+      // ══ MUNICIPAIS ══
+      ...municipais,
     ];
 
-    // Dia das Mães = 2º domingo de maio
-    const maes = (()=>{
-      const d=new Date(ano,4,1); let dom=d.getDay();
-      let first=dom===0?1:8-dom; return `${ano}-05-${String(first+7).padStart(2,'0')}`;
-    })();
-    // Dia dos Pais = 2º domingo de agosto
-    const pais = (()=>{
-      const d=new Date(ano,7,1); let dom=d.getDay();
-      let first=dom===0?1:8-dom; return `${ano}-08-${String(first+7).padStart(2,'0')}`;
-    })();
-
-    // Substitui datas comemorativas pelos domingos corretos
-    const result = lista.map(f => {
-      if(f.nome==='Dia das Mães') return {...f, iso: maes};
-      if(f.nome==='Dia dos Pais') return {...f, iso: pais};
-      if(f.nome==='Quarta de Cinzas') return {...f, iso: iso(addDays(p,-45))};
-      return f;
-    });
-
     // Ordena por data
-    result.sort((a,b)=>a.iso.localeCompare(b.iso));
+    lista.sort((a,b)=>a.iso.localeCompare(b.iso));
 
-    return result.map(f => ({...f, fmt: fmt(new Date(f.iso+'T12:00:00'))}));
+    return lista.map(f => ({...f, fmt: fmt(new Date(f.iso+'T12:00:00'))}));
   }
 
   const hoje = new Date();
   const hojeISO = hoje.toISOString().split('T')[0];
   const ano = hoje.getFullYear();
-  const feriados = getFeriados(ano).filter(f => f.iso >= hojeISO);
+  let cidadeAtual = window._feriadosCidade;
+
+  const CIDADES = {
+    'linhares':    'Linhares',
+    'aracruz':     'Aracruz',
+    'sao-mateus':  'São Mateus',
+    'vitoria':     'Vitória',
+    'cariacica':   'Cariacica',
+    'viana':       'Viana',
+    'guarapari':   'Guarapari',
+    'joao-neiva':  'João Neiva',
+    'ibiracu':     'Ibiraçu',
+    'colatina':    'Colatina',
+    'marilandia':  'Marilândia',
+  };
+
+  function renderFeriados(cidade){
+    cidadeAtual = cidade;
+    window._feriadosCidade = cidade;
+    try { localStorage.setItem('feriadosCidade', cidade); } catch(e){}
+    const fList = getFeriados(ano, cidade).filter(f => f.iso >= hojeISO);
+    const porMes2 = {};
+    fList.forEach(f => {
+      const d = new Date(f.iso+'T12:00:00');
+      const mes = d.getMonth();
+      if(!porMes2[mes]) porMes2[mes] = [];
+      porMes2[mes].push({...f, diaSemana: DIAS_PT[d.getDay()]});
+    });
+    const mesesOrdem2 = Object.keys(porMes2).map(Number).sort((a,b)=>a-b);
+    let html2 = '';
+    if(mesesOrdem2.length === 0){
+      html2 = '<div style="text-align:center;padding:40px 20px;color:rgba(180,220,240,.4);font-family:Space Grotesk,sans-serif;font-size:14px;">Nenhum feriado restante neste ano 🎉</div>';
+    } else {
+      mesesOrdem2.forEach(mes => {
+        html2 += `<div style="margin-bottom:6px;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;color:rgba(125,211,240,.55);text-transform:uppercase;padding:14px 0 8px 2px;">${MESES_PT[mes]}</div>`;
+        porMes2[mes].forEach((f,i) => {
+          const isHoje = f.iso === hojeISO;
+          const rowBg = isHoje ? 'background:rgba(0,160,200,.12);border:1px solid rgba(0,200,220,.22);' : (i%2===0 ? 'background:rgba(0,80,120,.18);' : 'background:rgba(0,80,120,.10);');
+          html2 += `<div style="${rowBg}border-radius:10px;padding:10px 13px;margin-bottom:5px;display:flex;align-items:center;gap:11px;"><div style="flex-shrink:0;min-width:46px;text-align:center;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:19px;font-weight:900;color:${isHoje?'#7dd3f0':'#e8f4ff'};line-height:1;">${f.fmt.split('/')[0]}</div><div style="font-family:\'Space Grotesk\',sans-serif;font-size:10px;font-weight:600;color:rgba(180,220,240,.5);text-transform:uppercase;letter-spacing:.04em;">${f.diaSemana}</div></div><div style="flex-shrink:0;font-size:20px;line-height:1;">${f.emoji}</div><div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;font-weight:700;color:${isHoje?'#7dd3f0':'#e8f4ff'};line-height:1.3;">${f.nome}${tipoBadge(f)}</div>${isHoje?'<div style="font-family:Space Grotesk,sans-serif;font-size:10px;color:rgba(125,211,240,.7);font-weight:600;margin-top:2px;">Hoje!</div>':''}</div></div>`;
+        });
+        html2 += '</div>';
+      });
+    }
+    const body = document.getElementById('_ferBody');
+    if(body) body.innerHTML = html2;
+    const cnt = document.getElementById('_ferCnt');
+    if(cnt) cnt.textContent = `${fList.length} restantes`;
+    const tit = document.getElementById('_ferTit');
+    if(tit) tit.textContent = `Feriados ${ano} — ${CIDADES[cidade]}/ES`;
+    document.querySelectorAll('._ferCidBtn').forEach(b => {
+      b.style.background = b.dataset.cidade === cidade ? 'rgba(0,160,200,.35)' : 'rgba(0,80,120,.25)';
+      b.style.border = b.dataset.cidade === cidade ? '1px solid rgba(0,200,220,.5)' : '1px solid rgba(0,140,180,.2)';
+    });
+  }
+
+  const feriados = getFeriados(ano, cidadeAtual).filter(f => f.iso >= hojeISO);
 
   const DIAS_PT = ['dom','seg','ter','qua','qui','sex','sáb'];
   const MESES_PT = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 
-  // Agrupa por mês
+  // Agrupa por mês (initial render)
   const porMes = {};
   feriados.forEach(f => {
     const d = new Date(f.iso+'T12:00:00');
@@ -4462,8 +5011,11 @@ function openFeriados(){
 
   // Tipo badge
   function tipoBadge(f){
-    if(f.tipo==='comemorativo') return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(251,191,36,.15);color:rgba(251,191,36,.9);border:1px solid rgba(251,191,36,.25);border-radius:5px;padding:1px 5px;margin-left:6px;">Comemorativo</span>';
-    if(f.tipo==='opcional') return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(148,163,184,.1);color:rgba(180,220,240,.55);border:1px solid rgba(148,163,184,.2);border-radius:5px;padding:1px 5px;margin-left:6px;">Facultativo</span>';
+    if(f.tipo==='nacional')     return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(59,130,246,.15);color:rgba(147,197,253,.9);border:1px solid rgba(59,130,246,.25);border-radius:5px;padding:1px 5px;margin-left:6px;">Nacional</span>';
+    if(f.tipo==='facultativo')  return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(148,163,184,.1);color:rgba(180,220,240,.6);border:1px solid rgba(148,163,184,.2);border-radius:5px;padding:1px 5px;margin-left:6px;">Facultativo</span>';
+    if(f.tipo==='estadual')     return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(52,211,153,.12);color:rgba(110,231,183,.9);border:1px solid rgba(52,211,153,.25);border-radius:5px;padding:1px 5px;margin-left:6px;">ES</span>';
+    if(f.tipo==='municipal')    return `<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(251,146,60,.12);color:rgba(253,186,116,.9);border:1px solid rgba(251,146,60,.25);border-radius:5px;padding:1px 5px;margin-left:6px;">${CIDADES[cidadeAtual]||'Municipal'}</span>`;
+    if(f.tipo==='comemorativo') return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(251,191,36,.12);color:rgba(253,224,71,.85);border:1px solid rgba(251,191,36,.2);border-radius:5px;padding:1px 5px;margin-left:6px;">Comemorativo</span>';
     return '';
   }
 
@@ -4495,24 +5047,43 @@ function openFeriados(){
     });
   }
 
+  // Gera botões de cidades
+  const cidBtns = Object.entries(CIDADES).map(([k,v]) =>
+    `<button class="_ferCidBtn" data-cidade="${k}" style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;border-radius:8px;padding:5px 10px;cursor:pointer;color:#e8f4ff;flex-shrink:0;white-space:nowrap;background:${k===cidadeAtual?'rgba(0,160,200,.35)':'rgba(0,80,120,.25)'};border:${k===cidadeAtual?'1px solid rgba(0,200,220,.5)':'1px solid rgba(0,140,180,.2)'};">${v}</button>`
+  ).join('');
+
   const ov = document.createElement('div');
   ov.id = 'feriadosOv';
   if(typeof window._navPush === 'function') window._navPush();
   ov.style.cssText = 'position:fixed;inset:0;background:linear-gradient(160deg,#021824,#04355a);z-index:99997;display:flex;flex-direction:column;';
   ov.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid rgba(0,140,180,.2);flex-shrink:0;gap:8px;">
-      <span style="font-size:18px;line-height:1;flex-shrink:0;margin-right:2px;">🎉</span><span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:#e8f4ff;">Feriados ${ano}</span>
-      <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;color:rgba(180,220,240,.45);flex-shrink:0;">${feriados.length} restantes</span>
+      <span style="font-size:18px;line-height:1;flex-shrink:0;margin-right:2px;">🎉</span>
+      <span id="_ferTit" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:#e8f4ff;">Feriados ${ano} — ${CIDADES[cidadeAtual]}/ES</span>
+      <span id="_ferCnt" style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;color:rgba(180,220,240,.45);flex-shrink:0;">${feriados.length} restantes</span>
       <button id="_ferBack" style="background:rgba(0,80,120,.3);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:#7dd3f0;font-size:17px;font-weight:900;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>
     </div>
-    <div style="flex:1;overflow-y:auto;padding:14px 16px 24px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
+    <div style="overflow-x:auto;display:flex;gap:6px;padding:10px 14px 8px;border-bottom:1px solid rgba(0,140,180,.15);flex-shrink:0;background:rgba(0,0,0,.15);scrollbar-width:none;">
+      ${cidBtns}
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px 7px;border-bottom:1px solid rgba(0,140,180,.1);flex-shrink:0;background:rgba(0,0,0,.1);">
+      <span style="font-size:9px;font-weight:700;background:rgba(59,130,246,.15);color:rgba(147,197,253,.9);border:1px solid rgba(59,130,246,.25);border-radius:5px;padding:2px 7px;">Nacional</span>
+      <span style="font-size:9px;font-weight:700;background:rgba(148,163,184,.1);color:rgba(180,220,240,.6);border:1px solid rgba(148,163,184,.2);border-radius:5px;padding:2px 7px;">Facultativo</span>
+      <span style="font-size:9px;font-weight:700;background:rgba(52,211,153,.12);color:rgba(110,231,183,.9);border:1px solid rgba(52,211,153,.25);border-radius:5px;padding:2px 7px;">Estadual ES</span>
+      <span style="font-size:9px;font-weight:700;background:rgba(251,146,60,.12);color:rgba(253,186,116,.9);border:1px solid rgba(251,146,60,.25);border-radius:5px;padding:2px 7px;">Municipal</span>
+      <span style="font-size:9px;font-weight:700;background:rgba(251,191,36,.12);color:rgba(253,224,71,.85);border:1px solid rgba(251,191,36,.2);border-radius:5px;padding:2px 7px;">Comemorativo</span>
+    </div>
+    <div id="_ferBody" style="flex:1;overflow-y:auto;padding:14px 16px 24px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
       ${html}
       <div style="margin-top:18px;padding:12px 14px;background:rgba(0,80,120,.15);border:1px solid rgba(0,140,180,.12);border-radius:10px;">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:rgba(180,220,240,.35);line-height:1.6;text-align:center;">Feriados nacionais · Páscoa e datas móveis calculados automaticamente · Inclui comemorativos e facultativos</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:rgba(180,220,240,.35);line-height:1.6;text-align:center;">Nacionais · Facultativos · Estaduais ES · Municipais por cidade · Datas móveis calculadas automaticamente</div>
       </div>
     </div>`;
   document.body.appendChild(ov);
   ov.querySelector('#_ferBack').onclick = () => { ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
+  ov.querySelectorAll('._ferCidBtn').forEach(b => {
+    b.onclick = () => renderFeriados(b.dataset.cidade);
+  });
 }
 
 // ══ FOLDER MODAL ══
@@ -5269,6 +5840,7 @@ function exportarDados() {
         if (rawDocs) exportData._docs = JSON.parse(rawDocs);
       } catch(e) {}
       try { const r=localStorage.getItem('agendaProMax_contas'); if(r) exportData._contas=JSON.parse(r); }catch(e){}
+      try { const r=localStorage.getItem('agendaProMax_receber'); if(r) exportData._receber=JSON.parse(r); }catch(e){}
       try { const r=localStorage.getItem('agendaProMax_exames'); if(r) exportData._exames=JSON.parse(r); }catch(e){}
       try { const r=localStorage.getItem('agendaProMax_compras'); if(r) exportData._compras=JSON.parse(r); }catch(e){}
       try { const r=localStorage.getItem('agendaProMax_mercado'); if(r) exportData._mercado=JSON.parse(r); }catch(e){}
@@ -6832,7 +7404,305 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:linear-grad
   });
 }
 
-function generateRemediosReport(){
+// ══ RELATÓRIO A PAGAR ══
+function generateContasPagarReport(){
+  const CSS=`*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:linear-gradient(160deg,#021824,#04355a);color:#e8f4ff;padding:16px;min-height:100vh}
+.wrap{max-width:600px;margin:0 auto}
+.page-hdr{padding:18px 18px 14px;background:rgba(0,80,120,.25);border:1px solid rgba(0,140,180,.18);border-radius:14px 14px 0 0}
+.page-title{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;color:#e8f4ff;letter-spacing:-.3px;margin-bottom:3px}
+.page-sub{font-size:11px;font-weight:600;color:rgba(180,220,240,.5)}
+.stats{display:flex;gap:8px;padding:12px 16px 14px;background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.18);border-top:none;margin-bottom:14px;}
+.stat{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;background:rgba(0,80,120,.28);border:1px solid rgba(0,160,200,.14);border-radius:12px;}
+.stat-n{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:900;color:#7dd3f0;line-height:1;}
+.stat-l{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:800;color:rgba(180,220,240,.55);text-transform:uppercase;letter-spacing:.6px;text-align:center;}
+.section-label{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:#7dd3f0;margin:14px 0 10px;}
+.section-label.paga{color:rgba(180,220,240,.45);}
+.card{background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.18);border-radius:14px;overflow:hidden;margin-bottom:10px;}
+.card.paga{opacity:.65;border-color:rgba(0,100,140,.12);}
+.card-hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,80,120,.25);border-bottom:1px solid rgba(0,140,180,.12);}
+.card-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:#e8f4ff;}
+.card-badge{font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;}
+.card-badge.pendente{background:rgba(251,146,60,.18);border:1px solid rgba(251,146,60,.35);color:#fb923c;}
+.card-badge.vencida{background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.35);color:#f87171;}
+.card-badge.paga{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.2);color:rgba(74,222,128,.7);}
+.card-badge.fixa{background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.3);color:#c4b5fd;}
+.card-body{padding:10px 14px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.field{background:rgba(0,80,120,.28);border:1px solid rgba(0,160,200,.14);border-radius:10px;padding:8px 10px;}
+.field-lbl{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:800;color:rgba(180,220,240,.55);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.field-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:#e8f4ff;}
+.field-val.red{color:#f87171;} .field-val.orange{color:#fb923c;} .field-val.green{color:#4ade80;}
+.footer{text-align:center;font-family:'Space Grotesk',sans-serif;font-size:10px;color:rgba(180,220,240,.3);padding:18px;margin-top:4px;}
+@media print{body{background:#fff!important;color:#0f172a!important}}`;
+
+  const today=new Date().toISOString().split('T')[0];
+  const todayDia=new Date().getDate();
+
+  function _askAndBuild(filtro){
+    const allContas=_getContas();
+    let contas;
+    if(filtro==='pendentes') contas=allContas.filter(c=>!c.paga);
+    else if(filtro==='pagas') contas=allContas.filter(c=>c.paga);
+    else contas=allContas;
+
+    // Ordena por dia de vencimento (pendentes primeiro, depois pagas)
+    contas.sort((a,b)=>{
+      if(a.paga!==b.paga) return a.paga?1:-1;
+      return (a.vencimento||31)-(b.vencimento||31);
+    });
+
+    const pendentes=contas.filter(c=>!c.paga);
+    const pagas=contas.filter(c=>c.paga);
+    const totalPendente=pendentes.reduce((s,c)=>s+(parseFloat(String(c.valor||0).replace(',','.'))||0),0);
+    const totalPago=pagas.reduce((s,c)=>s+(parseFloat(String(c.valor||0).replace(',','.'))||0),0);
+
+    function statusInfo(c){
+      if(c.paga) return {cls:'paga',lbl:'✅ Paga'};
+      const diff=(c.vencimento||31)-todayDia;
+      if(diff<0) return {cls:'vencida',lbl:`🔴 Vencida (dia ${c.vencimento||'?'})`};
+      if(diff===0) return {cls:'pendente',lbl:`🟠 Vence hoje`};
+      if(diff<=3) return {cls:'pendente',lbl:`🟡 Vence em ${diff}d`};
+      return {cls:'pendente',lbl:`📅 Dia ${c.vencimento||'?'}`};
+    }
+    function valorColor(c){
+      if(c.paga) return 'green';
+      const diff=(c.vencimento||31)-todayDia;
+      if(diff<0) return 'red';
+      if(diff<=3) return 'orange';
+      return '';
+    }
+
+    function cardH(c){
+      const st=statusInfo(c);
+      return `<div class="card${c.paga?' paga':''}">
+        <div class="card-hdr">
+          <div class="card-title">${escapeHtml(c.nome)}</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+            ${c.fixa?'<span class="card-badge fixa">FIXA</span>':''}
+            <span class="card-badge ${st.cls}">${st.lbl}</span>
+          </div>
+        </div>
+        <div class="card-body">
+          ${c.valor?`<div class="field"><div class="field-lbl">Valor</div><div class="field-val ${valorColor(c)}">R$ ${escapeHtml(c.valor)}</div></div>`:''}
+          <div class="field"><div class="field-lbl">Vencimento</div><div class="field-val">Dia ${c.vencimento||'—'}</div></div>
+          ${c.obs?`<div class="field" style="grid-column:span 2"><div class="field-lbl">Observação</div><div class="field-val">${escapeHtml(c.obs)}</div></div>`:''}
+        </div>
+      </div>`;
+    }
+
+    const pendentesHTML = pendentes.length===0
+      ?'<div style="text-align:center;padding:20px;color:rgba(180,220,240,.4);font-style:italic;font-family:Space Grotesk,sans-serif;">Nenhuma conta pendente</div>'
+      :pendentes.map(c=>cardH(c)).join('');
+    const pagasHTML = pagas.length===0
+      ?'<div style="text-align:center;padding:20px;color:rgba(180,220,240,.4);font-style:italic;font-family:Space Grotesk,sans-serif;">Nenhuma conta paga</div>'
+      :pagas.map(c=>cardH(c)).join('');
+
+    const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contas a Pagar — Agenda Pro Max</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>${CSS}</style></head><body>
+<div class="wrap">
+  <div class="page-hdr">
+    <div class="page-title">💳 Contas a Pagar</div>
+    <div class="page-sub">Gerado em ${new Date().toLocaleDateString('pt-BR')} · Filtro: ${filtro==='todas'?'Todas':filtro==='pendentes'?'Pendentes':'Pagas'}</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><span class="stat-n">${String(contas.length).padStart(2,'0')}</span><span class="stat-l">Total</span></div>
+    <div class="stat"><span class="stat-n" style="color:#f87171;">${String(pendentes.length).padStart(2,'0')}</span><span class="stat-l">Pendentes</span></div>
+    <div class="stat"><span class="stat-n" style="color:#4ade80;">${String(pagas.length).padStart(2,'0')}</span><span class="stat-l">Pagas</span></div>
+    ${totalPendente>0?`<div class="stat"><span class="stat-n" style="color:#fb923c;font-size:13px;">R$${totalPendente.toFixed(2).replace('.',',')}</span><span class="stat-l">A pagar</span></div>`:''}
+  </div>
+  ${filtro!=='pagas'&&pendentes.length>0?`<div class="section-label">💳 Pendentes — ${pendentes.length}</div>${pendentesHTML}`:''}
+  ${filtro!=='pendentes'&&pagas.length>0?`<div class="section-label paga">✅ Pagas — ${pagas.length}</div>${pagasHTML}`:''}
+  ${contas.length===0?'<div style="text-align:center;padding:40px;color:rgba(180,220,240,.4);font-family:Space Grotesk,sans-serif;font-size:14px;">Nenhuma conta cadastrada</div>':''}
+  <div class="footer">Agenda Pro Max</div>
+</div></body></html>`;
+    return html;
+  }
+
+  // Pergunta filtro antes de gerar
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(2,24,36,.85);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  ov.innerHTML=`<div style="background:linear-gradient(160deg,#021824,#04355a);border:1px solid rgba(0,140,180,.25);border-radius:20px;padding:24px;width:100%;max-width:320px;">
+    <div style="text-align:center;margin-bottom:18px;">
+      <div style="font-size:36px;margin-bottom:8px;">💳</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:#e8f4ff;">Contas a Pagar</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:rgba(180,220,240,.6);margin-top:4px;">Quais contas incluir?</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button data-f="pendentes" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(251,146,60,.35);background:rgba(251,146,60,.12);color:#fb923c;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">📋</span>Contas Pendentes / A Pagar</button>
+      <button data-f="pagas" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(34,197,94,.25);background:rgba(34,197,94,.08);color:#4ade80;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">✅</span>Contas Pagas</button>
+      <button data-f="todas" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(0,140,180,.2);background:rgba(0,80,120,.25);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">📊</span>Todas as Contas</button>
+      <button data-f="cancel" style="padding:9px;border-radius:12px;border:none;background:transparent;color:rgba(180,220,240,.4);font-family:'Space Grotesk',sans-serif;font-size:12px;cursor:pointer;">Cancelar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.querySelectorAll('button[data-f]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const f=btn.dataset.f;
+      ov.remove();
+      if(f==='cancel') return;
+      showFormatChoice('💳 Contas a Pagar','Como quer visualizar?',(fmt)=>{
+        const html=_askAndBuild(f);
+        if(fmt==='html') _openHtmlTab(html,{type:'contas'});
+        else _openAsPdf(html,'Contas a Pagar',{type:'contas'});
+        showToast('✅ Relatório aberto!');
+      });
+    });
+  });
+}
+
+// ══ RELATÓRIO A RECEBER ══
+function generateContasReceberReport(){
+  const CSS=`*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:linear-gradient(160deg,#021824,#04355a);color:#e8f4ff;padding:16px;min-height:100vh}
+.wrap{max-width:600px;margin:0 auto}
+.page-hdr{padding:18px 18px 14px;background:rgba(0,80,120,.25);border:1px solid rgba(0,140,180,.18);border-radius:14px 14px 0 0}
+.page-title{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;color:#e8f4ff;letter-spacing:-.3px;margin-bottom:3px}
+.page-sub{font-size:11px;font-weight:600;color:rgba(180,220,240,.5)}
+.stats{display:flex;gap:8px;padding:12px 16px 14px;background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.18);border-top:none;margin-bottom:14px;}
+.stat{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;background:rgba(0,80,120,.28);border:1px solid rgba(0,160,200,.14);border-radius:12px;}
+.stat-n{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:900;color:#7dd3f0;line-height:1;}
+.stat-l{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:800;color:rgba(180,220,240,.55);text-transform:uppercase;letter-spacing:.6px;text-align:center;}
+.section-label{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:#4ade80;margin:14px 0 10px;}
+.section-label.rec{color:rgba(180,220,240,.45);}
+.card{background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.18);border-radius:14px;overflow:hidden;margin-bottom:10px;}
+.card.recebido{opacity:.65;border-color:rgba(0,100,140,.12);}
+.card-hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,80,120,.25);border-bottom:1px solid rgba(0,140,180,.12);}
+.card-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:#e8f4ff;}
+.card-badge{font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;}
+.card-badge.pendente{background:rgba(0,160,200,.18);border:1px solid rgba(0,160,200,.35);color:#7dd3f0;}
+.card-badge.vencido{background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.35);color:#f87171;}
+.card-badge.recebido{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.2);color:rgba(74,222,128,.7);}
+.card-body{padding:10px 14px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.field{background:rgba(0,80,120,.28);border:1px solid rgba(0,160,200,.14);border-radius:10px;padding:8px 10px;}
+.field-lbl{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:800;color:rgba(180,220,240,.55);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.field-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:#e8f4ff;}
+.field-val.red{color:#f87171;} .field-val.green{color:#4ade80;} .field-val.blue{color:#7dd3f0;}
+.parc-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.parc-chip{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;}
+.parc-chip.ok{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+.parc-chip.pend{background:rgba(0,80,120,.4);border:1px solid rgba(0,140,180,.2);color:rgba(180,220,240,.8);}
+.footer{text-align:center;font-family:'Space Grotesk',sans-serif;font-size:10px;color:rgba(180,220,240,.3);padding:18px;margin-top:4px;}
+@media print{body{background:#fff!important;color:#0f172a!important}}`;
+
+  const today=new Date().toISOString().split('T')[0];
+
+  function _buildRec(filtro){
+    const allRec=_getReceber();
+    let lista;
+    if(filtro==='pendentes') lista=allRec.filter(c=>!c.recebido);
+    else if(filtro==='recebidos') lista=allRec.filter(c=>c.recebido);
+    else lista=allRec;
+
+    // Ordena por data de vencimento asc (pendentes primeiro, recebidos depois)
+    lista.sort((a,b)=>{
+      if(a.recebido!==b.recebido) return a.recebido?1:-1;
+      return (a.vencimento||'9999-12-31').localeCompare(b.vencimento||'9999-12-31');
+    });
+
+    const pendentes=lista.filter(c=>!c.recebido);
+    const recebidos=lista.filter(c=>c.recebido);
+    const totalPendente=pendentes.reduce((s,c)=>{
+      if(c.parcelas&&c.parcelas.length>1) return s+c.parcelas.filter(p=>!p.recebido).reduce((ps,p)=>ps+(parseFloat(String(p.valor||0).replace(',','.'))||0),0);
+      return s+(parseFloat(String(c.valor||0).replace(',','.'))||0);
+    },0);
+    const totalRecebido=recebidos.reduce((s,c)=>{
+      if(c.parcelas&&c.parcelas.length>1) return s+c.parcelas.filter(p=>p.recebido).reduce((ps,p)=>ps+(parseFloat(String(p.valor||0).replace(',','.'))||0),0);
+      return s+(parseFloat(String(c.valor||0).replace(',','.'))||0);
+    },0);
+
+    function statusInfo(c){
+      if(c.recebido) return {cls:'recebido',lbl:'✅ Recebido'};
+      if(!c.vencimento) return {cls:'pendente',lbl:'📅 A receber'};
+      if(c.vencimento<today) return {cls:'vencido',lbl:`🔴 Vencido`};
+      const diff=Math.round((new Date(c.vencimento)-new Date())/86400000);
+      if(diff===0) return {cls:'pendente',lbl:'🟠 Vence hoje'};
+      if(diff<=3) return {cls:'pendente',lbl:`🟡 Vence em ${diff}d`};
+      return {cls:'pendente',lbl:`📅 ${c.vencimento.split('-').reverse().join('/')}`};
+    }
+
+    function cardH(c){
+      const st=statusInfo(c);
+      const parcelsHtml=c.parcelas&&c.parcelas.length>1
+        ?`<div class="field" style="grid-column:span 2"><div class="field-lbl">Parcelas (${c.parcelas.filter(p=>p.recebido).length}/${c.parcelas.length} recebidas)</div><div class="parc-row">${c.parcelas.map((p,i)=>`<span class="parc-chip ${p.recebido?'ok':'pend'}">${i+1}/${c.parcelas.length} · R$${p.valor}${p.vencimento?' · '+p.vencimento.split('-').reverse().slice(0,2).join('/'):''}${p.recebido?' ✓':''}</span>`).join('')}</div></div>` : '';
+      const vcFmt=c.vencimento?c.vencimento.split('-').reverse().join('/'):'—';
+      return `<div class="card${c.recebido?' recebido':''}">
+        <div class="card-hdr">
+          <div class="card-title">${escapeHtml(c.nome)}</div>
+          <span class="card-badge ${st.cls}">${st.lbl}</span>
+        </div>
+        <div class="card-body">
+          ${c.valor?`<div class="field"><div class="field-lbl">Valor Total</div><div class="field-val ${c.recebido?'green':c.vencimento&&c.vencimento<today?'red':'blue'}">R$ ${escapeHtml(c.valor)}</div></div>`:''}
+          ${(!c.parcelas||c.parcelas.length<=1)?`<div class="field"><div class="field-lbl">Vencimento</div><div class="field-val">${vcFmt}</div></div>`:''}
+          ${parcelsHtml}
+          ${c.obs?`<div class="field" style="grid-column:span 2"><div class="field-lbl">Observação</div><div class="field-val">${escapeHtml(c.obs)}</div></div>`:''}
+        </div>
+      </div>`;
+    }
+
+    const pendentesHTML=pendentes.length===0
+      ?'<div style="text-align:center;padding:20px;color:rgba(180,220,240,.4);font-style:italic;font-family:Space Grotesk,sans-serif;">Nenhuma conta pendente</div>'
+      :pendentes.map(c=>cardH(c)).join('');
+    const recebidosHTML=recebidos.length===0
+      ?'<div style="text-align:center;padding:20px;color:rgba(180,220,240,.4);font-style:italic;font-family:Space Grotesk,sans-serif;">Nenhuma conta recebida</div>'
+      :recebidos.map(c=>cardH(c)).join('');
+
+    return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contas a Receber — Agenda Pro Max</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>${CSS}</style></head><body>
+<div class="wrap">
+  <div class="page-hdr">
+    <div class="page-title">💰 Contas a Receber</div>
+    <div class="page-sub">Gerado em ${new Date().toLocaleDateString('pt-BR')} · Filtro: ${filtro==='todas'?'Todas':filtro==='pendentes'?'A Receber':'Recebidas'}</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><span class="stat-n">${String(lista.length).padStart(2,'0')}</span><span class="stat-l">Total</span></div>
+    <div class="stat"><span class="stat-n" style="color:#7dd3f0;">${String(pendentes.length).padStart(2,'0')}</span><span class="stat-l">A receber</span></div>
+    <div class="stat"><span class="stat-n" style="color:#4ade80;">${String(recebidos.length).padStart(2,'0')}</span><span class="stat-l">Recebidos</span></div>
+    ${totalPendente>0?`<div class="stat"><span class="stat-n" style="color:#7dd3f0;font-size:13px;">R$${totalPendente.toFixed(2).replace('.',',')}</span><span class="stat-l">Pendente</span></div>`:''}
+  </div>
+  ${filtro!=='recebidos'&&pendentes.length>0?`<div class="section-label">💰 A Receber — ${pendentes.length}</div>${pendentesHTML}`:''}
+  ${filtro!=='pendentes'&&recebidos.length>0?`<div class="section-label rec">✅ Recebidos — ${recebidos.length}</div>${recebidosHTML}`:''}
+  ${lista.length===0?'<div style="text-align:center;padding:40px;color:rgba(180,220,240,.4);font-family:Space Grotesk,sans-serif;font-size:14px;">Nenhum lançamento cadastrado</div>':''}
+  <div class="footer">Agenda Pro Max</div>
+</div></body></html>`;
+  }
+
+  // Pergunta filtro
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(2,24,36,.85);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  ov.innerHTML=`<div style="background:linear-gradient(160deg,#021824,#04355a);border:1px solid rgba(0,140,180,.25);border-radius:20px;padding:24px;width:100%;max-width:320px;">
+    <div style="text-align:center;margin-bottom:18px;">
+      <div style="font-size:36px;margin-bottom:8px;">💰</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:#e8f4ff;">Contas a Receber</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:rgba(180,220,240,.6);margin-top:4px;">Quais contas incluir?</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button data-f="pendentes" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(0,160,200,.35);background:rgba(0,160,200,.12);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">📋</span>Contas a Receber (Pendentes)</button>
+      <button data-f="recebidos" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(34,197,94,.25);background:rgba(34,197,94,.08);color:#4ade80;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">✅</span>Contas Recebidas</button>
+      <button data-f="todas" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(0,140,180,.2);background:rgba(0,80,120,.25);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">📊</span>Todas</button>
+      <button data-f="cancel" style="padding:9px;border-radius:12px;border:none;background:transparent;color:rgba(180,220,240,.4);font-family:'Space Grotesk',sans-serif;font-size:12px;cursor:pointer;">Cancelar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.querySelectorAll('button[data-f]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const f=btn.dataset.f;
+      ov.remove();
+      if(f==='cancel') return;
+      showFormatChoice('💰 Contas a Receber','Como quer visualizar?',(fmt)=>{
+        const html=_buildRec(f);
+        if(fmt==='html') _openHtmlTab(html,{type:'receber'});
+        else _openAsPdf(html,'Contas a Receber',{type:'receber'});
+        showToast('✅ Relatório aberto!');
+      });
+    });
+  });
+}
   const remedios=(state.remedios||[]);
   const today=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0')+'-'+String(new Date().getDate()).padStart(2,'0');
 
