@@ -200,8 +200,7 @@
     <!-- ══ HOME VIEW ══ -->
     <div class="view show" id="homeView">
       <div class="homeBody">
-        <div class="folderSwipeHint">▲ &nbsp; DESLIZE PARA CIMA — TELA CHEIA &nbsp; ▲</div>
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.28);padding:14px 6px 10px;">Acesso Rápido</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.28);padding:10px 6px 10px;">Acesso Rápido</div>
         <div class="folderGrid" id="folderGrid"></div>
       </div>
     </div>
@@ -740,56 +739,55 @@
     <!-- ══ FOOTER PROGRESS BAR ══ -->
     <div id="progressRow" style="
       position:fixed;bottom:0;left:0;right:0;z-index:9997;
-      padding:8px 14px 16px 14px;
-      background:linear-gradient(to top, rgba(5,14,31,.95) 0%, rgba(5,14,31,.7) 70%, transparent 100%);
-      display:flex;flex-direction:column;gap:4px;
+      padding:6px 14px 14px 14px;
+      background:linear-gradient(to top, rgba(5,14,31,.97) 60%, transparent 100%);
     ">
-      <!-- Barra PROGRESSO integrada: label + barra na mesma linha -->
-      <div style="display:flex;align-items:center;gap:0;">
-        <!-- Barra + porcentagem -->
-        <div style="display:flex;flex-direction:column;flex:1;gap:1px;">
-          <span class="progressLabel" style="font-size:9px;font-weight:800;letter-spacing:.8px;color:rgba(180,220,255,.5);padding-left:2px;">PROGRESSO</span>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <div style="
-              flex:1;height:12px;
-              border-radius:99px;
-              background:rgba(255,255,255,.1);
-              box-shadow:inset 0 1px 3px rgba(0,0,0,.4);
-              padding:2px;position:relative;overflow:visible;
-            ">
+      <!-- Linha única: label + barra + % + botão + léo -->
+      <div style="display:flex;align-items:flex-end;gap:10px;">
+
+        <!-- Coluna esquerda: PROGRESSO label + barra -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0;">
+          <span style="font-size:8px;font-weight:900;letter-spacing:1.2px;color:rgba(180,220,255,.45);text-transform:uppercase;">Progresso</span>
+          <div style="display:flex;align-items:center;gap:7px;">
+            <div style="flex:1;height:13px;border-radius:99px;background:rgba(255,255,255,.1);box-shadow:inset 0 1px 3px rgba(0,0,0,.4);padding:2px;position:relative;overflow:visible;">
               <div class="progressFill" id="progressFill" style="width:0%">
                 <span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;z-index:2;filter:drop-shadow(0 0 4px rgba(255,255,255,.8));">⚡</span>
               </div>
             </div>
-            <span class="progressPct" id="progressPct" style="min-width:28px;text-align:left;font-size:11px;font-weight:800;color:rgba(249,115,22,.9);">0%</span>
+            <span class="progressPct" id="progressPct" style="min-width:30px;font-size:12px;font-weight:800;color:rgba(249,115,22,.9);">0%</span>
           </div>
         </div>
-        <!-- Espaço + Botão menu -->
+
+        <!-- Botão menu ☰ -->
         <button id="sidebarFab" style="
           flex-shrink:0;
-          width:44px;height:44px;border-radius:14px;
+          width:48px;height:48px;border-radius:16px;
           background:linear-gradient(135deg,#f97316,#ea580c);
           border:none;
-          box-shadow:0 4px 14px rgba(234,88,12,0.55);
-          color:#fff;font-size:20px;cursor:pointer;
+          box-shadow:0 4px 16px rgba(234,88,12,0.6);
+          color:#fff;font-size:22px;cursor:pointer;
           display:flex;align-items:center;justify-content:center;
           transition:transform .15s;
           -webkit-tap-highlight-color:transparent;
-          margin-left:12px;
         ">☰</button>
-        <!-- Léo avatar + seta menu -->
-        <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;margin-left:4px;position:relative;">
-          <div style="font-size:9px;font-weight:800;color:rgba(249,115,22,.9);font-family:'Space Grotesk',sans-serif;white-space:nowrap;letter-spacing:.2px;margin-bottom:-1px;">aperte menu</div>
-          <div style="font-size:14px;line-height:1;transform:scaleX(-1);margin-bottom:-6px;">↩️</div>
+
+        <!-- Léo — flutua acima do footer -->
+        <div style="flex-shrink:0;position:relative;width:72px;display:flex;flex-direction:column;align-items:center;">
+          <!-- Seta + texto "aperte menu" -->
+          <div style="position:absolute;top:-28px;right:72px;white-space:nowrap;display:flex;flex-direction:column;align-items:flex-end;gap:1px;pointer-events:none;">
+            <span style="font-size:9px;font-weight:900;color:rgba(249,115,22,.95);font-family:'Space Grotesk',sans-serif;letter-spacing:.3px;">aperte menu</span>
+            <span style="font-size:18px;line-height:1;transform:rotate(30deg) scaleX(-1);display:inline-block;">↩️</span>
+          </div>
+          <!-- Léo saindo por cima -->
           <img id="leoFooterAvatar" src="" alt="Leo" style="
-            width:82px;height:82px;
+            width:88px;height:88px;
             object-fit:contain;object-position:bottom;
-            flex-shrink:0;
-            margin-bottom:-16px;
-            filter:drop-shadow(0 2px 10px rgba(0,0,0,.7));
+            margin-bottom:-14px;
+            filter:drop-shadow(0 -2px 12px rgba(0,0,0,.5));
             image-rendering:-webkit-optimize-contrast;
           ">
         </div>
+
       </div>
     </div>
 
@@ -1068,104 +1066,49 @@ function renderMonthGrid(){
 // Toggle expansão do weekStrip via handle
 function initStripExpand(){
   const wrap   = document.getElementById('weekStripWrap');
-  const card   = document.getElementById('weekStripCard');
   const handle = document.getElementById('stripHandle');
-  const homeBody = document.querySelector('.homeBody');
   if(!wrap || !handle) return;
 
-  let calExpanded = false;   // calendário expandido
-  let foldersExpanded = false; // pastas em tela cheia
+  let expanded = false;
 
-  // ── Aplica estado do calendário ──
-  function setCalendar(toExpand){
-    calExpanded = toExpand;
-    wrap.classList.toggle('expanded', calExpanded);
-    if(!calExpanded){ viewMonthYear=null; viewMonthMonth=null; }
+  function toggle(toExpand){
+    expanded = toExpand;
+    wrap.classList.toggle('expanded', expanded);
+    if(!expanded){ viewMonthYear=null; viewMonthMonth=null; }
     renderMonthGrid();
-  }
-
-  // ── Aplica estado das pastas (tela cheia) ──
-  function setFolders(toExpand){
-    foldersExpanded = toExpand;
-    if(toExpand){
-      // Esconde calendário, expande homeBody
-      card.style.transition = 'all .3s cubic-bezier(.4,0,.2,1)';
-      card.style.maxHeight  = '0px';
-      card.style.opacity    = '0';
-      card.style.marginTop  = '0';
-      card.style.marginBottom = '0';
-      card.style.overflow   = 'hidden';
-      if(homeBody){
-        homeBody.style.transition = 'padding-top .3s';
-        homeBody.style.paddingTop = '4px';
-      }
-    } else {
-      card.style.maxHeight  = '';
-      card.style.opacity    = '';
-      card.style.marginTop  = '';
-      card.style.marginBottom = '';
-      card.style.overflow   = '';
-      if(homeBody){
-        homeBody.style.paddingTop = '';
-      }
-    }
   }
 
   // Clique no handle = toggle calendário
   handle.addEventListener('click',(e)=>{
     if(e.target.closest('#feriadosShortcut')) return;
-    if(foldersExpanded){ setFolders(false); return; }
-    setCalendar(!calExpanded);
+    toggle(!expanded);
   });
 
-  // ── Swipe global — sem conflito ──
-  let _sy=0, _sx=0, _active=false, _consumed=false;
-  const MIN_SWIPE = 48;   // pixels mínimos (menos sensível)
-  const MIN_RATIO = 2.0;  // deve ser majoritariamente vertical
+  // Swipe vertical APENAS sobre o card do calendário (sem conflito com pastas)
+  const card = document.getElementById('weekStripCard');
+  if(!card) return;
 
-  document.addEventListener('touchstart',(e)=>{
-    const sidebar = document.getElementById('sidebar');
-    if(sidebar && sidebar.classList.contains('open')) return;
-    // Não ativa se toque for dentro de elemento scrollável com conteúdo
-    const target = e.target;
-    const scrollable = target.closest('.listArea, .sb-body, .homeBody');
-    if(scrollable && scrollable.scrollTop > 0) return;
-    _sy=e.touches[0].clientY;
-    _sx=e.touches[0].clientX;
-    _active=true; _consumed=false;
+  let _sy=0, _sx=0, _active=false;
+  const THRESHOLD = 50; // menos sensível
+
+  card.addEventListener('touchstart',(e)=>{
+    _sy = e.touches[0].clientY;
+    _sx = e.touches[0].clientX;
+    _active = true;
   },{passive:true});
 
-  document.addEventListener('touchmove',(e)=>{
-    if(!_active || _consumed) return;
+  card.addEventListener('touchmove',(e)=>{
+    if(!_active) return;
     const dy = e.touches[0].clientY - _sy;
     const dx = e.touches[0].clientX - _sx;
-    if(Math.abs(dy) < MIN_SWIPE) return;           // ainda não atingiu threshold
-    if(Math.abs(dx) > Math.abs(dy) / MIN_RATIO) return; // muito horizontal
-    _consumed = true;
+    if(Math.abs(dy) < THRESHOLD) return;
+    if(Math.abs(dx) > Math.abs(dy) * 0.8) return; // muito horizontal
     _active = false;
-
-    if(dy > 0){
-      // ── SWIPE PARA BAIXO ──
-      if(foldersExpanded){
-        // Pastas expandidas → volta ao normal
-        setFolders(false);
-      } else if(!calExpanded){
-        // Normal → expande calendário
-        setCalendar(true);
-      }
-    } else {
-      // ── SWIPE PARA CIMA ──
-      if(calExpanded){
-        // Calendário aberto → fecha
-        setCalendar(false);
-      } else if(!foldersExpanded){
-        // Normal → expande pastas
-        setFolders(true);
-      }
-    }
+    if(dy > 0 && !expanded) toggle(true);
+    else if(dy < 0 && expanded) toggle(false);
   },{passive:true});
 
-  document.addEventListener('touchend',()=>{ _active=false; },{passive:true});
+  card.addEventListener('touchend',()=>{ _active=false; },{passive:true});
 }
 
 // ══ PROGRESS ══
