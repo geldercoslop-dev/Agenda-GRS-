@@ -214,14 +214,14 @@
     }
     .stripHandleHint {
       font-family:'Plus Jakarta Sans',sans-serif; font-size:11px; font-weight:700;
-      color:rgba(255,255,255,.88); letter-spacing:.3px; text-transform:lowercase;
+      color:rgba(255,255,255,.88); letter-spacing:.3px; text-transform:capitalize;
       pointer-events:none; white-space:nowrap;
     }
     .stripHandleArrow {
-      font-size:11px; line-height:1; pointer-events:none;
+      font-size:14px; line-height:1; pointer-events:none;
       animation: bounceDown 1.4s ease-in-out infinite;
       display:inline-block;
-      opacity:.75;
+      opacity:.85;
     }
     .weekStripWrap.expanded .stripHandleArrow { transform: rotate(180deg); animation:none; }
     @keyframes bounceDown {
@@ -298,15 +298,15 @@
     .view.show { display:flex; }
 
     /* Home */
-    .homeBody { padding:20px 14px 64px; display:flex; flex-direction:column; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; }
-    .sectionTitle { font-size:clamp(10px,2.8vw,12px); font-weight:900; letter-spacing:1px; text-transform:uppercase; color:var(--text-white); margin-bottom:12px; padding-left:2px; margin-top:18px; }
+    .homeBody { padding:8px 14px 64px; display:flex; flex-direction:column; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; }
+    .sectionTitle { font-size:clamp(10px,2.8vw,12px); font-weight:900; letter-spacing:1px; text-transform:uppercase; color:var(--text-white); margin-bottom:14px; padding-left:2px; margin-top:14px; }
     [data-theme="light"] .sectionTitle { color:var(--surface-2); font-weight:900; }
     .folderGrid {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 16px 4px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px 6px;
       margin-bottom: 24px;
-      padding: 0 4px;
+      padding: 0 6px;
       place-items: start center;
     }
 

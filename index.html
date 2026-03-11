@@ -140,24 +140,25 @@
     </div>
 
     <!-- ══ TOP SEARCH BAR (Google-style) ══ -->
-    <div id="topSearchBar" style="margin:14px 14px 6px;">
+    <div id="topSearchBar" style="margin:10px 14px 6px;">
       <div id="topSearchInput" onclick="openSearch()" style="
         display:flex;align-items:center;gap:10px;
-        background:rgba(10,28,50,.75);
-        border:1px solid rgba(125,211,240,.16);
+        background:rgba(255,255,255,.09);
+        border:1.5px solid rgba(125,211,240,.32);
         border-radius:18px;
-        padding:10px 16px 10px 14px;
+        padding:11px 16px 11px 14px;
         cursor:pointer;
         backdrop-filter:blur(8px);
+        box-shadow:0 2px 12px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.07);
         transition:background .15s;
         -webkit-tap-highlight-color:transparent;
       ">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;opacity:.5;">
-          <circle cx="11" cy="11" r="8" stroke="rgba(125,211,240,.7)" stroke-width="2.2"/>
-          <path d="M16.5 16.5 L21 21" stroke="rgba(125,211,240,.7)" stroke-width="2.2" stroke-linecap="round"/>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;opacity:.75;">
+          <circle cx="11" cy="11" r="8" stroke="rgba(125,211,240,.9)" stroke-width="2.2"/>
+          <path d="M16.5 16.5 L21 21" stroke="rgba(125,211,240,.9)" stroke-width="2.2" stroke-linecap="round"/>
         </svg>
-        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:400;color:rgba(180,210,230,.4);flex:1;letter-spacing:.1px;">Buscar tarefas, consultas, remédios…</span>
-        <span style="font-size:10px;font-weight:700;color:rgba(125,211,240,.45);font-family:'Space Grotesk',sans-serif;letter-spacing:.8px;flex-shrink:0;">GRS</span>
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;color:rgba(200,230,245,.65);flex:1;letter-spacing:.1px;">Buscar tarefas, consultas, remédios…</span>
+        <span style="font-size:10px;font-weight:800;color:rgba(125,211,240,.7);font-family:'Space Grotesk',sans-serif;letter-spacing:.8px;flex-shrink:0;">GRS</span>
       </div>
     </div>
 
@@ -185,11 +186,11 @@
       <div class="stripHandle" id="stripHandle">
         <button id="feriadosShortcut" onclick="openFeriados()" style="background:none;border:none;padding:0;margin:0;cursor:pointer;display:flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;">
           <span style="font-size:12px;line-height:1;pointer-events:none;">🎉</span>
-          <span class="stripHandleHint" style="pointer-events:none;color:rgba(255,255,255,.92);">feriados · clique aqui</span>
+          <span class="stripHandleHint" style="pointer-events:none;color:rgba(255,255,255,.92);">Feriados · Clique Aqui</span>
         </button>
         <div style="display:flex;align-items:center;gap:6px;pointer-events:none;">
           <span class="stripHandleArrow" id="stripHandleArrow" style="font-size:10px;color:rgba(249,115,22,.75);font-weight:900;">▾</span>
-          <span class="stripHandleHint" id="stripHandleHintText">arraste para ver o mês</span>
+          <span class="stripHandleHint" id="stripHandleHintText">Arraste Para Ver o Mês</span>
           <span class="stripHandleArrow" id="stripHandleArrow2" style="font-size:10px;color:rgba(249,115,22,.75);font-weight:900;">▾</span>
         </div>
       </div>
@@ -199,7 +200,7 @@
     <!-- ══ HOME VIEW ══ -->
     <div class="view show" id="homeView">
       <div class="homeBody">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.28);padding:0 6px 8px;">Acesso Rápido</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.28);padding:14px 6px 10px;">Acesso Rápido</div>
         <div class="folderGrid" id="folderGrid"></div>
       </div>
     </div>
@@ -742,24 +743,25 @@
       background:linear-gradient(to top, rgba(5,14,31,.95) 0%, rgba(5,14,31,.7) 70%, transparent 100%);
       display:flex;flex-direction:column;gap:4px;
     ">
-      <!-- Linha 1: label PROGRESSO -->
-      <span class="progressLabel" style="font-size:9px;font-weight:800;letter-spacing:.8px;color:rgba(180,220,255,.5);padding-left:2px;">PROGRESSO</span>
-      <!-- Linha 2: barra + % | botão | léo -->
+      <!-- Barra PROGRESSO integrada: label + barra na mesma linha -->
       <div style="display:flex;align-items:center;gap:0;">
         <!-- Barra + porcentagem -->
-        <div style="display:flex;align-items:center;gap:6px;flex:1;">
-          <div style="
-            flex:1;height:12px;
-            border-radius:99px;
-            background:rgba(255,255,255,.1);
-            box-shadow:inset 0 1px 3px rgba(0,0,0,.4);
-            padding:2px;position:relative;overflow:visible;
-          ">
-            <div class="progressFill" id="progressFill" style="width:0%">
-              <span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;z-index:2;filter:drop-shadow(0 0 4px rgba(255,255,255,.8));">⚡</span>
+        <div style="display:flex;flex-direction:column;flex:1;gap:1px;">
+          <span class="progressLabel" style="font-size:9px;font-weight:800;letter-spacing:.8px;color:rgba(180,220,255,.5);padding-left:2px;">PROGRESSO</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="
+              flex:1;height:12px;
+              border-radius:99px;
+              background:rgba(255,255,255,.1);
+              box-shadow:inset 0 1px 3px rgba(0,0,0,.4);
+              padding:2px;position:relative;overflow:visible;
+            ">
+              <div class="progressFill" id="progressFill" style="width:0%">
+                <span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;z-index:2;filter:drop-shadow(0 0 4px rgba(255,255,255,.8));">⚡</span>
+              </div>
             </div>
+            <span class="progressPct" id="progressPct" style="min-width:28px;text-align:left;font-size:11px;font-weight:800;color:rgba(249,115,22,.9);">0%</span>
           </div>
-          <span class="progressPct" id="progressPct" style="min-width:28px;text-align:left;font-size:11px;font-weight:800;color:rgba(249,115,22,.9);">0%</span>
         </div>
         <!-- Espaço + Botão menu -->
         <button id="sidebarFab" style="
@@ -774,15 +776,18 @@
           -webkit-tap-highlight-color:transparent;
           margin-left:12px;
         ">☰</button>
-        <!-- Léo avatar -->
-        <img id="leoFooterAvatar" src="" alt="Leo" style="
-          width:50px;height:50px;
-          object-fit:contain;object-position:bottom;
-          flex-shrink:0;
-          margin-left:10px;
-          filter:drop-shadow(0 2px 8px rgba(0,0,0,.6));
-          image-rendering:-webkit-optimize-contrast;
-        ">
+        <!-- Léo avatar + seta menu -->
+        <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;margin-left:6px;position:relative;">
+          <div style="font-size:10px;font-weight:800;color:rgba(249,115,22,.9);font-family:'Space Grotesk',sans-serif;white-space:nowrap;letter-spacing:.2px;margin-bottom:-2px;">aperte menu</div>
+          <div style="font-size:16px;line-height:1;transform:scaleX(-1);margin-bottom:-4px;">↩️</div>
+          <img id="leoFooterAvatar" src="" alt="Leo" style="
+            width:68px;height:68px;
+            object-fit:contain;object-position:bottom;
+            flex-shrink:0;
+            filter:drop-shadow(0 2px 8px rgba(0,0,0,.6));
+            image-rendering:-webkit-optimize-contrast;
+          ">
+        </div>
       </div>
     </div>
 
@@ -5322,6 +5327,19 @@ function _runSearch(query) {
     }
   });
 
+  // Pastas (nome das pastas)
+  (state.folders || []).forEach(f => {
+    if ((f.name||'').toLowerCase().includes(q)) {
+      results.push({
+        type:'pasta', icon: f.emoji||'📁', typeLabel:'Pasta',
+        text: f.name,
+        sub: f.parentId ? ('subpasta') : '',
+        sortKey:'',
+        action:()=>{ closeSearch(); openBucket(f.id); }
+      });
+    }
+  });
+
   // Mercado
   (_getMercado ? _getMercado() : []).forEach(m => {
     const searchable = [m.nome, m.qtd].filter(Boolean).join(' ');
@@ -5421,6 +5439,17 @@ function _runSearch(query) {
           <div style="flex:1;min-width:0;">
             <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}</div>
             <div class="searchItemType" style="margin:0;">Mercado${r.sub?' · '+_escHtml(r.sub):''}</div>
+          </div>
+        </div>
+      </div>`;
+    }
+    if (r.type === 'pasta') {
+      return `<div class="searchItem searchItemCard" data-idx="${i}" style="cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:22px;line-height:1;">${_escHtml(r.icon)}</span>
+          <div style="flex:1;min-width:0;">
+            <div class="searchItemText" style="margin:0;">${_highlight(r.text, query)}</div>
+            <div class="searchItemType" style="margin:0;">Pasta${r.sub?' · '+_escHtml(r.sub):''}</div>
           </div>
         </div>
       </div>`;
