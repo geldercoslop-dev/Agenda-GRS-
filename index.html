@@ -748,7 +748,7 @@
     <!-- ══ FOOTER PROGRESS BAR ══ -->
     <div id="progressRow" style="
       position:fixed;bottom:0;left:0;right:0;z-index:9997;
-      padding:4px 14px 8px 14px;
+      padding:8px 14px 14px 14px;
       background:linear-gradient(to top, rgba(5,14,31,.97) 60%, transparent 100%);
     ">
       <div style="display:flex;align-items:center;gap:10px;">
@@ -780,11 +780,11 @@
         ">☰</button>
 
         <!-- Léo — robusto, sai por baixo -->
-        <div style="flex-shrink:0;width:100px;display:flex;align-items:flex-end;justify-content:center;align-self:flex-end;margin-left:4px;">
+        <div style="flex-shrink:0;width:108px;display:flex;align-items:flex-end;justify-content:center;align-self:flex-end;margin-left:4px;">
           <img id="leoFooterAvatar" src="" alt="Leo" style="
-            width:136px;height:136px;
+            width:158px;height:158px;
             object-fit:contain;object-position:bottom;
-            margin-bottom:-14px;
+            margin-bottom:-18px;
             filter:drop-shadow(0 -2px 14px rgba(0,0,0,.6));
             image-rendering:-webkit-optimize-contrast;
           ">
@@ -1446,11 +1446,11 @@ function openTodasPastas(){
   const hdr = document.createElement('div');
   hdr.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px 10px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;';
   hdr.innerHTML = `
-    <button id="_tpClose" style="flex-shrink:0;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,rgba(0,130,200,.55),rgba(0,100,170,.45));border:1px solid rgba(80,180,255,.35);color:#7dd3f0;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,100,180,.3);">‹</button>
     <div style="flex:1;min-width:0;">
       <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:#e8f4ff;line-height:1.2;">📁 Todas as Pastas</div>
       <div style="font-size:10px;color:rgba(255,255,255,.38);margin-top:4px;font-family:'Plus Jakarta Sans',sans-serif;">Segure e arraste para reordenar</div>
-    </div>`;
+    </div>
+    <button id="_tpClose" class="sCloseBtn">✕</button>`;
   box.appendChild(hdr);
 
   // Área scrollável
@@ -6119,32 +6119,41 @@ function _runSearch(query) {
     return;
   }
 
-  // ── Renderiza agrupado por categoria ──
+  // ── Renderiza: lista flat, cards de linha única ──
   const allActions = [];
   let html = '';
+  const allItems = [];
+  Object.values(cats).forEach(cat => cat.items.forEach(item => allItems.push(item)));
 
-  Object.values(cats).forEach(cat => {
-    if (cat.items.length === 0) return;
-    html += `<div class="srCat">${_escHtml(cat.label)}</div>`;
-    cat.items.forEach(item => {
-      const idx = allActions.length;
-      allActions.push(item.action);
-      const badgeHtml = item.badge
-        ? `<div class="srBadge"><span class="srDate ${item.badgeCls||''}">${_escHtml(item.badge)}</span><span class="srChevron">›</span></div>`
-        : `<span class="srChevron">›</span>`;
-      html += `<div class="searchItem" data-idx="${idx}">
-        <div class="srIcon ${item.iconCls||''}">${item.icon}</div>
-        <div class="srBody">
-          <div class="srTitle">${_highlight(item.title, query)}</div>
-          ${item.sub ? `<div class="srSub">${_escHtml(item.sub)}</div>` : ''}
-        </div>
-        ${badgeHtml}
-      </div>`;
-    });
+  // Monta legenda de data/contexto para linha única
+  allItems.forEach(item => {
+    const idx = allActions.length;
+    allActions.push(item.action);
+
+    // Linha única: [data/badge] · [título]   OU apenas [título]
+    let datePart = '';
+    if (item.badge) {
+      // pega só DD/MM se tiver formato completo DD/MM/YYYY
+      const m = item.badge.match(/^(\d{2}\/\d{2})/);
+      datePart = m ? m[1] : item.badge;
+    } else if (item.sub && /^\d{2}\/\d{2}/.test(item.sub)) {
+      const m2 = item.sub.match(/^(\d{2}\/\d{2})/);
+      datePart = m2 ? m2[1] : '';
+    }
+
+    const lineHtml = datePart
+      ? `<span class="srCardDate">${_escHtml(datePart)}</span><span class="srCardSep">·</span><span class="srCardText">${_highlight(item.title, query)}</span>`
+      : `<span class="srCardText srCardTextFull">${_highlight(item.title, query)}</span>`;
+
+    html += `<div class="srCard" data-idx="${idx}">
+      <div class="srCardIcon ${item.iconCls||''}">${item.icon}</div>
+      <div class="srCardLine">${lineHtml}</div>
+      <span class="srCardArrow">›</span>
+    </div>`;
   });
 
   container.innerHTML = html;
-  container.querySelectorAll('.searchItem').forEach(el => {
+  container.querySelectorAll('.srCard').forEach(el => {
     const idx = parseInt(el.dataset.idx);
     el.addEventListener('click', () => allActions[idx]());
   });
