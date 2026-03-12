@@ -745,26 +745,26 @@
     <!-- ══ FOOTER PROGRESS BAR ══ -->
     <div id="progressRow" style="
       position:fixed;bottom:0;left:0;right:0;z-index:9997;
-      padding:60px 14px 6px 14px;
-      background:linear-gradient(to top, rgba(5,14,31,.97) 55%, transparent 100%);
+      padding:55px 0 0 0;
+      background:linear-gradient(to top, rgba(5,14,31,.58) 33%, transparent 100%);
     ">
-      <div style="display:flex;align-items:center;gap:14px;padding:0 4px;">
+      <!-- linha interna: Léo sai por baixo, botão e barra ficam alinhados no centro -->
+      <div style="display:flex;align-items:center;padding:0 14px 16px 0;gap:10px;">
 
-        <!-- Léo — esquerda, sai por baixo -->
-        <div style="flex-shrink:0;width:120px;display:flex;align-items:flex-end;justify-content:center;align-self:flex-end;">
+        <!-- Léo — colado à esquerda, sai por baixo da tela -->
+        <div style="flex-shrink:0;width:95px;display:flex;align-items:flex-end;align-self:flex-end;margin-left:-10px;margin-bottom:-16px;">
           <img id="leoFooterAvatar" src="" alt="Leo" style="
             width:158px;height:158px;
             object-fit:contain;object-position:bottom;
-            margin-bottom:-18px;
             filter:drop-shadow(0 -2px 14px rgba(0,0,0,.6));
             image-rendering:-webkit-optimize-contrast;
           ">
         </div>
 
-        <!-- Progresso — centro -->
+        <!-- Progresso — centralizado verticalmente igual ao botão -->
         <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;justify-content:center;">
-          <span style="font-size:8px;font-weight:900;letter-spacing:1.2px;color:rgba(180,220,255,.45);text-transform:uppercase;padding-left:8px;">Progresso</span>
-          <div style="display:flex;align-items:center;gap:7px;padding:0 8px;">
+          <span style="font-size:8px;font-weight:900;letter-spacing:1.2px;color:rgba(180,220,255,.45);text-transform:uppercase;padding-left:4px;">Progresso</span>
+          <div style="display:flex;align-items:center;gap:7px;">
             <div style="flex:1;height:13px;border-radius:99px;background:rgba(255,255,255,.1);box-shadow:inset 0 1px 3px rgba(0,0,0,.4);padding:2px;position:relative;overflow:visible;">
               <div class="progressFill" id="progressFill" style="width:0%">
                 <span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;z-index:2;filter:drop-shadow(0 0 4px rgba(255,255,255,.8));">⚡</span>
@@ -774,10 +774,10 @@
           </div>
         </div>
 
-        <!-- Botão menu ☰ — direita -->
+        <!-- Botão menu ☰ — na altura da bermuda do Léo, centralizado com a barra -->
         <button id="sidebarFab" style="
           flex-shrink:0;
-          width:50px;height:50px;border-radius:15px;
+          width:54px;height:54px;border-radius:15px;
           background:linear-gradient(135deg,#f97316,#ea580c);
           border:none;
           box-shadow:0 4px 16px rgba(234,88,12,0.6);
@@ -785,6 +785,7 @@
           display:flex;align-items:center;justify-content:center;
           transition:transform .15s;
           -webkit-tap-highlight-color:transparent;
+          margin-right:6px;
         ">☰</button>
 
       </div>
@@ -1699,7 +1700,7 @@ function goHome(){
   document.getElementById('weekStripCard')?.classList.remove('hidden');
   document.getElementById('bottomBar').classList.remove('hidden');
   const _fab2=document.getElementById('sidebarFab');
-  if(_fab2){ _fab2.style.opacity='1'; _fab2.style.pointerEvents='auto'; _fab2.style.transform='scale(1)'; _fab2.style.bottom='22px'; }
+  if(_fab2){ _fab2.style.opacity='1'; _fab2.style.pointerEvents='auto'; _fab2.style.transform='scale(1)'; }
   // Mostrar watermark na home
   // watermarkWrap oculto permanentemente (Léo agora só no footer)
   const sub=document.getElementById('subFolderArea');
