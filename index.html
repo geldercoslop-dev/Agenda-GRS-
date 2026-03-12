@@ -749,7 +749,7 @@
     <!-- ══ FOOTER PROGRESS BAR ══ -->
     <div id="progressRow" style="
       position:fixed;bottom:0;left:0;right:0;z-index:9997;
-      padding:100px 14px 8px 14px;
+      padding:100px 14px 2px 14px;
       background:linear-gradient(to top, rgba(5,14,31,.97) 55%, transparent 100%);
     ">
       <div style="display:flex;align-items:center;gap:10px;">
@@ -781,7 +781,7 @@
         ">☰</button>
 
         <!-- Léo — robusto, sai por baixo -->
-        <div style="flex-shrink:0;width:108px;display:flex;align-items:flex-end;justify-content:center;align-self:flex-end;margin-left:4px;">
+        <div style="flex-shrink:0;width:120px;display:flex;align-items:flex-end;justify-content:center;align-self:flex-end;margin-left:10px;">
           <img id="leoFooterAvatar" src="" alt="Leo" style="
             width:158px;height:158px;
             object-fit:contain;object-position:bottom;
@@ -1451,7 +1451,7 @@ function openTodasPastas(){
       <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:#e8f4ff;line-height:1.2;">📁 Todas as Pastas</div>
       <div style="font-size:10px;color:rgba(255,255,255,.38);margin-top:4px;font-family:'Plus Jakarta Sans',sans-serif;">Segure e arraste para reordenar</div>
     </div>
-    <button id="_tpClose" class="sCloseBtn">✕</button>`;
+    <button id="_tpClose" class="sCloseBtn" style="width:32px;height:32px;border-radius:9px;background:rgba(0,120,160,.25);border:1px solid rgba(0,160,200,.3);color:#7dd3f0;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>`;
   box.appendChild(hdr);
 
   // Área scrollável
@@ -3602,6 +3602,8 @@ function init(){
   initStripExpand();
   _initTouchDragGlobal();
   setInterval(updateHeader, 60000);
+  // Garante barra de busca visível na home ao iniciar
+  atualizarLupa('home');
 }
 
 // ══ VERIFICAÇÃO DIÁRIA DE PENDÊNCIAS ══

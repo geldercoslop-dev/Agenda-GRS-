@@ -301,7 +301,7 @@
     .wDay .wdDotEmpty { width:4px; height:4px; }
 
     /* ══ VIEWS ══ */
-    .view { display:none; flex:1; min-height:0; flex-direction:column; }
+    .view { display:none; flex:1; min-height:0; flex-direction:column; position:relative; }
     .view.show { display:flex; }
 
     /* Home */
@@ -848,10 +848,10 @@
       gap: 6px; height: 0; overflow: hidden;
       background: transparent; transition: height 0.15s ease;
       font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700;
-      color: transparent; pointer-events: none;
+      color: transparent; pointer-events: none; visibility: hidden;
     }
     [data-theme="light"] .pullIndicator { color: transparent; }
-    .pullIndicator.show { height: 38px; }
+    .pullIndicator.show { height: 38px; visibility: visible; color: rgba(249,115,22,.85); }
 
     /* ══ CALENDAR MODAL ══ */
     .calModalOverlay {
