@@ -140,7 +140,7 @@
     </div>
 
     <!-- ══ TOP SEARCH BAR (Google-style) ══ -->
-    <div id="topSearchBar" style="margin:6px 14px 14px;">
+    <div id="topSearchBar" style="margin:6px 14px 14px;display:none;">
       <div id="topSearchInput" onclick="openSearch()" style="
         display:flex;align-items:center;gap:10px;
         background:rgba(255,255,255,.09);
@@ -213,25 +213,25 @@
       <div id="subFolderArea" style="display:none;grid-template-columns:repeat(4,1fr);gap:10px 8px;padding:14px 14px 4px;justify-items:center;border-bottom:1px solid var(--line);"></div>
       <div class="listArea" id="listArea"></div>
       <div class="inputBar">
-        <button class="dayFabBtn" id="dayZapSendBtn">
-          <span class="dfbi"><svg style="width:22px;height:22px;display:block;" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M22.58 9.4A9.3 9.3 0 0016.02 7C11.14 7 7.17 10.97 7.17 15.85c0 1.56.41 3.08 1.19 4.42L7.1 25l4.84-1.27a9.35 9.35 0 004.08.93h.003c4.87 0 8.84-3.97 8.84-8.85a8.8 8.8 0 00-2.25-5.41zm-6.56 13.6h-.003a7.76 7.76 0 01-3.96-1.08l-.28-.17-2.92.77.78-2.85-.19-.29a7.73 7.73 0 01-1.18-4.13c0-4.28 3.48-7.76 7.77-7.76a7.7 7.7 0 017.76 7.77c0 4.28-3.49 7.76-7.77 7.76zm4.26-5.82c-.23-.12-1.38-.68-1.6-.76-.21-.08-.37-.12-.52.12-.16.23-.6.76-.74.92-.13.15-.27.17-.5.06-.23-.12-.97-.36-1.85-1.14-.68-.6-1.14-1.35-1.27-1.58-.13-.23-.01-.35.1-.47.1-.1.23-.27.35-.4.11-.14.15-.23.23-.38.07-.15.04-.28-.02-.4-.06-.12-.52-1.26-.72-1.72-.18-.45-.38-.39-.52-.4h-.44c-.16 0-.41.06-.62.29-.21.23-.82.8-.82 1.95s.84 2.26.96 2.42c.12.15 1.65 2.52 4 3.54.56.24 1 .39 1.34.49.56.18 1.07.16 1.48.1.45-.07 1.38-.57 1.58-1.11.19-.54.19-1.01.13-1.11-.06-.1-.21-.16-.44-.27z" fill="white"/></svg></span>
-          <span class="dfbl">Zap</span>
-        </button>
         <button class="dayFabBtn" id="dayBackBtn">
           <span class="dfbi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#f97316"/><path d="M14 7L9 12L14 17" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           <span class="dfbl" id="backLabel">Voltar</span>
-        </button>
-        <button class="dayFabBtn" id="dayAddBtn">
-          <span class="dfbi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14M5 12h14" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/></svg></span>
-          <span class="dfbl">ADD</span>
         </button>
         <button class="dayFabBtn" id="voiceBtn">
           <span class="dfbi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="2" width="6" height="11" rx="3" stroke="rgba(255,255,255,.85)" stroke-width="2"/><path d="M5 11a7 7 0 0014 0" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="18" x2="12" y2="22" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/></svg></span>
           <span class="dfbl">Voz</span>
         </button>
+        <button class="dayFabBtn" id="dayAddBtn">
+          <span class="dfbi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14M5 12h14" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/></svg></span>
+          <span class="dfbl">ADD</span>
+        </button>
         <button class="dayFabBtn" id="dayPhotoBtn">
           <span class="dfbi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="6" width="20" height="14" rx="3" stroke="rgba(251,191,36,.6)" stroke-width="2"/><circle cx="12" cy="13" r="3.5" stroke="rgba(251,191,36,.6)" stroke-width="2"/><path d="M8 6l1.5-2h5L16 6" stroke="rgba(251,191,36,.6)" stroke-width="2" stroke-linecap="round"/></svg></span>
           <span class="dfbl">Foto</span>
+        </button>
+        <button class="dayFabBtn" id="dayZapSendBtn">
+          <span class="dfbi"><svg style="width:22px;height:22px;display:block;" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M22.58 9.4A9.3 9.3 0 0016.02 7C11.14 7 7.17 10.97 7.17 15.85c0 1.56.41 3.08 1.19 4.42L7.1 25l4.84-1.27a9.35 9.35 0 004.08.93h.003c4.87 0 8.84-3.97 8.84-8.85a8.8 8.8 0 00-2.25-5.41zm-6.56 13.6h-.003a7.76 7.76 0 01-3.96-1.08l-.28-.17-2.92.77.78-2.85-.19-.29a7.73 7.73 0 01-1.18-4.13c0-4.28 3.48-7.76 7.77-7.76a7.7 7.7 0 017.76 7.77c0 4.28-3.49 7.76-7.77 7.76zm4.26-5.82c-.23-.12-1.38-.68-1.6-.76-.21-.08-.37-.12-.52.12-.16.23-.6.76-.74.92-.13.15-.27.17-.5.06-.23-.12-.97-.36-1.85-1.14-.68-.6-1.14-1.35-1.27-1.58-.13-.23-.01-.35.1-.47.1-.1.23-.27.35-.4.11-.14.15-.23.23-.38.07-.15.04-.28-.02-.4-.06-.12-.52-1.26-.72-1.72-.18-.45-.38-.39-.52-.4h-.44c-.16 0-.41.06-.62.29-.21.23-.82.8-.82 1.95s.84 2.26.96 2.42c.12.15 1.65 2.52 4 3.54.56.24 1 .39 1.34.49.56.18 1.07.16 1.48.1.45-.07 1.38-.57 1.58-1.11.19-.54.19-1.01.13-1.11-.06-.1-.21-.16-.44-.27z" fill="white"/></svg></span>
+          <span class="dfbl">Zap</span>
         </button>
         <button class="dayFabBtn" id="daySubBtn">
           <span class="dfbi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="3" width="9" height="7" rx="2" stroke="rgba(167,139,250,.85)" stroke-width="2"/><rect x="13" y="14" width="9" height="7" rx="2" stroke="rgba(167,139,250,.85)" stroke-width="2"/><path d="M7 10v4h10" stroke="rgba(167,139,250,.85)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -292,7 +292,7 @@
         </div>
         <div class="sCard" id="rowStats" style="cursor:pointer;">
           <span class="sCardIcon">📊</span>
-          <span class="sCardLabel">Estatísticas</span>
+          <span class="sCardLabel">Estatísticas do sistema</span>
           <span class="sCardSub">Seu uso</span>
         </div>
         <div class="sCard" id="rowManual">
@@ -377,9 +377,10 @@
 <div class="subScreen" id="subScreenOverlay">
   <div class="subScreenBox" id="subScreenBox">
     <div class="subScreenHdr">
-      <button class="subScreenBack" id="subScreenBack">‹</button>
+      <span class="subScreenIcon" id="subScreenIcon"></span>
       <span class="subScreenTitle" id="subScreenTitle"></span>
       <div id="subScreenActions" style="display:flex;gap:6px;margin-left:auto;"></div>
+      <button class="sCloseBtn" id="subScreenBack">✕</button>
     </div>
     <div class="subScreenBody" id="subScreenBody"></div>
   </div>
@@ -590,7 +591,7 @@
       <!-- Cards grid -->
       <div class="fActionCards">
         <div class="fCard" id="fCardNova">
-          <div class="fCardIcon">➕</div>
+          <div class="fCardIcon" id="fCardIconNova">+</div>
           <div class="fCardLabel">Nova pasta</div>
           <div class="fCardSub">Criar do zero</div>
         </div>
@@ -726,9 +727,9 @@
         <div class="sb-section-label">Relatórios</div>
         <div class="sb-item" id="sb-rWeek" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.1);">📅</div><span class="sb-label">Relatório da semana</span></div>
         <div class="sb-item" id="sb-rAll" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.08);">📋</div><span class="sb-label">Relatório de pendências</span></div>
-        <div class="sb-item" id="sb-rPagar" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.12);">💳</div><span class="sb-label">Rel. Contas a Pagar</span></div>
-        <div class="sb-item" id="sb-rReceber" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(34,197,94,.12);">💰</div><span class="sb-label">Rel. Contas a Receber</span></div>
-        <div class="sb-item" id="sb-stats" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(34,197,94,.1);">📊</div><span class="sb-label">Estatísticas</span></div>
+        <div class="sb-item" id="sb-rPagar" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(251,146,60,.12);">💳</div><span class="sb-label">Relatório de pagamentos</span></div>
+        <div class="sb-item" id="sb-rReceber" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(34,197,94,.12);">💰</div><span class="sb-label">Relatório de recebimentos</span></div>
+        <div class="sb-item" id="sb-stats" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(34,197,94,.1);">📊</div><span class="sb-label">Estatísticas do sistema</span></div>
         <div class="sb-item" id="sb-zap" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(37,211,102,.1);"><svg style="width:18px;height:18px" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M22.58 9.4A9.3 9.3 0 0016.02 7C11.14 7 7.17 10.97 7.17 15.85c0 1.56.41 3.08 1.19 4.42L7.1 25l4.84-1.27a9.35 9.35 0 004.08.93h.003c4.87 0 8.84-3.97 8.84-8.85a8.8 8.8 0 00-2.25-5.41zm-6.56 13.6h-.003a7.76 7.76 0 01-3.96-1.08l-.28-.17-2.92.77.78-2.85-.19-.29a7.73 7.73 0 01-1.18-4.13c0-4.28 3.48-7.76 7.77-7.76a7.7 7.7 0 017.76 7.77c0 4.28-3.49 7.76-7.77 7.76zm4.26-5.82c-.23-.12-1.38-.68-1.6-.76-.21-.08-.37-.12-.52.12-.16.23-.6.76-.74.92-.13.15-.27.17-.5.06-.23-.12-.97-.36-1.85-1.14-.68-.6-1.14-1.35-1.27-1.58-.13-.23-.01-.35.1-.47.1-.1.23-.27.35-.4.11-.14.15-.23.23-.38.07-.15.04-.28-.02-.4-.06-.12-.52-1.26-.72-1.72-.18-.45-.38-.39-.52-.4h-.44c-.16 0-.41.06-.62.29-.21.23-.82.8-.82 1.95s.84 2.26.96 2.42c.12.15 1.65 2.52 4 3.54.56.24 1 .39 1.34.49.56.18 1.07.16 1.48.1.45-.07 1.38-.57 1.58-1.11.19-.54.19-1.01.13-1.11-.06-.1-.21-.16-.44-.27z" fill="white"/></svg></div><span class="sb-label">Relatório para WhatsApp</span></div>
 
         <div class="sb-divider"></div>
@@ -748,8 +749,8 @@
     <!-- ══ FOOTER PROGRESS BAR ══ -->
     <div id="progressRow" style="
       position:fixed;bottom:0;left:0;right:0;z-index:9997;
-      padding:8px 14px 14px 14px;
-      background:linear-gradient(to top, rgba(5,14,31,.97) 60%, transparent 100%);
+      padding:100px 14px 20px 14px;
+      background:linear-gradient(to top, rgba(5,14,31,.97) 55%, transparent 100%);
     ">
       <div style="display:flex;align-items:center;gap:10px;">
 
@@ -1370,7 +1371,7 @@ function openPastasDaFrente(){
       <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;">⭐ Pastas da Frente</div>
       <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;">Escolha até 7 — aparecem na tela inicial</div>
     </div>
-    <button id="_pfClose" style="background:rgba(255,255,255,.08);border:none;width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer;color:#e8f4ff;display:flex;align-items:center;justify-content:center;">✕</button>`;
+    <button id="_pfClose" class="sCloseBtn">✕</button>`;
   box.appendChild(hdr);
 
   // Contador
@@ -2898,7 +2899,18 @@ function openSubScreen(title, bodyHtml, initFn, exitFn){
 function _renderSubScreen(){
   if(_subStack.length===0){ _hideSubScreen(); return; }
   const top=_subStack[_subStack.length-1];
-  document.getElementById('subScreenTitle').textContent = top.title;
+  // Separa emoji do texto do título
+  const titleStr = top.title || '';
+  const emojiMatch = titleStr.match(/^(\p{Emoji_Presentation}|\p{Extended_Pictographic})\s*/u);
+  const iconEl = document.getElementById('subScreenIcon');
+  const titleEl = document.getElementById('subScreenTitle');
+  if(emojiMatch){
+    iconEl.textContent = emojiMatch[0].trim();
+    titleEl.textContent = titleStr.slice(emojiMatch[0].length);
+  } else {
+    iconEl.textContent = '';
+    titleEl.textContent = titleStr;
+  }
   document.getElementById('subScreenBody').innerHTML = top.bodyHtml;
   document.getElementById('subScreenOverlay').classList.add('show');
   if(top.initFn) setTimeout(top.initFn, 50);
@@ -3926,32 +3938,55 @@ function _renderContasOv(){
   const ACC='#7dd3f0';
   const ACCENT='#0ea5e9';
 
-  // Ordena: pendentes primeiro, depois pagas
+  // Ordena: pendentes primeiro por data de vencimento, depois pagas
   const sorted = [...contas].sort((a,b)=>{
-    if(a.paga===b.paga) return (a.vencimento||31)-(b.vencimento||31);
+    if(a.paga===b.paga) return (a.vencimento||'9999-12-31').toString().localeCompare((b.vencimento||'9999-12-31').toString());
     return a.paga?1:-1;
   });
 
   function statusColor(c){
     if(c.paga) return 'rgba(34,197,94,.8)';
-    const hoje = new Date().getDate();
-    const diff = (c.vencimento||31) - hoje;
-    if(diff<0) return '#f87171'; // vencida
-    if(diff<=3) return '#fb923c'; // próxima
-    return '#7dd3f0';
+    if(!c.vencimento) return '#7dd3f0';
+    const v=String(c.vencimento);
+    // suporte a formato antigo (número dia) e novo (YYYY-MM-DD)
+    if(v.includes('-')){
+      const hoje=new Date().toISOString().split('T')[0];
+      if(v<hoje) return '#f87171';
+      const diff=Math.round((new Date(v)-new Date())/86400000);
+      if(diff<=3) return '#fb923c';
+      return '#7dd3f0';
+    } else {
+      const diff=parseInt(v)-(new Date().getDate());
+      if(diff<0) return '#f87171';
+      if(diff<=3) return '#fb923c';
+      return '#7dd3f0';
+    }
   }
   function statusLabel(c){
     if(c.paga) return '✅ Paga';
-    const hoje=new Date().getDate(), diff=(c.vencimento||31)-hoje;
-    if(diff<0) return '🔴 Vencida';
-    if(diff===0) return '🟠 Vence hoje';
-    if(diff<=3) return `🟡 Vence em ${diff}d`;
-    return `Dia ${c.vencimento||'?'}`;
+    if(!c.vencimento) return '📅 Sem vencto';
+    const v=String(c.vencimento);
+    if(v.includes('-')){
+      const hoje=new Date().toISOString().split('T')[0];
+      if(v<hoje) return '🔴 Vencida';
+      const diff=Math.round((new Date(v)-new Date())/86400000);
+      if(diff===0) return '🟠 Vence hoje';
+      if(diff<=3) return `🟡 Vence em ${diff}d`;
+      return `📅 ${v.split('-').reverse().join('/')}`;
+    } else {
+      const diff=parseInt(v)-(new Date().getDate());
+      if(diff<0) return '🔴 Vencida';
+      if(diff===0) return '🟠 Vence hoje';
+      if(diff<=3) return `🟡 Vence em ${diff}d`;
+      return `Dia ${v}`;
+    }
   }
 
   function cardH(c,i){
-    return `<div style="background:rgba(0,80,120,.22);border:1px solid rgba(0,140,180,.15);border-radius:14px;padding:13px 14px;margin-bottom:9px;${c.paga?'opacity:.55;':''}">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+    const parcelasInfo = c.parcelas&&c.parcelas.length>1
+      ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">${c.parcelas.map((p,pi)=>`<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:${p.paga?'rgba(34,197,94,.18)':'rgba(0,80,120,.35)'};border:1px solid ${p.paga?'rgba(34,197,94,.35)':'rgba(0,140,180,.2)'};color:${p.paga?'#4ade80':TEXT};cursor:pointer;" class="cParc" data-cidx="${i}" data-pidx="${pi}">${pi+1}/${c.parcelas.length} · R$${p.valor} · ${p.vencimento?p.vencimento.split('-').reverse().slice(0,2).join('/'):'?'}${p.paga?' ✓':''}</span>`).join('')}</div>` : '';
+    return `<div style="background:rgba(0,80,120,.22);border:1px solid rgba(0,140,180,.15);border-radius:14px;padding:13px 14px;margin-bottom:9px;${c.paga&&!c.parcelas?.length?'opacity:.55;':''}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
             <span style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:800;color:${TEXT};flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(c.nome)}</span>
@@ -3962,9 +3997,10 @@ function _renderContasOv(){
             <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${statusColor(c)};">${statusLabel(c)}</span>
           </div>
           ${c.obs?`<div style="font-size:11px;color:${MUTED};margin-top:4px;">${escapeHtml(c.obs)}</div>`:''}
+          ${parcelasInfo}
         </div>
         <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
-          <button class="cPagar" data-idx="${i}" style="background:${c.paga?'rgba(34,197,94,.12)':'rgba(34,197,94,.2)'};border:1px solid ${c.paga?'rgba(34,197,94,.2)':'rgba(34,197,94,.4)'};border-radius:8px;color:${c.paga?'rgba(34,197,94,.5)':'#4ade80'};font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="${c.paga?'Desfazer':'Marcar paga'}">${c.paga?'↩':'✓'}</button>
+          ${(!c.parcelas||c.parcelas.length<=1)?`<button class="cPagar" data-idx="${i}" style="background:${c.paga?'rgba(34,197,94,.12)':'rgba(34,197,94,.2)'};border:1px solid ${c.paga?'rgba(34,197,94,.2)':'rgba(34,197,94,.4)'};border-radius:8px;color:${c.paga?'rgba(34,197,94,.5)':'#4ade80'};font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="${c.paga?'Desfazer':'Marcar paga'}">${c.paga?'↩':'✓'}</button>`:''}
           <button class="cEdit" data-idx="${i}" style="background:rgba(0,160,200,.15);border:1px solid rgba(0,160,200,.25);border-radius:8px;color:${ACC};font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✏️</button>
           <button class="cDel" data-idx="${i}" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#f87171;font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">🗑️</button>
         </div>
@@ -3973,7 +4009,10 @@ function _renderContasOv(){
   }
 
   const pendentes = contas.filter(c=>!c.paga).length;
-  const totalPendente = contas.filter(c=>!c.paga&&c.valor).reduce((s,c)=>s+parseFloat(String(c.valor).replace(',','.'))||0,0);
+  const totalPendente = contas.filter(c=>!c.paga&&c.valor).reduce((s,c)=>{
+    if(c.parcelas&&c.parcelas.length>1) return s+c.parcelas.filter(p=>!p.paga).reduce((ps,p)=>ps+(parseFloat(String(p.valor).replace(',','.'))||0),0);
+    return s+(parseFloat(String(c.valor).replace(',','.'))||0);
+  },0);
 
   const ov = document.createElement('div');
   ov.id = 'contasOv';
@@ -4002,16 +4041,28 @@ function _renderContasOv(){
       <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
         <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Nome da Conta *</div>
         <input id="_cfNome" type="text" maxlength="60" placeholder="Ex: Aluguel, Luz, Internet, Cartão Nubank…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;outline:none;margin-bottom:14px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
           <div>
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Valor (R$)</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Valor (R$) *</div>
             <input id="_cfValor" type="text" inputmode="decimal" maxlength="12" placeholder="0,00" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;outline:none;">
           </div>
           <div>
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Dia Vencimento</div>
-            <input id="_cfVenc" type="number" min="1" max="31" placeholder="Ex: 10" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;outline:none;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Qtd Parcelas</div>
+            <input id="_cfQtd" type="number" min="1" max="99" value="1" placeholder="1" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;outline:none;">
+          </div>
+          <div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">1º Vencto</div>
+            <input id="_cfVenc" type="date" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;">
           </div>
         </div>
+
+        <!-- Preview parcelas (aparece quando qtd > 1) -->
+        <div id="_cfParcelasPreview" style="display:none;margin-bottom:14px;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:8px;">✏️ Confirmar / Ajustar Parcelas</div>
+          <div id="_cfParcelasLista" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+
         <label style="display:flex;align-items:center;gap:12px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.22);border-radius:12px;padding:13px 14px;margin-bottom:14px;cursor:pointer;">
           <input type="checkbox" id="_cfFixa" style="width:18px;height:18px;accent-color:#a78bfa;cursor:pointer;">
           <div>
@@ -4027,35 +4078,123 @@ function _renderContasOv(){
 
   document.body.appendChild(ov);
   let _cEditIdx=null;
+  let _cfParcelasTemp=[];
+
+  function buildCParcelasTemp(){
+    const qtd=parseInt(ov.querySelector('#_cfQtd').value)||1;
+    const valorTotal=parseFloat(String(ov.querySelector('#_cfValor').value).replace(',','.'))||0;
+    const venc1=ov.querySelector('#_cfVenc').value;
+    const valorParcela=qtd>0?(valorTotal/qtd).toFixed(2):'0.00';
+    _cfParcelasTemp=Array.from({length:qtd},(_,i)=>{
+      const existing=_cfParcelasTemp[i];
+      if(existing) return existing;
+      let data='';
+      if(venc1){ const d=new Date(venc1+'T12:00:00'); d.setDate(d.getDate()+(i*30)); data=d.toISOString().split('T')[0]; }
+      return {valor:valorParcela.replace('.',','),vencimento:data,paga:false};
+    });
+    _cfParcelasTemp=_cfParcelasTemp.slice(0,qtd);
+  }
+
+  function renderCParcelasPreview(){
+    const qtd=parseInt(ov.querySelector('#_cfQtd').value)||1;
+    const preview=ov.querySelector('#_cfParcelasPreview');
+    const lista=ov.querySelector('#_cfParcelasLista');
+    if(qtd<=1){ preview.style.display='none'; return; }
+    buildCParcelasTemp();
+    preview.style.display='block';
+    lista.innerHTML=_cfParcelasTemp.map((p,i)=>`
+      <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;align-items:center;background:rgba(0,80,120,.3);border:1px solid rgba(0,140,180,.2);border-radius:10px;padding:9px 12px;">
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${MUTED};min-width:28px;">${i+1}/${qtd}</span>
+        <input type="text" inputmode="decimal" class="cfPVal" data-pi="${i}" value="${p.valor}" placeholder="0,00" style="padding:8px 10px;border-radius:8px;border:1.5px solid rgba(0,140,180,.22);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;outline:none;width:100%;box-sizing:border-box;">
+        <input type="date" class="cfPDat" data-pi="${i}" value="${p.vencimento}" style="padding:8px 10px;border-radius:8px;border:1.5px solid rgba(0,140,180,.22);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;width:100%;box-sizing:border-box;">
+      </div>`).join('');
+    lista.querySelectorAll('.cfPVal').forEach(inp=>inp.addEventListener('change',()=>{ _cfParcelasTemp[parseInt(inp.dataset.pi)].valor=inp.value; }));
+    lista.querySelectorAll('.cfPDat').forEach(inp=>inp.addEventListener('change',()=>{ _cfParcelasTemp[parseInt(inp.dataset.pi)].vencimento=inp.value; }));
+  }
 
   function showCForm(idx){
-    _cEditIdx=idx;
+    _cEditIdx=idx; _cfParcelasTemp=[];
     const f=ov.querySelector('#_contasForm'); f.style.display='flex';
-    ov.querySelector('#_cfTitle').textContent = idx!==null?'Editar Conta':'Nova Conta';
+    ov.querySelector('#_cfTitle').textContent=idx!==null?'Editar Conta':'Nova Conta';
     const arr=_getContas();
-    if(idx!==null){ const c=arr[idx]; ov.querySelector('#_cfNome').value=c.nome||''; ov.querySelector('#_cfValor').value=c.valor||''; ov.querySelector('#_cfVenc').value=c.vencimento||''; ov.querySelector('#_cfFixa').checked=!!c.fixa; ov.querySelector('#_cfObs').value=c.obs||''; }
-    else { ov.querySelector('#_cfNome').value=''; ov.querySelector('#_cfValor').value=''; ov.querySelector('#_cfVenc').value=''; ov.querySelector('#_cfFixa').checked=false; ov.querySelector('#_cfObs').value=''; }
+    if(idx!==null){
+      const c=arr[idx];
+      ov.querySelector('#_cfNome').value=c.nome||'';
+      ov.querySelector('#_cfValor').value=c.valor||'';
+      ov.querySelector('#_cfFixa').checked=!!c.fixa;
+      ov.querySelector('#_cfObs').value=c.obs||'';
+      if(c.parcelas&&c.parcelas.length>1){
+        ov.querySelector('#_cfQtd').value=c.parcelas.length;
+        ov.querySelector('#_cfVenc').value=c.parcelas[0]?.vencimento||'';
+        _cfParcelasTemp=c.parcelas.map(p=>({...p}));
+        renderCParcelasPreview();
+        setTimeout(()=>{
+          ov.querySelectorAll('.cfPVal').forEach((inp,i)=>{ inp.value=_cfParcelasTemp[i].valor; });
+          ov.querySelectorAll('.cfPDat').forEach((inp,i)=>{ inp.value=_cfParcelasTemp[i].vencimento; });
+        },50);
+      } else {
+        ov.querySelector('#_cfQtd').value=1;
+        ov.querySelector('#_cfVenc').value=c.vencimento&&String(c.vencimento).includes('-')?c.vencimento:'';
+        ov.querySelector('#_cfParcelasPreview').style.display='none';
+      }
+    } else {
+      ov.querySelector('#_cfNome').value=''; ov.querySelector('#_cfValor').value='';
+      ov.querySelector('#_cfQtd').value=1; ov.querySelector('#_cfVenc').value='';
+      ov.querySelector('#_cfFixa').checked=false; ov.querySelector('#_cfObs').value='';
+      ov.querySelector('#_cfParcelasPreview').style.display='none';
+    }
     setTimeout(()=>ov.querySelector('#_cfNome').focus(),120);
   }
+
+  ['_cfQtd','_cfValor','_cfVenc'].forEach(id=>{
+    ov.querySelector('#'+id).addEventListener('change',()=>{ _cfParcelasTemp=[]; renderCParcelasPreview(); });
+  });
+
   ov.querySelector('#_contasBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
   ov.querySelector('#_contasNew').onclick=()=>showCForm(null);
   ov.querySelector('#_cfBack').onclick=()=>{ ov.querySelector('#_contasForm').style.display='none'; };
   ov.querySelector('#_cfSave').onclick=()=>{
     const nome=ov.querySelector('#_cfNome').value.trim();
     if(!nome){showToast('⚠️ Informe o nome da conta!');return;}
+    const valor=ov.querySelector('#_cfValor').value.trim();
+    if(!valor){showToast('⚠️ Informe o valor!');return;}
+    const qtd=parseInt(ov.querySelector('#_cfQtd').value)||1;
+    const venc=ov.querySelector('#_cfVenc').value;
     const arr=_getContas();
-    const entry={id:Date.now(),nome,valor:ov.querySelector('#_cfValor').value.trim(),vencimento:parseInt(ov.querySelector('#_cfVenc').value)||null,fixa:ov.querySelector('#_cfFixa').checked,obs:ov.querySelector('#_cfObs').value.trim(),paga:false};
+    let entry;
+    if(qtd>1){
+      ov.querySelectorAll('.cfPVal').forEach((inp,i)=>{ if(_cfParcelasTemp[i]) _cfParcelasTemp[i].valor=inp.value; });
+      ov.querySelectorAll('.cfPDat').forEach((inp,i)=>{ if(_cfParcelasTemp[i]) _cfParcelasTemp[i].vencimento=inp.value; });
+      if(!_cfParcelasTemp.length) buildCParcelasTemp();
+      entry={id:_cEditIdx!==null?arr[_cEditIdx].id:Date.now(),nome,valor,obs:ov.querySelector('#_cfObs').value.trim(),fixa:ov.querySelector('#_cfFixa').checked,parcelas:[..._cfParcelasTemp],paga:false,vencimento:_cfParcelasTemp[0]?.vencimento||venc};
+    } else {
+      entry={id:_cEditIdx!==null?arr[_cEditIdx].id:Date.now(),nome,valor,vencimento:venc,fixa:ov.querySelector('#_cfFixa').checked,obs:ov.querySelector('#_cfObs').value.trim(),paga:false,parcelas:[]};
+    }
     if(_cEditIdx!==null) arr[_cEditIdx]={...arr[_cEditIdx],...entry,paga:arr[_cEditIdx].paga};
     else arr.push(entry);
     _saveContas(arr); ov.querySelector('#_contasForm').style.display='none'; _renderContasOv();
   };
   ov.querySelector('#_contasBody').addEventListener('click',e=>{
-    const pBtn=e.target.closest('.cPagar'), eBtn=e.target.closest('.cEdit'), dBtn=e.target.closest('.cDel');
+    const pBtn=e.target.closest('.cPagar'), eBtn=e.target.closest('.cEdit'), dBtn=e.target.closest('.cDel'), parcBtn=e.target.closest('.cParc');
     const arr=_getContas();
-    const sorted2=[...arr].sort((a,b)=>{if(a.paga===b.paga)return(a.vencimento||31)-(b.vencimento||31);return a.paga?1:-1;});
-    if(pBtn){ const i=parseInt(pBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id); arr[real].paga=!arr[real].paga; _saveContas(arr); _renderContasOv(); }
-    else if(eBtn){ const i=parseInt(eBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id); showCForm(real); }
-    else if(dBtn){ const i=parseInt(dBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id); if(!confirm(`Excluir "${arr[real].nome}"?`))return; arr.splice(real,1); _saveContas(arr); _renderContasOv(); }
+    const sorted2=[...arr].sort((a,b)=>{if(a.paga===b.paga)return(a.vencimento||'9999-12-31').toString().localeCompare((b.vencimento||'9999-12-31').toString());return a.paga?1:-1;});
+    if(pBtn){
+      const i=parseInt(pBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id);
+      arr[real].paga=!arr[real].paga; _saveContas(arr); _renderContasOv();
+    } else if(parcBtn){
+      const ci=parseInt(parcBtn.dataset.cidx), pi=parseInt(parcBtn.dataset.pidx);
+      const real=arr.findIndex(x=>x.id===sorted2[ci].id);
+      if(real>=0&&arr[real].parcelas[pi]){
+        arr[real].parcelas[pi].paga=!arr[real].parcelas[pi].paga;
+        arr[real].paga=arr[real].parcelas.every(p=>p.paga);
+        _saveContas(arr); _renderContasOv();
+      }
+    } else if(eBtn){
+      const i=parseInt(eBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id); showCForm(real);
+    } else if(dBtn){
+      const i=parseInt(dBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id);
+      if(!confirm(`Excluir "${arr[real].nome}"?`))return; arr.splice(real,1); _saveContas(arr); _renderContasOv();
+    }
   });
 }
 
@@ -4599,10 +4738,13 @@ function _renderMercadoOv(){
       ${items.length===0?`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;"><div style="font-size:40px;margin-bottom:12px;">🛍️</div><div style="font-size:14px;font-weight:700;margin-bottom:6px;">Lista vazia</div><div style="font-size:12px;opacity:.7;">Adicione itens abaixo</div></div>`:items.map((it,i)=>itemRow(it,i)).join('')}
     </div>
     <!-- Input rápido fixo no rodapé -->
-    <div style="padding:12px 16px;background:rgba(0,80,120,.3);border-top:1px solid ${BDR};display:flex;gap:8px;flex-shrink:0;">
-      <input id="_mkNome" type="text" maxlength="60" placeholder="Item do mercado…" style="flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;outline:none;">
-      <input id="_mkQtd" type="text" maxlength="10" placeholder="Qtd" style="width:60px;padding:10px 8px;border-radius:10px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;outline:none;text-align:center;">
-      <button id="_mkAdd" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;padding:10px 14px;cursor:pointer;">+</button>
+    <div style="padding:12px 16px;background:rgba(0,80,120,.3);border-top:1px solid ${BDR};display:flex;gap:8px;flex-shrink:0;align-items:center;">
+      <input id="_mkQtd" type="text" maxlength="10" placeholder="Qtd" style="width:54px;padding:10px 8px;border-radius:10px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;outline:none;text-align:center;flex-shrink:0;">
+      <input id="_mkNome" type="text" maxlength="60" placeholder="Descrição…" style="flex:1;min-width:0;padding:10px 11px;border-radius:10px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;outline:none;">
+      <button id="_mkAdd" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;width:42px;height:42px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>
+      <button id="_mkVoice" style="background:rgba(255,255,255,.07);border:1.5px solid rgba(0,140,180,.25);border-radius:10px;color:rgba(255,255,255,.85);width:42px;height:42px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="9" y="2" width="6" height="11" rx="3" stroke="rgba(255,255,255,.85)" stroke-width="2"/><path d="M5 11a7 7 0 0014 0" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="18" x2="12" y2="22" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
     </div>`;
   document.body.appendChild(ov);
   ov.querySelector('#_mkBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
@@ -4615,6 +4757,17 @@ function _renderMercadoOv(){
     _saveMercado(arr); _renderMercadoOv();
   };
   ov.querySelector('#_mkNome').addEventListener('keydown',e=>{ if(e.key==='Enter') ov.querySelector('#_mkAdd').click(); });
+  ov.querySelector('#_mkVoice').onclick=()=>{
+    if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){showToast('⚠️ Voz não suportada neste navegador');return;}
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    const sr=new SR(); sr.lang='pt-BR'; sr.interimResults=false; sr.maxAlternatives=1;
+    const btn=ov.querySelector('#_mkVoice');
+    btn.style.background='rgba(239,68,68,.25)'; btn.style.borderColor='rgba(239,68,68,.5)';
+    sr.onresult=e=>{ ov.querySelector('#_mkNome').value=e.results[0][0].transcript; btn.style.background='rgba(255,255,255,.07)'; btn.style.borderColor='rgba(0,140,180,.25)'; };
+    sr.onerror=()=>{ btn.style.background='rgba(255,255,255,.07)'; btn.style.borderColor='rgba(0,140,180,.25)'; };
+    sr.onend=()=>{ btn.style.background='rgba(255,255,255,.07)'; btn.style.borderColor='rgba(0,140,180,.25)'; };
+    sr.start();
+  };
   ov.querySelector('#_mkBody').addEventListener('click',e=>{
     const cb=e.target.closest('[data-ci]');
     const dl=e.target.closest('[data-di]');
@@ -5939,7 +6092,7 @@ function openSearch() {
   if (!overlay) return;
   overlay.style.display = 'flex';
   input.value = '';
-  document.getElementById('searchResults').innerHTML = '<p class="searchEmpty">Digite para pesquisar…</p>';
+  document.getElementById('searchResults').innerHTML = '';
   setTimeout(() => input.focus(), 100);
 }
 
@@ -6006,11 +6159,12 @@ function _runSearch(query) {
     (arr||[]).forEach(t => {
       if (t.text.toLowerCase().includes(q)) {
         const df = dk.split('-').reverse().join('/');
+        const [dy, dm, dd] = dk.split('-').map(Number);
         cats.calendario.items.push({
           icon:'📅', iconCls:'cal',
           title: t.text, sub: df,
           badge: df, badgeCls:'blue',
-          action:()=>{ closeSearch(); }
+          action:()=>{ closeSearch(); openQuickAddTask(dk, dd, dm-1, dy); }
         });
       }
     });
@@ -6119,21 +6273,19 @@ function _runSearch(query) {
     return;
   }
 
-  // ── Renderiza: lista flat, cards de linha única ──
+  // ── Renderiza: cards estilo relatório semanal, sem ícone ──
   const allActions = [];
   let html = '';
   const allItems = [];
   Object.values(cats).forEach(cat => cat.items.forEach(item => allItems.push(item)));
 
-  // Monta legenda de data/contexto para linha única
   allItems.forEach(item => {
     const idx = allActions.length;
     allActions.push(item.action);
 
-    // Linha única: [data/badge] · [título]   OU apenas [título]
+    // Extrai data no formato DD/MM
     let datePart = '';
     if (item.badge) {
-      // pega só DD/MM se tiver formato completo DD/MM/YYYY
       const m = item.badge.match(/^(\d{2}\/\d{2})/);
       datePart = m ? m[1] : item.badge;
     } else if (item.sub && /^\d{2}\/\d{2}/.test(item.sub)) {
@@ -6141,19 +6293,18 @@ function _runSearch(query) {
       datePart = m2 ? m2[1] : '';
     }
 
-    const lineHtml = datePart
-      ? `<span class="srCardDate">${_escHtml(datePart)}</span><span class="srCardSep">·</span><span class="srCardText">${_highlight(item.title, query)}</span>`
-      : `<span class="srCardText srCardTextFull">${_highlight(item.title, query)}</span>`;
-
-    html += `<div class="srCard" data-idx="${idx}">
-      <div class="srCardIcon ${item.iconCls||''}">${item.icon}</div>
-      <div class="srCardLine">${lineHtml}</div>
-      <span class="srCardArrow">›</span>
+    html += `<div class="srFutCard" data-idx="${idx}">
+      <div class="fut-section" style="margin:0;cursor:pointer;">
+        <div class="fut-row" style="border-bottom:none;">
+          ${datePart ? `<span class="fut-date">${_escHtml(datePart)}</span>` : ''}
+          <span class="fut-text">${_highlight(item.title, query)}</span>
+        </div>
+      </div>
     </div>`;
   });
 
   container.innerHTML = html;
-  container.querySelectorAll('.srCard').forEach(el => {
+  container.querySelectorAll('.srFutCard').forEach(el => {
     const idx = parseInt(el.dataset.idx);
     el.addEventListener('click', () => allActions[idx]());
   });
@@ -6238,7 +6389,7 @@ function openStats(fromSettings) {
     </div>`;
 
   closeSettings();
-  openSubScreen('📊 Estatísticas', html, null, null);
+  openSubScreen('📊 Estatísticas do sistema', html, null, null);
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -6599,52 +6750,76 @@ function openConsultaModal(editId){
 
   const ov=document.createElement('div');
   ov.id='consultaFormOv';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,10,20,.82);z-index:99993;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;';
+  ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99993;display:flex;flex-direction:column;`;
   ov.innerHTML=`
-    <div style="background:${BG};border:1px solid ${FBDR};border-radius:20px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.65);overflow:hidden;margin:auto;">
-      <!-- Header -->
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:18px;line-height:1;">🏥</span>
-          <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;color:${TEXT};letter-spacing:-.2px;">${editing?'Editar':'Nova'} Consulta</span>
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <span style="font-size:22px;line-height:1;flex-shrink:0;">🏥</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:${TEXT};flex:1;letter-spacing:-.2px;">${editing?'Editar':'Nova'} Consulta</span>
+      <button id="_cClose" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;padding:8px 16px;cursor:pointer;flex-shrink:0;">Fechar</button>
+    </div>
+    <!-- Corpo com scroll -->
+    <div style="flex:1;overflow-y:auto;padding:20px 16px 36px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
+
+      <!-- Especialidade -->
+      <div style="${LBL}margin-bottom:6px;">Especialidade *</div>
+      <input id="_cEspec" style="${iS}margin-bottom:18px;" placeholder="Ex: Cardiologista, Dentista..." value="${editing?editing.especialidade:''}">
+
+      <!-- Médico -->
+      <div style="${LBL}margin-bottom:6px;">Médico / Clínica</div>
+      <input id="_cMedico" style="${iS}margin-bottom:18px;" placeholder="Nome do médico ou clínica..." value="${editing?editing.medico||'':''}">
+
+      <!-- Paciente -->
+      <div style="${LBL}margin-bottom:6px;">Paciente *</div>
+      <input id="_cPac" style="${iS}margin-bottom:18px;" placeholder="Nome do paciente..." value="${editing?editing.paciente:''}">
+
+      <!-- Local -->
+      <div style="${LBL}margin-bottom:6px;">Local / Endereço</div>
+      <input id="_cLocal" style="${iS}margin-bottom:18px;" placeholder="Endereço ou nome do local..." value="${editing?editing.local||'':''}">
+
+      <!-- Data e Hora -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;">
+        <div>
+          <div style="${LBL}margin-bottom:6px;">Data *</div>
+          <input id="_cData" type="date" style="${iS}margin-bottom:0;">
         </div>
-        <button id="_cClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:8px;color:${ACCENT};width:28px;height:28px;cursor:pointer;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
-      </div>
-      <!-- Campos -->
-      <div style="padding:14px 16px 18px;">
-        <div style="${LBL}">Especialidade *</div>
-        <input id="_cEspec" style="${iS}" placeholder="Ex: Cardiologista, Dentista..." value="${editing?editing.especialidade:''}">
-        <div style="${LBL}">Médico / Clínica</div>
-        <input id="_cMedico" style="${iS}" placeholder="Nome do médico ou clínica..." value="${editing?editing.medico||'':''}">
-        <div style="${LBL}">Paciente *</div>
-        <input id="_cPac" style="${iS}" placeholder="Nome do paciente..." value="${editing?editing.paciente:''}">
-        <div style="${LBL}">Local / Endereço</div>
-        <input id="_cLocal" style="${iS}" placeholder="Endereço ou nome do local..." value="${editing?editing.local||'':''}">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <div><div style="${LBL}">Data *</div><input id="_cData" type="date" style="${iS}" value="${editing?editing.data:''}"></div>
-          <div><div style="${LBL}">Hora *</div><input id="_cHora" type="time" style="${iS}" value="${editing?editing.hora:''}"></div>
-        </div>
-        <div style="${LBL}">Observação</div>
-        <input id="_cObs" style="${iS}" placeholder="Opcional..." value="${editing?editing.obs||'':''}">
-        <div style="margin-top:14px;margin-bottom:8px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(180,220,240,.55);">📷 Foto da Receita / Pedido (opcional)</div>
-        <div id="_csFotoThumb" style="display:none;margin-bottom:8px;width:100%;text-align:center;"><img id="_csFotoImg" style="max-height:100px;border-radius:10px;border:2px solid ${ACCENT};" src=""></div>
-        <input type="file" id="_csFotoCam" accept="image/*" capture="environment" style="display:none;">
-        <input type="file" id="_csFotoGal" accept="image/*" style="display:none;">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px;">
-          <button id="_csFotoCamBtn" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
-            <span style="font-size:18px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span>
-          </button>
-          <button id="_csFotoGalBtn" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
-            <span style="font-size:18px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span>
-          </button>
-          <button id="_cSave" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
-            <span style="font-size:18px;line-height:1;display:block;text-align:center;">✔</span><span style="line-height:1;display:block;text-align:center;">${editing?'Salvar':'Agendar'}</span>
-          </button>
+        <div>
+          <div style="${LBL}margin-bottom:6px;">Hora *</div>
+          <input id="_cHora" type="time" style="${iS}margin-bottom:0;">
         </div>
       </div>
+
+      <!-- Observação -->
+      <div style="${LBL}margin-bottom:6px;">Observação</div>
+      <input id="_cObs" style="${iS}margin-bottom:24px;" placeholder="Opcional..." value="${editing?editing.obs||'':''}">
+
+      <!-- Foto -->
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:${MUTED};margin-bottom:12px;">📷 Foto da Receita / Pedido (opcional)</div>
+
+      <div id="_csFotoThumb" style="display:none;margin-bottom:16px;width:100%;text-align:center;">
+        <img id="_csFotoImg" style="max-height:160px;border-radius:14px;border:2px solid ${ACCENT};object-fit:contain;" src="">
+      </div>
+
+      <input type="file" id="_csFotoCam" accept="image/*" capture="environment" style="display:none;">
+      <input type="file" id="_csFotoGal" accept="image/*" style="display:none;">
+
+      <!-- Botões de ação: Câmera, Galeria, Salvar -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px;">
+        <button id="_csFotoCamBtn" type="button" style="padding:14px 6px;border-radius:14px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+          <span style="font-size:22px;line-height:1;">📸</span><span>Câmera</span>
+        </button>
+        <button id="_csFotoGalBtn" type="button" style="padding:14px 6px;border-radius:14px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+          <span style="font-size:22px;line-height:1;">🖼️</span><span>Galeria</span>
+        </button>
+        <button id="_cSave" type="button" style="padding:14px 6px;border-radius:14px;border:none;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+          <span style="font-size:22px;line-height:1;">✔</span><span>${editing?'Salvar':'Agendar'}</span>
+        </button>
+      </div>
+
     </div>`;
   document.body.appendChild(ov);
   if(!editing) ov.querySelector('#_cData').value=new Date().toISOString().split('T')[0];
+  if(editing){ ov.querySelector('#_cData').value=editing.data||''; ov.querySelector('#_cHora').value=editing.hora||''; }
   ov.querySelector('#_cClose').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
 
   // Foto consulta
@@ -6662,7 +6837,6 @@ function openConsultaModal(editId){
   ov.querySelector('#_csFotoGalBtn').onclick=()=>ov.querySelector('#_csFotoGal').click();
   ov.querySelector('#_csFotoCam').addEventListener('change',function(){ _csHandleFoto(this.files[0]); });
   ov.querySelector('#_csFotoGal').addEventListener('change',function(){ _csHandleFoto(this.files[0]); });
-  ov.addEventListener('click',(e)=>{if(e.target===ov)ov.remove();});
   ov.querySelector('#_cSave').onclick=()=>{
     const esp=ov.querySelector('#_cEspec').value.trim();
     const pac=ov.querySelector('#_cPac').value.trim();
@@ -6954,112 +7128,112 @@ function openRemedioModal(editId){
 
   const ov=document.createElement('div');
   ov.id='remedioFormOv';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,10,20,.82);z-index:99993;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;';
+  ov.style.cssText=`position:fixed;inset:0;background:${BG};z-index:99993;display:flex;flex-direction:column;`;
   ov.innerHTML=`
-    <div style="background:${BG};border:1px solid ${FBDR};border-radius:20px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.65);overflow:hidden;margin:auto;">
-      <!-- Header -->
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:${HDR};border-bottom:1px solid ${HBDR};">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:18px;line-height:1;">💊</span>
-          <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;color:${TEXT};letter-spacing:-.2px;">${editing?'Editar':'Novo'} Remédio</span>
-        </div>
-        <button id="_rmClose" style="background:${FIELD};border:1px solid ${BDR};border-radius:8px;color:${ACCENT};width:28px;height:28px;cursor:pointer;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <span style="font-size:22px;line-height:1;flex-shrink:0;">💊</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:${TEXT};flex:1;letter-spacing:-.2px;">${editing?'Editar':'Novo'} Remédio</span>
+      <button id="_rmClose" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;padding:8px 16px;cursor:pointer;flex-shrink:0;">Fechar</button>
+    </div>
+    <!-- Corpo com scroll -->
+    <div style="flex:1;overflow-y:auto;padding:20px 16px 36px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
+
+      <div style="${FGRP}">
+        <div style="${LBL}">Nome do Remédio *</div>
+        <input id="_rmNome" style="${iS}" placeholder="Ex: Losartana, Amoxicilina..." value="${editing?editing.nome:''}">
       </div>
-      <!-- Campos -->
-      <div style="padding:18px 18px 22px;">
 
-        <div style="${FGRP}">
-          <div style="${LBL}">Nome do Remédio *</div>
-          <input id="_rmNome" style="${iS}" placeholder="Ex: Losartana, Amoxicilina..." value="${editing?editing.nome:''}">
+      <div style="${FGRP}">
+        <div style="${LBL}">Paciente *</div>
+        <input id="_rmPac" style="${iS}" placeholder="Quem vai tomar..." value="${editing?editing.paciente:''}">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;${FGRP}">
+        <div>
+          <div style="${LBL}">Dose</div>
+          <input id="_rmDose" style="${iS}" placeholder="Ex: 50mg, 1cp" value="${editing?editing.dose||'':''}">
         </div>
-
-        <div style="${FGRP}">
-          <div style="${LBL}">Paciente *</div>
-          <input id="_rmPac" style="${iS}" placeholder="Quem vai tomar..." value="${editing?editing.paciente:''}">
+        <div>
+          <div style="${LBL}">Qtd por uso</div>
+          <input id="_rmQtd" type="number" min="1" style="${iS}" placeholder="Ex: 1" value="${editing?editing.qtd||'':''}">
         </div>
+      </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;${FGRP}">
-          <div>
-            <div style="${LBL}">Dose</div>
-            <input id="_rmDose" style="${iS}" placeholder="Ex: 50mg, 1cp" value="${editing?editing.dose||'':''}">
-          </div>
-          <div>
-            <div style="${LBL}">Qtd por uso</div>
-            <input id="_rmQtd" type="number" min="1" style="${iS}" placeholder="Ex: 1" value="${editing?editing.qtd||'':''}">
-          </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;${FGRP}">
+        <div>
+          <div style="${LBL}">Data Início *</div>
+          <input id="_rmData" type="date" style="${iS}" value="${editing?editing.data:''}">
         </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;${FGRP}">
-          <div>
-            <div style="${LBL}">Data Início *</div>
-            <input id="_rmData" type="date" style="${iS}" value="${editing?editing.data:''}">
-          </div>
-          <div>
-            <div style="${LBL}">1ª Hora *</div>
-            <input id="_rmHora" type="time" style="${iS}" value="${editing?editing.hora:''}">
-          </div>
+        <div>
+          <div style="${LBL}">1ª Hora *</div>
+          <input id="_rmHora" type="time" style="${iS}" value="${editing?editing.hora:''}">
         </div>
+      </div>
 
-        <!-- Duração + toggle uso contínuo -->
-        <div style="${FGRP}">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <div style="${LBL}margin-bottom:0;">Duração do tratamento *</div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-size:11px;font-weight:700;color:${MUTED};font-family:'Space Grotesk',sans-serif;">Uso contínuo</span>
-              <div id="_rmContDiv" style="width:42px;height:24px;border-radius:12px;background:rgba(255,255,255,.15);border:1px solid ${BDR};position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;">
-                <div id="_rmContKnob" style="position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.3);pointer-events:none;"></div>
-              </div>
-              <input type="checkbox" id="_rmContinuo" style="display:none;" ${editing&&editing.continuo?'checked':''}>
+      <!-- Duração + toggle uso contínuo -->
+      <div style="${FGRP}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="${LBL}margin-bottom:0;">Duração do tratamento *</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;font-weight:700;color:${MUTED};font-family:'Space Grotesk',sans-serif;">Uso contínuo</span>
+            <div id="_rmContDiv" style="width:42px;height:24px;border-radius:12px;background:rgba(255,255,255,.15);border:1px solid ${BDR};position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;">
+              <div id="_rmContKnob" style="position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.3);pointer-events:none;"></div>
             </div>
-          </div>
-          <div id="_rmDiasDiv" style="${editing&&editing.continuo?'display:none':''}">
-            <input id="_rmDias" type="number" min="1" max="365" style="${iS}" placeholder="Quantos dias? Ex: 7, 30, 90..." value="${editing&&!editing.continuo?editing.dias:''}">
-          </div>
-          <div id="_rmContinuoInfo" style="display:${editing&&editing.continuo?'block':'none'};background:${FIELD};border:1px solid ${BDR};border-radius:10px;padding:11px 14px;font-size:12px;font-weight:700;color:${ACCENT};font-family:'Space Grotesk',sans-serif;line-height:1.4;">
-            ♾️ Sem data de término — reagende a cada 90 dias nas notificações
+            <input type="checkbox" id="_rmContinuo" style="display:none;" ${editing&&editing.continuo?'checked':''}>
           </div>
         </div>
-
-        <!-- Frequência -->
-        <div style="${FGRP}">
-          <div style="${LBL}">Frequência *</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-            <label id="_lbl8" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${MUTED};background:${FIELD};text-align:center;">
-              <input type="radio" name="rmFreq" value="8" style="display:none;" ${editing&&editing.frequencia===8?'checked':''}> 8 em 8h</label>
-            <label id="_lbl12" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${MUTED};background:${FIELD};text-align:center;">
-              <input type="radio" name="rmFreq" value="12" style="display:none;" ${editing&&editing.frequencia===12?'checked':''}> 12 em 12h</label>
-            <label id="_lblCustom" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${MUTED};background:${FIELD};text-align:center;">
-              <input type="radio" name="rmFreq" value="custom" style="display:none;" ${editing&&editing.frequencia!==8&&editing.frequencia!==12?'checked':''}> Personalizar</label>
-          </div>
-          <div id="_rmFreqCustomDiv" style="display:none;margin-top:10px;">
-            <div style="${LBL}">A cada quantas horas?</div>
-            <input id="_rmFreqH" type="number" min="1" max="72" style="${iS}" placeholder="Ex: 6, 24..." value="${editing&&editing.frequencia!==8&&editing.frequencia!==12?editing.frequencia:''}">
-          </div>
+        <div id="_rmDiasDiv" style="${editing&&editing.continuo?'display:none':''}">
+          <input id="_rmDias" type="number" min="1" max="365" style="${iS}" placeholder="Quantos dias? Ex: 7, 30, 90..." value="${editing&&!editing.continuo?editing.dias:''}">
         </div>
-
-        <!-- Preview -->
-        <div id="_rmPreview" style="margin-bottom:16px;"></div>
-
-        <!-- Foto -->
-        <div style="${FGRP}">
-          <div style="margin-top:14px;margin-bottom:8px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(180,220,240,.55);">📷 Foto da Receita / Caixa (opcional)</div>
-          <div id="_rmFotoThumb" style="display:none;margin-bottom:8px;width:100%;text-align:center;"><img id="_rmFotoImg" style="max-height:100px;border-radius:10px;border:2px solid ${ACCENT};" src=""></div>
-          <input type="file" id="_rmFotoCam" accept="image/*" capture="environment" style="display:none;">
-          <input type="file" id="_rmFotoGal" accept="image/*" style="display:none;">
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px;">
-          <button id="_rmFotoCamBtn" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
-            <span style="font-size:18px;line-height:1;display:block;text-align:center;">📸</span><span style="line-height:1;display:block;text-align:center;">Câmera</span>
-          </button>
-          <button id="_rmFotoGalBtn" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
-            <span style="font-size:18px;line-height:1;display:block;text-align:center;">🖼️</span><span style="line-height:1;display:block;text-align:center;">Galeria</span>
-          </button>
-          <button id="_rmSave" type="button" style="padding:10px 4px;border-radius:11px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
-            <span style="font-size:18px;line-height:1;display:block;text-align:center;">✔</span><span style="line-height:1;display:block;text-align:center;">${editing?'Salvar':'Adicionar'}</span>
-          </button>
+        <div id="_rmContinuoInfo" style="display:${editing&&editing.continuo?'block':'none'};background:${FIELD};border:1px solid ${BDR};border-radius:10px;padding:11px 14px;font-size:12px;font-weight:700;color:${ACCENT};font-family:'Space Grotesk',sans-serif;line-height:1.4;">
+          ♾️ Sem data de término — reagende a cada 90 dias nas notificações
         </div>
       </div>
+
+      <!-- Frequência -->
+      <div style="${FGRP}">
+        <div style="${LBL}">Frequência *</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <label id="_lbl8" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:14px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${MUTED};background:${FIELD};text-align:center;">
+            <input type="radio" name="rmFreq" value="8" style="display:none;" ${editing&&editing.frequencia===8?'checked':''}> 8 em 8h</label>
+          <label id="_lbl12" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:14px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${MUTED};background:${FIELD};text-align:center;">
+            <input type="radio" name="rmFreq" value="12" style="display:none;" ${editing&&editing.frequencia===12?'checked':''}> 12 em 12h</label>
+          <label id="_lblCustom" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:14px 6px;border-radius:12px;border:2px solid ${BDR};cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${MUTED};background:${FIELD};text-align:center;">
+            <input type="radio" name="rmFreq" value="custom" style="display:none;" ${editing&&editing.frequencia!==8&&editing.frequencia!==12?'checked':''}> Personalizar</label>
+        </div>
+        <div id="_rmFreqCustomDiv" style="display:none;margin-top:12px;">
+          <div style="${LBL}">A cada quantas horas?</div>
+          <input id="_rmFreqH" type="number" min="1" max="72" style="${iS}" placeholder="Ex: 6, 24..." value="${editing&&editing.frequencia!==8&&editing.frequencia!==12?editing.frequencia:''}">
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div id="_rmPreview" style="margin-bottom:20px;"></div>
+
+      <!-- Foto -->
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:${MUTED};margin-bottom:12px;">📷 Foto da Receita / Caixa (opcional)</div>
+
+      <div id="_rmFotoThumb" style="display:none;margin-bottom:16px;width:100%;text-align:center;">
+        <img id="_rmFotoImg" style="max-height:160px;border-radius:14px;border:2px solid ${ACCENT};object-fit:contain;" src="">
+      </div>
+
+      <input type="file" id="_rmFotoCam" accept="image/*" capture="environment" style="display:none;">
+      <input type="file" id="_rmFotoGal" accept="image/*" style="display:none;">
+
+      <!-- Botões de ação: Câmera, Galeria, Salvar -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px;">
+        <button id="_rmFotoCamBtn" type="button" style="padding:14px 6px;border-radius:14px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+          <span style="font-size:22px;line-height:1;">📸</span><span>Câmera</span>
+        </button>
+        <button id="_rmFotoGalBtn" type="button" style="padding:14px 6px;border-radius:14px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+          <span style="font-size:22px;line-height:1;">🖼️</span><span>Galeria</span>
+        </button>
+        <button id="_rmSave" type="button" style="padding:14px 6px;border-radius:14px;border:none;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+          <span style="font-size:22px;line-height:1;">✔</span><span>${editing?'Salvar':'Adicionar'}</span>
+        </button>
+      </div>
+
     </div>`;
   document.body.appendChild(ov);
   if(!editing) ov.querySelector('#_rmData').value=new Date().toISOString().split('T')[0];
@@ -7123,8 +7297,7 @@ function openRemedioModal(editId){
 
   if(editing)updateRadioStyle();
 
-  ov.querySelector('#_rmClose').onclick=()=>ov.remove();
-  ov.addEventListener('click',(e)=>{if(e.target===ov)ov.remove();});
+  ov.querySelector('#_rmClose').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
 
   // Foto da receita
   let _rmFotoData=null;
@@ -7457,31 +7630,55 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:linear-grad
     else if(filtro==='pagas') contas=allContas.filter(c=>c.paga);
     else contas=allContas;
 
-    // Ordena por dia de vencimento (pendentes primeiro, depois pagas)
+    // Ordena por data de vencimento (pendentes primeiro, depois pagas)
     contas.sort((a,b)=>{
       if(a.paga!==b.paga) return a.paga?1:-1;
-      return (a.vencimento||31)-(b.vencimento||31);
+      return (a.vencimento||'9999-12-31').toString().localeCompare((b.vencimento||'9999-12-31').toString());
     });
 
     const pendentes=contas.filter(c=>!c.paga);
     const pagas=contas.filter(c=>c.paga);
-    const totalPendente=pendentes.reduce((s,c)=>s+(parseFloat(String(c.valor||0).replace(',','.'))||0),0);
+    const totalPendente=pendentes.reduce((s,c)=>{
+      if(c.parcelas&&c.parcelas.length>1) return s+c.parcelas.filter(p=>!p.paga).reduce((ps,p)=>ps+(parseFloat(String(p.valor||0).replace(',','.'))||0),0);
+      return s+(parseFloat(String(c.valor||0).replace(',','.'))||0);
+    },0);
     const totalPago=pagas.reduce((s,c)=>s+(parseFloat(String(c.valor||0).replace(',','.'))||0),0);
 
     function statusInfo(c){
       if(c.paga) return {cls:'paga',lbl:'✅ Paga'};
-      const diff=(c.vencimento||31)-todayDia;
-      if(diff<0) return {cls:'vencida',lbl:`🔴 Vencida (dia ${c.vencimento||'?'})`};
-      if(diff===0) return {cls:'pendente',lbl:`🟠 Vence hoje`};
-      if(diff<=3) return {cls:'pendente',lbl:`🟡 Vence em ${diff}d`};
-      return {cls:'pendente',lbl:`📅 Dia ${c.vencimento||'?'}`};
+      if(!c.vencimento) return {cls:'pendente',lbl:'📅 Sem vencto'};
+      const v=String(c.vencimento);
+      if(v.includes('-')){
+        const hoje=new Date().toISOString().split('T')[0];
+        if(v<hoje) return {cls:'vencida',lbl:`🔴 Vencida (${v.split('-').reverse().join('/')})`};
+        const diff=Math.round((new Date(v)-new Date())/86400000);
+        if(diff===0) return {cls:'pendente',lbl:'🟠 Vence hoje'};
+        if(diff<=3) return {cls:'pendente',lbl:`🟡 Vence em ${diff}d`};
+        return {cls:'pendente',lbl:`📅 ${v.split('-').reverse().join('/')}`};
+      } else {
+        const diff=parseInt(v)-todayDia;
+        if(diff<0) return {cls:'vencida',lbl:`🔴 Vencida (dia ${v})`};
+        if(diff===0) return {cls:'pendente',lbl:'🟠 Vence hoje'};
+        if(diff<=3) return {cls:'pendente',lbl:`🟡 Vence em ${diff}d`};
+        return {cls:'pendente',lbl:`📅 Dia ${v}`};
+      }
     }
     function valorColor(c){
       if(c.paga) return 'green';
-      const diff=(c.vencimento||31)-todayDia;
-      if(diff<0) return 'red';
-      if(diff<=3) return 'orange';
-      return '';
+      if(!c.vencimento) return '';
+      const v=String(c.vencimento);
+      if(v.includes('-')){
+        const hoje=new Date().toISOString().split('T')[0];
+        if(v<hoje) return 'red';
+        const diff=Math.round((new Date(v)-new Date())/86400000);
+        if(diff<=3) return 'orange';
+        return '';
+      } else {
+        const diff=parseInt(v)-todayDia;
+        if(diff<0) return 'red';
+        if(diff<=3) return 'orange';
+        return '';
+      }
     }
 
     function cardH(c){
@@ -7496,7 +7693,8 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:linear-grad
         </div>
         <div class="card-body">
           ${c.valor?`<div class="field"><div class="field-lbl">Valor</div><div class="field-val ${valorColor(c)}">R$ ${escapeHtml(c.valor)}</div></div>`:''}
-          <div class="field"><div class="field-lbl">Vencimento</div><div class="field-val">Dia ${c.vencimento||'—'}</div></div>
+          <div class="field"><div class="field-lbl">Vencimento</div><div class="field-val">${c.vencimento?String(c.vencimento).includes('-')?c.vencimento.split('-').reverse().join('/'):('Dia '+c.vencimento):'—'}</div></div>
+          ${c.parcelas&&c.parcelas.length>1?`<div class="field" style="grid-column:span 2"><div class="field-lbl">Parcelas</div><div class="field-val">${c.parcelas.filter(p=>p.paga).length}/${c.parcelas.length} pagas · R$ ${c.parcelas.filter(p=>!p.paga).reduce((s,p)=>s+(parseFloat(String(p.valor||0).replace(',','.'))||0),0).toFixed(2).replace('.',',')} restante</div></div>`:''}
           ${c.obs?`<div class="field" style="grid-column:span 2"><div class="field-lbl">Observação</div><div class="field-val">${escapeHtml(c.obs)}</div></div>`:''}
         </div>
       </div>`;
