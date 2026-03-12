@@ -1023,7 +1023,7 @@
 #searchOverlay { display:none; }
 
 /* ── Itens da busca — cards flat linha única ── */
-.srFutCard { margin:0 8px 6px; border-radius:12px; overflow:hidden; transition:opacity .14s; -webkit-tap-highlight-color:transparent; }
+.srFutCard { margin:0 12px 8px; border-radius:10px; overflow:hidden; transition:opacity .14s; -webkit-tap-highlight-color:transparent; }
 .srFutCard:active { opacity:.7; }
 .srCard {
   display:flex; align-items:center; gap:10px;
