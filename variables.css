@@ -381,9 +381,9 @@ body {
 }
 .searchFab:active { transform: scale(.88) !important; }
 [data-theme="light"] .searchFab {
-  background: rgba(255,255,255,.2);
-  border-color: rgba(255,255,255,.4);
-  color: #fff;
+  background: rgba(234,88,12,.15);
+  border-color: rgba(234,88,12,.4);
+  color: #ea580c;
 }
 
 /* ── Calendário azul/roxo no tema light (igual ao print) ── */
