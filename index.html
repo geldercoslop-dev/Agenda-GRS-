@@ -322,50 +322,51 @@
 <!-- ══ PESQUISA GLOBAL ══ -->
 <div id="searchOverlay" style="
   position:fixed;inset:0;z-index:9500;
-  background:rgba(0,0,0,.65);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  background:rgba(3,10,25,.96);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   display:none;flex-direction:column;
-  align-items:center;
-  justify-content:flex-start;
-  padding:70px 16px 0;
 ">
+  <!-- Header fixo com input -->
   <div style="
-    width:100%;max-width:420px;
-    background:linear-gradient(160deg,#031a2c 0%,#042d4a 100%);
-    border:1px solid rgba(0,180,230,.18);
-    border-radius:14px;
-    box-shadow:0 24px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(0,180,230,.06);
-    overflow:hidden;
+    flex-shrink:0;
+    padding:14px 16px 12px;
+    background:rgba(4,20,40,.95);
+    border-bottom:1px solid rgba(0,160,210,.18);
+    box-shadow:0 2px 20px rgba(0,0,0,.4);
   ">
-    <!-- Input row -->
+    <!-- Título -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:rgba(125,211,240,.6);">🔍 Buscar</span>
+      <button id="searchClose" class="sCloseBtn" style="-webkit-tap-highlight-color:transparent;">‹</button>
+    </div>
+    <!-- Campo de busca -->
     <div style="
       display:flex;align-items:center;gap:10px;
-      padding:14px 16px;
-      border-bottom:1px solid rgba(0,160,200,.14);
-      background:rgba(0,0,0,.15);
+      background:rgba(0,60,100,.45);
+      border:1.5px solid rgba(0,180,230,.22);
+      border-radius:14px;
+      padding:12px 16px;
     ">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;opacity:.55;">
-        <circle cx="11" cy="11" r="8" stroke="rgba(125,211,240,.8)" stroke-width="2.2"/>
-        <path d="M16.5 16.5L21 21" stroke="rgba(125,211,240,.8)" stroke-width="2.2" stroke-linecap="round"/>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;opacity:.6;">
+        <circle cx="11" cy="11" r="8" stroke="rgba(125,211,240,.9)" stroke-width="2.2"/>
+        <path d="M16.5 16.5L21 21" stroke="rgba(125,211,240,.9)" stroke-width="2.2" stroke-linecap="round"/>
       </svg>
       <input id="searchInput" type="search" autocomplete="off" autocorrect="off"
         placeholder="Buscar tarefas, consultas, remédios…"
         style="
           flex:1;background:transparent;border:none;outline:none;
-          font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;
-          font-weight:500;color:#e8f4ff;caret-color:#7dd3f0;
+          font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;
+          font-weight:600;color:#e8f4ff;caret-color:#7dd3f0;
         ">
-      <button id="searchClose" style="
-        border:none;background:rgba(255,255,255,.08);color:rgba(180,220,240,.7);
-        width:28px;height:28px;border-radius:50%;
-        font-size:13px;cursor:pointer;line-height:1;
-        display:flex;align-items:center;justify-content:center;
-        -webkit-tap-highlight-color:transparent;flex-shrink:0;
-      ">✕</button>
     </div>
-    <!-- Results -->
-    <div id="searchResults" style="max-height:62vh;overflow-y:auto;padding:10px 0 12px;color:#e8f4ff;"></div>
   </div>
+
+  <!-- Resultados — scroll livre -->
+  <div id="searchResults" style="
+    flex:1;overflow-y:auto;
+    padding:18px 16px 100px;
+    color:#e8f4ff;
+  "></div>
 </div>
 
 <!-- ══ MANUAL ══ -->
@@ -376,7 +377,7 @@
       <span class="subScreenIcon" id="subScreenIcon"></span>
       <span class="subScreenTitle" id="subScreenTitle"></span>
       <div id="subScreenActions" style="display:flex;gap:6px;margin-left:auto;"></div>
-      <button class="sCloseBtn" id="subScreenBack">✕</button>
+      <button class="sCloseBtn" id="subScreenBack">‹</button>
     </div>
     <div class="subScreenBody" id="subScreenBody"></div>
   </div>
@@ -581,7 +582,7 @@
     <div class="fModalHdr">
       <span style="font-size:18px;line-height:1;">📁</span>
       <span style="flex:1;">Gerenciar Pastas</span>
-      <button class="sCloseBtn" id="fClose">✕</button>
+      <button class="sCloseBtn" id="fClose">‹</button>
     </div>
     <div id="fBody">
       <!-- Cards grid -->
@@ -743,27 +744,31 @@
     </div>
 
     <!-- ══ FOOTER PROGRESS BAR ══ -->
+    <!-- Gradiente decorativo — só visual, não empurra conteúdo -->
+    <div style="position:fixed;bottom:0;left:0;right:0;height:110px;z-index:9996;pointer-events:none;
+      background:linear-gradient(to top, rgba(5,14,31,.58) 33%, transparent 100%);"></div>
+
     <div id="progressRow" style="
       position:fixed;bottom:0;left:0;right:0;z-index:9997;
-      padding:55px 0 0 0;
-      background:linear-gradient(to top, rgba(5,14,31,.58) 33%, transparent 100%);
     ">
-      <!-- linha interna: Léo sai por baixo, botão e barra ficam alinhados no centro -->
-      <div style="display:flex;align-items:center;padding:0 14px 16px 0;gap:10px;">
+      <!-- Linha com Léo + barra + botão — tudo no fundo -->
+      <div style="display:flex;align-items:flex-end;gap:10px;padding:0 14px 14px 0;">
 
-        <!-- Léo — colado à esquerda, sai por baixo da tela -->
-        <div style="flex-shrink:0;width:95px;display:flex;align-items:flex-end;align-self:flex-end;margin-left:-10px;margin-bottom:-16px;">
+        <!-- Léo — colado à esquerda, corpo visível, pés saem por baixo -->
+        <div style="flex-shrink:0;width:90px;margin-left:-8px;align-self:flex-end;">
           <img id="leoFooterAvatar" src="" alt="Leo" style="
-            width:158px;height:158px;
+            width:155px;height:155px;
             object-fit:contain;object-position:bottom;
+            display:block;
+            margin-bottom:-14px;
             filter:drop-shadow(0 -2px 14px rgba(0,0,0,.6));
             image-rendering:-webkit-optimize-contrast;
           ">
         </div>
 
-        <!-- Progresso — centralizado verticalmente igual ao botão -->
-        <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;justify-content:center;">
-          <span style="font-size:8px;font-weight:900;letter-spacing:1.2px;color:rgba(180,220,255,.45);text-transform:uppercase;padding-left:4px;">Progresso</span>
+        <!-- Barra de progresso — centralizada verticalmente com o botão -->
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;justify-content:center;padding-bottom:3px;">
+          <span style="font-size:8px;font-weight:900;letter-spacing:1.2px;color:rgba(180,220,255,.45);text-transform:uppercase;padding-left:2px;">Progresso</span>
           <div style="display:flex;align-items:center;gap:7px;">
             <div style="flex:1;height:13px;border-radius:99px;background:rgba(255,255,255,.1);box-shadow:inset 0 1px 3px rgba(0,0,0,.4);padding:2px;position:relative;overflow:visible;">
               <div class="progressFill" id="progressFill" style="width:0%">
@@ -774,9 +779,9 @@
           </div>
         </div>
 
-        <!-- Botão menu ☰ — na altura da bermuda do Léo, centralizado com a barra -->
+        <!-- Botão menu ☰ — direita, alinhado na base com a barra -->
         <button id="sidebarFab" style="
-          flex-shrink:0;
+          flex-shrink:0;align-self:flex-end;
           width:54px;height:54px;border-radius:15px;
           background:linear-gradient(135deg,#f97316,#ea580c);
           border:none;
@@ -785,7 +790,6 @@
           display:flex;align-items:center;justify-content:center;
           transition:transform .15s;
           -webkit-tap-highlight-color:transparent;
-          margin-right:6px;
         ">☰</button>
 
       </div>
@@ -6273,40 +6277,80 @@ function _runSearch(query) {
     return;
   }
 
-  // ── Renderiza: cards estilo relatório semanal, sem ícone ──
+  // ── Renderiza: por categoria, cards estilo relatório semanal ──
   const allActions = [];
   let html = '';
-  const allItems = [];
-  Object.values(cats).forEach(cat => cat.items.forEach(item => allItems.push(item)));
 
-  allItems.forEach(item => {
-    const idx = allActions.length;
-    allActions.push(item.action);
+  const catIcons = {
+    tarefas:'✅', calendario:'📅', pastas:'📁',
+    consultas:'🏥', remedios:'💊', exames:'🩺',
+    docs:'🪪', contas:'💳', mercado:'🛍️'
+  };
+  const catColors = {
+    tarefas:'rgba(99,102,241,.7)', calendario:'rgba(0,180,230,.7)',
+    pastas:'rgba(249,115,22,.7)', consultas:'rgba(20,184,166,.7)',
+    remedios:'rgba(168,85,247,.7)', exames:'rgba(16,185,129,.7)',
+    docs:'rgba(251,191,36,.7)', contas:'rgba(239,68,68,.7)',
+    mercado:'rgba(34,197,94,.7)'
+  };
 
-    // Extrai data no formato DD/MM
-    let datePart = '';
-    if (item.badge) {
-      const m = item.badge.match(/^(\d{2}\/\d{2})/);
-      datePart = m ? m[1] : item.badge;
-    } else if (item.sub && /^\d{2}\/\d{2}/.test(item.sub)) {
-      const m2 = item.sub.match(/^(\d{2}\/\d{2})/);
-      datePart = m2 ? m2[1] : '';
-    }
+  Object.entries(cats).forEach(([catKey, cat]) => {
+    if (cat.items.length === 0) return;
+    const color = catColors[catKey] || 'rgba(125,211,240,.7)';
+    const icon  = catIcons[catKey] || '🔎';
 
-    html += `<div class="srFutCard" data-idx="${idx}">
-      <div class="fut-section" style="margin:0;cursor:pointer;">
-        <div class="fut-row" style="border-bottom:none;">
-          ${datePart ? `<span class="fut-date">${_escHtml(datePart)}</span>` : ''}
-          <span class="fut-text">${_highlight(item.title, query)}</span>
-        </div>
+    html += `<div style="margin-bottom:22px;">
+      <!-- cabeçalho da categoria -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:0 2px;">
+        <span style="font-size:15px;line-height:1;">${icon}</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:${color};">${_escHtml(cat.label)}</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.25);margin-left:2px;">${cat.items.length}</span>
       </div>
-    </div>`;
+      <!-- cards dos itens -->
+      <div style="display:flex;flex-direction:column;gap:8px;">`;
+
+    cat.items.forEach(item => {
+      const idx = allActions.length;
+      allActions.push(item.action);
+
+      let datePart = '';
+      if (item.badge) {
+        const m = item.badge.match(/^(\d{2}\/\d{2})/);
+        datePart = m ? m[1] : item.badge;
+      } else if (item.sub && /^\d{2}\/\d{2}/.test(item.sub)) {
+        const m2 = item.sub.match(/^(\d{2}\/\d{2})/);
+        datePart = m2 ? m2[1] : '';
+      }
+
+      const subText = item.sub && !/^\d{2}\/\d{2}/.test(item.sub) ? item.sub : '';
+
+      html += `<div class="srCard2" data-idx="${idx}" style="
+        background:rgba(4,40,70,.55);
+        border:1px solid rgba(0,160,200,.13);
+        border-left:3px solid ${color};
+        border-radius:12px;
+        padding:13px 16px;
+        cursor:pointer;
+        -webkit-tap-highlight-color:transparent;
+        transition:opacity .12s;
+      ">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:rgba(232,244,255,.92);line-height:1.4;flex:1;">${_highlight(item.title, query)}</span>
+          ${datePart ? `<span style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;color:#7dd3f0;flex-shrink:0;margin-top:1px;">${_escHtml(datePart)}</span>` : ''}
+        </div>
+        ${subText ? `<div style="margin-top:5px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;color:rgba(180,220,240,.5);">${_escHtml(subText)}</div>` : ''}
+      </div>`;
+    });
+
+    html += `</div></div>`;
   });
 
   container.innerHTML = html;
-  container.querySelectorAll('.srFutCard').forEach(el => {
+  container.querySelectorAll('.srCard2').forEach(el => {
     const idx = parseInt(el.dataset.idx);
     el.addEventListener('click', () => allActions[idx]());
+    el.addEventListener('touchstart', () => el.style.opacity='.6', {passive:true});
+    el.addEventListener('touchend',   () => el.style.opacity='1',   {passive:true});
   });
 }
 

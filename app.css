@@ -243,7 +243,7 @@
     /* Cabeçalho do mês expandido */
     .monthHdr {
       display:none; align-items:center; justify-content:space-between;
-      padding:14px 14px 6px;
+      padding:18px 16px 10px;
     }
     .weekStripWrap.expanded .monthHdr { display:flex; }
     .monthHdrLabel {
@@ -253,7 +253,7 @@
     [data-theme="light"] .monthHdrLabel { color:#1e2d6b; }
     .monthDayNames {
       display:none; grid-template-columns:repeat(7,1fr); gap:3px;
-      padding:0 8px 2px;
+      padding:0 8px 4px;
     }
     .weekStripWrap.expanded .monthDayNames { display:grid; }
     .monthDayName {
@@ -262,12 +262,13 @@
       color:rgba(255,255,255,.75); padding:2px 0;
     }
     [data-theme="light"] .monthDayName { color:#1e2d6b; }
-    /* Células do mês — mesmo tamanho/formato do fechado */
+    /* Células do mês — quadradas igual ao calendário fechado */
     .mCell {
       display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:4px; padding:4px 1px;
+      gap:4px; padding:0;
+      aspect-ratio:1/1;
       border-radius:10px; font-family:'Space Grotesk',sans-serif;
-      font-size:clamp(13px,3.4vw,15px);
+      font-size:clamp(12px,3.2vw,14px);
       font-weight:700; cursor:pointer; color:rgba(255,255,255,.7); position:relative;
       transition:background .1s;
     }
@@ -700,7 +701,7 @@
       border-radius:24px 24px 0 0;
     }
     [data-theme="light"] .sModalHdr { color:rgba(10,15,60,.9); }
-    .sCloseBtn { background:rgba(0,120,160,.25); border:1px solid rgba(0,160,200,.3); color:#7dd3f0; font-size:15px; width:32px; height:32px; border-radius:9px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .sCloseBtn { background:rgba(0,120,160,.25); border:1px solid rgba(0,160,200,.3); color:#7dd3f0; font-size:22px; font-weight:700; line-height:1; width:32px; height:32px; border-radius:9px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; -webkit-tap-highlight-color:transparent; }
     [data-theme="light"] .sCloseBtn { background:rgba(0,120,160,.15); }
 
     .sCardGrid { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:12px; }
