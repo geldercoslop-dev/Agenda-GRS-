@@ -749,7 +749,7 @@
     <!-- ══ FOOTER PROGRESS BAR ══ -->
     <div id="progressRow" style="
       position:fixed;bottom:0;left:0;right:0;z-index:9997;
-      padding:100px 14px 20px 14px;
+      padding:100px 14px 8px 14px;
       background:linear-gradient(to top, rgba(5,14,31,.97) 55%, transparent 100%);
     ">
       <div style="display:flex;align-items:center;gap:10px;">
@@ -2799,7 +2799,7 @@ function openSettings(){
 
 function closeSettings(){
   document.getElementById('sModalOverlay').classList.remove('show');
-  if(typeof currentView!=='undefined' && currentView==='home') _setFooter(true);
+  if(typeof currentView!=='undefined' && currentView==='home'){ _setFooter(true); atualizarLupa('home'); }
 }
 
 function saveSettings(){
@@ -2878,17 +2878,15 @@ function _setFooter(visible){
   if(!row) return;
   if(visible){ row.classList.remove('hidden'); }
   else { row.classList.add('hidden'); }
-  // topSearchBar e weekStripCard APENAS na home
-  const tsb=document.getElementById('topSearchBar');
+  // weekStripCard APENAS na home
   const wsc=document.getElementById('weekStripCard');
   const isHome = (currentView === 'home');
   if(visible && isHome){
-    if(tsb) tsb.style.display='block';
     if(wsc) wsc.classList.remove('hidden');
   } else {
-    if(tsb) tsb.style.display='none';
     if(wsc) wsc.classList.add('hidden');
   }
+  // topSearchBar é controlado exclusivamente por atualizarLupa() / goHome()
 }
 function openSubScreen(title, bodyHtml, initFn, exitFn){
   _setFooter(false);
@@ -2919,7 +2917,10 @@ function _hideSubScreen(){
   document.getElementById('subScreenOverlay').classList.remove('show');
   document.getElementById('subScreenBody').innerHTML = '';
   // Só mostra o footer se estiver na home
-  if(typeof currentView!=='undefined' && currentView==='home') _setFooter(true);
+  if(typeof currentView!=='undefined' && currentView==='home'){
+    _setFooter(true);
+    atualizarLupa('home');
+  }
 }
 function closeSubScreen(){ goSubBack(); }
 function goSubBack(){
@@ -3343,7 +3344,7 @@ function init(){
   // Manual
   document.getElementById('manualClose').addEventListener('click',()=>{
     document.getElementById('manualOverlay').style.display='none';
-    if(typeof currentView!=='undefined' && currentView==='home') _setFooter(true);
+    if(typeof currentView!=='undefined' && currentView==='home'){ _setFooter(true); atualizarLupa('home'); }
   });
 
   // ── Botão voltar Android ──
@@ -3401,7 +3402,7 @@ function init(){
       const manualOv=document.getElementById('manualOverlay');
       if(manualOv?.style.display==='flex'){
         manualOv.style.display='none';
-        if(currentView==='home')_setFooter(true);
+        if(currentView==='home'){ _setFooter(true); atualizarLupa('home'); }
         _histDepth++;
         history.pushState({app:'screen', depth:_histDepth},'');
         return;
@@ -5255,7 +5256,7 @@ function openFolderModal(){
 }
 function closeFolderModal(){
   document.getElementById('fModalOverlay').classList.remove('show');
-  if(typeof currentView!=='undefined' && currentView==='home') _setFooter(true);
+  if(typeof currentView!=='undefined' && currentView==='home'){ _setFooter(true); atualizarLupa('home'); }
 }
 function toggleFSub(id){
   const sub=document.getElementById(id);

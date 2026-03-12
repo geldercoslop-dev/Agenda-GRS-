@@ -190,7 +190,7 @@
     .weekStripWrap {
       flex-shrink:0; overflow:hidden;
       transition: max-height 0.35s cubic-bezier(.4,0,.2,1);
-      max-height: 120px; /* semana + handle embaixo */
+      max-height: 150px; /* semana + handle embaixo — aumentado para não cortar o handle */
       position: relative;
       margin-top: 0;
       margin-bottom: 0;
