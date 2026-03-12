@@ -582,7 +582,15 @@
     <div class="fModalHdr">
       <span style="font-size:18px;line-height:1;">📁</span>
       <span style="flex:1;">Gerenciar Pastas</span>
-      <button class="sCloseBtn" id="fClose">‹</button>
+      <button id="fClose" style="
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+        background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);
+        border-radius:12px;padding:6px 10px;cursor:pointer;
+        -webkit-tap-highlight-color:transparent;flex-shrink:0;
+      ">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#f97316"/><path d="M14 7L9 12L14 17" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:9px;font-weight:800;color:rgba(255,255,255,.7);letter-spacing:.3px;text-transform:uppercase;">Voltar</span>
+      </button>
     </div>
     <div id="fBody">
       <!-- Cards grid -->
@@ -766,10 +774,10 @@
           ">
         </div>
 
-        <!-- Barra de progresso — centralizada verticalmente com o botão -->
-        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;justify-content:center;padding-bottom:3px;">
+        <!-- Barra de progresso — centralizada no meio do botão, 25% mais curta -->
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;justify-content:center;padding-bottom:14px;padding-left:8px;">
           <span style="font-size:8px;font-weight:900;letter-spacing:1.2px;color:rgba(180,220,255,.45);text-transform:uppercase;padding-left:2px;">Progresso</span>
-          <div style="display:flex;align-items:center;gap:7px;">
+          <div style="display:flex;align-items:center;gap:7px;padding-right:25%;">
             <div style="flex:1;height:13px;border-radius:99px;background:rgba(255,255,255,.1);box-shadow:inset 0 1px 3px rgba(0,0,0,.4);padding:2px;position:relative;overflow:visible;">
               <div class="progressFill" id="progressFill" style="width:0%">
                 <span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;z-index:2;filter:drop-shadow(0 0 4px rgba(255,255,255,.8));">⚡</span>
@@ -6277,74 +6285,46 @@ function _runSearch(query) {
     return;
   }
 
-  // ── Renderiza: por categoria, cards estilo relatório semanal ──
+  // ── Renderiza: todos os itens em cards limpos, título + data/pasta ──
   const allActions = [];
-  let html = '';
-
-  const catIcons = {
-    tarefas:'✅', calendario:'📅', pastas:'📁',
-    consultas:'🏥', remedios:'💊', exames:'🩺',
-    docs:'🪪', contas:'💳', mercado:'🛍️'
-  };
-  const catColors = {
-    tarefas:'rgba(99,102,241,.7)', calendario:'rgba(0,180,230,.7)',
-    pastas:'rgba(249,115,22,.7)', consultas:'rgba(20,184,166,.7)',
-    remedios:'rgba(168,85,247,.7)', exames:'rgba(16,185,129,.7)',
-    docs:'rgba(251,191,36,.7)', contas:'rgba(239,68,68,.7)',
-    mercado:'rgba(34,197,94,.7)'
-  };
+  let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
 
   Object.entries(cats).forEach(([catKey, cat]) => {
-    if (cat.items.length === 0) return;
-    const color = catColors[catKey] || 'rgba(125,211,240,.7)';
-    const icon  = catIcons[catKey] || '🔎';
-
-    html += `<div style="margin-bottom:22px;">
-      <!-- cabeçalho da categoria -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:0 2px;">
-        <span style="font-size:15px;line-height:1;">${icon}</span>
-        <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:${color};">${_escHtml(cat.label)}</span>
-        <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.25);margin-left:2px;">${cat.items.length}</span>
-      </div>
-      <!-- cards dos itens -->
-      <div style="display:flex;flex-direction:column;gap:8px;">`;
-
     cat.items.forEach(item => {
       const idx = allActions.length;
       allActions.push(item.action);
 
-      let datePart = '';
+      // Data: pega de badge ou sub se for data
+      let rightLabel = '';
       if (item.badge) {
         const m = item.badge.match(/^(\d{2}\/\d{2})/);
-        datePart = m ? m[1] : item.badge;
-      } else if (item.sub && /^\d{2}\/\d{2}/.test(item.sub)) {
-        const m2 = item.sub.match(/^(\d{2}\/\d{2})/);
-        datePart = m2 ? m2[1] : '';
+        rightLabel = m ? m[1] : item.badge;
       }
-
-      const subText = item.sub && !/^\d{2}\/\d{2}/.test(item.sub) ? item.sub : '';
+      if (!rightLabel && item.sub && /^\d{2}\/\d{2}/.test(item.sub)) {
+        const m2 = item.sub.match(/^(\d{2}\/\d{2})/);
+        rightLabel = m2 ? m2[1] : '';
+      }
+      // Se não tiver data, usa o sub como label (nome da pasta/onde está)
+      if (!rightLabel && item.sub && !/^\d{2}\/\d{2}/.test(item.sub)) {
+        rightLabel = item.sub.length > 14 ? item.sub.slice(0,14)+'…' : item.sub;
+      }
 
       html += `<div class="srCard2" data-idx="${idx}" style="
         background:rgba(4,40,70,.55);
-        border:1px solid rgba(0,160,200,.13);
-        border-left:3px solid ${color};
+        border:1px solid rgba(0,160,200,.15);
         border-radius:12px;
-        padding:13px 16px;
+        padding:14px 16px;
         cursor:pointer;
         -webkit-tap-highlight-color:transparent;
-        transition:opacity .12s;
+        display:flex;align-items:center;justify-content:space-between;gap:12px;
       ">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
-          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:rgba(232,244,255,.92);line-height:1.4;flex:1;">${_highlight(item.title, query)}</span>
-          ${datePart ? `<span style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;color:#7dd3f0;flex-shrink:0;margin-top:1px;">${_escHtml(datePart)}</span>` : ''}
-        </div>
-        ${subText ? `<div style="margin-top:5px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;color:rgba(180,220,240,.5);">${_escHtml(subText)}</div>` : ''}
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:rgba(232,244,255,.92);line-height:1.4;flex:1;">${_highlight(item.title, query)}</span>
+        ${rightLabel ? `<span style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;color:#7dd3f0;flex-shrink:0;white-space:nowrap;">${_escHtml(rightLabel)}</span>` : ''}
       </div>`;
     });
-
-    html += `</div></div>`;
   });
 
+  html += '</div>';
   container.innerHTML = html;
   container.querySelectorAll('.srCard2').forEach(el => {
     const idx = parseInt(el.dataset.idx);
