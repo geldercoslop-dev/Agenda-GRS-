@@ -7703,6 +7703,8 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:linear-grad
     });
   });
 }
+
+function generateRemediosReport(){
   const remedios=(state.remedios||[]);
   const today=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0')+'-'+String(new Date().getDate()).padStart(2,'0');
 
