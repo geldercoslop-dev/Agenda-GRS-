@@ -1444,23 +1444,23 @@ function openTodasPastas(){
 
   // Header fixo
   const hdr = document.createElement('div');
-  hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:16px 18px 14px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;';
+  hdr.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px 10px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;';
   hdr.innerHTML = `
-    <div>
-      <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;">📁 Todas as Pastas</span>
-      <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;font-family:'Plus Jakarta Sans',sans-serif;">Segure e arraste para reordenar</div>
-    </div>
-    <button id="_tpClose" style="background:rgba(255,255,255,.08);border:none;width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer;color:#e8f4ff;display:flex;align-items:center;justify-content:center;">✕</button>`;
+    <button id="_tpClose" style="flex-shrink:0;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,rgba(0,130,200,.55),rgba(0,100,170,.45));border:1px solid rgba(80,180,255,.35);color:#7dd3f0;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,100,180,.3);">‹</button>
+    <div style="flex:1;min-width:0;">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:#e8f4ff;line-height:1.2;">📁 Todas as Pastas</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.38);margin-top:4px;font-family:'Plus Jakarta Sans',sans-serif;">Segure e arraste para reordenar</div>
+    </div>`;
   box.appendChild(hdr);
 
   // Área scrollável
   const scroll = document.createElement('div');
-  scroll.style.cssText = 'overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;flex:1;min-height:0;padding:14px 14px 24px;';
+  scroll.style.cssText = 'overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;flex:1;min-height:0;padding:16px 14px 28px;';
 
   // Grid de todas as pastas
   const grid = document.createElement('div');
   grid.id = '_tpGrid';
-  grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:18px 6px;place-items:start center;';
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:20px 8px;place-items:start center;';
 
   const byId = Object.fromEntries(state.folders.map(f=>[f.id,f]));
   const order = (state.folderOrder||[]).filter((id,i,a)=>a.indexOf(id)===i&&byId[id]);
@@ -1478,12 +1478,12 @@ function openTodasPastas(){
     const f = byId[id]; if(!f) return null;
     const tile = document.createElement('div');
     tile.dataset.id = id;
-    tile.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;width:100%;max-width:76px;transition:opacity .15s,transform .18s;user-select:none;';
+    tile.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;width:100%;max-width:76px;transition:opacity .15s,transform .18s;user-select:none;';
     tile.innerHTML = `
-      <div style="width:58px;height:58px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;margin-bottom:6px;transition:transform .15s;">
+      <div style="width:58px;height:58px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s;">
         <span style="font-size:28px;line-height:1;">${f.emoji||'📁'}</span>
       </div>
-      <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:800;color:rgba(255,255,255,.85);text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px;">${f.name}</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:800;color:rgba(255,255,255,.85);text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px;display:block;">${f.name}</span>
     `;
 
     // Click to open
@@ -1594,6 +1594,9 @@ function openTodasPastas(){
           }
           elB.style.transform='scale(1.05)';
           setTimeout(()=>{ if(elB) elB.style.transform=''; },250);
+          // Animação igual à tela inicial
+          elB.classList.add('_modalReorder');
+          setTimeout(()=>{ if(elB) elB.classList.remove('_modalReorder'); },280);
           if(_modalDragEl){ _modalDragEl.style.opacity='0'; _modalDragEl.style.visibility='hidden'; }
         }
       }
@@ -1604,7 +1607,7 @@ function openTodasPastas(){
 
   scroll.appendChild(grid);
   box.appendChild(scroll);
-  box.style.cssText = (box.style.cssText||'') + 'display:flex;flex-direction:column;max-height:84vh;';
+  box.style.cssText = (box.style.cssText||'') + 'display:flex;flex-direction:column;max-height:88vh;padding:0;overflow:hidden;';
   document.getElementById('_tpClose').addEventListener('click', close);
 }
 
@@ -7528,12 +7531,12 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:linear-grad
     <div style="text-align:center;margin-bottom:18px;">
       <div style="font-size:36px;margin-bottom:8px;">💳</div>
       <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:#e8f4ff;">Contas a Pagar</div>
-      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:rgba(180,220,240,.6);margin-top:4px;">Quais contas incluir?</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:rgba(180,220,240,.6);margin-top:4px;">Escolha 1 opção</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px;">
-      <button data-f="pendentes" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(251,146,60,.35);background:rgba(251,146,60,.12);color:#fb923c;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">📋</span>Contas Pendentes / A Pagar</button>
-      <button data-f="pagas" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(34,197,94,.25);background:rgba(34,197,94,.08);color:#4ade80;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">✅</span>Contas Pagas</button>
-      <button data-f="todas" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(0,140,180,.2);background:rgba(0,80,120,.25);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">📊</span>Todas as Contas</button>
+      <button data-f="pendentes" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(251,146,60,.35);background:rgba(251,146,60,.12);color:#fb923c;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">📋</span>A Pagar</button>
+      <button data-f="pagas" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(34,197,94,.25);background:rgba(34,197,94,.08);color:#4ade80;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">✅</span>Pagas</button>
+      <button data-f="todas" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(0,140,180,.2);background:rgba(0,80,120,.25);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">📊</span>Todas juntas</button>
       <button data-f="cancel" style="padding:9px;border-radius:12px;border:none;background:transparent;color:rgba(180,220,240,.4);font-family:'Space Grotesk',sans-serif;font-size:12px;cursor:pointer;">Cancelar</button>
     </div>
   </div>`;
@@ -7679,12 +7682,12 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:linear-grad
     <div style="text-align:center;margin-bottom:18px;">
       <div style="font-size:36px;margin-bottom:8px;">💰</div>
       <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:#e8f4ff;">Contas a Receber</div>
-      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:rgba(180,220,240,.6);margin-top:4px;">Quais contas incluir?</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:rgba(180,220,240,.6);margin-top:4px;">Escolha 1 opção</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px;">
-      <button data-f="pendentes" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(0,160,200,.35);background:rgba(0,160,200,.12);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">📋</span>Contas a Receber (Pendentes)</button>
-      <button data-f="recebidos" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(34,197,94,.25);background:rgba(34,197,94,.08);color:#4ade80;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">✅</span>Contas Recebidas</button>
-      <button data-f="todas" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(0,140,180,.2);background:rgba(0,80,120,.25);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">📊</span>Todas</button>
+      <button data-f="pendentes" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(0,160,200,.35);background:rgba(0,160,200,.12);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">📋</span>A Receber</button>
+      <button data-f="recebidos" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(34,197,94,.25);background:rgba(34,197,94,.08);color:#4ade80;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">✅</span>Recebidas</button>
+      <button data-f="todas" style="padding:11px 14px;border-radius:12px;border:1px solid rgba(0,140,180,.2);background:rgba(0,80,120,.25);color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;"><span style="font-size:16px;">📊</span>Todas juntas</button>
       <button data-f="cancel" style="padding:9px;border-radius:12px;border:none;background:transparent;color:rgba(180,220,240,.4);font-family:'Space Grotesk',sans-serif;font-size:12px;cursor:pointer;">Cancelar</button>
     </div>
   </div>`;
