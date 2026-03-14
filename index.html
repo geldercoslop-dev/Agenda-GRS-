@@ -8999,5 +8999,52 @@ setTimeout(function() {
 </script>
 <!-- bootFix: deve ser o último script — roda após agenda.js e ui.js (ambos defer) -->
 <script src="./core/bootFix.js" defer></script>
+
+<script>
+window.addEventListener("load", function(){
+
+  console.log("FORCE BOOT INIT");
+
+  try{
+
+    if(typeof window.state === "undefined"){
+      window.state = {
+        consultas: [],
+        tasks: [],
+        dateTasks: {},
+        folders: [],
+        folderOrder: []
+      };
+    }
+
+    if(typeof atualizarCalendario === "function"){
+      atualizarCalendario();
+    }
+
+    // renderFolders é o nome real no codebase (renderPastas não existe)
+    if(typeof renderFolders === "function"){
+      renderFolders();
+    }
+
+    // renderWeekStrip garante que a faixa semanal apareça
+    if(typeof renderWeekStrip === "function"){
+      renderWeekStrip();
+    }
+
+    // atualizarLupa('home') restaura a barra de busca na home
+    if(typeof atualizarLupa === "function"){
+      atualizarLupa("home");
+    }
+
+    console.log("FORCE BOOT OK");
+
+  }catch(e){
+
+    console.error("BOOT FAILURE:", e);
+
+  }
+
+});
+</script>
 </body>
 </html>
