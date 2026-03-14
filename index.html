@@ -6716,6 +6716,47 @@ runSystemAudit().catch(function (e) {
 // Verificação de módulos — fase boot (módulos síncronos já carregados)
 checkModules('boot');
 
+// ── Guarda de inicialização: aguarda AppStorage (IDB) e valida state ──────────
+// waitForStorageReady() garante que o IDB esteja pronto antes de continuar o boot.
+// Se o IDB falhar ou não existir, resolve imediatamente e continua com localStorage.
+// Nunca bloqueia: timeout de 2s garante que o boot não trava em ambientes lentos.
+async function waitForStorageReady() {
+  // Guarda 1: state deve existir e ser objeto válido
+  if (typeof state === 'undefined' || state === null || typeof state !== 'object') {
+    if (typeof AppLog !== 'undefined') {
+      AppLog.error('waitForStorageReady', 'state inválido ou indefinido após init() — abortando render');
+    }
+    console.error('[waitForStorageReady] state inválido — render bloqueado');
+    return false;
+  }
+
+  // Guarda 2: aguarda IDB se disponível, com timeout de segurança
+  if (typeof AppStorage !== 'undefined' && AppStorage.idbReady instanceof Promise) {
+    try {
+      var _timeout = new Promise(function (resolve) { setTimeout(resolve, 2000, 'timeout'); });
+      var result   = await Promise.race([AppStorage.idbReady, _timeout]);
+      if (result === 'timeout') {
+        if (typeof AppLog !== 'undefined') {
+          AppLog.warn('waitForStorageReady', 'IDB não respondeu em 2s — continuando com localStorage');
+        }
+      }
+    } catch (e) {
+      if (typeof AppLog !== 'undefined') {
+        AppLog.warn('waitForStorageReady', 'Erro ao aguardar IDB — continuando com localStorage', e.message || e);
+      }
+    }
+  }
+
+  if (typeof AppLog !== 'undefined') {
+    AppLog.log('waitForStorageReady', 'Storage pronto — idbAvailable=' + (typeof AppStorage !== 'undefined' ? AppStorage.idbAvailable : false));
+  }
+  return true;
+}
+
+// Executa a guarda e dispara o boot do sync apenas após storage estar pronto
+waitForStorageReady().then(function (ready) {
+  if (!ready) return; // state inválido: não prossegue
+
 // Modo diagnóstico ativo — roda apenas se DIAGNOSTIC_MODE = true
 // Executa verificações funcionais (round-trip de storage, consistência cruzada
 // de dados, state operacional, fila de sync) sem bloquear o sistema.
@@ -6730,29 +6771,31 @@ if (typeof DIAGNOSTIC_MODE !== 'undefined' && DIAGNOSTIC_MODE === true) {
 
 // ══════════════════════════════════════════════════════════════════
 // SINCRONIZAÇÃO SUPABASE — inicialização e listeners
+// Executado apenas após waitForStorageReady() confirmar state e IDB prontos.
 // ──────────────────────────────────────────────────────────────────
-(function _initSyncListeners() {
-  // Função de render completo usada pelo pull
-  function _renderAll() {
-    try { renderWeekStrip();  } catch(e){}
-    try { renderDayView();    } catch(e){}
-    try { renderFolders();    } catch(e){}
-    try { updateProgress();   } catch(e){}
-  }
+  (function _initSyncListeners() {
+    // Função de render completo usada pelo pull
+    function _renderAll() {
+      try { renderWeekStrip();  } catch(e){}
+      try { renderDayView();    } catch(e){}
+      try { renderFolders();    } catch(e){}
+      try { updateProgress();   } catch(e){}
+    }
 
-  // 1. Sync ao abrir o app
-  setTimeout(() => initSync(state, save, _renderAll), 1500);
+    // 1. Sync ao abrir o app
+    setTimeout(() => initSync(state, save, _renderAll), 1500);
 
-  // 2. Sync ao voltar online
-  window.addEventListener('online', () => {
-    initSync(state, save, _renderAll);
-  });
+    // 2. Sync ao voltar online
+    window.addEventListener('online', () => {
+      initSync(state, save, _renderAll);
+    });
 
-  // 3. Sync periódico a cada 5 minutos
-  setInterval(() => {
-    if (navigator.onLine) initSync(state, save, _renderAll);
-  }, 5 * 60 * 1000);
-})();
+    // 3. Sync periódico a cada 5 minutos
+    setInterval(() => {
+      if (navigator.onLine) initSync(state, save, _renderAll);
+    }, 5 * 60 * 1000);
+  })();
+}); // fim de waitForStorageReady().then()
 
 
 // ════════════════════════════════════════════
