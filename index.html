@@ -3132,7 +3132,15 @@ function closeSidebar(){
   }
 
 function init(){
+  // Tarefa 4 — state nunca pode ser undefined ao entrar no render
+  if (typeof state === 'undefined' || state === null || typeof state !== 'object') {
+    window.state = { consultas: [], tasks: [], dateTasks: {}, folders: [] };
+  }
   state=load();
+  // Garantia pós-load: se load() retornar algo inválido, aplica estado mínimo seguro
+  if (typeof state === 'undefined' || state === null || typeof state !== 'object') {
+    window.state = { consultas: [], tasks: [], dateTasks: {}, folders: [] };
+  }
   repairRemedioFolder();
   document.body.setAttribute('data-theme',state.theme);
   const _ti = document.getElementById('thIcon');
@@ -6755,7 +6763,12 @@ async function waitForStorageReady() {
 
 // Executa a guarda e dispara o boot do sync apenas após storage estar pronto
 waitForStorageReady().then(function (ready) {
-  if (!ready) return; // state inválido: não prossegue
+  if (!ready) {
+    // Tarefa 5 — storage/state inválido não bloqueia mais a UI: fallback de render
+    console.warn('[waitForStorageReady] state inválido — disparando safeBootRender como fallback');
+    if (typeof safeBootRender === 'function') safeBootRender();
+    return;
+  }
 
 // Modo diagnóstico ativo — roda apenas se DIAGNOSTIC_MODE = true
 // Executa verificações funcionais (round-trip de storage, consistência cruzada
@@ -8934,12 +8947,54 @@ function quickCreateSubfolder() {
   setTimeout(()=>inp.focus(), 120);
 }
 
-// Verificação de módulos — fase deferred (agenda.js, notificacoes.js, ui.js)
-// DOMContentLoaded garante que os scripts defer já foram avaliados.
-// Se o evento já disparou (execução tardia), o callback roda imediatamente.
+// ── safeBootRender — Tarefa 1 ──────────────────────────────────────────────────
+// Garante que os componentes visuais principais sempre renderizem,
+// mesmo que o storage ou IndexedDB ainda não esteja pronto.
+async function safeBootRender() {
+  // Aguarda IDB se disponível, sem nunca bloquear
+  try {
+    if (window.AppStorage && AppStorage.idbReady) {
+      await AppStorage.idbReady.catch(function() {});
+    }
+  } catch(e) {
+    console.warn('[safeBootRender] Storage not ready, continuing boot:', e);
+  }
+
+  // Garante state mínimo antes de qualquer render — Tarefa 4 (reforço)
+  if (typeof state === 'undefined' || state === null || typeof state !== 'object') {
+    window.state = { consultas: [], tasks: [], dateTasks: {}, folders: [] };
+  }
+
+  // Dispara renders principais com isolamento de erros
+  try {
+    if (typeof atualizarCalendario === 'function') atualizarCalendario();
+    if (typeof renderFolders      === 'function') renderFolders();
+    if (typeof renderWeekStrip    === 'function') renderWeekStrip();
+    if (typeof atualizarLupa      === 'function') atualizarLupa('home');
+  } catch(e) {
+    console.error('[safeBootRender] Render error:', e);
+  }
+}
+
+// Tarefa 2 — boot via DOMContentLoaded com delay de segurança
 document.addEventListener('DOMContentLoaded', function () {
   checkModules('deferred');
+  setTimeout(safeBootRender, 50);
 });
+
+// Tarefa 3 — fallback de 1s: força re-render se calendário estiver vazio
+setTimeout(function() {
+  try {
+    var strip = document.getElementById('weekStrip');
+    var folders = document.getElementById('folderGrid');
+    var stripEmpty   = strip   && strip.children.length === 0;
+    var foldersEmpty = folders && folders.children.length === 0;
+    if (stripEmpty || foldersEmpty) {
+      console.warn('[safeBootRender] Forcing UI re-render — weekStrip ou folderGrid vazios');
+      safeBootRender();
+    }
+  } catch(e) {}
+}, 1000);
 
 </script>
 </body>
