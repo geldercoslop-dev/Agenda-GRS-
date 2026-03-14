@@ -57,25 +57,24 @@ const SYNC_DEVICE_KEY = 'agendaProMax_deviceId';
 
 function _cfg() {
   try {
-    const raw = localStorage.getItem(SYNC_CONFIG_KEY);
-    if (!raw) return null;
-    const c = JSON.parse(raw);
+    const c = AppStorage.get(SYNC_CONFIG_KEY, null);
+    if (!c) return null;
     return (c.url && c.anonKey) ? c : null;
   } catch { return null; }
 }
 
 function setSyncConfig(cfg) {
   try {
-    if (!cfg) localStorage.removeItem(SYNC_CONFIG_KEY);
-    else      localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(cfg));
-  } catch (e) { console.warn('[Sync] setSyncConfig:', e); }
+    if (!cfg) AppStorage.remove(SYNC_CONFIG_KEY);
+    else      AppStorage.set(SYNC_CONFIG_KEY, cfg);
+  } catch (e) { AppLog.warn("sync.js/setSyncConfig","Erro ao salvar config de sync",e); }
 }
 
 function _deviceId() {
-  let id = localStorage.getItem(SYNC_DEVICE_KEY);
+  let id = AppStorage.get(SYNC_DEVICE_KEY, null);
   if (!id) {
     id = _uuid();
-    try { localStorage.setItem(SYNC_DEVICE_KEY, id); } catch {}
+    AppStorage.set(SYNC_DEVICE_KEY, id);
   }
   return id;
 }
@@ -156,8 +155,8 @@ async function _req(method, table, body, params) {
 
 function _getCursors() {
   try {
-    const raw = localStorage.getItem(SYNC_CURSOR_KEY);
-    return raw ? JSON.parse(raw) : { tasks: 0, consultas: 0, remedios: 0 };
+    const cursors = AppStorage.get(SYNC_CURSOR_KEY, null);
+    return cursors || { tasks: 0, consultas: 0, remedios: 0 };
   } catch { return { tasks: 0, consultas: 0, remedios: 0 }; }
 }
 
@@ -165,7 +164,7 @@ function _setCursor(table, ts) {
   try {
     const c = _getCursors();
     c[table] = ts;
-    localStorage.setItem(SYNC_CURSOR_KEY, JSON.stringify(c));
+    AppStorage.set(SYNC_CURSOR_KEY, c);
   } catch {}
 }
 
@@ -192,8 +191,14 @@ async function syncPush(state, save) {
   if (state.tasks) {
     Object.entries(state.tasks).forEach(([bid, arr]) => _collectArr(arr, bid));
   }
-  if (state.dateTasks) {
-    Object.entries(state.dateTasks).forEach(([date, arr]) => _collectArr(arr, date));
+  if (state.dateTasks && typeof state.dateTasks === 'object' && !Array.isArray(state.dateTasks)) {
+    Object.entries(state.dateTasks).forEach(([date, arr]) => {
+      if (!Array.isArray(arr)) {
+        if (typeof AppLog !== 'undefined') AppLog.warn('sync.js/syncPush', 'dateTasks[' + date + '] não é array — ignorado no push', typeof arr);
+        return;
+      }
+      _collectArr(arr, date);
+    });
   }
   (state.folders || []).forEach(f => {
     if (f && f.id && f.synced === false)
@@ -248,7 +253,7 @@ async function syncPush(state, save) {
 
   if (pushed > 0) {
     try { save(); } catch {}
-    console.info(`[Sync] Push: ${pushed} item(s)`);
+    AppLog.log("sync.js/syncPush","Push concluído: "+pushed+" item(s)");
   }
   return { pushed };
 }
@@ -329,7 +334,7 @@ async function syncPull(state, save, render) {
       const remoteTs = row.updated_at || 0;
 
       if (row.deleted) {
-        state.consultas = (state.consultas || []).filter(c => c.id !== row.id);
+        StateManager.bulkSetConsultas((state.consultas || []).filter(c => c.id !== row.id));
         merged++;
         return;
       }
@@ -337,10 +342,7 @@ async function syncPull(state, save, render) {
       const local = (state.consultas || []).find(c => c.id === row.id);
       if (!local || remoteTs > (local.updatedAt || 0)) {
         remote.synced = true;
-        if (!state.consultas) state.consultas = [];
-        const idx = state.consultas.findIndex(c => c.id === row.id);
-        if (idx >= 0) state.consultas[idx] = remote;
-        else          state.consultas.push(remote);
+        StateManager.upsertConsulta(remote);
         merged++;
       }
     });
@@ -387,7 +389,7 @@ async function syncPull(state, save, render) {
   if (merged > 0) {
     try { save(); } catch {}
     try { if (typeof render === 'function') render(); } catch {}
-    console.info(`[Sync] Pull: ${pulled} recebidos, ${merged} mergeados`);
+    AppLog.log("sync.js/syncPull","Pull concluído: "+pulled+" recebidos, "+merged+" mergeados");
   }
 
   return { pulled, merged };
@@ -400,8 +402,16 @@ async function syncPull(state, save, render) {
 function _getTaskArr(state, bucketId) {
   const isDate = /^\d{4}-\d{2}-\d{2}$/.test(bucketId);
   if (isDate) {
-    if (!state.dateTasks)           state.dateTasks = {};
-    if (!state.dateTasks[bucketId]) state.dateTasks[bucketId] = [];
+    if (!state.dateTasks || typeof state.dateTasks !== 'object' || Array.isArray(state.dateTasks)) {
+      if (typeof AppLog !== 'undefined') AppLog.warn('sync.js/_getTaskArr', 'state.dateTasks inválido — reinicializado');
+      state.dateTasks = {};
+    }
+    if (!Array.isArray(state.dateTasks[bucketId])) {
+      if (state.dateTasks[bucketId] !== undefined) {
+        if (typeof AppLog !== 'undefined') AppLog.warn('sync.js/_getTaskArr', 'dateTasks[' + bucketId + '] não é array — reinicializado', typeof state.dateTasks[bucketId]);
+      }
+      state.dateTasks[bucketId] = [];
+    }
     return state.dateTasks[bucketId];
   }
   if (!state.tasks)           state.tasks = {};
@@ -453,7 +463,7 @@ async function initSync(state, save, render) {
     await syncPull(state, save, render);
     await syncPush(state, save);
   } catch (err) {
-    console.warn('[Sync] initSync error:', err.message || err);
+    AppLog.error("sync.js/initSync","Erro na sincronização",err.message||err);
   } finally {
     _syncBusy = false;
   }
@@ -483,7 +493,7 @@ async function syncDelete(table, id, bucketId = '') {
       deleted:    true,
     }]);
   } catch (err) {
-    console.warn('[Sync] syncDelete:', err.message);
+    AppLog.warn("sync.js/syncDelete","Erro ao deletar item no servidor",err.message);
   }
 }
 
@@ -552,7 +562,7 @@ function abrirPainelSync() {
   if (connected) {
     ov.querySelector('#_sDisco').addEventListener('click', () => {
       setSyncConfig(null);
-      localStorage.removeItem(SYNC_CURSOR_KEY);
+      AppStorage.remove(SYNC_CURSOR_KEY);
       ov.remove();
       if (typeof showToast === 'function') showToast('🔌 Sync desconectado');
     });

@@ -108,6 +108,28 @@
   <!-- ═══ Estilos externos (design tokens + app) ═══ -->
   <link rel="stylesheet" href="./variables.css">
   <link rel="stylesheet" href="./app.css">
+  <!-- Estado global centralizado — deve ser o primeiro script carregado -->
+  <script src="./core/state.js"></script>
+  <!-- Validação centralizada de dados -->
+  <script src="./core/validators.js"></script>
+  <!-- Sanitização centralizada — proteção contra XSS e dados maliciosos -->
+  <script src="./core/sanitizer.js"></script>
+  <!-- Logger centralizado — rastreabilidade de erros e diagnóstico -->
+  <script src="./core/logger.js"></script>
+  <!-- Verificação de integridade do state na inicialização -->
+  <script src="./core/stateIntegrity.js"></script>
+  <!-- Controlador central de state — toda mutação de consultas passa por aqui -->
+  <script src="./core/stateManager.js"></script>
+  <!-- Camada centralizada de armazenamento — toda leitura/gravação passa por aqui -->
+  <script src="./core/storage.js"></script>
+  <!-- Fila de sincronização offline — garante operações offline não se percam -->
+  <script src="./core/syncQueue.js"></script>
+  <!-- Auditoria automática de inicialização — detecta problemas estruturais no boot -->
+  <script src="./core/systemAudit.js"></script>
+  <!-- Modo diagnóstico ativo — detecta falhas funcionais em tempo de execução -->
+  <script src="./core/diagnostics.js"></script>
+  <!-- Verificação de carregamento de módulos críticos -->
+  <script src="./core/moduleCheck.js"></script>
   <!-- Módulo de sincronização Supabase (offline-first, opt-in) -->
   <script src="./sync.js"></script>
   <!-- Módulos de arquitetura separados -->
@@ -816,7 +838,7 @@ const DAYS = [
 ];
 
 // ══ STATE ══
-let state = {};
+// state é definido em core/state.js (carregado antes deste script)
 let currentBucket = 'seg';
 let currentView = 'home';
 let pendingPhoto = null;
@@ -881,20 +903,7 @@ function ensureSystemFolders(){
 }
 
 function save() {
-  try {
-    // Salva fotos separado (podem ser grandes em base64)
-    const photos = state.bucketPhotos || {};
-    const stateWithoutPhotos = Object.assign({}, state, {bucketPhotos: null});
-    localStorage.setItem('agendaProMax', JSON.stringify(stateWithoutPhotos));
-    try {
-      localStorage.setItem('agendaProMax_photos', JSON.stringify(photos));
-    } catch(e2) {
-      // Se fotos não couberem, tenta salvar com menos qualidade (só mantém as últimas 20 por bucket)
-      const trimmed = {};
-      for(const k in photos){ trimmed[k] = (photos[k]||[]).slice(-20); }
-      try { localStorage.setItem('agendaProMax_photos', JSON.stringify(trimmed)); } catch(e3){}
-    }
-  } catch(e){}
+  AppStorage.saveState(state);
 }
 
 // Migra dom2 → dom quando a semana vira (novo domingo)
@@ -928,33 +937,26 @@ function checkWeekTransition(){
 }
 
 function load() {
-  try {
-    const raw = localStorage.getItem('agendaProMax');
-    if (raw) {
-      const p = JSON.parse(raw);
-      const d = defaultState();
-      // Merge safely
-      const s = Object.assign({}, d, p);
-      s.weekStartISO = getSunday(); // always current week
-      if (!Array.isArray(s.folders)) s.folders = d.folders;
-      if (!Array.isArray(s.folderOrder)) s.folderOrder = d.folderOrder;
-      if (!s.tasks || typeof s.tasks !== 'object') s.tasks = d.tasks;
-      for (const k of ['dom','seg','ter','qua','qui','sex','sab','dom2','pauta']) {
-        if (!Array.isArray(s.tasks[k])) s.tasks[k] = [];
-      }
-      if (!s.lastManualVarrerWeek) s.lastManualVarrerWeek = null;
-      if (!s.lastAutoVarrerWeek) s.lastAutoVarrerWeek = null;
-      if (!s.lastDailyReviewDate) s.lastDailyReviewDate = null;
-      if (!Array.isArray(s.consultas)) s.consultas = [];
-      if (!Array.isArray(s.remedios)) s.remedios = [];
-      // Carrega fotos (salvas separado por serem grandes)
-      try {
-        const rawPhotos = localStorage.getItem('agendaProMax_photos');
-        s.bucketPhotos = rawPhotos ? JSON.parse(rawPhotos) : {};
-      } catch(ep){ s.bucketPhotos = {}; }
-      return s;
+  const loaded = AppStorage.loadState();
+  if (loaded) {
+    const d = defaultState();
+    const s = Object.assign({}, d, loaded);
+    s.weekStartISO = getSunday(); // sempre semana atual
+    if (!Array.isArray(s.folders))    s.folders    = d.folders;
+    if (!Array.isArray(s.folderOrder))s.folderOrder= d.folderOrder;
+    if (!s.tasks || typeof s.tasks !== 'object') s.tasks = d.tasks;
+    for (const k of ['dom','seg','ter','qua','qui','sex','sab','dom2','pauta']) {
+      if (!Array.isArray(s.tasks[k])) s.tasks[k] = [];
     }
-  } catch(e) {}
+    if (!s.lastManualVarrerWeek) s.lastManualVarrerWeek = null;
+    if (!s.lastAutoVarrerWeek)   s.lastAutoVarrerWeek   = null;
+    if (!s.lastDailyReviewDate)  s.lastDailyReviewDate  = null;
+    if (!Array.isArray(s.consultas)) s.consultas = [];
+    if (!Array.isArray(s.remedios))  s.remedios  = [];
+    // bucketPhotos já vem dentro do objeto retornado por loadState
+    if (!s.bucketPhotos || typeof s.bucketPhotos !== 'object') s.bucketPhotos = {};
+    return s;
+  }
   return defaultState();
 }
 
@@ -1687,7 +1689,7 @@ function openBucket(id, _pushCurrent){
       tile.className='folderTile';
       tile.style.cssText='cursor:pointer;';
       const pendentes=(state.tasks[child.id]||[]).filter(t=>!t.done).length;
-      tile.innerHTML=`<div class="fi-wrap"><div class="fi">${child.emoji||'📁'}</div></div><div class="fl">${child.name}</div>`
+      tile.innerHTML=`<div class="fi-wrap"><div class="fi">${escHtml(child.emoji||'📁')}</div></div><div class="fl">${escHtml(child.name)}</div>`
         +'';
       tile.addEventListener('click',()=>openBucket(child.id));
       subArea.appendChild(tile);
@@ -2026,6 +2028,8 @@ function openMoveTaskModal(task, fromBucket){
 function addTask(text){
   const v=(text||'').trim();
   if(!v) return;
+  const _vTask=validateTask({text:v});
+  if(!_vTask.valid){AppLog.error('index.js/addTask','Tarefa inválida',_vTask.errors);return;}
   if(!state.tasks[currentBucket]) state.tasks[currentBucket]=[];
   state.tasks[currentBucket].push(ensureSyncFields({text:v,done:false,createdAt:Date.now()}));
   if (typeof _metrics !== 'undefined') _metrics.trackTask();
@@ -3918,17 +3922,17 @@ function openDatePickerForTask(task, mainOv, onConfirm){
 function autoBackup(){
   try {
     const key='agendaProMax_backup_'+new Date().toISOString().split('T')[0];
-    localStorage.setItem(key, JSON.stringify(state));
+    AppStorage.set(key, state);
     // Manter apenas os últimos 4 backups automáticos
-    const bkKeys=Object.keys(localStorage).filter(k=>k.startsWith('agendaProMax_backup_')).sort();
-    while(bkKeys.length>4){ localStorage.removeItem(bkKeys.shift()); }
+    const bkKeys=AppStorage.keys('agendaProMax_backup_').sort();
+    while(bkKeys.length>4){ AppStorage.remove(bkKeys.shift()); }
     showToast('💾 Backup automático salvo!');
   } catch(e){}
 }
 
 // ══ CONTAS A PAGAR ══
-function _getContas(){ try{ return JSON.parse(localStorage.getItem('agendaProMax_contas')||'[]'); }catch(e){ return []; } }
-function _saveContas(arr){ localStorage.setItem('agendaProMax_contas', JSON.stringify(arr)); }
+function _getContas(){ return AppStorage.get('agendaProMax_contas', []); }
+function _saveContas(arr){ AppStorage.set('agendaProMax_contas', arr); }
 
 function openContas(){
   const existing = document.getElementById('contasOv');
@@ -4211,8 +4215,8 @@ function _renderContasOv(){
 }
 
 // ══ A RECEBER ══
-function _getReceber(){ try{ return JSON.parse(localStorage.getItem('agendaProMax_receber')||'[]'); }catch(e){ return []; } }
-function _saveReceber(arr){ localStorage.setItem('agendaProMax_receber', JSON.stringify(arr)); }
+function _getReceber(){ return AppStorage.get('agendaProMax_receber', []); }
+function _saveReceber(arr){ AppStorage.set('agendaProMax_receber', arr); }
 
 function openReceber(){
   const existing = document.getElementById('receberOv');
@@ -4493,8 +4497,8 @@ function _renderReceberOv(){
     }
   });
 }
-function _getExames(){ try{ return JSON.parse(localStorage.getItem('agendaProMax_exames')||'[]'); }catch(e){ return []; } }
-function _saveExames(arr){ localStorage.setItem('agendaProMax_exames', JSON.stringify(arr)); }
+function _getExames(){ return AppStorage.get('agendaProMax_exames', []); }
+function _saveExames(arr){ AppStorage.set('agendaProMax_exames', arr); }
 
 function openExames(){
   const existing=document.getElementById('examesOv');
@@ -4627,8 +4631,8 @@ function _renderExamesOv(){
 }
 
 // ══ LISTA DE COMPRAS ══
-function _getCompras(){ try{ return JSON.parse(localStorage.getItem('agendaProMax_compras')||'[]'); }catch(e){ return []; } }
-function _saveCompras(arr){ localStorage.setItem('agendaProMax_compras', JSON.stringify(arr)); }
+function _getCompras(){ return AppStorage.get('agendaProMax_compras', []); }
+function _saveCompras(arr){ AppStorage.set('agendaProMax_compras', arr); }
 
 function openCompras(){
   const existing=document.getElementById('comprasOv');
@@ -4703,8 +4707,8 @@ function _renderComprasOv(){
 }
 
 // ══ MERCADO ══
-function _getMercado(){ try{ return JSON.parse(localStorage.getItem('agendaProMax_mercado')||'[]'); }catch(e){ return []; } }
-function _saveMercado(arr){ localStorage.setItem('agendaProMax_mercado', JSON.stringify(arr)); }
+function _getMercado(){ return AppStorage.get('agendaProMax_mercado', []); }
+function _saveMercado(arr){ AppStorage.set('agendaProMax_mercado', arr); }
 
 function openMercado(){
   const existing=document.getElementById('mercadoOv');
@@ -4789,8 +4793,8 @@ function _renderMercadoOv(){
 }
 
 // ══ DOCUMENTOS ══
-function _getDocs(){ try{ return JSON.parse(localStorage.getItem('agendaProMax_docs')||'[]'); }catch(e){ return []; } }
-function _saveDocs(arr){ localStorage.setItem('agendaProMax_docs', JSON.stringify(arr)); }
+function _getDocs(){ return AppStorage.get('agendaProMax_docs', []); }
+function _saveDocs(arr){ AppStorage.set('agendaProMax_docs', arr); }
 
 function openDocs(){
   const existing = document.getElementById('docsOv');
@@ -4951,7 +4955,7 @@ function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt
 
 // ══ FERIADOS ══
 // Cidade selecionada (persiste via localStorage)
-window._feriadosCidade = window._feriadosCidade || localStorage.getItem('feriadosCidade') || 'linhares';
+window._feriadosCidade = window._feriadosCidade || AppStorage.get('feriadosCidade', 'linhares');
 
 function openFeriados(){
   const existing = document.getElementById('feriadosOv');
@@ -5127,7 +5131,7 @@ function openFeriados(){
   function renderFeriados(cidade){
     cidadeAtual = cidade;
     window._feriadosCidade = cidade;
-    try { localStorage.setItem('feriadosCidade', cidade); } catch(e){}
+    AppStorage.set('feriadosCidade', cidade);
     const fList = getFeriados(ano, cidade).filter(f => f.iso >= hojeISO);
     const porMes2 = {};
     fList.forEach(f => {
@@ -5291,7 +5295,7 @@ function populateFolderSelect(containerId, mode){
   for(const f of visible){
     const item=document.createElement('div');
     item.className='fSelectItem';
-    item.innerHTML=`<span class="fSelectEmoji">${f.emoji||'📁'}</span><span class="fSelectName">${f.name}</span>`;
+    item.innerHTML=`<span class="fSelectEmoji">${escHtml(f.emoji||'📁')}</span><span class="fSelectName">${escHtml(f.name)}</span>`;
     item.addEventListener('click',()=>{
       if(mode==='sub'){
         editingFolderId=f.id;
@@ -5840,6 +5844,8 @@ function _doQuickAdd(){
   const input = document.getElementById('quickAddInput');
   const v = (input.value||'').trim();
   if(!v){ showToast('⚠️ Digite uma tarefa.'); return; }
+  const _vQA=validateTask({text:v});
+  if(!_vQA.valid){AppLog.error('index.js/_doQuickAdd','Tarefa inválida',_vQA.errors);showToast('⚠️ Tarefa inválida.');return;}
   if(_quickAddBucket){
     // Add to weekday or folder bucket
     if(!state.tasks[_quickAddBucket]) state.tasks[_quickAddBucket]=[];
@@ -5868,6 +5874,8 @@ function calAddTask(){
   const input=document.getElementById('calTaskInput');
   const v=(input.value||'').trim();
   if(!v){showToast('⚠️ Digite uma tarefa.');return;}
+  const _vCal=validateTask({text:v});
+  if(!_vCal.valid){AppLog.error('index.js/calAddTask','Tarefa inválida',_vCal.errors);showToast('⚠️ Tarefa inválida.');return;}
 
   // If the selected date is in current week, add directly to the weekday bucket
   const dayId=getWeekDayId(calSelectedDate);
@@ -5959,15 +5967,25 @@ function _deleteTaskWithUndo(arr, bucketId, taskId) {
 
 // ── Deletar consulta com undo ──
 function _deleteConsultaWithUndo(id) {
-  const idx = (state.consultas || []).findIndex(c => c.id === id);
-  if (idx < 0) return;
-  const [removed] = state.consultas.splice(idx, 1);
-  save(); openListaConsultas();
+  const result = StateManager.removeConsulta(id);
+  if (!result) return;
+  const { item: removed, idx } = result;
+  openListaConsultas();
   _undoToast('🗑 Consulta removida', () => {
-    state.consultas.splice(idx, 0, removed);
-    save(); openListaConsultas();
+    StateManager.restoreConsulta(idx, removed);
+    openListaConsultas();
     showToast('↩️ Consulta restaurada!');
+    // Undo: não precisa reenfileirar — o item ainda não saiu da fila de sync
+    // pois o timer de 4s do undo é menor que o processamento da fila
   });
+  // Enfileira o delete APÓS o toast de undo (4s depois) para dar chance ao undo cancelar
+  setTimeout(function () {
+    // Só enfileira se a consulta ainda não foi restaurada (não existe mais no state)
+    const stillGone = !(state.consultas || []).find(function (c) { return c.id === id; });
+    if (stillGone && typeof SyncQueue !== 'undefined') {
+      SyncQueue.enqueue('delete', 'consulta', { id: id });
+    }
+  }, 4500);
 }
 
 // ── Deletar remédio com undo ──
@@ -6000,18 +6018,18 @@ function exportarDados() {
       // Incluir dados e fotos juntos no export completo
       let exportData = { ...state };
       try {
-        const rawPhotos = localStorage.getItem('agendaProMax_photos');
+        const rawPhotos = AppStorage.get('agendaProMax_photos', null);
         if (rawPhotos) exportData._photos = JSON.parse(rawPhotos);
       } catch(e) {}
       try {
-        const rawDocs = localStorage.getItem('agendaProMax_docs');
+        const rawDocs = AppStorage.get('agendaProMax_docs', null);
         if (rawDocs) exportData._docs = JSON.parse(rawDocs);
       } catch(e) {}
-      try { const r=localStorage.getItem('agendaProMax_contas'); if(r) exportData._contas=JSON.parse(r); }catch(e){}
-      try { const r=localStorage.getItem('agendaProMax_receber'); if(r) exportData._receber=JSON.parse(r); }catch(e){}
-      try { const r=localStorage.getItem('agendaProMax_exames'); if(r) exportData._exames=JSON.parse(r); }catch(e){}
-      try { const r=localStorage.getItem('agendaProMax_compras'); if(r) exportData._compras=JSON.parse(r); }catch(e){}
-      try { const r=localStorage.getItem('agendaProMax_mercado'); if(r) exportData._mercado=JSON.parse(r); }catch(e){}
+      try { const r=AppStorage.get('agendaProMax_contas',null); if(r) exportData._contas=r; }catch(e){}
+      try { const r=AppStorage.get('agendaProMax_receber',null); if(r) exportData._receber=r; }catch(e){}
+      try { const r=AppStorage.get('agendaProMax_exames',null); if(r) exportData._exames=r; }catch(e){}
+      try { const r=AppStorage.get('agendaProMax_compras',null); if(r) exportData._compras=r; }catch(e){}
+      try { const r=AppStorage.get('agendaProMax_mercado',null); if(r) exportData._mercado=r; }catch(e){}
       exportData._exportedAt = new Date().toISOString();
       exportData._appVersion  = typeof APP_DATA_VERSION !== 'undefined' ? APP_DATA_VERSION : 1;
 
@@ -6065,19 +6083,19 @@ function importarDados() {
         // Restaurar fotos separadas se existirem no export
         if (data._photos) {
           try {
-            localStorage.setItem('agendaProMax_photos', JSON.stringify(data._photos));
+            AppStorage.set('agendaProMax_photos', data._photos);
           } catch(e) {}
           delete data._photos;
         }
         // Restaurar documentos
         if (data._docs) {
-          try { localStorage.setItem('agendaProMax_docs', JSON.stringify(data._docs)); }catch(e){}
+          try { AppStorage.set('agendaProMax_docs', data._docs); }catch(e){}
           delete data._docs;
         }
-        if (data._contas) { try{localStorage.setItem('agendaProMax_contas',JSON.stringify(data._contas));}catch(e){} delete data._contas; }
-        if (data._exames) { try{localStorage.setItem('agendaProMax_exames',JSON.stringify(data._exames));}catch(e){} delete data._exames; }
-        if (data._compras){ try{localStorage.setItem('agendaProMax_compras',JSON.stringify(data._compras));}catch(e){} delete data._compras; }
-        if (data._mercado){ try{localStorage.setItem('agendaProMax_mercado',JSON.stringify(data._mercado));}catch(e){} delete data._mercado; }
+        if (data._contas) { AppStorage.set('agendaProMax_contas', data._contas); delete data._contas; }
+        if (data._exames) { AppStorage.set('agendaProMax_exames', data._exames); delete data._exames; }
+        if (data._compras){ AppStorage.set('agendaProMax_compras', data._compras); delete data._compras; }
+        if (data._mercado){ AppStorage.set('agendaProMax_mercado', data._mercado); delete data._mercado; }
         delete data._exportedAt;
         delete data._appVersion;
 
@@ -6461,8 +6479,8 @@ function verificarIntegridade() {
 
     // 6. localStorage size estimate
     try {
-      const raw = localStorage.getItem('agendaProMax') || '';
-      const photos = localStorage.getItem('agendaProMax_photos') || '';
+      const raw = AppStorage.get('agendaProMax', '') || '';
+      const photos = AppStorage.get('agendaProMax_photos', '') || '';
       const totalKB = Math.round((raw.length + photos.length) / 1024);
       if (totalKB > 4000) avisos.push(`localStorage: ~${totalKB} KB (perto do limite de 5 MB)`);
     } catch(e) {}
@@ -6600,7 +6618,7 @@ const _MIGRATIONS = {
 function _runMigrations(s) {
   let currentVersion = 0;
   try {
-    currentVersion = parseInt(localStorage.getItem(_MIGRATION_KEY) || '0', 10);
+    currentVersion = parseInt(AppStorage.get(_MIGRATION_KEY, '0') || '0', 10);
   } catch(e) {}
   if (currentVersion >= APP_DATA_VERSION) return s;
 
@@ -6614,7 +6632,7 @@ function _runMigrations(s) {
     }
   }
   try {
-    localStorage.setItem(_MIGRATION_KEY, String(APP_DATA_VERSION));
+    AppStorage.set(_MIGRATION_KEY, String(APP_DATA_VERSION));
   } catch(e) {}
   return s;
 }
@@ -6638,7 +6656,7 @@ const _metrics = (function() {
 
   function _load() {
     try {
-      const raw = localStorage.getItem(_METRICS_KEY);
+      const raw = AppStorage.get(_METRICS_KEY, null);
       if (raw) {
         const parsed = JSON.parse(raw);
         // Merge para não perder campos novos em versões futuras
@@ -6651,7 +6669,7 @@ const _metrics = (function() {
   }
 
   function _save(data) {
-    try { localStorage.setItem(_METRICS_KEY, JSON.stringify(data)); } catch(e) {}
+    AppStorage.set(_METRICS_KEY, data);
   }
 
   const _data = _load();
@@ -6680,6 +6698,35 @@ const _metrics = (function() {
 init();
 // Executar migrações após init() para que state já esteja carregado
 state = _runMigrations(state);
+
+// Verificação de integridade — garante que nenhuma corrupção passe para o runtime
+(function () {
+  var _integrityResult = checkStateIntegrity(state);
+  if (!_integrityResult.ok) {
+    // Se houve reparos, persiste imediatamente o state corrigido
+    try { save(); } catch (e) {}
+  }
+})();
+
+// Auditoria de inicialização — detecta problemas estruturais sem bloquear o sistema
+runSystemAudit().catch(function (e) {
+  console.error('[systemAudit] Falha inesperada na auditoria:', e);
+});
+
+// Verificação de módulos — fase boot (módulos síncronos já carregados)
+checkModules('boot');
+
+// Modo diagnóstico ativo — roda apenas se DIAGNOSTIC_MODE = true
+// Executa verificações funcionais (round-trip de storage, consistência cruzada
+// de dados, state operacional, fila de sync) sem bloquear o sistema.
+if (typeof DIAGNOSTIC_MODE !== 'undefined' && DIAGNOSTIC_MODE === true) {
+  // Pequeno delay para garantir que todo o boot (SW, sync, fila) já inicializou
+  setTimeout(function () {
+    AppDiagnostics.run().catch(function (e) {
+      console.error('[diagnostics] Falha inesperada no diagnóstico:', e);
+    });
+  }, 800);
+}
 
 // ══════════════════════════════════════════════════════════════════
 // SINCRONIZAÇÃO SUPABASE — inicialização e listeners
@@ -6870,19 +6917,25 @@ function openConsultaModal(editId){
     const local=ov.querySelector('#_cLocal').value.trim();
     const obs=ov.querySelector('#_cObs').value.trim();
     if(!esp||!pac||!data||!hora){showToast('⚠️ Preencha os campos obrigatórios!');return;}
+    // Validação centralizada antes de qualquer persistência
+    var _vRes=validateConsulta({paciente:pac,data:data,hora:hora});
+    if(!_vRes.valid){showToast('⚠️ Dados inválidos: '+_vRes.errors[0]);return;}
     if(!state.consultas)state.consultas=[];
     if(editing){
-      const idx=state.consultas.findIndex(x=>x.id===editId);
       const _cFotoFinal2=ov.querySelector('#_csFotoImg')?ov.querySelector('#_csFotoImg').src.startsWith('data:')?ov.querySelector('#_csFotoImg').src:null:null;
+      const idx=state.consultas.findIndex(x=>x.id===editId);
       if(idx>=0){
-        state.consultas[idx]={...state.consultas[idx],especialidade:esp,medico,paciente:pac,local,data,hora,obs,foto:_cFotoFinal2};
-        markDirty(state.consultas[idx]);
+        const updated = StateManager.updateConsulta(editId, {especialidade:esp,medico,paciente:pac,local,data,hora,obs,foto:_cFotoFinal2});
+        if(updated) markDirty(updated);
+        if (typeof SyncQueue !== 'undefined' && updated) SyncQueue.enqueue('update', 'consulta', { id: updated.id });
       }
     } else {
       const _cFotoFinal3=ov.querySelector('#_csFotoImg')?ov.querySelector('#_csFotoImg').src.startsWith('data:')?ov.querySelector('#_csFotoImg').src:null:null;
       const c=ensureSyncFields({especialidade:esp,medico,paciente:pac,local,data,hora,obs,foto:_cFotoFinal3,createdAt:Date.now()});
       const cId=c.id;
-      state.consultas.push(c);
+      const _added = StateManager.addConsulta(c);
+      if (!_added) { showToast('⚠️ Consulta duplicada: ' + pac + ' já tem consulta nessa data e hora.'); return; }
+      if (typeof SyncQueue !== 'undefined') SyncQueue.enqueue('create', 'consulta', { id: c.id });
       if (typeof _metrics !== 'undefined') _metrics.trackConsulta();
       // Garante pasta Consultas na tela inicial
       ensureConsultaFolder();
@@ -7073,14 +7126,21 @@ function atualizarConsulta(id, campos){
   if(idx<0) return;
   const c=state.consultas[idx];
 
+  // Validação centralizada: mescla campos pendentes com dados existentes antes de validar
+  const merged=Object.assign({},c,campos);
+  const _vRes=validateConsulta({paciente:merged.paciente,data:merged.data,hora:merged.hora});
+  if(!_vRes.valid){ AppLog.error('index.js/atualizarConsulta','Atualização bloqueada',_vRes.errors); return; }
+
   // Remover entrada antiga do calendário (dateTasks)
   if(c.data && state.dateTasks && state.dateTasks[c.data]){
     state.dateTasks[c.data]=state.dateTasks[c.data].filter(t=>!t.text.includes(c.especialidade)||!t.text.includes(c.paciente));
   }
 
-  // Atualizar campos
-  Object.assign(c, campos);
-  if(typeof markDirty==='function') markDirty(c);
+  // Atualizar campos via StateManager (persiste + loga)
+  const updated = StateManager.updateConsulta(id, campos);
+  if (!updated) return;
+  if(typeof markDirty==='function') markDirty(updated);
+  if (typeof SyncQueue !== 'undefined') SyncQueue.enqueue('update', 'consulta', { id: updated.id });
 
   // Recriar no calendário com novos dados
   if(c.data){
@@ -8396,7 +8456,7 @@ function openHistoricoPaciente(){
 
         agendarNotificacoesRemedios().catch(() => {});
 
-      }).catch((err) => console.warn('[SW] Erro de registro:', err.message));
+      }).catch((err) => AppLog.warn('index.js/SW','Erro de registro do Service Worker', err.message));
     }
   })();
 
@@ -8830,6 +8890,13 @@ function quickCreateSubfolder() {
   inp.addEventListener('keydown', e=>{ if(e.key==='Enter') saveBtn.click(); });
   setTimeout(()=>inp.focus(), 120);
 }
+
+// Verificação de módulos — fase deferred (agenda.js, notificacoes.js, ui.js)
+// DOMContentLoaded garante que os scripts defer já foram avaliados.
+// Se o evento já disparou (execução tardia), o callback roda imediatamente.
+document.addEventListener('DOMContentLoaded', function () {
+  checkModules('deferred');
+});
 
 </script>
 </body>

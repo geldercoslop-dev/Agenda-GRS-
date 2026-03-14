@@ -1,13 +1,14 @@
 /* ═══════════════════════════════════════════════════════
-   Agenda Pro Max — Service Worker
-   Versão automática baseada em timestamp de deploy.
-   Nunca altere manualmente — atualiza sozinho a cada deploy.
+   Agenda Pro Max — Service Worker v33
+   Versão fixa — incrementar manualmente a cada deploy.
    ═══════════════════════════════════════════════════════ */
 
-// Versão gerada automaticamente no momento do deploy.
-// Date.now() muda a cada novo arquivo sw.js gerado — sem necessidade de v1, v2, v3...
-const CACHE_VERSION = Date.now().toString();
+// Versão fixa. Incrementar ao fazer deploy para forçar atualização do cache.
+// Histórico: v33 (2026-03) — corrigido Date.now() por versão estável
+const CACHE_VERSION = "v33";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
+// Prefixo usado para identificar caches deste app e limpar apenas os deles
+const CACHE_PREFIX  = "agenda-cache-";
 
 // Arquivos essenciais para funcionar offline
 const CORE_ASSETS = [
@@ -34,17 +35,17 @@ self.addEventListener("install", (event) => {
 });
 
 // ══════════════════════════════════════════════════════
-// ACTIVATE — limpa todos os caches antigos automaticamente
+// ACTIVATE — limpa caches antigos deste app automaticamente
 // clientsClaim() assume controle de todas as abas abertas
 // sem precisar recarregar manualmente
 // ══════════════════════════════════════════════════════
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
-    // Remove todos os caches que não sejam o atual
     const keys = await caches.keys();
     await Promise.all(
       keys
-        .filter((key) => key !== CACHE_NAME)
+        // Remove apenas caches deste app que não sejam o atual
+        .filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
         .map((key) => {
           console.log("[SW] Removendo cache antigo:", key);
           return caches.delete(key);
@@ -55,7 +56,7 @@ self.addEventListener("activate", (event) => {
     await self.clients.claim();
 
     // Avisa todas as abas que há nova versão ativa
-    // O index.html escuta esta mensagem e recarrega automaticamente
+    // O index.html escuta esta mensagem e exibe banner de atualização
     const allClients = await self.clients.matchAll({ includeUncontrolled: true });
     allClients.forEach((client) =>
       client.postMessage({ type: "SW_UPDATED", version: CACHE_VERSION })
@@ -130,7 +131,7 @@ async function networkFirst(request) {
     const cached = await caches.match(request);
     if (cached) return cached;
     if (request.mode === "navigate") {
-      const fallback = await caches.match("./");
+      const fallback = await caches.match("./index.html") || await caches.match("./");
       if (fallback) return fallback;
     }
     return new Response("Offline — sem conexão e sem cache.", {
