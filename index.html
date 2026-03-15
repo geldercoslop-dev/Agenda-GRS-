@@ -6722,8 +6722,7 @@ runSystemAudit().catch(function (e) {
   console.error('[systemAudit] Falha inesperada na auditoria:', e);
 });
 
-// Verificação de módulos — fase boot (módulos síncronos já carregados)
-checkModules('boot');
+// checkModules('boot') — desativado: utilitário manual/diagnóstico apenas
 
 // ── Guarda de inicialização: aguarda AppStorage (IDB) e valida state ──────────
 // waitForStorageReady() garante que o IDB esteja pronto antes de continuar o boot.
@@ -8947,10 +8946,7 @@ function quickCreateSubfolder() {
   setTimeout(()=>inp.focus(), 120);
 }
 
-// checkModules fase deferred — mantido
-document.addEventListener('DOMContentLoaded', function () {
-  checkModules('deferred');
-});
+// checkModules('deferred') — desativado: utilitário manual/diagnóstico apenas
 
 </script>
 <!-- bootFix: deve ser o último script — roda após agenda.js e ui.js (ambos defer) -->
