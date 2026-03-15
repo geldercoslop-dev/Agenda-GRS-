@@ -108,30 +108,7 @@
   <!-- ═══ Estilos externos (design tokens + app) ═══ -->
   <link rel="stylesheet" href="./variables.css">
   <link rel="stylesheet" href="./app.css">
-  <!-- Estado global centralizado — deve ser o primeiro script carregado -->
-  <script src="./core/state.js"></script>
-  <!-- Validação centralizada de dados -->
-  <script src="./core/validators.js"></script>
-  <!-- Sanitização centralizada — proteção contra XSS e dados maliciosos -->
-  <script src="./core/sanitizer.js"></script>
-  <!-- Logger centralizado — rastreabilidade de erros e diagnóstico -->
-  <script src="./core/logger.js"></script>
-  <!-- Verificação de integridade do state na inicialização -->
-  <script src="./core/stateIntegrity.js"></script>
-  <!-- Controlador central de state — toda mutação de consultas passa por aqui -->
-  <script src="./core/stateManager.js"></script>
-  <!-- Camada centralizada de armazenamento — toda leitura/gravação passa por aqui -->
-  <script src="./core/storage.js"></script>
-  <!-- Fila de sincronização offline — garante operações offline não se percam -->
-  <script src="./core/syncQueue.js"></script>
-  <!-- Auditoria automática de inicialização — detecta problemas estruturais no boot -->
-  <script src="./core/systemAudit.js"></script>
-  <!-- Modo diagnóstico ativo — detecta falhas funcionais em tempo de execução -->
-  <script src="./core/diagnostics.js"></script>
-  <!-- Verificação de carregamento de módulos críticos -->
-  <script src="./core/moduleCheck.js"></script>
-  <!-- Módulo de sincronização Supabase (offline-first, opt-in) -->
-  <script src="./sync.js"></script>
+
 </head>
 <body>
 <div class="screen">
@@ -821,10 +798,7 @@
       </div>
     </div>
 
-<!-- Módulos de arquitetura separados — sem defer, executam em ordem -->
-<script src="./agenda.js"></script>
-<script src="./notificacoes.js"></script>
-<script src="./ui.js"></script>
+
 
 <script>
 // ══ CONSTANTS ══
@@ -6722,7 +6696,6 @@ runSystemAudit().catch(function (e) {
   console.error('[systemAudit] Falha inesperada na auditoria:', e);
 });
 
-// checkModules('boot') — desativado: utilitário manual/diagnóstico apenas
 
 // ── Guarda de inicialização: aguarda AppStorage (IDB) e valida state ──────────
 // waitForStorageReady() garante que o IDB esteja pronto antes de continuar o boot.
@@ -8946,35 +8919,34 @@ function quickCreateSubfolder() {
   setTimeout(()=>inp.focus(), 120);
 }
 
-// checkModules('deferred') — desativado: utilitário manual/diagnóstico apenas
 
 </script>
-<!-- bootFix: deve ser o último script — roda após agenda.js e ui.js (ambos defer) -->
-<script src="./core/bootFix.js"></script>
 
 
 
-<script>
-window.onerror = function(msg, url, line, col, error){
-  console.error("GLOBAL ERROR:", msg, "at", line, col, error);
-  alert("Erro JS detectado: " + msg);
-};
-
-window.addEventListener("unhandledrejection", function(e){
-  console.error("PROMISE ERROR:", e.reason);
-  alert("Promise error: " + e.reason);
-});
-</script>
 
 
-<!-- Controlador único de inicialização — deve ser o último script -->
+
+
+
+
+<!-- ═══════════════════════════════════════════════════════
+     SCRIPTS — carregam em ordem antes de </body>
+     Caminhos preservados conforme estrutura real do projeto
+     ═══════════════════════════════════════════════════════ -->
+<script src="./core/state.js"></script>
+<script src="./core/storage.js"></script>
+<script src="./core/logger.js"></script>
+<script src="./core/validators.js"></script>
+<script src="./core/sanitizer.js"></script>
+<script src="./core/stateIntegrity.js"></script>
+<script src="./core/stateManager.js"></script>
+<script src="./core/syncQueue.js"></script>
+<script src="./core/systemAudit.js"></script>
+<script src="./agenda.js"></script>
+<script src="./ui.js"></script>
+<script src="./notificacoes.js"></script>
+<script src="./sync.js"></script>
 <script src="./core/bootController.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function(){
-  if (typeof startApplication === 'function') {
-    startApplication();
-  }
-});
-</script>
 </body>
 </html>

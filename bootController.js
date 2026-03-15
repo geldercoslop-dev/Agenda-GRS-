@@ -1,18 +1,17 @@
 /**
  * core/bootController.js — Agenda GRS
- * Controlador único de inicialização: garante que storage e state
- * estejam prontos antes de qualquer render de UI.
+ * Único responsável pela inicialização da UI.
  *
- * Ordem de boot:
- *   1. waitStorage()     → aguarda AppStorage.idbReady (com fallback)
+ * Fluxo:
+ *   1. waitStorage()         → aguarda AppStorage.idbReady (nunca bloqueia)
  *   2. checkStateIntegrity() → valida integridade do state
- *   3. renderUI()        → dispara todos os renders principais
+ *   3. renderUI()            → dispara todos os renders principais
  *
- * Nomes reais mapeados do codebase:
+ * Nomes reais do codebase:
  *   renderFolders()       → pastas (folderGrid)
  *   renderWeekStrip()     → faixa semanal (weekStrip)
- *   atualizarCalendario() → sincroniza consultas no dateTasks (agenda.js)
- *   atualizarLupa('home') → barra de busca na home
+ *   atualizarCalendario() → consultas no dateTasks (agenda.js)
+ *   atualizarLupa('home') → barra de busca na home (ui.js)
  */
 (async function () {
 
@@ -27,7 +26,6 @@
   }
 
   function renderUI() {
-    // Garante state mínimo caso load() tenha falhado
     if (typeof window.state === 'undefined' || window.state === null || typeof window.state !== 'object') {
       window.state = { consultas: [], tasks: {}, dateTasks: {}, folders: [], folderOrder: [], remedios: [] };
       console.warn('[bootController] state ausente — objeto mínimo injetado');
@@ -55,5 +53,10 @@
       console.error('[bootController] renderUI erro:', e);
     }
   };
+
+  // Inicia automaticamente após DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', function () {
+    window.startApplication();
+  });
 
 }());
