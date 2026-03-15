@@ -6766,8 +6766,7 @@ async function waitForStorageReady() {
 waitForStorageReady().then(function (ready) {
   if (!ready) {
     // Tarefa 5 — storage/state inválido não bloqueia mais a UI: fallback de render
-    console.warn('[waitForStorageReady] state inválido — disparando safeBootRender como fallback');
-    if (typeof safeBootRender === 'function') safeBootRender();
+    console.warn('[waitForStorageReady] state inválido — startApplication fará a recuperação');
     return;
   }
 
@@ -8948,105 +8947,16 @@ function quickCreateSubfolder() {
   setTimeout(()=>inp.focus(), 120);
 }
 
-// ── safeBootRender — Tarefa 1 ──────────────────────────────────────────────────
-// Garante que os componentes visuais principais sempre renderizem,
-// mesmo que o storage ou IndexedDB ainda não esteja pronto.
-async function safeBootRender() {
-  // Aguarda IDB se disponível, sem nunca bloquear
-  try {
-    if (window.AppStorage && AppStorage.idbReady) {
-      await AppStorage.idbReady.catch(function() {});
-    }
-  } catch(e) {
-    console.warn('[safeBootRender] Storage not ready, continuing boot:', e);
-  }
-
-  // Garante state mínimo antes de qualquer render — Tarefa 4 (reforço)
-  if (typeof state === 'undefined' || state === null || typeof state !== 'object') {
-    window.state = { consultas: [], tasks: [], dateTasks: {}, folders: [] };
-  }
-
-  // Dispara renders principais com isolamento de erros
-  try {
-    if (typeof atualizarCalendario === 'function') atualizarCalendario();
-    if (typeof renderFolders      === 'function') renderFolders();
-    if (typeof renderWeekStrip    === 'function') renderWeekStrip();
-    if (typeof atualizarLupa      === 'function') atualizarLupa('home');
-  } catch(e) {
-    console.error('[safeBootRender] Render error:', e);
-  }
-}
-
-// Tarefa 2 — boot via DOMContentLoaded com delay de segurança
+// checkModules fase deferred — mantido
 document.addEventListener('DOMContentLoaded', function () {
   checkModules('deferred');
-  setTimeout(safeBootRender, 50);
 });
-
-// Tarefa 3 — fallback de 1s: força re-render se calendário estiver vazio
-setTimeout(function() {
-  try {
-    var strip = document.getElementById('weekStrip');
-    var folders = document.getElementById('folderGrid');
-    var stripEmpty   = strip   && strip.children.length === 0;
-    var foldersEmpty = folders && folders.children.length === 0;
-    if (stripEmpty || foldersEmpty) {
-      console.warn('[safeBootRender] Forcing UI re-render — weekStrip ou folderGrid vazios');
-      safeBootRender();
-    }
-  } catch(e) {}
-}, 1000);
 
 </script>
 <!-- bootFix: deve ser o último script — roda após agenda.js e ui.js (ambos defer) -->
 <script src="./core/bootFix.js"></script>
 
-<script>
-window.addEventListener("load", function(){
 
-  console.log("FORCE BOOT INIT");
-
-  try{
-
-    if(typeof window.state === "undefined"){
-      window.state = {
-        consultas: [],
-        tasks: [],
-        dateTasks: {},
-        folders: [],
-        folderOrder: []
-      };
-    }
-
-    if(typeof atualizarCalendario === "function"){
-      atualizarCalendario();
-    }
-
-    // renderFolders é o nome real no codebase (renderPastas não existe)
-    if(typeof renderFolders === "function"){
-      renderFolders();
-    }
-
-    // renderWeekStrip garante que a faixa semanal apareça
-    if(typeof renderWeekStrip === "function"){
-      renderWeekStrip();
-    }
-
-    // atualizarLupa('home') restaura a barra de busca na home
-    if(typeof atualizarLupa === "function"){
-      atualizarLupa("home");
-    }
-
-    console.log("FORCE BOOT OK");
-
-  }catch(e){
-
-    console.error("BOOT FAILURE:", e);
-
-  }
-
-});
-</script>
 
 <script>
 window.onerror = function(msg, url, line, col, error){
@@ -9060,53 +8970,15 @@ window.addEventListener("unhandledrejection", function(e){
 });
 </script>
 
+
+<!-- Controlador único de inicialização — deve ser o último script -->
+<script src="./core/bootController.js"></script>
 <script>
-
-function forceAppInit(){
-
-  console.log("FORCE APP INIT");
-
-  try{
-
-    if(typeof checkStateIntegrity === "function"){
-      checkStateIntegrity();
-    }
-
-    if(typeof atualizarCalendario === "function"){
-      atualizarCalendario();
-    }
-
-    // renderFolders é o nome real no codebase (renderPastas não existe)
-    if(typeof renderFolders === "function"){
-      renderFolders();
-    }
-
-    // renderWeekStrip garante que a faixa semanal apareça
-    if(typeof renderWeekStrip === "function"){
-      renderWeekStrip();
-    }
-
-    if(typeof iniciarVerificacaoNotificacoes === "function"){
-      iniciarVerificacaoNotificacoes();
-    }
-
-    // atualizarLupa('home') restaura a barra de busca na home
-    if(typeof atualizarLupa === "function"){
-      atualizarLupa("home");
-    }
-
-  }catch(e){
-    console.error("Init error:", e);
+document.addEventListener("DOMContentLoaded", function(){
+  if (typeof startApplication === 'function') {
+    startApplication();
   }
-
-}
-
-window.addEventListener("load", function(){
-
-  setTimeout(forceAppInit, 200);
-
 });
-
 </script>
 </body>
 </html>
