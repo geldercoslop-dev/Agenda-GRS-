@@ -541,7 +541,42 @@ var AppStorage = (function () {
 
   function loadState() {
     var raw = _syncGet(KEY_STATE);
-    if (!raw) return null;
+
+    // ── Tarefa 2: fallback para chave legada do localStorage ─────────
+    // Quando o IndexedDB está vazio (migração recente ou primeira abertura),
+    // _syncGet pode retornar null. Tenta restaurar do localStorage com a chave antiga.
+    if (!raw) {
+      _log('warn', 'loadState', 'IndexedDB vazio — tentando restaurar do localStorage');
+      try {
+        var legacy = localStorage.getItem('agendaProMax_state');
+        if (legacy) {
+          raw = legacy;
+          _log('log', 'loadState', 'State restaurado do localStorage (chave legada)');
+        }
+      } catch (e) {
+        _log('warn', 'loadState', 'Falha ao restaurar state legado', e.message || e);
+      }
+    }
+
+    // ── Tarefa 3: state mínimo garantido se tudo falhar ──────────────
+    if (!raw) {
+      var _minState = {
+        consultas:   [],
+        tasks:       {},
+        dateTasks:   {},
+        folders:     [],
+        folderOrder: [],
+        remedios:    []
+      };
+      _log('warn', 'loadState', 'Nenhum state encontrado — criando state inicial minimo');
+      // Tarefa 4: persiste o state mínimo para evitar loop na próxima abertura
+      var _minSerialized = _serialize(_minState);
+      if (_minSerialized) {
+        _syncSet(KEY_STATE, _minSerialized);
+        _idbSet(KEY_STATE, _minSerialized);
+      }
+      return _minState;
+    }
 
     var parsed = _deserialize(raw, null);
     if (parsed === null) { _log('error', 'loadState', 'State corrompido — retornando null'); return null; }
