@@ -9058,5 +9058,54 @@ window.addEventListener("unhandledrejection", function(e){
   alert("Promise error: " + e.reason);
 });
 </script>
+
+<script>
+
+function forceAppInit(){
+
+  console.log("FORCE APP INIT");
+
+  try{
+
+    if(typeof checkStateIntegrity === "function"){
+      checkStateIntegrity();
+    }
+
+    if(typeof atualizarCalendario === "function"){
+      atualizarCalendario();
+    }
+
+    // renderFolders é o nome real no codebase (renderPastas não existe)
+    if(typeof renderFolders === "function"){
+      renderFolders();
+    }
+
+    // renderWeekStrip garante que a faixa semanal apareça
+    if(typeof renderWeekStrip === "function"){
+      renderWeekStrip();
+    }
+
+    if(typeof iniciarVerificacaoNotificacoes === "function"){
+      iniciarVerificacaoNotificacoes();
+    }
+
+    // atualizarLupa('home') restaura a barra de busca na home
+    if(typeof atualizarLupa === "function"){
+      atualizarLupa("home");
+    }
+
+  }catch(e){
+    console.error("Init error:", e);
+  }
+
+}
+
+window.addEventListener("load", function(){
+
+  setTimeout(forceAppInit, 200);
+
+});
+
+</script>
 </body>
 </html>
