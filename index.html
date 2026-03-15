@@ -8947,6 +8947,40 @@ function quickCreateSubfolder() {
 <script src="./ui.js"></script>
 <script src="./notificacoes.js"></script>
 <script src="./sync.js"></script>
-<script src="./core/bootController.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+  console.log("BOOT SIMPLES");
+
+  try{
+
+    if(typeof checkStateIntegrity === "function"){
+      checkStateIntegrity();
+    }
+
+    if(typeof renderFolders === "function"){
+      renderFolders();
+    }
+
+    if(typeof renderWeekStrip === "function"){
+      renderWeekStrip();
+    }
+
+    if(typeof atualizarCalendario === "function"){
+      atualizarCalendario();
+    }
+
+    if(typeof atualizarLupa === "function"){
+      atualizarLupa("home");
+    }
+
+  }catch(e){
+
+    console.error("Erro na inicialização:", e);
+
+  }
+
+});
+</script>
 </body>
 </html>
