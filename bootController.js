@@ -1,38 +1,29 @@
 /**
  * core/bootController.js — Agenda GRS
- * Único responsável pela inicialização da UI.
- *
- * Nomes reais do codebase:
- *   renderFolders()       → pastas (folderGrid)
- *   renderWeekStrip()     → faixa semanal (weekStrip)
- *   atualizarCalendario() → consultas no dateTasks (agenda.js)
- *   atualizarLupa('home') → barra de busca na home (ui.js)
+ * Último script carregado. Único responsável pela inicialização da UI.
  */
+document.addEventListener("DOMContentLoaded", function () {
 
-document.addEventListener('DOMContentLoaded', function () {
   try {
 
-    if (typeof checkStateIntegrity === 'function') {
-      checkStateIntegrity();
-    }
+    if (typeof initState === "function") initState();
 
-    if (typeof window.renderFolders === 'function') {
-      window.renderFolders();
-    }
+    if (typeof loadStorage === "function") loadStorage();
 
-    if (typeof window.renderWeekStrip === 'function') {
-      window.renderWeekStrip();
-    }
+    if (typeof renderFolders === "function") renderFolders();
 
-    if (typeof window.atualizarCalendario === 'function') {
-      window.atualizarCalendario();
-    }
+    if (typeof renderWeekStrip === "function") renderWeekStrip();
 
-    if (typeof window.atualizarLupa === 'function') {
-      window.atualizarLupa('home');
-    }
+    if (typeof atualizarCalendario === "function") atualizarCalendario();
 
-  } catch (e) {
-    console.error('Erro no boot:', e);
+    if (typeof atualizarLupa === "function") atualizarLupa("home");
+
+    if (typeof startSync === "function") startSync();
+
+    console.log("BOOT OK");
+
+  } catch (err) {
+    console.error("BOOT ERROR:", err);
   }
+
 });
