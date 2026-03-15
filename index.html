@@ -132,10 +132,6 @@
   <script src="./core/moduleCheck.js"></script>
   <!-- Módulo de sincronização Supabase (offline-first, opt-in) -->
   <script src="./sync.js"></script>
-  <!-- Módulos de arquitetura separados -->
-  <script src="./agenda.js" defer></script>
-  <script src="./notificacoes.js" defer></script>
-  <script src="./ui.js" defer></script>
 </head>
 <body>
 <div class="screen">
@@ -824,6 +820,11 @@
 
       </div>
     </div>
+
+<!-- Módulos de arquitetura separados — sem defer, executam em ordem -->
+<script src="./agenda.js"></script>
+<script src="./notificacoes.js"></script>
+<script src="./ui.js"></script>
 
 <script>
 // ══ CONSTANTS ══
@@ -8998,7 +8999,7 @@ setTimeout(function() {
 
 </script>
 <!-- bootFix: deve ser o último script — roda após agenda.js e ui.js (ambos defer) -->
-<script src="./core/bootFix.js" defer></script>
+<script src="./core/bootFix.js"></script>
 
 <script>
 window.addEventListener("load", function(){
