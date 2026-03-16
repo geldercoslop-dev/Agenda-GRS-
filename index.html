@@ -755,24 +755,28 @@
       position:fixed;bottom:0;left:0;right:0;z-index:9997;
     ">
       <!-- Linha com Léo + barra + botão — tudo no fundo -->
-      <div style="display:flex;align-items:flex-end;gap:10px;padding:0 14px 14px 0;">
+      <div style="display:flex;align-items:flex-end;gap:10px;padding:0 0 12px 0;">
 
-        <!-- Léo — colado à esquerda, corpo visível, pés saem por baixo -->
-        <div style="flex-shrink:0;width:90px;margin-left:-8px;align-self:flex-end;">
+        <!-- Léo — levemente afastado da borda esquerda -->
+        <div style="flex-shrink:0;width:90px;margin-left:6px;align-self:flex-end;">
           <img id="leoFooterAvatar" src="" alt="Leo" style="
             width:155px;height:155px;
             object-fit:contain;object-position:bottom;
             display:block;
-            margin-bottom:-14px;
+            margin-bottom:-12px;
             filter:drop-shadow(0 -2px 14px rgba(0,0,0,.6));
             image-rendering:-webkit-optimize-contrast;
           ">
         </div>
 
-        <!-- Barra de progresso — centralizada no meio do botão, 25% mais curta -->
-        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;justify-content:center;padding-bottom:14px;padding-left:8px;">
+        <!-- Barra de progresso — centralizada horizontalmente entre Léo e botão,
+             padding-bottom posiciona o centro da barra no centro vertical do botão (54px) -->
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;
+                    justify-content:flex-end;
+                    padding-bottom:30px;
+                    padding-left:6px;padding-right:6px;">
           <span style="font-size:8px;font-weight:900;letter-spacing:1.2px;color:rgba(180,220,255,.45);text-transform:uppercase;padding-left:2px;">Progresso</span>
-          <div style="display:flex;align-items:center;gap:7px;padding-right:25%;">
+          <div style="display:flex;align-items:center;gap:7px;">
             <div style="flex:1;height:13px;border-radius:99px;background:rgba(255,255,255,.1);box-shadow:inset 0 1px 3px rgba(0,0,0,.4);padding:2px;position:relative;overflow:visible;">
               <div class="progressFill" id="progressFill" style="width:0%">
                 <span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;z-index:2;filter:drop-shadow(0 0 4px rgba(255,255,255,.8));">⚡</span>
@@ -782,7 +786,7 @@
           </div>
         </div>
 
-        <!-- Botão menu ☰ — direita, alinhado na base com a barra -->
+        <!-- Botão menu ☰ — direita, afastado da borda e do fundo -->
         <button id="sidebarFab" style="
           flex-shrink:0;align-self:flex-end;
           width:54px;height:54px;border-radius:15px;
@@ -793,6 +797,8 @@
           display:flex;align-items:center;justify-content:center;
           transition:transform .15s;
           -webkit-tap-highlight-color:transparent;
+          margin-right:14px;
+          margin-bottom:0px;
         ">☰</button>
 
       </div>
@@ -1460,7 +1466,7 @@ function openTodasPastas(){
   // Grid de todas as pastas
   const grid = document.createElement('div');
   grid.id = '_tpGrid';
-  grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:20px 8px;place-items:start center;';
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:14px 6px;place-items:start center;';
 
   const byId = Object.fromEntries(state.folders.map(f=>[f.id,f]));
   const order = (state.folderOrder||[]).filter((id,i,a)=>a.indexOf(id)===i&&byId[id]);
@@ -1476,14 +1482,13 @@ function openTodasPastas(){
 
   function _buildModalTile(id){
     const f = byId[id]; if(!f) return null;
-    const tile = document.createElement('div');
+    // Usa exatamente as mesmas classes das pastas da frente — efeitos idênticos
+    const tile = document.createElement('button');
     tile.dataset.id = id;
-    tile.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;width:100%;max-width:76px;transition:opacity .15s,transform .18s;user-select:none;';
+    tile.className = 'folderTile';
     tile.innerHTML = `
-      <div style="width:58px;height:58px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s;">
-        <span style="font-size:28px;line-height:1;">${f.emoji||'📁'}</span>
-      </div>
-      <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:800;color:rgba(255,255,255,.85);text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px;display:block;">${f.name}</span>
+      <div class="fi-wrap"><span class="fi">${f.emoji||'📁'}</span></div>
+      <span class="fl">${f.name}</span>
     `;
 
     // Click to open
@@ -1608,6 +1613,18 @@ function openTodasPastas(){
   scroll.appendChild(grid);
   box.appendChild(scroll);
   box.style.cssText = (box.style.cssText||'') + 'display:flex;flex-direction:column;max-height:88vh;padding:0;overflow:hidden;';
+
+  // Entrada suave — igual ao efeito das pastas da frente ao abrir o modal
+  box.style.opacity = '0';
+  box.style.transform = 'translateY(18px) scale(.97)';
+  box.style.transition = 'opacity .22s ease, transform .22s cubic-bezier(.34,1.56,.64,1)';
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      box.style.opacity = '1';
+      box.style.transform = 'translateY(0) scale(1)';
+    });
+  });
+
   document.getElementById('_tpClose').addEventListener('click', close);
 }
 
@@ -1636,6 +1653,9 @@ function openBucket(id, _pushCurrent){
     if(typeof window._navPush === 'function') window._navPush();
   }
   currentBucket=id; currentView='day';
+  // Garante que o indicador pull-to-back nunca fique preso visível
+  const _pi=document.getElementById('pullIndicator');
+  if(_pi) _pi.classList.remove('show');
   // Show day badge (always visible in header right)
   const badge=document.getElementById('dayBadge');
   const folder=state.folders.find(f=>f.id===id);
@@ -1693,6 +1713,9 @@ function openBucket(id, _pushCurrent){
 function goHome(){
   currentView='home';
   navStack=[];
+  // Garante que o indicador pull-to-back nunca fique preso
+  const _pi2=document.getElementById('pullIndicator');
+  if(_pi2) _pi2.classList.remove('show');
   if (typeof _metrics !== 'undefined') _metrics.trackScreen('home');
   // Reset badge: clear on home
   const badge=document.getElementById('dayBadge');
@@ -2536,6 +2559,7 @@ function doBackup(){
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a'); a.href=url; a.download=fileName;
     document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    _markBackupDone();
     showToast('✅ Backup salvo!');
   });
   box.querySelector('#_bkRestore').addEventListener('click',()=>{
@@ -3613,6 +3637,9 @@ function init(){
   setInterval(updateHeader, 60000);
   // Garante barra de busca visível na home ao iniciar
   atualizarLupa('home');
+
+  // Lembrete de backup — avisa se passaram mais de 3 dias sem backup
+  setTimeout(checkBackupReminder, 3000);
 }
 
 // ══ VERIFICAÇÃO DIÁRIA DE PENDÊNCIAS ══
@@ -3924,6 +3951,39 @@ function autoBackup(){
     while(bkKeys.length>4){ AppStorage.remove(bkKeys.shift()); }
     showToast('💾 Backup automático salvo!');
   } catch(e){}
+}
+
+// ══ LEMBRETE DE BACKUP ══
+function checkBackupReminder(){
+  try {
+    const KEY = 'agendaProMax_lastBackupDate';
+    const last = localStorage.getItem(KEY);
+    const now = Date.now();
+    const TRES_DIAS = 3 * 24 * 60 * 60 * 1000;
+
+    // Só avisa se passaram mais de 3 dias (ou nunca fez backup)
+    if (last && (now - parseInt(last)) < TRES_DIAS) return;
+
+    // Monta toast de aviso com botão de ação
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e3a5f;border:1.5px solid rgba(249,115,22,.6);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;padding:12px 16px;border-radius:16px;z-index:9999;display:flex;align-items:center;gap:10px;box-shadow:0 4px 24px rgba(0,0,0,.5);max-width:320px;';
+    t.innerHTML = '<span style="font-size:22px;">💾</span><div style="flex:1;line-height:1.4;">Faça backup agora!<br><span style="font-weight:500;font-size:11px;opacity:.7;">Seus dados ficam só no celular.</span></div><button id="_bkNow" style="padding:6px 12px;border-radius:10px;border:none;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;">Fazer agora</button>';
+    document.body.appendChild(t);
+
+    t.querySelector('#_bkNow').addEventListener('click', () => {
+      t.remove();
+      doBackup();
+    });
+
+    // Remove sozinho após 8 segundos
+    setTimeout(() => { if (t.parentNode) t.remove(); }, 8000);
+
+  } catch(e) {}
+}
+
+// Registra data do último backup manual (chamado dentro de doBackup após download)
+function _markBackupDone(){
+  try { localStorage.setItem('agendaProMax_lastBackupDate', Date.now().toString()); } catch(e){}
 }
 
 // ══ CONTAS A PAGAR ══
