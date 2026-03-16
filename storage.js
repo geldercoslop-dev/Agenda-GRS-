@@ -499,8 +499,19 @@ var AppStorage = (function () {
   function saveState(stateObj) {
     var errors = _validateState(stateObj);
     if (errors.length > 0) {
-      _log('error', 'saveState', 'State inválido — gravação bloqueada: ' + errors.join(', '));
-      return false;
+      // Tenta reparar campos inválidos em vez de bloquear a gravação
+      _log('warn', 'saveState', 'State com problemas — tentando reparar antes de salvar: ' + errors.join(', '));
+      if (!Array.isArray(stateObj.consultas))   stateObj.consultas   = [];
+      if (!Array.isArray(stateObj.folders))     stateObj.folders     = [];
+      if (!Array.isArray(stateObj.remedios))    stateObj.remedios    = [];
+      if (!stateObj.tasks || typeof stateObj.tasks !== 'object' || Array.isArray(stateObj.tasks)) stateObj.tasks = {};
+      if (!stateObj.dateTasks || typeof stateObj.dateTasks !== 'object') stateObj.dateTasks = {};
+      // Re-valida após reparo
+      var errors2 = _validateState(stateObj);
+      if (errors2.length > 0) {
+        _log('error', 'saveState', 'State inválido mesmo após reparo — gravação bloqueada: ' + errors2.join(', '));
+        return false;
+      }
     }
 
     var photos = stateObj.bucketPhotos || {};

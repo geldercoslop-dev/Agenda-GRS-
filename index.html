@@ -198,7 +198,7 @@
 
     <!-- ══ DAY VIEW ══ -->
     <div class="view" id="dayView">
-      <div class="pullIndicator" id="pullIndicator">↑ Soltar para voltar</div>
+      <div class="pullIndicator" id="pullIndicator" style="display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;"></div>
       <!-- Subpastas dentro da pasta atual -->
       <div id="quickSubBtn" style="display:none;"></div>
       <div id="subFolderArea" style="display:none;grid-template-columns:repeat(4,1fr);gap:10px 8px;padding:14px 14px 4px;justify-items:center;border-bottom:1px solid var(--line);"></div>
@@ -2574,12 +2574,27 @@ function doBackup(){
           const data = JSON.parse(text);
           if(!data || typeof data !== 'object') throw new Error('Não é um objeto JSON');
           if(!data.tasks && !data.folders && !data.weekStartISO) throw new Error('Arquivo não reconhecido como backup do app');
-          // Merge preservando campos que possam não existir no backup antigo
-          Object.assign(state, data);
+          // Substitui state completamente pelo backup (sem merge parcial)
+          // Preserva apenas weekStartISO atual para evitar checkWeekTransition apagar tudo
+          const _restoredState = Object.assign({}, data);
+          _restoredState.weekStartISO = getSunday(); // semana atual — evita varredura indevida
+          // Garante estrutura mínima caso backup seja antigo
+          if (!_restoredState.tasks || typeof _restoredState.tasks !== 'object') _restoredState.tasks = {};
+          if (!Array.isArray(_restoredState.folders)) _restoredState.folders = [];
+          if (!Array.isArray(_restoredState.folderOrder)) _restoredState.folderOrder = [];
+          if (!Array.isArray(_restoredState.consultas)) _restoredState.consultas = [];
+          if (!Array.isArray(_restoredState.remedios)) _restoredState.remedios = [];
+          // Aplica ao state global
+          Object.keys(_restoredState).forEach(k => { state[k] = _restoredState[k]; });
+          // Salva de forma síncrona no localStorage primeiro (garantia imediata)
+          try { localStorage.setItem('agendaProMax', JSON.stringify(state)); } catch(_){}
+          // Depois salva via AppStorage (IDB em background)
           save();
+          _markBackupDone();
           close();
-          showToast('✅ Backup restaurado com sucesso!');
-          setTimeout(()=>location.reload(),1000);
+          showToast('✅ Backup restaurado! Recarregando...');
+          // Delay maior garante que localStorage já gravou antes do reload
+          setTimeout(()=>location.reload(), 1200);
         } catch(err){
           showToast('❌ Erro: ' + (err.message || 'Arquivo inválido.'));
         }
@@ -3964,19 +3979,29 @@ function checkBackupReminder(){
     // Só avisa se passaram mais de 3 dias (ou nunca fez backup)
     if (last && (now - parseInt(last)) < TRES_DIAS) return;
 
-    // Monta toast de aviso com botão de ação
-    const t = document.createElement('div');
-    t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e3a5f;border:1.5px solid rgba(249,115,22,.6);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;padding:12px 16px;border-radius:16px;z-index:9999;display:flex;align-items:center;gap:10px;box-shadow:0 4px 24px rgba(0,0,0,.5);max-width:320px;';
-    t.innerHTML = '<span style="font-size:22px;">💾</span><div style="flex:1;line-height:1.4;">Faça backup agora!<br><span style="font-weight:500;font-size:11px;opacity:.7;">Seus dados ficam só no celular.</span></div><button id="_bkNow" style="padding:6px 12px;border-radius:10px;border:none;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;">Fazer agora</button>';
-    document.body.appendChild(t);
+    // Modal central — mesmo padrão visual do doBackup()
+    const {box, close} = _modalBase();
+    box.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:18px;">
+        <div style="font-size:44px;margin-bottom:10px;filter:drop-shadow(0 4px 12px rgba(249,115,22,.5));">💾</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:900;color:#e8f4ff;letter-spacing:-.3px;text-align:center;">Faça backup agora!</div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:rgba(180,220,255,.55);margin-top:6px;text-align:center;line-height:1.5;">Seus dados ficam salvos só neste dispositivo.<br>Se limpar o navegador, tudo some.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button id="_bkReminderNow" style="padding:13px 16px;border-radius:14px;border:none;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:14px;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 16px rgba(234,88,12,.45);">
+          <span style="font-size:18px;">📥</span>
+          <span>Fazer backup agora</span>
+        </button>
+        <button id="_bkReminderLater" style="padding:11px 16px;border-radius:14px;border:none;background:rgba(255,255,255,.07);color:rgba(180,220,255,.55);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;width:100%;border:1px solid rgba(255,255,255,.08);">
+          Lembrar depois
+        </button>
+      </div>`;
 
-    t.querySelector('#_bkNow').addEventListener('click', () => {
-      t.remove();
+    box.querySelector('#_bkReminderNow').addEventListener('click', () => {
+      close();
       doBackup();
     });
-
-    // Remove sozinho após 8 segundos
-    setTimeout(() => { if (t.parentNode) t.remove(); }, 8000);
+    box.querySelector('#_bkReminderLater').addEventListener('click', close);
 
   } catch(e) {}
 }
