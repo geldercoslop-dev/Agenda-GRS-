@@ -757,22 +757,22 @@
       <!-- Linha com Léo + barra + botão -->
       <div style="display:flex;align-items:flex-end;gap:10px;padding:0 0 12px 0;">
 
-        <!-- Léo — mais à esquerda, solado alinhado com fundo do botão (54px + 12px padding = 66px do fundo) -->
-        <div style="flex-shrink:0;width:90px;margin-left:2px;align-self:flex-end;">
+        <!-- Léo — solado alinhado com fundo do botão: ambos têm margin-bottom:0 dentro do padding-bottom:12px -->
+        <div style="flex-shrink:0;width:90px;margin-left:14px;align-self:flex-end;margin-bottom:0;">
           <img id="leoFooterAvatar" src="" alt="Leo" style="
             width:155px;height:155px;
             object-fit:contain;object-position:bottom;
             display:block;
-            margin-bottom:0px;
+            margin-bottom:0;
             filter:drop-shadow(0 -2px 14px rgba(0,0,0,.6));
             image-rendering:-webkit-optimize-contrast;
           ">
         </div>
 
-        <!-- Barra de progresso — um pouco mais baixa (padding-bottom menor) -->
+        <!-- Barra de progresso — padding-bottom:18px (um pouco mais baixa) -->
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;
                     justify-content:flex-end;
-                    padding-bottom:22px;
+                    padding-bottom:18px;
                     padding-left:6px;padding-right:6px;">
           <span style="font-size:8px;font-weight:900;letter-spacing:1.2px;color:rgba(180,220,255,.45);text-transform:uppercase;padding-left:2px;">Progresso</span>
           <div style="display:flex;align-items:center;gap:7px;">
