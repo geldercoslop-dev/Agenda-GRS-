@@ -918,7 +918,7 @@
     .calCell.today { background:transparent; color:#f97316; font-weight:800; border:none; position:relative; }
     .calCell.today::before {
       content:''; position:absolute; inset:0; margin:auto;
-      width:clamp(26px,7vw,32px); height:clamp(26px,7vw,32px);
+      width:clamp(24px,7vw,30px); height:clamp(24px,7vw,30px);
       border-radius:8px; border:1.5px solid rgba(249,115,22,.85);
       box-shadow:0 0 5px rgba(249,115,22,.25);
       pointer-events:none;

@@ -754,26 +754,25 @@
     <div id="progressRow" style="
       position:fixed;bottom:0;left:0;right:0;z-index:9997;
     ">
-      <!-- Linha com Léo + barra + botão — tudo no fundo -->
+      <!-- Linha com Léo + barra + botão -->
       <div style="display:flex;align-items:flex-end;gap:10px;padding:0 0 12px 0;">
 
-        <!-- Léo — levemente afastado da borda esquerda -->
-        <div style="flex-shrink:0;width:90px;margin-left:6px;align-self:flex-end;">
+        <!-- Léo — mais à esquerda, solado alinhado com fundo do botão (54px + 12px padding = 66px do fundo) -->
+        <div style="flex-shrink:0;width:90px;margin-left:2px;align-self:flex-end;">
           <img id="leoFooterAvatar" src="" alt="Leo" style="
             width:155px;height:155px;
             object-fit:contain;object-position:bottom;
             display:block;
-            margin-bottom:-12px;
+            margin-bottom:0px;
             filter:drop-shadow(0 -2px 14px rgba(0,0,0,.6));
             image-rendering:-webkit-optimize-contrast;
           ">
         </div>
 
-        <!-- Barra de progresso — centralizada horizontalmente entre Léo e botão,
-             padding-bottom posiciona o centro da barra no centro vertical do botão (54px) -->
+        <!-- Barra de progresso — um pouco mais baixa (padding-bottom menor) -->
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;
                     justify-content:flex-end;
-                    padding-bottom:30px;
+                    padding-bottom:22px;
                     padding-left:6px;padding-right:6px;">
           <span style="font-size:8px;font-weight:900;letter-spacing:1.2px;color:rgba(180,220,255,.45);text-transform:uppercase;padding-left:2px;">Progresso</span>
           <div style="display:flex;align-items:center;gap:7px;">
@@ -786,7 +785,7 @@
           </div>
         </div>
 
-        <!-- Botão menu ☰ — direita, afastado da borda e do fundo -->
+        <!-- Botão menu ☰ — posição mantida exatamente -->
         <button id="sidebarFab" style="
           flex-shrink:0;align-self:flex-end;
           width:54px;height:54px;border-radius:15px;
