@@ -259,11 +259,14 @@
       background: rgba(15,25,60,.92);
       border-radius: 16px;
     }
-    [data-theme="light"] .weekStripWrap.expanded .monthHdrLabel { color:#e8f4ff; }
-    [data-theme="light"] .weekStripWrap.expanded .monthDayName { color:rgba(180,220,255,.6); }
-    [data-theme="light"] .weekStripWrap.expanded .calCell { color:rgba(255,255,255,.8); }
-    [data-theme="light"] .weekStripWrap.expanded .stripHandleHint { color:rgba(255,255,255,.7); }
+    [data-theme="light"] .weekStripWrap.expanded .monthHdrLabel { color:#fff; }
+    [data-theme="light"] .weekStripWrap.expanded .monthDayName { color:rgba(255,255,255,.65); }
+    [data-theme="light"] .weekStripWrap.expanded .calCell { color:#fff; }
+    [data-theme="light"] .weekStripWrap.expanded .calCell.today { color:#f97316; }
+    [data-theme="light"] .weekStripWrap.expanded .stripHandleHint { color:#fff; }
+    [data-theme="light"] .weekStripWrap.expanded .stripFeriadoHint { color:#fff; }
     [data-theme="light"] .weekStripWrap.expanded .stripHandleArrow { color:rgba(249,115,22,.85) !important; }
+    [data-theme="light"] .weekStripWrap.expanded #feriadosShortcut span { color:#fff; }
     .monthDayNames {
       display:none; grid-template-columns:repeat(7,1fr); gap:3px;
       padding:0 8px 4px;
@@ -1142,7 +1145,15 @@
 /* Dark: gradiente azul-marinho (padrão, já no inline) */
 /* Light: gradiente lavanda para transparent, mesma altura */
 [data-theme="light"] #progressRow {
-  background: linear-gradient(to top, rgba(123,136,188,.97) 55%, transparent 100%) !important;
+  background: linear-gradient(to top, rgba(240,245,255,.82) 55%, transparent 100%) !important;
+}
+[data-theme="light"] #progressRow .progress-lbl,
+[data-theme="light"] #progressRow span[style*="letter-spacing:1.2px"] {
+  color: #f97316 !important;
+}
+[data-theme="light"] #progressRow .progressPct,
+[data-theme="light"] #progressRow #progressPct {
+  color: #f97316 !important;
 }
 
 /* ══ LOADER SPINNER ══ */
