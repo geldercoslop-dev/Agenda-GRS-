@@ -173,7 +173,8 @@ async function staleWhileRevalidate(request) {
       caches.open(CACHE_NAME).then((c) => c.put(request, response.clone()));
     return response;
   }).catch(() => null);
-  return cached || networkPromise;
+  if (cached) return cached;
+  return (await networkPromise) || new Response("", { status: 504, statusText: "Gateway Timeout" });
 }
 
 // ══════════════════════════════════════════════════════
@@ -199,7 +200,7 @@ self.addEventListener("message", (event) => {
         await self.registration.showNotification(
           isConsulta ? `🏥 ${item.nome}` : `💊 ${item.nome}`,
           {
-            body: `${item.hora}${item.paciente ? " — " + item.paciente : ""}${item.dose ? " · " + item.dose : ""}`,
+            body: `${item.hora} • Abra o app para detalhes`,
             icon: "./leo-192.png",
             badge: "./leo-192.png",
             tag: item.id,

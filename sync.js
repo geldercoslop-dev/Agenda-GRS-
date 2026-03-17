@@ -266,12 +266,14 @@ async function syncPull(state, save, render) {
   if (!_cfg() || !navigator.onLine) return { pulled: 0, merged: 0 };
 
   const cursors = _getCursors();
+  const devId = _deviceId();
   let pulled = 0, merged = 0;
 
   // ── tasks ─────────────────────────────────────────────────────
   {
     const rows = await _req('GET', 'tasks', null, {
       'updated_at': `gt.${cursors.tasks}`,
+      'device_id':  `eq.${devId}`,
       'order':      'updated_at.asc',
       'limit':      '1000',
     });
@@ -321,6 +323,7 @@ async function syncPull(state, save, render) {
   {
     const rows = await _req('GET', 'consultas', null, {
       'updated_at': `gt.${cursors.consultas}`,
+      'device_id':  `eq.${devId}`,
       'order':      'updated_at.asc',
       'limit':      '500',
     });
@@ -354,6 +357,7 @@ async function syncPull(state, save, render) {
   {
     const rows = await _req('GET', 'remedios', null, {
       'updated_at': `gt.${cursors.remedios}`,
+      'device_id':  `eq.${devId}`,
       'order':      'updated_at.asc',
       'limit':      '500',
     });

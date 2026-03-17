@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   try {
 
-    if (typeof checkStateIntegrity === "function") checkStateIntegrity();
+    if (typeof checkStateIntegrity === "function") checkStateIntegrity(state);
 
     if (typeof renderFolders       === "function") renderFolders();
 

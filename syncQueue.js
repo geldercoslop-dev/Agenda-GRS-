@@ -10,7 +10,7 @@
  *   SyncQueue.peek()                          → retorna cópia da fila (somente leitura)
  *
  * Tipos de operação suportados: 'create' | 'update' | 'delete'
- * Entidades suportadas: 'consulta' | (extensível)
+ * Entidades suportadas: 'consulta' | 'task' | 'remedio' | (extensível)
  *
  * A fila é persistida via AppStorage e sobrevive a refresh de página.
  * O processamento é serial (FIFO) e para ao primeiro erro de rede.
@@ -208,6 +208,10 @@ var SyncQueue = (function () {
     switch (item.entity) {
       case 'consulta':
         return await _execConsulta(item);
+      case 'task':
+        return await _execTask(item);
+      case 'remedio':
+        return await _execRemedio(item);
       default:
         throw new Error('Entidade desconhecida: ' + item.entity);
     }
@@ -241,6 +245,34 @@ var SyncQueue = (function () {
 
     // Marca como pending e executa push
     consulta.synced = false;
+    if (typeof syncPush === 'function' && typeof save === 'function') {
+      await syncPush(state, save);
+    }
+  }
+
+  // ── Handler: task ────────────────────────────────────────────────
+  async function _execTask(item) {
+    var payload = item.payload || {};
+    if (item.type === 'delete') {
+      if (typeof syncDelete === 'function') {
+        await syncDelete('tasks', payload.id || '', payload.bucketId || '');
+      }
+      return;
+    }
+    if (typeof syncPush === 'function' && typeof save === 'function') {
+      await syncPush(state, save);
+    }
+  }
+
+  // ── Handler: remédio ─────────────────────────────────────────────
+  async function _execRemedio(item) {
+    var payload = item.payload || {};
+    if (item.type === 'delete') {
+      if (typeof syncDelete === 'function') {
+        await syncDelete('remedios', payload.id || '');
+      }
+      return;
+    }
     if (typeof syncPush === 'function' && typeof save === 'function') {
       await syncPush(state, save);
     }
