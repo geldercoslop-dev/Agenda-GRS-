@@ -1090,8 +1090,10 @@ function initStripExpand(){
       if(_ov){ _ov.style.display='block'; requestAnimationFrame(()=>_ov.classList.add('open')); }
       if(_pr){ _pr.style.opacity='0'; _pr.style.pointerEvents='none'; _pr.style.transition='opacity .2s'; }
     } else {
-      if(_ov){ _ov.classList.remove('open'); setTimeout(()=>{ _ov.style.display='none'; },250); }
-      if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; }
+      if(_ov){ _ov.classList.remove('open'); setTimeout(()=>{ if(_ov) _ov.style.display='none'; },250); }
+      if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; _pr.style.transition=''; }
+      // Garante que wrap não fique escondido
+      if(wrap){ wrap.style.display=''; wrap.style.visibility=''; wrap.style.opacity=''; }
     }
   }
 
@@ -1124,6 +1126,8 @@ function initStripExpand(){
 
   document.addEventListener('touchmove',(e)=>{
     if(!_active) return;
+    // Só ativa swipe do calendário na tela home
+    if(typeof currentView !== 'undefined' && currentView !== 'home') { _active=false; return; }
     const dy = e.touches[0].clientY - _sy;
     const dx = e.touches[0].clientX - _sx;
     if(Math.abs(dy) < THRESHOLD) return;

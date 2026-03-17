@@ -1145,14 +1145,13 @@
 /* Dark: gradiente azul-marinho (padrão, já no inline) */
 /* Light: gradiente lavanda para transparent, mesma altura */
 [data-theme="light"] #progressRow {
-  background: linear-gradient(to top, rgba(240,245,255,.82) 55%, transparent 100%) !important;
+  background: transparent !important;
 }
-[data-theme="light"] #progressRow .progress-lbl,
-[data-theme="light"] #progressRow span[style*="letter-spacing:1.2px"] {
+/* Textos laranja no rodapé — light */
+[data-theme="light"] #progressLabel {
   color: #f97316 !important;
 }
-[data-theme="light"] #progressRow .progressPct,
-[data-theme="light"] #progressRow #progressPct {
+[data-theme="light"] #progressPct {
   color: #f97316 !important;
 }
 
