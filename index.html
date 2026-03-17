@@ -4250,8 +4250,8 @@ function _renderContasOv(){
     lista.innerHTML=_cfParcelasTemp.map((p,i)=>`
       <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;align-items:center;background:rgba(0,80,120,.3);border:1px solid rgba(0,140,180,.2);border-radius:10px;padding:9px 12px;">
         <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${MUTED};min-width:28px;">${i+1}/${qtd}</span>
-        <input type="text" inputmode="decimal" class="cfPVal" data-pi="${i}" value="${p.valor}" placeholder="0,00" style="padding:8px 10px;border-radius:8px;border:1.5px solid rgba(0,140,180,.22);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;outline:none;width:100%;box-sizing:border-box;">
-        <input type="date" class="cfPDat" data-pi="${i}" value="${p.vencimento}" style="padding:8px 10px;border-radius:8px;border:1.5px solid rgba(0,140,180,.22);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;width:100%;box-sizing:border-box;">
+        <input type="text" inputmode="decimal" class="cfPVal" data-pi="${i}" value="${escAttr(p.valor)}" placeholder="0,00" style="padding:8px 10px;border-radius:8px;border:1.5px solid rgba(0,140,180,.22);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;outline:none;width:100%;box-sizing:border-box;">
+        <input type="date" class="cfPDat" data-pi="${i}" value="${escAttr(p.vencimento)}" style="padding:8px 10px;border-radius:8px;border:1.5px solid rgba(0,140,180,.22);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;width:100%;box-sizing:border-box;">
       </div>`).join('');
     lista.querySelectorAll('.cfPVal').forEach(inp=>inp.addEventListener('change',()=>{ _cfParcelasTemp[parseInt(inp.dataset.pi)].valor=inp.value; }));
     lista.querySelectorAll('.cfPDat').forEach(inp=>inp.addEventListener('change',()=>{ _cfParcelasTemp[parseInt(inp.dataset.pi)].vencimento=inp.value; }));
@@ -4517,8 +4517,8 @@ function _renderReceberOv(){
     lista.innerHTML = _rfParcelasTemp.map((p,i)=>`
       <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;align-items:center;background:rgba(0,80,120,.3);border:1px solid rgba(0,140,180,.2);border-radius:10px;padding:9px 12px;">
         <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${MUTED};min-width:28px;">${i+1}/${qtd}</span>
-        <input type="text" inputmode="decimal" class="rfPVal" data-pi="${i}" value="${p.valor}" placeholder="0,00" style="padding:8px 10px;border-radius:8px;border:1.5px solid rgba(0,140,180,.22);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;outline:none;width:100%;box-sizing:border-box;">
-        <input type="date" class="rfPDat" data-pi="${i}" value="${p.vencimento}" style="padding:8px 10px;border-radius:8px;border:1.5px solid rgba(0,140,180,.22);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;width:100%;box-sizing:border-box;">
+        <input type="text" inputmode="decimal" class="rfPVal" data-pi="${i}" value="${escAttr(p.valor)}" placeholder="0,00" style="padding:8px 10px;border-radius:8px;border:1.5px solid rgba(0,140,180,.22);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;outline:none;width:100%;box-sizing:border-box;">
+        <input type="date" class="rfPDat" data-pi="${i}" value="${escAttr(p.vencimento)}" style="padding:8px 10px;border-radius:8px;border:1.5px solid rgba(0,140,180,.22);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;width:100%;box-sizing:border-box;">
       </div>`).join('');
     lista.querySelectorAll('.rfPVal').forEach(inp=>inp.addEventListener('change',()=>{ _rfParcelasTemp[parseInt(inp.dataset.pi)].valor=inp.value; }));
     lista.querySelectorAll('.rfPDat').forEach(inp=>inp.addEventListener('change',()=>{ _rfParcelasTemp[parseInt(inp.dataset.pi)].vencimento=inp.value; }));
@@ -5528,7 +5528,7 @@ function openPhotoFullscreen(photo, bucketId, galleryOv){
     <div style="position:absolute;top:14px;right:14px;">
       <button id="_pfDel" style="background:rgba(255,50,50,.2);border:1px solid rgba(255,50,50,.35);border-radius:10px;color:#ff6b6b;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;font-family:Space Grotesk,sans-serif;">🗑 Excluir</button>
     </div>
-    <img loading="lazy" decoding="async" src="${photo.url}" style="max-width:95vw;max-height:82vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);">
+    <img loading="lazy" decoding="async" src="${escAttr(photo.url)}" style="max-width:95vw;max-height:82vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);">
     <div style="margin-top:12px;font-size:11px;color:rgba(255,255,255,.4);font-family:Space Grotesk,sans-serif;">${new Date(photo.ts).toLocaleString('pt-BR')}</div>
   `;
   document.body.appendChild(ov);
@@ -5607,7 +5607,7 @@ function initFolderModal(){
              <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:24px;">${f.emoji||''} <b style="color:#fff">${f.name}</b><br>Todas as tarefas serão perdidas.</div>
              <div style="display:flex;gap:10px;">
                <button onclick="goSubBack()" style="flex:1;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#fff;font-weight:700;font-size:13px;cursor:pointer;">Cancelar</button>
-               <button onclick="confirmDelPasta('${f.id}')" style="flex:1;padding:12px;border-radius:12px;border:none;background:#ff3b3b;color:#fff;font-weight:800;font-size:13px;cursor:pointer;">Excluir</button>
+              <button onclick="confirmDelPasta('${escAttr(f.id)}')" style="flex:1;padding:12px;border-radius:12px;border:none;background:#ff3b3b;color:#fff;font-weight:800;font-size:13px;cursor:pointer;">Excluir</button>
              </div>
            </div>`, null, null);
       }),
@@ -5941,9 +5941,9 @@ function openQuickAddTask(key, d, m, y){
     taskListEl.style.display='block';
     taskListEl.innerHTML = existingTasks.map((t,i)=>`
       <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.06);border-radius:10px;margin-bottom:6px;">
-        <span onclick="toggleDateTask('${key}',${i})" style="cursor:pointer;font-size:16px;">${t.done?'✅':'⬜'}</span>
+        <span onclick="toggleDateTask('${escAttr(key)}',${i})" style="cursor:pointer;font-size:16px;">${t.done?'✅':'⬜'}</span>
         <span style="flex:1;font-family:'Space Grotesk',sans-serif;font-size:13px;color:${t.done?'rgba(255,255,255,.4)':'#fff'};text-decoration:${t.done?'line-through':''};font-weight:600;">${t.text}</span>
-        <span onclick="removeDateTask('${key}',${i})" style="cursor:pointer;color:rgba(255,80,80,.7);font-size:14px;">✕</span>
+        <span onclick="removeDateTask('${escAttr(key)}',${i})" style="cursor:pointer;color:rgba(255,80,80,.7);font-size:14px;">✕</span>
       </div>`).join('');
   } else {
     taskListEl.style.display='none';
@@ -7257,27 +7257,27 @@ function _abrirMiniRelatorio(id){
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
           <div>
             <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Paciente</div>
-            <input class="editable" id="_mrPac" value="${escHtml(c.paciente||'')}" readonly>
+            <input class="editable" id="_mrPac" value="${escAttr(c.paciente||'')}" readonly>
           </div>
           <div>
             <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Especialidade</div>
-            <input class="editable" id="_mrEspec" value="${escHtml(c.especialidade||'')}" readonly>
+            <input class="editable" id="_mrEspec" value="${escAttr(c.especialidade||'')}" readonly>
           </div>
           <div>
             <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Médico</div>
-            <input class="editable" id="_mrMedico" value="${escHtml(c.medico||'')}" readonly>
+            <input class="editable" id="_mrMedico" value="${escAttr(c.medico||'')}" readonly>
           </div>
           <div>
             <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Local</div>
-            <input class="editable" id="_mrLocal" value="${escHtml(c.local||'')}" readonly>
+            <input class="editable" id="_mrLocal" value="${escAttr(c.local||'')}" readonly>
           </div>
           <div>
             <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Data</div>
-            <input class="editable" id="_mrData" type="date" value="${c.data||''}" readonly>
+            <input class="editable" id="_mrData" type="date" value="${escAttr(c.data||'')}" readonly>
           </div>
           <div>
             <div style="font-size:9px;font-weight:800;color:${MUTED};text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Hora</div>
-            <input class="editable" id="_mrHora" type="time" value="${c.hora||''}" readonly>
+            <input class="editable" id="_mrHora" type="time" value="${escAttr(c.hora||'')}" readonly>
           </div>
         </div>
         <button id="_mrSaveBtn" style="display:none;width:100%;padding:14px;border-radius:14px;border:none;background:var(--primary,#4da3ff);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:14px;cursor:pointer;margin-top:4px;">✔ Salvar Alterações</button>
@@ -7450,11 +7450,11 @@ function openRemedioModal(editId){
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;${FGRP}">
         <div>
           <div style="${LBL}">Data Início *</div>
-          <input id="_rmData" type="date" style="${iS}" value="${editing?editing.data:''}">
+          <input id="_rmData" type="date" style="${iS}" value="${editing?escAttr(editing.data||''):''}">
         </div>
         <div>
           <div style="${LBL}">1ª Hora *</div>
-          <input id="_rmHora" type="time" style="${iS}" value="${editing?editing.hora:''}">
+          <input id="_rmHora" type="time" style="${iS}" value="${editing?escAttr(editing.hora||''):''}">
         </div>
       </div>
 
@@ -7471,7 +7471,7 @@ function openRemedioModal(editId){
           </div>
         </div>
         <div id="_rmDiasDiv" style="${editing&&editing.continuo?'display:none':''}">
-          <input id="_rmDias" type="number" min="1" max="365" style="${iS}" placeholder="Quantos dias? Ex: 7, 30, 90..." value="${editing&&!editing.continuo?editing.dias:''}">
+          <input id="_rmDias" type="number" min="1" max="365" style="${iS}" placeholder="Quantos dias? Ex: 7, 30, 90..." value="${editing&&!editing.continuo?escAttr(editing.dias||''):''}">
         </div>
         <div id="_rmContinuoInfo" style="display:${editing&&editing.continuo?'block':'none'};background:${FIELD};border:1px solid ${BDR};border-radius:10px;padding:11px 14px;font-size:12px;font-weight:700;color:${ACCENT};font-family:'Space Grotesk',sans-serif;line-height:1.4;">
           ♾️ Sem data de término — reagende a cada 90 dias nas notificações
@@ -7491,7 +7491,7 @@ function openRemedioModal(editId){
         </div>
         <div id="_rmFreqCustomDiv" style="display:none;margin-top:12px;">
           <div style="${LBL}">A cada quantas horas?</div>
-          <input id="_rmFreqH" type="number" min="1" max="72" style="${iS}" placeholder="Ex: 6, 24..." value="${editing&&editing.frequencia!==8&&editing.frequencia!==12?editing.frequencia:''}">
+          <input id="_rmFreqH" type="number" min="1" max="72" style="${iS}" placeholder="Ex: 6, 24..." value="${editing&&editing.frequencia!==8&&editing.frequencia!==12?escAttr(editing.frequencia||''):''}">
         </div>
       </div>
 
