@@ -402,6 +402,23 @@
     }
     .sidebarOverlay.open { display:block; opacity:1; }
 
+    /* Overlay do calendário expandido — mesmo efeito do sidebar */
+    #calExpandOverlay {
+      display:none; position:fixed; inset:0; z-index:899;
+      background:rgba(0,0,0,.6); backdrop-filter:blur(3px);
+      -webkit-backdrop-filter:blur(3px);
+      opacity:0; transition:opacity .25s ease;
+      pointer-events:none;
+    }
+    #calExpandOverlay.open {
+      display:block; opacity:1; pointer-events:auto;
+    }
+    /* Rodapé some quando calendário está expandido */
+    #weekStripWrap.expanded ~ * #progressRow,
+    body.cal-expanded #progressRow {
+      opacity:0; pointer-events:none; transition:opacity .2s;
+    }
+
     .sidebar {
       position:fixed; top:0; left:-310px; bottom:0; width:300px; z-index:9999;
       background:var(--bg2);
@@ -919,8 +936,8 @@
     .calCell.today::before {
       content:''; position:absolute;
       top:50%; left:50%; transform:translate(-50%,-50%);
-      width:30px; height:30px;
-      border-radius:8px; border:1.5px solid rgba(249,115,22,.85);
+      width:22px; height:22px;
+      border-radius:6px; border:1.5px solid rgba(249,115,22,.85);
       box-shadow:0 0 5px rgba(249,115,22,.25);
       pointer-events:none;
     }

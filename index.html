@@ -154,7 +154,9 @@
     </div>
 
     <!-- ══ WEEK STRIP — expansível ══ -->
-    <div id="weekStripCard" style="margin:0 14px 8px;background:transparent;border:none;border-radius:20px;overflow:hidden;">
+    <!-- Overlay blur para calendário expandido -->
+    <div id="calExpandOverlay"></div>
+    <div id="weekStripCard" style="margin:0 14px 8px;background:transparent;border:none;border-radius:20px;overflow:hidden;position:relative;z-index:900;">
     <div class="weekStripWrap" id="weekStripWrap">
       <!-- Linha semanal (padrão) -->
       <div class="weekStrip" id="weekStrip"></div>
@@ -755,39 +757,37 @@
       position:fixed;bottom:0;left:0;right:0;z-index:9997;
     ">
       <!-- Linha com Léo + barra + botão -->
-      <div style="display:flex;align-items:flex-end;gap:10px;padding:0 0 12px 0;">
+      <div style="position:relative;height:78px;">
 
-        <!-- Léo — solado alinhado com fundo do botão: ambos têm margin-bottom:0 dentro do padding-bottom:12px -->
-        <div style="flex-shrink:0;width:90px;margin-left:14px;align-self:flex-end;margin-bottom:0;">
-          <img id="leoFooterAvatar" src="" alt="Leo" style="
-            width:155px;height:155px;
-            object-fit:contain;object-position:bottom;
-            display:block;
-            margin-bottom:0;
-            filter:drop-shadow(0 -2px 14px rgba(0,0,0,.6));
-            image-rendering:-webkit-optimize-contrast;
-          ">
-        </div>
+        <!-- Léo — prancheta a 14px da borda esquerda, pé alinhado com fundo do botão -->
+        <img id="leoFooterAvatar" src="" alt="Leo" style="
+          position:absolute;left:-21px;bottom:-8px;
+          width:155px;height:155px;
+          object-fit:contain;object-position:bottom left;
+          display:block;
+          pointer-events:none;
+          filter:drop-shadow(0 -2px 14px rgba(0,0,0,.6));
+          image-rendering:-webkit-optimize-contrast;
+          z-index:1;
+        ">
 
-        <!-- Barra de progresso — padding-bottom:18px (um pouco mais baixa) -->
-        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;
-                    justify-content:flex-end;
-                    padding-bottom:18px;
-                    padding-left:6px;padding-right:6px;">
+        <!-- Barra de progresso — posição absoluta, centralizada entre Léo e botão -->
+        <div style="position:absolute;left:95px;right:90px;bottom:12px;
+                    display:flex;flex-direction:column;gap:4px;padding-bottom:15px;">
           <span style="font-size:8px;font-weight:900;letter-spacing:1.2px;color:rgba(180,220,255,.45);text-transform:uppercase;padding-left:2px;">Progresso</span>
-          <div style="display:flex;align-items:center;gap:7px;">
+          <div style="display:flex;align-items:center;gap:4px;">
             <div style="flex:1;height:13px;border-radius:99px;background:rgba(255,255,255,.1);box-shadow:inset 0 1px 3px rgba(0,0,0,.4);padding:2px;position:relative;overflow:visible;">
               <div class="progressFill" id="progressFill" style="width:0%">
                 <span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;z-index:2;filter:drop-shadow(0 0 4px rgba(255,255,255,.8));">⚡</span>
               </div>
             </div>
-            <span class="progressPct" id="progressPct" style="min-width:30px;font-size:12px;font-weight:800;color:rgba(249,115,22,.9);">0%</span>
+            <span class="progressPct" id="progressPct" style="font-size:12px;font-weight:800;color:rgba(249,115,22,.9);white-space:nowrap;">0%</span>
           </div>
         </div>
 
-        <!-- Botão menu ☰ — posição mantida exatamente -->
+        <!-- Botão menu ☰ — direita 14px, fundo 12px -->
         <button id="sidebarFab" style="
-          flex-shrink:0;align-self:flex-end;
+          position:absolute;right:14px;bottom:12px;
           width:54px;height:54px;border-radius:15px;
           background:linear-gradient(135deg,#f97316,#ea580c);
           border:none;
@@ -796,8 +796,7 @@
           display:flex;align-items:center;justify-content:center;
           transition:transform .15s;
           -webkit-tap-highlight-color:transparent;
-          margin-right:14px;
-          margin-bottom:0px;
+          z-index:2;
         ">☰</button>
 
       </div>
@@ -1085,6 +1084,16 @@ function initStripExpand(){
     wrap.classList.toggle('expanded', expanded);
     if(!expanded){ viewMonthYear=null; viewMonthMonth=null; }
     renderMonthGrid();
+    // Overlay blur + ocultar rodapé ao expandir
+    const _ov = document.getElementById('calExpandOverlay');
+    const _pr = document.getElementById('progressRow');
+    if(toExpand){
+      if(_ov){ _ov.style.display='block'; requestAnimationFrame(()=>_ov.classList.add('open')); }
+      if(_pr){ _pr.style.opacity='0'; _pr.style.pointerEvents='none'; _pr.style.transition='opacity .2s'; }
+    } else {
+      if(_ov){ _ov.classList.remove('open'); setTimeout(()=>{ _ov.style.display='none'; },250); }
+      if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; }
+    }
   }
 
   // Clique no handle = toggle calendário
