@@ -12,6 +12,10 @@
  * NÃO existem no codebase: renderPastas, inicializarBusca, initState, loadStorage
  */
 document.addEventListener("DOMContentLoaded", function () {
+  if (window.__APP_PRIMARY_BOOT_DONE === true) {
+    console.log("BOOT SKIP (primary already executed)");
+    return;
+  }
 
   try {
 
