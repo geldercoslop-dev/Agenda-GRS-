@@ -237,8 +237,11 @@
       50%       { transform: translateX(4px); }
     }
     [data-theme="light"] .stripHandleHint { color:#1e2d6b; }
+    /* Quando expandido: "Arraste" some, feriados e setas ficam */
     .weekStripWrap.expanded .stripHandleHint { display:none; }
-    .weekStripWrap.expanded #feriadosShortcut { display:none; }
+    .weekStripWrap.expanded .stripFeriadoHint { display:inline !important; }
+    .weekStripWrap.expanded #feriadosShortcut { display:flex !important; }
+    .weekStripWrap.expanded .stripHandleArrow { animation:none; }
 
     /* Cabeçalho do mês expandido */
     .monthHdr {
@@ -251,6 +254,16 @@
       letter-spacing:.6px; text-transform:uppercase; color:rgba(255,255,255,.85);
     }
     [data-theme="light"] .monthHdrLabel { color:#1e2d6b; }
+    /* Tema light: fundo do calendário expandido escuro para contraste */
+    [data-theme="light"] .weekStripWrap.expanded {
+      background: rgba(15,25,60,.92);
+      border-radius: 16px;
+    }
+    [data-theme="light"] .weekStripWrap.expanded .monthHdrLabel { color:#e8f4ff; }
+    [data-theme="light"] .weekStripWrap.expanded .monthDayName { color:rgba(180,220,255,.6); }
+    [data-theme="light"] .weekStripWrap.expanded .calCell { color:rgba(255,255,255,.8); }
+    [data-theme="light"] .weekStripWrap.expanded .stripHandleHint { color:rgba(255,255,255,.7); }
+    [data-theme="light"] .weekStripWrap.expanded .stripHandleArrow { color:rgba(249,115,22,.85) !important; }
     .monthDayNames {
       display:none; grid-template-columns:repeat(7,1fr); gap:3px;
       padding:0 8px 4px;
@@ -697,6 +710,7 @@
 
     .sModalOverlay {
       display:none; position:fixed; inset:0; background:rgba(0,0,0,.6);
+      backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
       z-index:9000; align-items:center; justify-content:center; padding:20px;
     }
     .sModalOverlay.show { display:flex; }
@@ -751,6 +765,7 @@
     /* ══ FOLDER MODAL ══ */
     .fModalOverlay {
       display:none; position:fixed; inset:0; background:rgba(0,0,0,.6);
+      backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
       z-index:9000; align-items:center; justify-content:center; padding:20px;
     }
     .fModalOverlay.show { display:flex; }
@@ -875,6 +890,7 @@
     /* ══ CALENDAR MODAL ══ */
     .calModalOverlay {
       display:none; position:fixed; inset:0; background:rgba(0,0,0,.6);
+      backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
       z-index:9200; align-items:center; justify-content:center; padding:16px;
     }
     .calModalOverlay.show { display:flex; }
