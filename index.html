@@ -958,6 +958,17 @@ function addDays(date, n) { const d = new Date(date); d.setDate(d.getDate()+n); 
 function fmtFull(date) { return String(date.getDate()).padStart(2,'0')+'/'+String(date.getMonth()+1).padStart(2,'0')+'/'+date.getFullYear(); }
 function escHtml(s) { return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
 function escAttr(s) { return escHtml(s).replace(/`/g, '&#096;'); }
+function safeImageUrl(rawUrl) {
+  const val = String(rawUrl || '').trim();
+  if (!val) return '';
+  if (val.startsWith('data:image/')) return val;
+  if (val.startsWith('blob:')) return val;
+  try {
+    const u = new URL(val, window.location.origin);
+    if (u.protocol === 'http:' || u.protocol === 'https:') return u.toString();
+  } catch (_) {}
+  return '';
+}
 function _sanitizeInboundData(raw) {
   const seen = new WeakSet();
   function stripUnsafeKeysDeep(node) {
@@ -1438,8 +1449,8 @@ function openPastasDaFrente(){
     const isChecked = selected.has(id);
     row.style.cssText = 'display:flex;align-items:center;gap:14px;padding:11px 18px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05);transition:background .1s;';
     row.innerHTML = `
-      <span style="font-size:24px;line-height:1;flex-shrink:0;">${f.emoji||'📁'}</span>
-      <span style="flex:1;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:#e8f4ff;">${f.name}</span>
+      <span style="font-size:24px;line-height:1;flex-shrink:0;">${escHtml(f.emoji||'📁')}</span>
+      <span style="flex:1;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:#e8f4ff;">${escHtml(f.name)}</span>
       <div class="_pfCheck" style="width:22px;height:22px;border-radius:8px;border:2px solid ${isChecked?'#f97316':'rgba(255,255,255,.2)'};background:${isChecked?'#f97316':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;">
         ${isChecked?'<span style="color:#fff;font-size:13px;font-weight:900;">✓</span>':''}
       </div>
@@ -1535,8 +1546,8 @@ function openTodasPastas(){
     tile.dataset.id = id;
     tile.className = 'folderTile';
     tile.innerHTML = `
-      <div class="fi-wrap"><span class="fi">${f.emoji||'📁'}</span></div>
-      <span class="fl">${f.name}</span>
+      <div class="fi-wrap"><span class="fi">${escHtml(f.emoji||'📁')}</span></div>
+      <span class="fl">${escHtml(f.name)}</span>
     `;
 
     // Click to open
@@ -2439,7 +2450,7 @@ function shareWhatsApp(){
 
   if(arr.length===0){showToast('✅ Nenhuma tarefa pendente para enviar!');return;}
 
-  const itens=arr.map(t=>`<div class="task"><span class="ttick">${t.done?"✓":"·"}</span><span class="ttxt" data-tid="${t.id}" data-bid="${currentBucket}">${escHtml(t.text).replace(/^[^a-zA-Z0-9À-ÿ\(\[\{]*/,"")}</span></div>`).join('');
+  const itens=arr.map(t=>`<div class="task"><span class="ttick">${t.done?"✓":"·"}</span><span class="ttxt" data-tid="${escAttr(t.id)}" data-bid="${escAttr(currentBucket)}">${escHtml(t.text).replace(/^[^a-zA-Z0-9À-ÿ\(\[\{]*/,"")}</span></div>`).join('');
 
   const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -2525,7 +2536,7 @@ function shareWhatsAppGlobal(){
   // Cards em 2 colunas quando >2 seções
   const useGrid = secoes.length > 2;
   const cardsHtml = secoes.map(sec=>{
-    const items = sec.tasks.map(t=>`<div class="task"><span class="ttick">${t.done?"✓":"·"}</span><span class="ttxt" data-tid="${t.id}" data-bid="${sec.bid}">${escHtml(t.text).replace(/^[^a-zA-Z0-9À-ÿ\(\[\{\-]*/,"")}</span></div>`).join('');
+    const items = sec.tasks.map(t=>`<div class="task"><span class="ttick">${t.done?"✓":"·"}</span><span class="ttxt" data-tid="${escAttr(t.id)}" data-bid="${escAttr(sec.bid)}">${escHtml(t.text).replace(/^[^a-zA-Z0-9À-ÿ\(\[\{\-]*/,"")}</span></div>`).join('');
     return `<div class="sec-card"><div class="sec-hdr">${escHtml(sec.titulo)}</div><div class="sec-body">${items}</div></div>`;
   }).join('');
 
@@ -2746,7 +2757,7 @@ function generateWeekReport(includeAllPending){
     }
 
     const cardHtml = dayCards.filter(dc=>dc.arr.length>0).map(dc=>{
-      const tasks = dc.arr.map(t=>`<div class="task${t.done?' done':''}"><span class="ttick">${t.done?"✓":"·"}</span><span class="ttxt" data-tid="${t.id}" data-bid="${dc.bid}">${escHtml(t.text).replace(/^[^a-zA-Z0-9À-ÿ\(\[\{]*/,"")}</span></div>`).join('');
+      const tasks = dc.arr.map(t=>`<div class="task${t.done?' done':''}"><span class="ttick">${t.done?"✓":"·"}</span><span class="ttxt" data-tid="${escAttr(t.id)}" data-bid="${escAttr(dc.bid)}">${escHtml(t.text).replace(/^[^a-zA-Z0-9À-ÿ\(\[\{]*/,"")}</span></div>`).join('');
       return `<div class="day-card"><div class="day-hdr"><span class="day-name">${dc.name}</span><span class="day-meta">${dc.dateStr}</span></div><div class="task-list">${tasks}</div></div>`;
     }).join('');
 
@@ -2911,8 +2922,8 @@ function toggleSub(id){
 function buildFolderPickHtml(btnClass, includePauta){
   const items = state.folders
     .filter(f=>includePauta || f.id!=='pauta')
-    .map(f=>`<button class="${btnClass} fSelectItem" data-fid="${f.id}" style="width:100%;margin-bottom:6px;padding:11px 14px;border-radius:12px;border:1px solid rgba(0,160,200,.15);background:rgba(255,255,255,.08);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;">
-      <span style="font-size:18px;">${f.emoji||'📁'}</span><span>${f.name}</span>
+    .map(f=>`<button class="${btnClass} fSelectItem" data-fid="${escAttr(f.id)}" style="width:100%;margin-bottom:6px;padding:11px 14px;border-radius:12px;border:1px solid rgba(0,160,200,.15);background:rgba(255,255,255,.08);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;">
+      <span style="font-size:18px;">${escHtml(f.emoji||'📁')}</span><span>${escHtml(f.name)}</span>
     </button>`).join('');
   return `<div style="overflow-y:auto;max-height:55vh;">${items||'<div style="color:rgba(180,220,240,.5);font-size:13px;">Nenhuma pasta encontrada.</div>'}</div>`;
 }
@@ -3897,7 +3908,7 @@ function openDailyReview(pendentes, yesterdayKey, yDayId, todayKey){
       pastas.forEach(f=>{
         const btn=document.createElement('button');
         btn.style.cssText='padding:12px 16px;border-radius:13px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;';
-        btn.innerHTML=`<span style="font-size:18px;">${f.emoji||'📁'}</span> ${escHtml(f.name)}`;
+        btn.innerHTML=`<span style="font-size:18px;">${escHtml(f.emoji||'📁')}</span> ${escHtml(f.name)}`;
         btn.addEventListener('click',()=>{
           removeFromOrigin();
           if(!state.tasks[f.id]) state.tasks[f.id]=[];
@@ -5448,7 +5459,7 @@ function populateFolderSelect(containerId, mode){
         ov2.innerHTML=`<div style="background:var(--bg1);border:1px solid var(--cardBorder);border-radius:20px;padding:26px 22px;max-width:300px;width:100%;font-family:Plus Jakarta Sans,sans-serif;text-align:center">
           <div style="font-size:32px;margin-bottom:10px">🗑️</div>
           <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:8px">Excluir pasta?</div>
-          <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:20px">${f.emoji||''} <strong style="color:#fff">${f.name}</strong><br>Todas as tarefas serão perdidas.</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:20px">${escHtml(f.emoji||'')} <strong style="color:#fff">${escHtml(f.name)}</strong><br>Todas as tarefas serão perdidas.</div>
           <div style="display:flex;gap:10px">
             <button id="_dN" style="flex:1;padding:12px;border-radius:12px;border:1px solid var(--cardBorder);background:transparent;color:#fff;font-weight:700;cursor:pointer">Cancelar</button>
             <button id="_dS" style="flex:1;padding:12px;border-radius:12px;border:none;background:#ff3b3b;color:#fff;font-weight:800;cursor:pointer">Excluir</button>
@@ -5503,7 +5514,7 @@ function openBucketPhotoGallery(bucketId){
     const cell=document.createElement('div');
     cell.style.cssText='position:relative;aspect-ratio:1;overflow:hidden;border-radius:10px;cursor:pointer;';
     const img=document.createElement('img');
-    img.src=p.url;
+    img.src=safeImageUrl(p.url);
     img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
     img.addEventListener('click',()=>openPhotoFullscreen(p, bucketId, ov));
     cell.appendChild(img);
@@ -5529,7 +5540,7 @@ function openPhotoFullscreen(photo, bucketId, galleryOv){
     <div style="position:absolute;top:14px;right:14px;">
       <button id="_pfDel" style="background:rgba(255,50,50,.2);border:1px solid rgba(255,50,50,.35);border-radius:10px;color:#ff6b6b;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;font-family:Space Grotesk,sans-serif;">🗑 Excluir</button>
     </div>
-    <img loading="lazy" decoding="async" src="${escAttr(photo.url)}" style="max-width:95vw;max-height:82vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);">
+    <img loading="lazy" decoding="async" src="${escAttr(safeImageUrl(photo.url))}" style="max-width:95vw;max-height:82vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);">
     <div style="margin-top:12px;font-size:11px;color:rgba(255,255,255,.4);font-family:Space Grotesk,sans-serif;">${new Date(photo.ts).toLocaleString('pt-BR')}</div>
   `;
   document.body.appendChild(ov);
@@ -5605,7 +5616,7 @@ function initFolderModal(){
           `<div style="text-align:center;padding:8px 0 20px">
              <div style="font-size:40px;margin-bottom:12px">🗑️</div>
              <div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:8px">Excluir pasta?</div>
-             <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:24px;">${f.emoji||''} <b style="color:#fff">${f.name}</b><br>Todas as tarefas serão perdidas.</div>
+             <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:24px;">${escHtml(f.emoji||'')} <b style="color:#fff">${escHtml(f.name)}</b><br>Todas as tarefas serão perdidas.</div>
              <div style="display:flex;gap:10px;">
                <button onclick="goSubBack()" style="flex:1;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#fff;font-weight:700;font-size:13px;cursor:pointer;">Cancelar</button>
               <button onclick="confirmDelPasta('${escAttr(f.id)}')" style="flex:1;padding:12px;border-radius:12px;border:none;background:#ff3b3b;color:#fff;font-weight:800;font-size:13px;cursor:pointer;">Excluir</button>
@@ -6114,8 +6125,10 @@ function _removeConsultaProjections(consulta) {
     if (!t || typeof t.text !== 'string') return false;
     const esp = String(consulta.especialidade || '').trim();
     const pac = String(consulta.paciente || '').trim();
+    const hora = String(consulta.hora || '').trim();
     if (!esp || !pac) return false;
-    return t.text.includes(esp) && t.text.includes(pac);
+    if (!(t.text.includes(esp) && t.text.includes(pac))) return false;
+    return !hora || t.text.includes(hora);
   };
 
   if (state.tasks && Array.isArray(state.tasks['_consultas'])) {
@@ -6986,9 +6999,13 @@ waitForStorageReady().then(function (ready) {
 if (typeof DIAGNOSTIC_MODE !== 'undefined' && DIAGNOSTIC_MODE === true) {
   // Pequeno delay para garantir que todo o boot (SW, sync, fila) já inicializou
   setTimeout(function () {
-    AppDiagnostics.run().catch(function (e) {
-      console.error('[diagnostics] Falha inesperada no diagnóstico:', e);
-    });
+    if (typeof AppDiagnostics !== 'undefined' && AppDiagnostics && typeof AppDiagnostics.run === 'function') {
+      AppDiagnostics.run().catch(function (e) {
+        console.error('[diagnostics] Falha inesperada no diagnóstico:', e);
+      });
+    } else {
+      console.warn('[diagnostics] DIAGNOSTIC_MODE ativo, mas diagnostics.js não está carregado.');
+    }
   }, 800);
 }
 
@@ -7011,6 +7028,13 @@ if (typeof DIAGNOSTIC_MODE !== 'undefined' && DIAGNOSTIC_MODE === true) {
     // 2. Sync ao voltar online
     window.addEventListener('online', () => {
       initSync(state, save, _renderAll);
+    });
+
+    // 2.1 Sync ao voltar para foreground (resumo de alterações remotas)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && navigator.onLine) {
+        initSync(state, save, _renderAll);
+      }
     });
 
     // 3. Sync periódico a cada 5 minutos
@@ -7862,21 +7886,21 @@ function generateConsultasReport(){
       const badgeText=isPast?'Realizada':'Próxima';
       return `<div class="card${isPast?' past':''}">
         <div class="card-hdr">
-          <div class="card-title" data-cid="${c.id}" data-cfield="especialidade">${escHtml(c.especialidade)}</div>
+          <div class="card-title" data-cid="${escAttr(c.id)}" data-cfield="especialidade">${escHtml(c.especialidade)}</div>
           <span class="card-badge${isPast?' past':''}">${badgeText}</span>
         </div>
         <div class="card-body">
           <div class="field">
             <div class="field-lbl">Paciente</div>
-            <div class="field-val" data-cid="${c.id}" data-cfield="paciente">👤 ${escHtml(c.paciente)}</div>
+            <div class="field-val" data-cid="${escAttr(c.id)}" data-cfield="paciente">👤 ${escHtml(c.paciente)}</div>
           </div>
           <div class="field">
             <div class="field-lbl">Data e Hora</div>
-            <div class="field-val">📅 ${df} <span class="accent" data-cid="${c.id}" data-cfield="hora">${c.hora}</span></div>
+            <div class="field-val">📅 ${df} <span class="accent" data-cid="${escAttr(c.id)}" data-cfield="hora">${escHtml(c.hora)}</span></div>
           </div>
-          ${c.medico?`<div class="field"><div class="field-lbl">Médico</div><div class="field-val" data-cid="${c.id}" data-cfield="medico">👨‍⚕️ ${escHtml(c.medico)}</div></div>`:''}
-          ${c.local?`<div class="field"><div class="field-lbl">Local</div><div class="field-val" data-cid="${c.id}" data-cfield="local">📍 ${escHtml(c.local)}</div></div>`:''}
-          ${c.obs?`<div class="field" style="grid-column:span 2"><div class="field-lbl">Observação</div><div class="field-val" data-cid="${c.id}" data-cfield="obs">📝 ${escHtml(c.obs)}</div></div>`:''}
+          ${c.medico?`<div class="field"><div class="field-lbl">Médico</div><div class="field-val" data-cid="${escAttr(c.id)}" data-cfield="medico">👨‍⚕️ ${escHtml(c.medico)}</div></div>`:''}
+          ${c.local?`<div class="field"><div class="field-lbl">Local</div><div class="field-val" data-cid="${escAttr(c.id)}" data-cfield="local">📍 ${escHtml(c.local)}</div></div>`:''}
+          ${c.obs?`<div class="field" style="grid-column:span 2"><div class="field-lbl">Observação</div><div class="field-val" data-cid="${escAttr(c.id)}" data-cfield="obs">📝 ${escHtml(c.obs)}</div></div>`:''}
         </div>
       </div>`;
     }
@@ -8316,7 +8340,7 @@ function generateRemediosReport(){
         return `<div style="background:#1a1f3a;border:1px solid ${cardBorder};border-radius:14px;padding:16px;margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px;">
             <div>
-              <div style="font-size:16px;font-weight:900;color:${accent};" data-rid="${r.id}" data-rfield="nome">💊 <span data-rid="${r.id}" data-rfield="nome">${escHtml(r.nome)}</span>${r.dose?`<span style="font-size:12px;font-weight:500;color:#64748b;margin-left:6px;" data-rid="${r.id}" data-rfield="dose">${escHtml(r.dose)}</span>`:''}</div>
+              <div style="font-size:16px;font-weight:900;color:${accent};" data-rid="${escAttr(r.id)}" data-rfield="nome">💊 <span data-rid="${escAttr(r.id)}" data-rfield="nome">${escHtml(r.nome)}</span>${r.dose?`<span style="font-size:12px;font-weight:500;color:#64748b;margin-left:6px;" data-rid="${escAttr(r.id)}" data-rfield="dose">${escHtml(r.dose)}</span>`:''}</div>
               <div style="font-size:12px;color:#94a3b8;margin-top:3px;">👤 ${escHtml(r.paciente)}</div>
             </div>
             <span style="background:${isAtivo?'rgba(167,139,250,.15)':'rgba(100,116,139,.12)'};color:${accent};font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;white-space:nowrap;border:1px solid ${cardBorder};">${isAtivo?'Ativo':'Encerrado'}</span>

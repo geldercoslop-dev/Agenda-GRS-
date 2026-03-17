@@ -554,7 +554,9 @@ function _upsertConsultaProjection(state, consulta) {
   var df   = data ? data.split('-').reverse().join('/') : '';
   var now  = Date.now();
 
-  var tIdx = state.tasks['_consultas'].findIndex(function (t) { return t && t.consultaRef === consulta.id; });
+  state.tasks['_consultas'] = state.tasks['_consultas'].filter(function (t) {
+    return !(t && t.consultaRef === consulta.id);
+  });
   var folderTask = {
     id: 'cq_' + consulta.id,
     text: '🏥 ' + esp + (med ? ' · ' + med : '') + (pac ? ' — ' + pac : '') + ' | ' + df + ' ' + hora,
@@ -564,8 +566,7 @@ function _upsertConsultaProjection(state, consulta) {
     updatedAt: consulta.updatedAt || now,
     synced: true
   };
-  if (tIdx >= 0) state.tasks['_consultas'][tIdx] = folderTask;
-  else state.tasks['_consultas'].push(folderTask);
+  state.tasks['_consultas'].push(folderTask);
 
   Object.keys(state.dateTasks).forEach(function (dk) {
     if (!Array.isArray(state.dateTasks[dk])) return;
@@ -577,7 +578,6 @@ function _upsertConsultaProjection(state, consulta) {
 
   if (!data) return;
   if (!Array.isArray(state.dateTasks[data])) state.dateTasks[data] = [];
-  var dIdx = state.dateTasks[data].findIndex(function (t) { return t && t.consultaRef === consulta.id; });
   var dateTask = {
     id: 'cd_' + consulta.id,
     text: '🏥 ' + esp + (med ? ' · ' + med : '') + (pac ? ' — ' + pac : '') + ' às ' + hora,
@@ -587,8 +587,7 @@ function _upsertConsultaProjection(state, consulta) {
     updatedAt: consulta.updatedAt || now,
     synced: true
   };
-  if (dIdx >= 0) state.dateTasks[data][dIdx] = dateTask;
-  else state.dateTasks[data].push(dateTask);
+  state.dateTasks[data].push(dateTask);
 }
 
 function _removeConsultaProjection(state, consultaId) {
