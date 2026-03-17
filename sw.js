@@ -1,12 +1,13 @@
 /* ═══════════════════════════════════════════════════════
-   Agenda Pro Max — Service Worker v34
+   Agenda Pro Max — Service Worker v35
    Versão fixa — incrementar manualmente a cada deploy.
    ═══════════════════════════════════════════════════════ */
 
 // Versão fixa. Incrementar ao fazer deploy para forçar atualização do cache.
 // Histórico: v33 (2026-03) — corrigido Date.now() por versão estável
 //            v34 (2026-03) — força limpeza de cache com caminhos /Agenda-GRS-/ antigos
-const CACHE_VERSION = "v34";
+//            v35 (2026-03) — botão Fechar modal pastas + marcador cal 22px
+const CACHE_VERSION = "v35";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
 // Prefixo usado para identificar caches deste app e limpar apenas os deles
 const CACHE_PREFIX  = "agenda-cache-";

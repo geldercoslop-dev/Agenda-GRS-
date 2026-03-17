@@ -333,7 +333,7 @@
   ">
     <!-- Título -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:rgba(125,211,240,.6);">🔍 Buscar</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:rgba(125,211,240,.6);">Pesquisa rápida</span>
       <button id="searchClose" class="sCloseBtn" style="-webkit-tap-highlight-color:transparent;">‹</button>
     </div>
     <!-- Campo de busca -->
@@ -580,14 +580,11 @@
       <span style="font-size:18px;line-height:1;">📁</span>
       <span style="flex:1;">Gerenciar Pastas</span>
       <button id="fClose" style="
-        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-        background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);
-        border-radius:12px;padding:6px 10px;cursor:pointer;
-        -webkit-tap-highlight-color:transparent;flex-shrink:0;
-      ">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#f97316"/><path d="M14 7L9 12L14 17" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:9px;font-weight:800;color:rgba(255,255,255,.7);letter-spacing:.3px;text-transform:uppercase;">Voltar</span>
-      </button>
+        background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;
+        border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;
+        font-size:13px;font-weight:900;padding:8px 16px;cursor:pointer;flex-shrink:0;
+        -webkit-tap-highlight-color:transparent;
+      ">Fechar</button>
     </div>
     <div id="fBody">
       <!-- Cards grid -->
@@ -754,7 +751,7 @@
       background:linear-gradient(to top, rgba(5,14,31,.58) 33%, transparent 100%);"></div>
 
     <div id="progressRow" style="
-      position:fixed;bottom:0;left:0;right:0;z-index:9997;
+      position:fixed;bottom:0;left:0;right:0;z-index:900;
     ">
       <!-- Linha com Léo + barra + botão -->
       <div style="position:relative;height:78px;">
@@ -1453,8 +1450,15 @@ function openPastasDaFrente(){
 
 function openTodasPastas(){
   if(typeof window._navPush === 'function') window._navPush();
-  const {ov, box, close} = _modalBase();
+  const {ov, box, close: _closeBase} = _modalBase();
   ov.id = 'todasPastasOv';
+  // Esconde rodapé (Léo + barra + botão) igual ao calendário expandido
+  const _pr = document.getElementById('progressRow');
+  if(_pr){ _pr.style.opacity='0'; _pr.style.pointerEvents='none'; _pr.style.transition='opacity .2s'; }
+  const close = ()=>{
+    _closeBase();
+    if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; }
+  };
 
   // Header fixo
   const hdr = document.createElement('div');
@@ -1464,7 +1468,7 @@ function openTodasPastas(){
       <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:#e8f4ff;line-height:1.2;">📁 Todas as Pastas</div>
       <div style="font-size:10px;color:rgba(255,255,255,.38);margin-top:4px;font-family:'Plus Jakarta Sans',sans-serif;">Segure e arraste para reordenar</div>
     </div>
-    <button id="_tpClose" class="sCloseBtn" style="width:32px;height:32px;border-radius:9px;background:rgba(0,120,160,.25);border:1px solid rgba(0,160,200,.3);color:#7dd3f0;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>`;
+    <button id="_tpClose" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;padding:8px 16px;cursor:pointer;flex-shrink:0;">Fechar</button>`;
   box.appendChild(hdr);
 
   // Área scrollável
@@ -2129,7 +2133,7 @@ function _modalBase(){
   const isLight=document.body.getAttribute('data-theme')==='light';
   const ov=document.createElement('div');
   ov.className='modalOverlay';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9800;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:9800;display:flex;align-items:center;justify-content:center;padding:14px;overflow-y:auto;';
   const box=document.createElement('div');
   box.style.cssText='width:100%;max-width:380px;border-radius:22px;padding:22px;overflow-y:auto;max-height:calc(100dvh - 28px);animation:scaleIn .22s ease;font-family:\'Space Grotesk\',sans-serif;box-sizing:border-box;'
     +'background:linear-gradient(160deg,#021824,#04355a);border:1px solid rgba(0,160,200,.2);box-shadow:0 20px 60px rgba(0,0,0,.55);';
@@ -4024,6 +4028,7 @@ function _getContas(){ return AppStorage.get('agendaProMax_contas', []); }
 function _saveContas(arr){ AppStorage.set('agendaProMax_contas', arr); }
 
 function openContas(){
+  _setFooter(false);
   const existing = document.getElementById('contasOv');
   if(existing){ existing.remove(); return; }
 
@@ -4308,6 +4313,7 @@ function _getReceber(){ return AppStorage.get('agendaProMax_receber', []); }
 function _saveReceber(arr){ AppStorage.set('agendaProMax_receber', arr); }
 
 function openReceber(){
+  _setFooter(false);
   const existing = document.getElementById('receberOv');
   if(existing){ existing.remove(); return; }
   _renderReceberOv();
@@ -4590,6 +4596,7 @@ function _getExames(){ return AppStorage.get('agendaProMax_exames', []); }
 function _saveExames(arr){ AppStorage.set('agendaProMax_exames', arr); }
 
 function openExames(){
+  _setFooter(false);
   const existing=document.getElementById('examesOv');
   if(existing){existing.remove();return;}
 
@@ -4800,6 +4807,7 @@ function _getMercado(){ return AppStorage.get('agendaProMax_mercado', []); }
 function _saveMercado(arr){ AppStorage.set('agendaProMax_mercado', arr); }
 
 function openMercado(){
+  _setFooter(false);
   const existing=document.getElementById('mercadoOv');
   if(existing){ existing.remove(); return; }
 
@@ -4886,6 +4894,7 @@ function _getDocs(){ return AppStorage.get('agendaProMax_docs', []); }
 function _saveDocs(arr){ AppStorage.set('agendaProMax_docs', arr); }
 
 function openDocs(){
+  _setFooter(false);
   const existing = document.getElementById('docsOv');
   if(existing){ existing.remove(); return; }
 
@@ -6207,6 +6216,9 @@ function importarDados() {
 // ══════════════════════════════════════════════════════════════════
 function openSearch() {
   const overlay = document.getElementById('searchOverlay');
+  // Oculta rodapé na tela de busca
+  const _pr = document.getElementById('progressRow');
+  if(_pr){ _pr.style.opacity='0'; _pr.style.pointerEvents='none'; _pr.style.transition='opacity .15s'; }
   const input   = document.getElementById('searchInput');
   if (!overlay) return;
   overlay.style.display = 'flex';
@@ -6217,6 +6229,11 @@ function openSearch() {
 
 function closeSearch() {
   const overlay = document.getElementById('searchOverlay');
+  // Restaura rodapé apenas se estiver na home
+  if(typeof currentView !== 'undefined' && currentView === 'home'){
+    const _pr = document.getElementById('progressRow');
+    if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; }
+  }
   if (overlay) overlay.style.display = 'none';
 }
 
@@ -7090,6 +7107,7 @@ function openConsultaModal(editId){
 }
 
 function openListaConsultas(){
+  _setFooter(false);
   const existing=document.getElementById('listaConsultasOv');
   if(existing)existing.remove();
 
@@ -7627,6 +7645,7 @@ function openRemedioModal(editId){
 }
 
 function openListaRemedios(){
+  _setFooter(false);
 
   const existing=document.getElementById('listaRemediosOv');
   if(existing)existing.remove();
