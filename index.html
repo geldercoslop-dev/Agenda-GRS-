@@ -6179,6 +6179,71 @@ function _restoreConsultaProjections(snapshot) {
   });
 }
 
+function _removeRemedioProjections(remedio) {
+  const snapshot = { folderItems: [], dateItems: [] };
+  if (!remedio || !remedio.id) return snapshot;
+
+  if (state.tasks && Array.isArray(state.tasks['_remedios'])) {
+    const kept = [];
+    state.tasks['_remedios'].forEach((t, idx) => {
+      if (t && t.remedioRef === remedio.id) snapshot.folderItems.push({ idx, item: t });
+      else kept.push(t);
+    });
+    state.tasks['_remedios'] = kept;
+  }
+
+  if (!state.dateTasks || typeof state.dateTasks !== 'object' || Array.isArray(state.dateTasks)) {
+    return snapshot;
+  }
+
+  const byCalIds = remedio.calIds && typeof remedio.calIds === 'object';
+  if (byCalIds) {
+    Object.entries(remedio.calIds).forEach(([dk, ids]) => {
+      if (!Array.isArray(ids) || !Array.isArray(state.dateTasks[dk])) return;
+      const idSet = new Set(ids);
+      const kept = [];
+      state.dateTasks[dk].forEach((t, idx) => {
+        if (t && idSet.has(t.id)) snapshot.dateItems.push({ dk, idx, item: t });
+        else kept.push(t);
+      });
+      state.dateTasks[dk] = kept;
+      if (state.dateTasks[dk].length === 0) delete state.dateTasks[dk];
+    });
+    return snapshot;
+  }
+
+  // Fallback legado: remove por remedioRef caso calIds não exista.
+  Object.keys(state.dateTasks).forEach((dk) => {
+    if (!Array.isArray(state.dateTasks[dk])) return;
+    const kept = [];
+    state.dateTasks[dk].forEach((t, idx) => {
+      if (t && t.remedioRef === remedio.id) snapshot.dateItems.push({ dk, idx, item: t });
+      else kept.push(t);
+    });
+    state.dateTasks[dk] = kept;
+    if (state.dateTasks[dk].length === 0) delete state.dateTasks[dk];
+  });
+
+  return snapshot;
+}
+
+function _restoreRemedioProjections(snapshot) {
+  if (!snapshot) return;
+  if (!state.tasks || typeof state.tasks !== 'object' || Array.isArray(state.tasks)) state.tasks = {};
+  if (!Array.isArray(state.tasks['_remedios'])) state.tasks['_remedios'] = [];
+  (snapshot.folderItems || []).forEach(({ idx, item }) => {
+    const safeIdx = Math.min(Math.max(idx, 0), state.tasks['_remedios'].length);
+    state.tasks['_remedios'].splice(safeIdx, 0, item);
+  });
+
+  if (!state.dateTasks || typeof state.dateTasks !== 'object' || Array.isArray(state.dateTasks)) state.dateTasks = {};
+  (snapshot.dateItems || []).forEach(({ dk, idx, item }) => {
+    if (!Array.isArray(state.dateTasks[dk])) state.dateTasks[dk] = [];
+    const safeIdx = Math.min(Math.max(idx, 0), state.dateTasks[dk].length);
+    state.dateTasks[dk].splice(safeIdx, 0, item);
+  });
+}
+
 // ── Deletar consulta com undo ──
 function _deleteConsultaWithUndo(id) {
   const result = StateManager.removeConsulta(id);
@@ -6211,9 +6276,11 @@ function _deleteRemedioWithUndo(id) {
   const idx = (state.remedios || []).findIndex(r => r.id === id);
   if (idx < 0) return;
   const [removed] = state.remedios.splice(idx, 1);
+  const projectionSnapshot = _removeRemedioProjections(removed);
   save(); openListaRemedios();
   _undoToast('🗑 Remédio removido', () => {
     state.remedios.splice(idx, 0, removed);
+    _restoreRemedioProjections(projectionSnapshot);
     save(); openListaRemedios();
     showToast('↩️ Remédio restaurado!');
   });

@@ -354,6 +354,20 @@ async function syncPull(state, save, render) {
 
       // Soft-delete
       if (row.deleted) {
+        if (bucketId === '__folders__') {
+          state.folders = (state.folders || []).filter(function (f) { return f.id !== row.id; });
+          if (Array.isArray(state.folderOrder)) {
+            state.folderOrder = state.folderOrder.filter(function (fid) { return fid !== row.id; });
+          }
+          if (state.homeFolders && Array.isArray(state.homeFolders)) {
+            state.homeFolders = state.homeFolders.filter(function (fid) { return fid !== row.id; });
+          }
+          if (state.tasks && typeof state.tasks === 'object') {
+            delete state.tasks[row.id];
+          }
+          merged++;
+          return;
+        }
         _removeTask(state, bucketId, row.id);
         merged++;
         return;
@@ -538,6 +552,10 @@ function _upsertFolder(state, item) {
   const idx = state.folders.findIndex(f => f.id === item.id);
   if (idx >= 0) state.folders[idx] = item;
   else          state.folders.push(item);
+  if (!Array.isArray(state.folderOrder)) state.folderOrder = [];
+  if (!state.folderOrder.includes(item.id)) state.folderOrder.push(item.id);
+  if (!state.tasks || typeof state.tasks !== 'object' || Array.isArray(state.tasks)) state.tasks = {};
+  if (!Array.isArray(state.tasks[item.id])) state.tasks[item.id] = [];
 }
 
 function _upsertConsultaProjection(state, consulta) {
