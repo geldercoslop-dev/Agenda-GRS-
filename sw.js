@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   Agenda Pro Max — Service Worker v35
+  Agenda Pro Max — Service Worker v36
    Versão fixa — incrementar manualmente a cada deploy.
    ═══════════════════════════════════════════════════════ */
 
@@ -7,7 +7,8 @@
 // Histórico: v33 (2026-03) — corrigido Date.now() por versão estável
 //            v34 (2026-03) — força limpeza de cache com caminhos /Agenda-GRS-/ antigos
 //            v35 (2026-03) — botão Fechar modal pastas + marcador cal 22px
-const CACHE_VERSION = "v35";
+//            v36 (2026-03) — atualização PWA forçada + JS/CSS em network-first
+const CACHE_VERSION = "v36";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
 // Prefixo usado para identificar caches deste app e limpar apenas os deles
 const CACHE_PREFIX  = "agenda-cache-";
@@ -105,10 +106,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // ── JS / CSS → Stale-While-Revalidate ────────────────
-  // Resposta imediata do cache + atualiza em background
+  // ── JS / CSS → Network First ──────────────────────────
+  // Evita ficar preso em versão antiga no PWA após hotfix.
   if (/\.(js|css)$/.test(path)) {
-    event.respondWith(staleWhileRevalidate(req));
+    event.respondWith(networkFirst(req));
     return;
   }
 
@@ -185,6 +186,11 @@ const agendados = new Map(); // id → timeoutId
 
 self.addEventListener("message", (event) => {
   const { type, payload } = event.data || {};
+
+  if (type === "SKIP_WAITING") {
+    self.skipWaiting();
+    return;
+  }
 
   if (type === "AGENDAR_NOTIFICACOES") {
     agendados.forEach((tid) => clearTimeout(tid));

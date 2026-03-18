@@ -8752,6 +8752,9 @@ function openHistoricoPaciente(){
   // Não recarrega automaticamente — usuário decide quando atualizar.
   (function _swUpdateBanner() {
     const BANNER_ID = '_swUpdateBanner';
+    const SW_BUILD_VERSION = '2026-03-18-3';
+    const SW_URL = './sw.js?v=' + encodeURIComponent(SW_BUILD_VERSION);
+    let _swReg = null;
 
     function _showUpdateBanner() {
       if (document.getElementById(BANNER_ID)) return;
@@ -8797,11 +8800,29 @@ function openHistoricoPaciente(){
         banner.style.transform = 'translateX(-50%) translateY(0)';
       });
       banner.querySelector('#_swUpdateBtn').addEventListener('click', () => {
+        let reloaded = false;
+        const _reloadSafely = () => {
+          if (reloaded) return;
+          reloaded = true;
+          window.location.reload();
+        };
+
+        // Se há SW waiting, ativa imediatamente e recarrega quando novo controller assumir.
+        if (_swReg && _swReg.waiting) {
+          navigator.serviceWorker.addEventListener('controllerchange', _reloadSafely, { once: true });
+          _swReg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          setTimeout(_reloadSafely, 2500); // fallback
+        } else if (_swReg) {
+          // Sem waiting: força check e recarrega para pegar última versão.
+          _swReg.update().catch(() => {}).finally(() => setTimeout(_reloadSafely, 250));
+        } else {
+          _reloadSafely();
+        }
+
         banner.style.opacity = '0';
         banner.style.transform = 'translateX(-50%) translateY(20px)';
         setTimeout(() => {
           if (banner.parentNode) banner.remove();
-          window.location.reload();
         }, 250);
       });
       banner.querySelector('#_swUpdateDismiss').addEventListener('click', () => {
@@ -8812,9 +8833,10 @@ function openHistoricoPaciente(){
     }
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js', {
+      navigator.serviceWorker.register(SW_URL, {
         updateViaCache: 'none'
       }).then((reg) => {
+        _swReg = reg;
 
         reg.update().catch(() => {});
         setInterval(() => reg.update().catch(() => {}), 60000);
@@ -8826,13 +8848,7 @@ function openHistoricoPaciente(){
         // SW manda SW_UPDATED após activate + clients.claim()
         navigator.serviceWorker.addEventListener('message', (event) => {
           if (event.data?.type === 'SW_UPDATED') {
-            // Se há campo sendo editado, mostrar banner em vez de recarregar
-            const editing = document.querySelector('[contenteditable="true"]');
-            if (editing) {
-              _showUpdateBanner();
-            } else {
-              window.location.reload();
-            }
+            _showUpdateBanner();
           }
         });
 
