@@ -1173,13 +1173,20 @@ function initStripExpand(){
     if(card && !card.contains(e.target)) toggle(false);
   },{passive:true});
 
-  // Swipe para expandir/recolher APENAS no handle do calendário.
+  // Swipe para expandir/recolher o calendário em qualquer ponto da home.
   let _sy=0, _sx=0, _active=false;
   const THRESHOLD = 55;
 
   document.addEventListener('touchstart',(e)=>{
     if(typeof currentView !== 'undefined' && currentView !== 'home') return;
-    if(!e.target.closest('#stripHandle')) return;
+    // Ignora gestos iniciados dentro de overlays/modais ou campos de digitação.
+    if(e.target.closest('#sidebar, #sidebarOverlay, #sModalOverlay, #fModalOverlay, #subScreenOverlay, #manualOverlay, [style*="position:fixed"]')) return;
+    if(e.target.closest('input, textarea, [contenteditable="true"]')) return;
+
+    // Se usuário está rolando a home já deslocada, não interpreta como abrir calendário.
+    const scrollable = e.target.closest('.homeBody');
+    if(scrollable && scrollable.scrollTop > 10) return;
+
     _sy = e.touches[0].clientY;
     _sx = e.touches[0].clientX;
     _active = true;
@@ -2929,7 +2936,7 @@ function openSettings(){
 
 function closeSettings(){
   document.getElementById('sModalOverlay').classList.remove('show');
-  if(typeof currentView!=='undefined' && currentView==='home'){ _setFooter(true); atualizarLupa('home'); }
+  _restoreHomeChrome();
 }
 
 function saveSettings(){
@@ -3017,6 +3024,44 @@ function _setFooter(visible){
     if(wsc) wsc.classList.add('hidden');
   }
   // topSearchBar é controlado exclusivamente por atualizarLupa() / goHome()
+}
+
+function _restoreHomeChrome(){
+  if(typeof currentView === 'undefined' || currentView !== 'home') return;
+
+  // Se ainda existe algum overlay principal aberto, não restaura ainda.
+  const blockers = [
+    '#sModalOverlay.show',
+    '#fModalOverlay.show',
+    '#subScreenOverlay.show',
+    '#manualOverlay[style*="display: flex"]',
+    '#sidebar.open',
+    '#consultaFormOv', '#remedioFormOv', '#listaConsultasOv', '#listaRemediosOv',
+    '#contasOv', '#receberOv', '#examesOv', '#mercadoOv', '#docsOv', '#feriadosOv',
+    '#historicoPacienteOv', '#photoGalleryOv', '#photoFullscreenOv',
+    '#inlineViewerOv', '#pastasFrenteOv', '#todasPastasOv'
+  ];
+  if (blockers.some((sel) => document.querySelector(sel))) return;
+
+  if(typeof window._forceCalendarCollapsed === 'function') window._forceCalendarCollapsed();
+  _setFooter(true);
+  atualizarLupa('home');
+  renderWeekStrip();
+
+  const pr = document.getElementById('progressRow');
+  if(pr){ pr.classList.remove('hidden'); pr.style.opacity=''; pr.style.pointerEvents=''; pr.style.transition=''; }
+
+  const wsw = document.getElementById('weekStripWrap');
+  if(wsw){ wsw.classList.remove('hidden'); wsw.classList.remove('expanded'); wsw.style.display=''; wsw.style.visibility=''; wsw.style.opacity=''; }
+
+  const wsc = document.getElementById('weekStripCard');
+  if(wsc){ wsc.classList.remove('hidden'); wsc.style.display=''; wsc.style.visibility=''; wsc.style.opacity=''; }
+
+  const cov = document.getElementById('calExpandOverlay');
+  if(cov){ cov.classList.remove('open'); cov.style.display='none'; cov.style.pointerEvents='none'; cov.style.opacity='0'; }
+
+  const bb = document.getElementById('bottomBar');
+  if(bb){ bb.classList.remove('hidden'); }
 }
 function openSubScreen(title, bodyHtml, initFn, exitFn){
   _setFooter(false);
@@ -3482,7 +3527,7 @@ function init(){
   // Manual
   document.getElementById('manualClose').addEventListener('click',()=>{
     document.getElementById('manualOverlay').style.display='none';
-    if(typeof currentView!=='undefined' && currentView==='home'){ _setFooter(true); atualizarLupa('home'); }
+    _restoreHomeChrome();
   });
 
   // ── Botão voltar Android ──
@@ -3540,7 +3585,7 @@ function init(){
       const manualOv=document.getElementById('manualOverlay');
       if(manualOv?.style.display==='flex'){
         manualOv.style.display='none';
-        if(currentView==='home'){ _setFooter(true); atualizarLupa('home'); }
+        _restoreHomeChrome();
         _histDepth++;
         history.pushState({app:'screen', depth:_histDepth},'');
         return;
@@ -3573,6 +3618,7 @@ function init(){
         const el=document.getElementById(oid);
         if(el){
           el.remove();
+          _restoreHomeChrome();
           // NÃO faz _histDepth++ nem pushState aqui.
           return;
         }
@@ -3581,6 +3627,7 @@ function init(){
       for(const ov of dynFixed){
         if(!ov.id){
           ov.remove();
+          _restoreHomeChrome();
           // NÃO faz _histDepth++ nem pushState aqui.
           return;
         }
@@ -4338,7 +4385,7 @@ function _renderContasOv(){
     ov.querySelector('#'+id).addEventListener('change',()=>{ _cfParcelasTemp=[]; renderCParcelasPreview(); });
   });
 
-  ov.querySelector('#_contasBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
+  ov.querySelector('#_contasBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_contasNew').onclick=()=>showCForm(null);
   ov.querySelector('#_cfBack').onclick=()=>{ ov.querySelector('#_contasForm').style.display='none'; };
   ov.querySelector('#_cfSave').onclick=()=>{
@@ -4613,7 +4660,7 @@ function _renderReceberOv(){
     });
   });
 
-  ov.querySelector('#_recBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
+  ov.querySelector('#_recBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_recNew').onclick=()=>showRForm(null);
   ov.querySelector('#_rfBack').onclick=()=>{ ov.querySelector('#_recForm').style.display='none'; };
 
@@ -4779,7 +4826,7 @@ function _renderExamesOv(){
 
   function addFoto(file){ if(!file)return; resizeImage(file,900,0.8,url=>{ _efFotos.push(url); renderFotoThumbs(); }); }
 
-  ov.querySelector('#_exBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
+  ov.querySelector('#_exBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_exNew').onclick=()=>showEForm(null);
   ov.querySelector('#_efBack').onclick=()=>{ ov.querySelector('#_exForm').style.display='none'; };
   ov.querySelector('#_efFotoCamBtn').onclick=()=>ov.querySelector('#_efFotoCamI').click();
@@ -4938,7 +4985,7 @@ function _renderMercadoOv(){
       </button>
     </div>`;
   document.body.appendChild(ov);
-  ov.querySelector('#_mkBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
+  ov.querySelector('#_mkBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   if(ov.querySelector('#_mkClearDone')) ov.querySelector('#_mkClearDone').onclick=()=>{ _saveMercado(_getMercado().filter(x=>!x.checked)); _renderMercadoOv(); };
   ov.querySelector('#_mkAdd').onclick=()=>{
     const nome=ov.querySelector('#_mkNome').value.trim();
@@ -5091,7 +5138,7 @@ function _renderDocsOv(){
     _editIdx = null;
   }
 
-  ov.querySelector('#_docsBack').onclick    = () => { ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
+  ov.querySelector('#_docsBack').onclick    = () => { ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_docsNew').onclick     = () => showForm(null);
   ov.querySelector('#_docsFormBack').onclick= () => hideForm();
 
@@ -5428,7 +5475,7 @@ function openFeriados(){
       </div>
     </div>`;
   document.body.appendChild(ov);
-  ov.querySelector('#_ferBack').onclick = () => { ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
+  ov.querySelector('#_ferBack').onclick = () => { ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelectorAll('._ferCidBtn').forEach(b => {
     b.onclick = () => renderFeriados(b.dataset.cidade);
   });
@@ -7412,7 +7459,7 @@ function openListaConsultas(){
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">${body}</div>`;
   document.body.appendChild(ov);
-  ov.querySelector('#_lcBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
+  ov.querySelector('#_lcBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_lcAdd').onclick=()=>{ ov.remove(); openConsultaModal(); };
 }
 
@@ -7961,7 +8008,7 @@ function openListaRemedios(){
     </div>
     <div style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">${body}</div>`;
   document.body.appendChild(ov);
-  ov.querySelector('#_lrBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
+  ov.querySelector('#_lrBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_lrAdd').onclick=()=>{ ov.remove(); openRemedioModal(); };
 }
 
