@@ -1118,25 +1118,47 @@ function initStripExpand(){
   if(!wrap || !handle) return;
 
   let expanded = false;
+  const _ov = document.getElementById('calExpandOverlay');
+  const _pr = document.getElementById('progressRow');
+
+  function resetExpandedVisualState(){
+    if(_ov){
+      _ov.classList.remove('open');
+      _ov.style.display='none';
+      _ov.style.pointerEvents='none';
+      _ov.style.opacity='0';
+    }
+    if(_pr){
+      _pr.style.opacity='';
+      _pr.style.pointerEvents='';
+      _pr.style.transition='';
+    }
+    if(wrap){
+      wrap.style.display='';
+      wrap.style.visibility='';
+      wrap.style.opacity='';
+    }
+  }
 
   function toggle(toExpand){
     expanded = toExpand;
     wrap.classList.toggle('expanded', expanded);
     if(!expanded){ viewMonthYear=null; viewMonthMonth=null; }
     renderMonthGrid();
-    // Overlay blur + ocultar rodapé ao expandir
-    const _ov = document.getElementById('calExpandOverlay');
-    const _pr = document.getElementById('progressRow');
     if(toExpand){
       if(_ov){ _ov.style.display='block'; requestAnimationFrame(()=>_ov.classList.add('open')); }
       if(_pr){ _pr.style.opacity='0'; _pr.style.pointerEvents='none'; _pr.style.transition='opacity .2s'; }
     } else {
-      if(_ov){ _ov.classList.remove('open'); setTimeout(()=>{ if(_ov) _ov.style.display='none'; },250); }
-      if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; _pr.style.transition=''; }
-      // Garante que wrap não fique escondido
-      if(wrap){ wrap.style.display=''; wrap.style.visibility=''; wrap.style.opacity=''; }
+      resetExpandedVisualState();
     }
   }
+
+  // Exposto para navegação (abrir pasta/voltar home) garantir reset completo.
+  window._forceCalendarCollapsed = function(){
+    expanded = false;
+    if(wrap) wrap.classList.remove('expanded');
+    resetExpandedVisualState();
+  };
 
   // Clique no handle = toggle calendário
   handle.addEventListener('click',(e)=>{
@@ -1151,15 +1173,13 @@ function initStripExpand(){
     if(card && !card.contains(e.target)) toggle(false);
   },{passive:true});
 
-  // Swipe em qualquer lugar da tela (exceto lista de tarefas e modais)
+  // Swipe para expandir/recolher APENAS no handle do calendário.
   let _sy=0, _sx=0, _active=false;
   const THRESHOLD = 55;
 
   document.addEventListener('touchstart',(e)=>{
-    // Não ativa dentro de modais, sidebar, listas scrolláveis já com scroll
-    if(e.target.closest('#sidebar, .fModalOverlay, .sModalOverlay, [style*="position:fixed"]')) return;
-    const scrollable = e.target.closest('.listArea, .homeBody');
-    if(scrollable && scrollable.scrollTop > 10) return;
+    if(typeof currentView !== 'undefined' && currentView !== 'home') return;
+    if(!e.target.closest('#stripHandle')) return;
     _sy = e.touches[0].clientY;
     _sx = e.touches[0].clientX;
     _active = true;
@@ -1691,6 +1711,7 @@ function openTodasPastas(){
 let navStack = []; // pilha de navegação: 'home' | bucketId string
 
 function openBucket(id, _pushCurrent){
+  if(typeof window._forceCalendarCollapsed === 'function') window._forceCalendarCollapsed();
   // Pastas especiais abrem seus próprios modais
   const specialMap = {
     '_consultas': ()=>openListaConsultas(),
@@ -1770,6 +1791,7 @@ function openBucket(id, _pushCurrent){
 }
 
 function goHome(){
+  if(typeof window._forceCalendarCollapsed === 'function') window._forceCalendarCollapsed();
   currentView='home';
   navStack=[];
   // Garante que o indicador pull-to-back nunca fique preso
@@ -1782,6 +1804,14 @@ function goHome(){
   document.getElementById('progressRow').classList.remove('hidden');
   document.getElementById('weekStripWrap').classList.remove('hidden');
   document.getElementById('weekStripCard')?.classList.remove('hidden');
+  const _pr = document.getElementById('progressRow');
+  if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; _pr.style.transition=''; }
+  const _wsw = document.getElementById('weekStripWrap');
+  if(_wsw){ _wsw.style.display=''; _wsw.style.visibility=''; _wsw.style.opacity=''; _wsw.classList.remove('expanded'); }
+  const _wsc = document.getElementById('weekStripCard');
+  if(_wsc){ _wsc.style.display=''; _wsc.style.visibility=''; _wsc.style.opacity=''; }
+  const _cov = document.getElementById('calExpandOverlay');
+  if(_cov){ _cov.classList.remove('open'); _cov.style.display='none'; _cov.style.pointerEvents='none'; _cov.style.opacity='0'; }
   document.getElementById('bottomBar').classList.remove('hidden');
   const _fab2=document.getElementById('sidebarFab');
   if(_fab2){ _fab2.style.opacity='1'; _fab2.style.pointerEvents='auto'; _fab2.style.transform='scale(1)'; }
@@ -1792,6 +1822,7 @@ function goHome(){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('show'));
   document.getElementById('homeView').classList.add('show');
   atualizarLupa('home');
+  renderWeekStrip();
   renderFolders();
 }
 
