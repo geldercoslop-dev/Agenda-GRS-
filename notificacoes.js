@@ -15,7 +15,7 @@ function verificarAlertasConsultasProximas() {
     const diff = ts - agora;
     if (diff > 0 && diff <= umDia) {
       const horas = Math.round(diff / 3600000);
-      const msg = `🏥 ${c.especialidade} — ${c.paciente} em ${horas}h`;
+      const msg = `🏥 Consulta em ${horas}h`;
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then(reg => {
           reg.showNotification('Agenda GRS — Consulta Próxima', {

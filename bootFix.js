@@ -28,7 +28,7 @@
     if (typeof window.state === 'undefined' || window.state === null || typeof window.state !== 'object') {
       window.state = {
         consultas:   [],
-        tasks:       [],
+        tasks:       {},
         dateTasks:   {},
         folders:     [],
         folderOrder: []

@@ -116,6 +116,70 @@ function markDirty(item) {
   return item;
 }
 
+function _stripUnsafeKeysDeep(node, seen) {
+  if (!node || typeof node !== 'object') return node;
+  var memo = seen || new WeakSet();
+  if (memo.has(node)) return node;
+  memo.add(node);
+
+  if (Array.isArray(node)) {
+    node.forEach(function (child) { _stripUnsafeKeysDeep(child, memo); });
+    return node;
+  }
+
+  delete node.__proto__;
+  delete node.prototype;
+  delete node.constructor;
+
+  Object.keys(node).forEach(function (k) {
+    if (k === '__proto__' || k === 'prototype' || k === 'constructor') {
+      delete node[k];
+      return;
+    }
+    _stripUnsafeKeysDeep(node[k], memo);
+  });
+  return node;
+}
+
+function _cloneObjSafe(obj) {
+  try { return JSON.parse(JSON.stringify(obj)); } catch (_) { return {}; }
+}
+
+function _sanitizeRemedio(remedio) {
+  if (!remedio || typeof remedio !== 'object') return {};
+  if (typeof sanitizeStr !== 'function') return remedio;
+  var out = remedio;
+  if (typeof out.nome       === 'string') out.nome       = sanitizeStr(out.nome, 120);
+  if (typeof out.paciente   === 'string') out.paciente   = sanitizeStr(out.paciente, 120);
+  if (typeof out.dose       === 'string') out.dose       = sanitizeStr(out.dose, 60);
+  if (typeof out.data       === 'string') out.data       = sanitizeStr(out.data, 10);
+  if (typeof out.hora       === 'string') out.hora       = sanitizeStr(out.hora, 10);
+  if (typeof out.frequencia === 'string') out.frequencia = sanitizeStr(out.frequencia, 10);
+  return out;
+}
+
+function _sanitizeInboundPayload(kind, payload) {
+  var cloned = _cloneObjSafe(payload || {});
+  _stripUnsafeKeysDeep(cloned);
+
+  if (kind === 'task') {
+    if (typeof sanitizeTask === 'function') return sanitizeTask(cloned) || cloned;
+    return cloned;
+  }
+  if (kind === 'folder') {
+    if (typeof sanitizeFolder === 'function') return sanitizeFolder(cloned) || cloned;
+    return cloned;
+  }
+  if (kind === 'consulta') {
+    if (typeof sanitizeConsulta === 'function') return sanitizeConsulta(cloned) || cloned;
+    return cloned;
+  }
+  if (kind === 'remedio') {
+    return _sanitizeRemedio(cloned);
+  }
+  return cloned;
+}
+
 // ──────────────────────────────────────────────────────────────────
 // 3. CAMADA HTTP
 // ──────────────────────────────────────────────────────────────────
@@ -266,12 +330,14 @@ async function syncPull(state, save, render) {
   if (!_cfg() || !navigator.onLine) return { pulled: 0, merged: 0 };
 
   const cursors = _getCursors();
+  const devId = _deviceId();
   let pulled = 0, merged = 0;
 
   // ── tasks ─────────────────────────────────────────────────────
   {
     const rows = await _req('GET', 'tasks', null, {
       'updated_at': `gt.${cursors.tasks}`,
+      'device_id':  `eq.${devId}`,
       'order':      'updated_at.asc',
       'limit':      '1000',
     });
@@ -282,12 +348,26 @@ async function syncPull(state, save, render) {
       pulled++;
       if (row.updated_at > maxTs) maxTs = row.updated_at;
 
-      const remote   = row.payload || {};
       const bucketId = row.data;
+      const remote   = _sanitizeInboundPayload(bucketId === '__folders__' ? 'folder' : 'task', row.payload || {});
       const remoteTs = row.updated_at || 0;
 
       // Soft-delete
       if (row.deleted) {
+        if (bucketId === '__folders__') {
+          state.folders = (state.folders || []).filter(function (f) { return f.id !== row.id; });
+          if (Array.isArray(state.folderOrder)) {
+            state.folderOrder = state.folderOrder.filter(function (fid) { return fid !== row.id; });
+          }
+          if (state.homeFolders && Array.isArray(state.homeFolders)) {
+            state.homeFolders = state.homeFolders.filter(function (fid) { return fid !== row.id; });
+          }
+          if (state.tasks && typeof state.tasks === 'object') {
+            delete state.tasks[row.id];
+          }
+          merged++;
+          return;
+        }
         _removeTask(state, bucketId, row.id);
         merged++;
         return;
@@ -297,6 +377,8 @@ async function syncPull(state, save, render) {
       if (bucketId === '__folders__') {
         const local = (state.folders || []).find(f => f.id === row.id);
         if (!local || remoteTs > (local.updatedAt || 0)) {
+          remote.id = row.id;
+          remote.updatedAt = remoteTs;
           remote.synced = true;
           _upsertFolder(state, remote);
           merged++;
@@ -308,6 +390,8 @@ async function syncPull(state, save, render) {
       const arr   = _getTaskArr(state, bucketId);
       const local = arr.find(t => t.id === row.id);
       if (!local || remoteTs > (local.updatedAt || 0)) {
+        remote.id = row.id;
+        remote.updatedAt = remoteTs;
         remote.synced = true;
         _upsertTask(state, bucketId, remote);
         merged++;
@@ -321,6 +405,7 @@ async function syncPull(state, save, render) {
   {
     const rows = await _req('GET', 'consultas', null, {
       'updated_at': `gt.${cursors.consultas}`,
+      'device_id':  `eq.${devId}`,
       'order':      'updated_at.asc',
       'limit':      '500',
     });
@@ -330,19 +415,23 @@ async function syncPull(state, save, render) {
       if (!row.id) return;
       pulled++;
       if (row.updated_at > maxTs) maxTs = row.updated_at;
-      const remote   = row.payload || {};
+      const remote   = _sanitizeInboundPayload('consulta', row.payload || {});
       const remoteTs = row.updated_at || 0;
 
       if (row.deleted) {
         StateManager.bulkSetConsultas((state.consultas || []).filter(c => c.id !== row.id));
+        _removeConsultaProjection(state, row.id);
         merged++;
         return;
       }
 
       const local = (state.consultas || []).find(c => c.id === row.id);
       if (!local || remoteTs > (local.updatedAt || 0)) {
+        remote.id = row.id;
+        remote.updatedAt = remoteTs;
         remote.synced = true;
         StateManager.upsertConsulta(remote);
+        _upsertConsultaProjection(state, remote);
         merged++;
       }
     });
@@ -354,6 +443,7 @@ async function syncPull(state, save, render) {
   {
     const rows = await _req('GET', 'remedios', null, {
       'updated_at': `gt.${cursors.remedios}`,
+      'device_id':  `eq.${devId}`,
       'order':      'updated_at.asc',
       'limit':      '500',
     });
@@ -363,17 +453,42 @@ async function syncPull(state, save, render) {
       if (!row.id) return;
       pulled++;
       if (row.updated_at > maxTs) maxTs = row.updated_at;
-      const remote   = row.payload || {};
+      const remote   = _sanitizeInboundPayload('remedio', row.payload || {});
       const remoteTs = row.updated_at || 0;
 
       if (row.deleted) {
+        var removedRemedio = (state.remedios || []).find(function (r) { return r.id === row.id; }) || null;
         state.remedios = (state.remedios || []).filter(r => r.id !== row.id);
+        if (state.tasks && Array.isArray(state.tasks['_remedios'])) {
+          state.tasks['_remedios'] = state.tasks['_remedios'].filter(function (t) {
+            return !(t && t.remedioRef === row.id);
+          });
+        }
+        if (
+          removedRemedio &&
+          removedRemedio.calIds &&
+          state.dateTasks &&
+          typeof state.dateTasks === 'object' &&
+          !Array.isArray(state.dateTasks)
+        ) {
+          Object.entries(removedRemedio.calIds).forEach(function (entry) {
+            var dk = entry[0];
+            var ids = entry[1];
+            if (!Array.isArray(ids) || !Array.isArray(state.dateTasks[dk])) return;
+            state.dateTasks[dk] = state.dateTasks[dk].filter(function (t) {
+              return !ids.includes(t.id);
+            });
+            if (state.dateTasks[dk].length === 0) delete state.dateTasks[dk];
+          });
+        }
         merged++;
         return;
       }
 
       const local = (state.remedios || []).find(r => r.id === row.id);
       if (!local || remoteTs > (local.updatedAt || 0)) {
+        remote.id = row.id;
+        remote.updatedAt = remoteTs;
         remote.synced = true;
         if (!state.remedios) state.remedios = [];
         const idx = state.remedios.findIndex(r => r.id === row.id);
@@ -437,6 +552,77 @@ function _upsertFolder(state, item) {
   const idx = state.folders.findIndex(f => f.id === item.id);
   if (idx >= 0) state.folders[idx] = item;
   else          state.folders.push(item);
+  if (!Array.isArray(state.folderOrder)) state.folderOrder = [];
+  if (!state.folderOrder.includes(item.id)) state.folderOrder.push(item.id);
+  if (!state.tasks || typeof state.tasks !== 'object' || Array.isArray(state.tasks)) state.tasks = {};
+  if (!Array.isArray(state.tasks[item.id])) state.tasks[item.id] = [];
+}
+
+function _upsertConsultaProjection(state, consulta) {
+  if (!consulta || !consulta.id) return;
+  if (!state.tasks || typeof state.tasks !== 'object' || Array.isArray(state.tasks)) state.tasks = {};
+  if (!Array.isArray(state.tasks['_consultas'])) state.tasks['_consultas'] = [];
+  if (!state.dateTasks || typeof state.dateTasks !== 'object' || Array.isArray(state.dateTasks)) state.dateTasks = {};
+
+  var data = consulta.data || '';
+  var hora = consulta.hora || '';
+  var esp  = consulta.especialidade || '';
+  var med  = consulta.medico || '';
+  var pac  = consulta.paciente || '';
+  var df   = data ? data.split('-').reverse().join('/') : '';
+  var now  = Date.now();
+
+  state.tasks['_consultas'] = state.tasks['_consultas'].filter(function (t) {
+    return !(t && t.consultaRef === consulta.id);
+  });
+  var folderTask = {
+    id: 'cq_' + consulta.id,
+    text: '🏥 ' + esp + (med ? ' · ' + med : '') + (pac ? ' — ' + pac : '') + ' | ' + df + ' ' + hora,
+    done: false,
+    createdAt: now,
+    consultaRef: consulta.id,
+    updatedAt: consulta.updatedAt || now,
+    synced: true
+  };
+  state.tasks['_consultas'].push(folderTask);
+
+  Object.keys(state.dateTasks).forEach(function (dk) {
+    if (!Array.isArray(state.dateTasks[dk])) return;
+    state.dateTasks[dk] = state.dateTasks[dk].filter(function (t) {
+      return !(t && t.consultaRef === consulta.id);
+    });
+    if (state.dateTasks[dk].length === 0) delete state.dateTasks[dk];
+  });
+
+  if (!data) return;
+  if (!Array.isArray(state.dateTasks[data])) state.dateTasks[data] = [];
+  var dateTask = {
+    id: 'cd_' + consulta.id,
+    text: '🏥 ' + esp + (med ? ' · ' + med : '') + (pac ? ' — ' + pac : '') + ' às ' + hora,
+    done: false,
+    createdAt: now,
+    consultaRef: consulta.id,
+    updatedAt: consulta.updatedAt || now,
+    synced: true
+  };
+  state.dateTasks[data].push(dateTask);
+}
+
+function _removeConsultaProjection(state, consultaId) {
+  if (!consultaId) return;
+  if (state.tasks && Array.isArray(state.tasks['_consultas'])) {
+    state.tasks['_consultas'] = state.tasks['_consultas'].filter(function (t) {
+      return !(t && t.consultaRef === consultaId);
+    });
+  }
+  if (!state.dateTasks || typeof state.dateTasks !== 'object' || Array.isArray(state.dateTasks)) return;
+  Object.keys(state.dateTasks).forEach(function (dk) {
+    if (!Array.isArray(state.dateTasks[dk])) return;
+    state.dateTasks[dk] = state.dateTasks[dk].filter(function (t) {
+      return !(t && t.consultaRef === consultaId);
+    });
+    if (state.dateTasks[dk].length === 0) delete state.dateTasks[dk];
+  });
 }
 
 // ──────────────────────────────────────────────────────────────────

@@ -50,7 +50,7 @@ function validateConsulta(consulta) {
     errors.push('Campo obrigatório ausente: hora.');
   }
   if (errors.length > 0) {
-    console.error('[validateConsulta] Dados inválidos:', errors, consulta);
+    console.error('[validateConsulta] Dados inválidos:', errors);
     return { valid: false, errors: errors };
   }
   return { valid: true, errors: [] };
@@ -68,7 +68,7 @@ function validateTask(task) {
     errors.push('Campo obrigatório ausente: text.');
   }
   if (errors.length > 0) {
-    console.error('[validateTask] Dados inválidos:', errors, task);
+    console.error('[validateTask] Dados inválidos:', errors);
     return { valid: false, errors: errors };
   }
   return { valid: true, errors: [] };

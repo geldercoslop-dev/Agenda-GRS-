@@ -120,7 +120,7 @@ var StateManager = (function () {
     state.consultas.push(data);
     _sortConsultas();
     _persist('addConsulta');
-    _log('addConsulta: id=' + (data.id || '?') + ', paciente=' + (data.paciente || '?'));
+    _log('addConsulta: id=' + (data.id || '?'));
     return data;
   }
 
@@ -141,7 +141,7 @@ var StateManager = (function () {
     }
     var removed = state.consultas.splice(idx, 1)[0];
     _persist('removeConsulta');
-    _log('removeConsulta: id=' + id + ', paciente=' + (removed.paciente || '?'));
+    _log('removeConsulta: id=' + id);
     return { item: removed, idx: idx };
   }
 

@@ -13,7 +13,7 @@
 
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html { font-size: clamp(14px, 3.8vw, 18px); overflow-x: hidden; }
-    html, body { height: 100dvh; overflow: hidden; }
+    html, body { height: 100dvh; overflow: hidden; overscroll-behavior-y: none; }
     body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; height: 100dvh; color: #fff; overflow-x: hidden; }
 
     
@@ -322,7 +322,7 @@
     .view.show { display:flex; }
 
     /* Home */
-    .homeBody { padding:28px 14px 100px; display:flex; flex-direction:column; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; }
+    .homeBody { padding:28px 14px 100px; display:flex; flex-direction:column; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior-y:contain; }
     .sectionTitle { font-size:clamp(10px,2.8vw,12px); font-weight:900; letter-spacing:1px; text-transform:uppercase; color:var(--text-white); margin-bottom:14px; padding-left:2px; margin-top:14px; }
     [data-theme="light"] .sectionTitle { color:rgba(10,15,60,.85); font-weight:900; }
     .folderGrid {
@@ -554,7 +554,7 @@
     [data-theme="light"] .cmdBtn .cl { color:rgba(10,15,60,.75); font-weight:800; }
 
     /* ══ DAY VIEW — List ══ */
-    .listArea { flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; background:transparent; padding: 6px 0; }
+    .listArea { flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; background:transparent; padding: 6px 0; overscroll-behavior-y:contain; }
     .taskRow { display:flex; align-items:center; padding:3px 14px; border-bottom:1px solid var(--line); gap:8px; min-height:clamp(30px,8vw,36px); }
     [data-theme="light"] .taskRow { border-bottom:1px solid rgba(99,102,241,.13); }
     .taskRow:last-child { border-bottom:none; }
