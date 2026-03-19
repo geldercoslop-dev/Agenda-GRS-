@@ -116,45 +116,19 @@
       background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 40%, var(--sky-bot) 100%);
     }
 
-    /* Inner fill — glossy blue gradient like bar 1 */
+    /* Inner fill — solid orange */
     .progressFill {
       height: 100%; border-radius:99px;
-      background: linear-gradient(180deg,
-        var(--aurora-1) 0%,
-        var(--aurora-2) 18%,
-        var(--cyan) 50%,
-        var(--aurora-3) 75%,
-        var(--cyan) 100%
-      );
-      background-size: 200% 100%;
+      background: #f97316;
       position: relative;
       overflow: hidden;
       transition: width .7s cubic-bezier(.4,0,.2,1);
-      box-shadow:
-        0 0 12px rgba(14,127,212,.7),
-        0 0 24px rgba(91,212,248,.4);
+      box-shadow: 0 0 10px rgba(249,115,22,.5);
       min-width: 30px;
     }
 
-    /* Gloss shine overlay on top of fill */
-    .progressFill::after {
-      content:'';
-      position:absolute; top:0; left:0; right:0;
-      height:45%;
-      border-radius:99px 99px 60% 60%;
-      background: linear-gradient(180deg, rgba(255,255,255,.75) 0%, rgba(255,255,255,.0) 100%);
-      pointer-events:none;
-    }
-
-    /* Shimmer sweep */
-    .progressFill::before {
-      content:'';
-      position:absolute; top:0; bottom:0; left:-60%;
-      width:40%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
-      border-radius:99px;
-      animation: barSweep 2.2s ease-in-out infinite;
-    }
+    .progressFill::after { display:none; }
+    .progressFill::before { display:none; }
 
     @keyframes barSweep {
       0%   { left: -60%; }
@@ -263,6 +237,9 @@
     [data-theme="light"] .weekStripWrap.expanded .monthDayName { color:rgba(255,255,255,.65); }
     [data-theme="light"] .weekStripWrap.expanded .calCell { color:#fff; }
     [data-theme="light"] .weekStripWrap.expanded .calCell.today { color:#f97316; }
+    [data-theme="light"] .weekStripWrap.expanded .mCell { color:rgba(255,255,255,.85) !important; }
+    [data-theme="light"] .weekStripWrap.expanded .mCell.mToday { color:#f97316 !important; }
+    [data-theme="light"] .weekStripWrap.expanded .mCell.mActive { color:#f97316 !important; }
     [data-theme="light"] .weekStripWrap.expanded .stripHandleHint { color:#fff; }
     [data-theme="light"] .weekStripWrap.expanded .stripFeriadoHint { color:#fff; }
     [data-theme="light"] .weekStripWrap.expanded .stripHandleArrow { color:rgba(249,115,22,.85) !important; }
