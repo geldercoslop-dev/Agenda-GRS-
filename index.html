@@ -747,9 +747,6 @@
     </div>
 
     <!-- ══ FOOTER PROGRESS BAR ══ -->
-    <!-- Gradiente decorativo — só visual, não empurra conteúdo -->
-    <div style="position:fixed;bottom:0;left:0;right:0;height:110px;z-index:9996;pointer-events:none;
-      background:linear-gradient(to top, rgba(5,14,31,.58) 33%, transparent 100%);"></div>
 
     <div id="progressRow" style="
       position:fixed;bottom:0;left:0;right:0;z-index:900;
@@ -3514,6 +3511,11 @@ function init(){
         _histDepth--;
         // Substitui a entry atual para manter o stack sincronizado
         history.replaceState({app:'screen', depth:_histDepth},'');
+      }
+      // Restaura footer e calendário se voltou pra home
+      if(typeof currentView !== 'undefined' && currentView === 'home'){
+        if(typeof _setFooter === 'function') _setFooter(true);
+        if(typeof atualizarLupa === 'function') atualizarLupa('home');
       }
     };
 
