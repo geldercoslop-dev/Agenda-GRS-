@@ -130,6 +130,10 @@
     .progressFill::after { display:none; }
     .progressFill::before { display:none; }
 
+    @keyframes slideUpIcon {
+      from { transform: translateY(60px); opacity:0; }
+      to   { transform: translateY(0);    opacity:1; }
+    }
     @keyframes barSweep {
       0%   { left: -60%; }
       100% { left: 120%; }
@@ -230,20 +234,21 @@
     [data-theme="light"] .monthHdrLabel { color:#1e2d6b; }
     /* Tema light: fundo do calendário expandido escuro para contraste */
     [data-theme="light"] .weekStripWrap.expanded {
-      background: rgba(15,25,60,.92);
+      background: rgba(255,255,255,.75);
       border-radius: 16px;
+      border: 1px solid rgba(30,45,110,.25);
     }
-    [data-theme="light"] .weekStripWrap.expanded .monthHdrLabel { color:#fff; }
-    [data-theme="light"] .weekStripWrap.expanded .monthDayName { color:rgba(255,255,255,.65); }
-    [data-theme="light"] .weekStripWrap.expanded .calCell { color:#fff; }
+    [data-theme="light"] .weekStripWrap.expanded .monthHdrLabel { color:rgba(30,45,110,.9); }
+    [data-theme="light"] .weekStripWrap.expanded .monthDayName { color:rgba(30,45,110,.6); }
+    [data-theme="light"] .weekStripWrap.expanded .calCell { color:rgba(30,45,110,.85); }
     [data-theme="light"] .weekStripWrap.expanded .calCell.today { color:#f97316; }
     [data-theme="light"] .weekStripWrap.expanded .mCell { color:rgba(255,255,255,.85) !important; }
     [data-theme="light"] .weekStripWrap.expanded .mCell.mToday { color:#f97316 !important; }
     [data-theme="light"] .weekStripWrap.expanded .mCell.mActive { color:#f97316 !important; }
-    [data-theme="light"] .weekStripWrap.expanded .stripHandleHint { color:#fff; }
-    [data-theme="light"] .weekStripWrap.expanded .stripFeriadoHint { color:#fff; }
+    [data-theme="light"] .weekStripWrap.expanded .stripHandleHint { color:rgba(30,45,110,.7); }
+    [data-theme="light"] .weekStripWrap.expanded .stripFeriadoHint { color:rgba(30,45,110,.7); }
     [data-theme="light"] .weekStripWrap.expanded .stripHandleArrow { color:rgba(249,115,22,.85) !important; }
-    [data-theme="light"] .weekStripWrap.expanded #feriadosShortcut span { color:#fff; }
+    [data-theme="light"] .weekStripWrap.expanded #feriadosShortcut span { color:rgba(30,45,110,.8); }
     .monthDayNames {
       display:none; grid-template-columns:repeat(7,1fr); gap:3px;
       padding:0 8px 4px;
