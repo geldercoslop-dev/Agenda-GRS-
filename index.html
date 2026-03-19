@@ -3005,15 +3005,8 @@ function _setFooter(visible){
   if(!row) return;
   if(visible){ row.classList.remove('hidden'); }
   else { row.classList.add('hidden'); }
-  // weekStripCard APENAS na home
-  const wsc=document.getElementById('weekStripCard');
-  const isHome = (currentView === 'home');
-  if(visible && isHome){
-    if(wsc) wsc.classList.remove('hidden');
-  } else {
-    if(wsc) wsc.classList.add('hidden');
-  }
-  // topSearchBar é controlado exclusivamente por atualizarLupa() / goHome()
+  // weekStripCard é controlado EXCLUSIVAMENTE por goHome() e openBucket()
+  // _setFooter NÃO toca no weekStripCard para evitar bug de sumiço ao voltar
 }
 function openSubScreen(title, bodyHtml, initFn, exitFn){
   _setFooter(false);
@@ -3515,6 +3508,9 @@ function init(){
       // Restaura footer e calendário se voltou pra home
       if(typeof currentView !== 'undefined' && currentView === 'home'){
         if(typeof _setFooter === 'function') _setFooter(true);
+        // Restaura weekStripCard explicitamente (não depende de _setFooter)
+        const _wsc = document.getElementById('weekStripCard');
+        if(_wsc){ _wsc.classList.remove('hidden'); _wsc.style.display=''; }
         if(typeof atualizarLupa === 'function') atualizarLupa('home');
       }
     };
