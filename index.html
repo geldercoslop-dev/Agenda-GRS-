@@ -637,7 +637,7 @@
           display:flex;align-items:center;justify-content:center;gap:8px;
           margin-bottom:10px;
         ">
-          <span style="font-size:18px;">🖼️</span> Escolher ícone 3D (181 disponíveis)
+          <span style="font-size:18px;">🖼️</span> Escolher ícone 3D (12 disponíveis)
         </button>
 
         <!-- Separador -->
@@ -856,9 +856,9 @@
         <button id="sidebarFab" style="
           position:absolute;right:14px;bottom:12px;
           width:54px;height:54px;border-radius:15px;
-          background:linear-gradient(135deg,#f97316,#ea580c);
+          background:#0984e3;
           border:none;
-          box-shadow:0 4px 16px rgba(234,88,12,0.6);
+          box-shadow:0 4px 16px rgba(9,132,227,0.5);
           color:#fff;font-size:22px;cursor:pointer;
           display:flex;align-items:center;justify-content:center;
           transition:transform .15s;
@@ -1241,13 +1241,18 @@ function initStripExpand(){
     if(card && !card.contains(e.target)) toggle(false);
   },{passive:true});
 
-  // Swipe para expandir/recolher APENAS no handle do calendário.
+  // Swipe em QUALQUER LUGAR da tela home para abrir/fechar calendário
   let _sy=0, _sx=0, _active=false;
-  const THRESHOLD = 55;
+  const THRESHOLD = 65;
 
   document.addEventListener('touchstart',(e)=>{
     if(typeof currentView !== 'undefined' && currentView !== 'home') return;
-    if(!e.target.closest('#stripHandle')) return;
+    // Ignorar toques em pastas, botões, overlays e sidebar
+    if(e.target.closest('.folderTile')) return;
+    if(e.target.closest('#sidebarOverlay')) return;
+    if(e.target.closest('.sidebar')) return;
+    if(e.target.closest('[id$="Overlay"]')) return;
+    if(e.target.closest('button')) return;
     _sy = e.touches[0].clientY;
     _sx = e.touches[0].clientX;
     _active = true;
@@ -1255,12 +1260,11 @@ function initStripExpand(){
 
   document.addEventListener('touchmove',(e)=>{
     if(!_active) return;
-    // Só ativa swipe do calendário na tela home
     if(typeof currentView !== 'undefined' && currentView !== 'home') { _active=false; return; }
     const dy = e.touches[0].clientY - _sy;
     const dx = e.touches[0].clientX - _sx;
     if(Math.abs(dy) < THRESHOLD) return;
-    if(Math.abs(dx) > Math.abs(dy) * 0.7) return; // horizontal demais
+    if(Math.abs(dx) > Math.abs(dy) * 0.65) return; // horizontal demais = sidebar
     _active = false;
     if(dy > 0 && !expanded) toggle(true);       // arrasta pra baixo → abre
     else if(dy < 0 && expanded) toggle(false);  // arrasta pra cima → fecha
@@ -3581,15 +3585,22 @@ function init(){
     window._navPop = function(){
       if(_histDepth > 1){
         _histDepth--;
-        // Substitui a entry atual para manter o stack sincronizado
         history.replaceState({app:'screen', depth:_histDepth},'');
       }
-      // Restaura footer e calendário se voltou pra home
+      // Restaura TUDO se voltou pra home
       if(typeof currentView !== 'undefined' && currentView === 'home'){
+        // progressRow
         if(typeof _setFooter === 'function') _setFooter(true);
-        // Restaura weekStripCard explicitamente (não depende de _setFooter)
+        const _pr = document.getElementById('progressRow');
+        if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; _pr.style.transition=''; }
+        // weekStripCard + weekStripWrap
         const _wsc = document.getElementById('weekStripCard');
-        if(_wsc){ _wsc.classList.remove('hidden'); _wsc.style.display=''; }
+        if(_wsc){ _wsc.classList.remove('hidden'); _wsc.style.display=''; _wsc.style.opacity=''; }
+        const _wsw = document.getElementById('weekStripWrap');
+        if(_wsw){ _wsw.classList.remove('hidden'); _wsw.style.display=''; _wsw.style.opacity=''; }
+        // sidebarFab (botão menu ☰)
+        const _fab = document.getElementById('sidebarFab');
+        if(_fab){ _fab.style.opacity='1'; _fab.style.pointerEvents='auto'; _fab.style.transform='scale(1)'; }
         if(typeof atualizarLupa === 'function') atualizarLupa('home');
       }
     };
