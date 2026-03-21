@@ -856,9 +856,9 @@
         <button id="sidebarFab" style="
           position:absolute;right:14px;bottom:12px;
           width:54px;height:54px;border-radius:15px;
-          background:#0984e3;
+          background:var(--fab-color, #0984e3);
           border:none;
-          box-shadow:0 4px 16px rgba(9,132,227,0.5);
+          box-shadow:0 4px 16px var(--fab-shadow, rgba(9,132,227,0.5));
           color:#fff;font-size:22px;cursor:pointer;
           display:flex;align-items:center;justify-content:center;
           transition:transform .15s;
@@ -1883,6 +1883,7 @@ function goHome(){
   // Reset badge: clear on home
   const badge=document.getElementById('dayBadge');
   badge.textContent='';
+  document.body.classList.remove('cal-expanded');
   document.getElementById('progressRow').classList.remove('hidden');
   document.getElementById('weekStripWrap').classList.remove('hidden');
   document.getElementById('weekStripCard')?.classList.remove('hidden');
