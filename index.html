@@ -1104,8 +1104,8 @@ function updateHeader() {
     const p2=v=>String(v).padStart(2,'0');
     const hh=p2(n.getHours()), mm=p2(n.getMinutes());
     const blink=n.getSeconds()%2===0;
-    const clr=light?'#ffffff':'#e2d4ff';
-    const glowClr=light?'rgba(255,255,255,0.4)':'rgba(200,160,255,0.5)';
+    const clr=light?'#1a2b48':'#ffffff';
+    const glowClr=light?'rgba(26,43,72,0.2)':'rgba(255,255,255,0.4)';
     const colonOp=blink?'1':'0.25';
     // SVG inline text approach — mais limpo e bonito
     el.innerHTML=`
@@ -1190,6 +1190,7 @@ function initStripExpand(){
   const _pr = document.getElementById('progressRow');
 
   function resetExpandedVisualState(){
+    document.body.classList.remove('cal-expanded');
     if(_ov){
       _ov.classList.remove('open');
       _ov.style.display='none';
@@ -1211,6 +1212,7 @@ function initStripExpand(){
   function toggle(toExpand){
     expanded = toExpand;
     wrap.classList.toggle('expanded', expanded);
+    document.body.classList.toggle('cal-expanded', expanded);
     if(!expanded){ viewMonthYear=null; viewMonthMonth=null; }
     renderMonthGrid();
     if(toExpand){

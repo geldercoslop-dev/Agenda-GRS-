@@ -342,9 +342,9 @@ body {
 [data-theme="light"] .hdrGreeting { color: #fff !important; }
 [data-theme="light"] .hdrSub { color: rgba(255,255,255,.8) !important; }
 [data-theme="light"] .clockBg {
-  background: #f8f9fa !important;
-  border-color: rgba(26,43,72,.2) !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,.12) !important;
+  background: rgba(255,255,255,.75) !important;
+  border-color: rgba(30,45,110,.18) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1) !important;
 }
 [data-theme="light"] .dayBadge { color: rgba(255,255,255,.9) !important; }
 [data-theme="light"] .progressLabel { color: rgba(30,45,107,.85) !important; }

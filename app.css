@@ -403,13 +403,18 @@
     /* Overlay do calendário expandido — mesmo efeito do sidebar */
     #calExpandOverlay {
       display:none; position:fixed; inset:0; z-index:899;
-      background:rgba(0,0,0,.6); backdrop-filter:blur(3px);
-      -webkit-backdrop-filter:blur(3px);
-      opacity:0; transition:opacity .25s ease;
+      background:rgba(0,0,0,.35);
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+      opacity:0; transition:opacity .3s ease;
       pointer-events:none;
     }
     #calExpandOverlay.open {
       display:block; opacity:1; pointer-events:auto;
+    }
+    /* Bloqueia scroll/toque no conteúdo abaixo quando calendário expandido */
+    body.cal-expanded #homeView > *:not(#weekStripCard) {
+      pointer-events:none;
     }
     /* Rodapé some quando calendário está expandido */
     #weekStripWrap.expanded ~ * #progressRow,
