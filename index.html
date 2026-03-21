@@ -837,7 +837,7 @@
         ">
 
         <!-- Barra de progresso -->
-        <div style="position:absolute;left:95px;right:90px;bottom:12px;
+        <div style="position:absolute;left:108px;right:103px;bottom:12px;
                     display:flex;flex-direction:column;gap:4px;padding-bottom:15px;">
           <!-- Linha 1: Progresso + % alinhados -->
           <div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px;">
@@ -1874,6 +1874,7 @@ function openBucket(id, _pushCurrent){
 
 function goHome(){
   if(typeof window._forceCalendarCollapsed === 'function') window._forceCalendarCollapsed();
+  document.body.classList.remove('cal-expanded');
   currentView='home';
   navStack=[];
   // Garante que o indicador pull-to-back nunca fique preso
@@ -2750,7 +2751,10 @@ function doBackup(){
           // Substitui state completamente pelo backup (sem merge parcial)
           // Preserva apenas weekStartISO atual para evitar checkWeekTransition apagar tudo
           const _restoredState = Object.assign({}, data);
-          _restoredState.weekStartISO = getSunday(); // semana atual — evita varredura indevida
+          // NÃO forçar weekStartISO — manter o do backup para não disparar
+          // checkWeekTransition que apagaria tarefas pendentes
+          // Mas garantir que não está em semana futura problemática
+          if (!_restoredState.weekStartISO) _restoredState.weekStartISO = getSunday();
           // Garante estrutura mínima caso backup seja antigo
           if (!_restoredState.tasks || typeof _restoredState.tasks !== 'object' || Array.isArray(_restoredState.tasks)) _restoredState.tasks = {};
           if (!Array.isArray(_restoredState.folders)) _restoredState.folders = [];
@@ -3087,12 +3091,18 @@ function confirmDelPasta(fid){
 // ══ SUB-SCREEN STACK ENGINE ══
 const _subStack = [];
 function _setFooter(visible){
-  const row=document.getElementById('progressRow');
+  // NUNCA usa .hidden — progressRow e weekStripCard são controlados
+  // EXCLUSIVAMENTE por goHome() e openBucket()
+  // Usar .hidden aqui causava o bug de sumiço do rodapé ao voltar de qualquer tela
+  const row = document.getElementById('progressRow');
   if(!row) return;
-  if(visible){ row.classList.remove('hidden'); }
-  else { row.classList.add('hidden'); }
-  // weekStripCard é controlado EXCLUSIVAMENTE por goHome() e openBucket()
-  // _setFooter NÃO toca no weekStripCard para evitar bug de sumiço ao voltar
+  if(visible){
+    row.classList.remove('hidden');
+    row.style.opacity = '';
+    row.style.pointerEvents = '';
+  }
+  // visible=false: não faz nada com progressRow
+  // goHome/openBucket cuidam de esconder/mostrar diretamente
 }
 function openSubScreen(title, bodyHtml, initFn, exitFn){
   _setFooter(false);
