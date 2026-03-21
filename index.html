@@ -1104,8 +1104,8 @@ function updateHeader() {
     const p2=v=>String(v).padStart(2,'0');
     const hh=p2(n.getHours()), mm=p2(n.getMinutes());
     const blink=n.getSeconds()%2===0;
-    const clr=light?'#1a2b48':'#ffffff';
-    const glowClr=light?'rgba(26,43,72,0.2)':'rgba(255,255,255,0.4)';
+    const clr=light?'#32261c':'#ffffff';
+    const glowClr=light?'rgba(50,38,28,0.15)':'rgba(255,255,255,0.4)';
     const colonOp=blink?'1':'0.25';
     // SVG inline text approach — mais limpo e bonito
     el.innerHTML=`
