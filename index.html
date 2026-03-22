@@ -299,6 +299,11 @@
           <span class="sCardLabel">Estatísticas do sistema</span>
           <span class="sCardSub">Seu uso</span>
         </div>
+        <div class="sCard" id="rowVersion" style="cursor:pointer;">
+          <span class="sCardIcon">🧭</span>
+          <span class="sCardLabel">Status da versão</span>
+          <span class="sCardSub">Sistema e atualização</span>
+        </div>
         <div class="sCard" id="rowManual">
           <span class="sCardIcon">📖</span>
           <span class="sCardLabel">Manual de uso</span>
@@ -852,6 +857,11 @@ let pendingPhoto = null;
 let pendingWmark = null;
 let pendingWallpaper = null;
 let reopenSettingsAfterWallpaperPick = false;
+const APP_BUILD_VERSION = '2026-03-22-6';
+const SAVE_MIN_INTERVAL_MS = 140;
+let _saveTimer = null;
+let _savePending = false;
+let _saveLastAt = 0;
 
 function _defaultWallpaperCatalog() {
   // Fallback seguro caso wallpapers.js não carregue por qualquer motivo
@@ -941,7 +951,7 @@ function ensureSystemFolders(){
   });
 }
 
-function save() {
+function _persistStateNow() {
   AppStorage.saveState(state);
   try {
     const activeScope = (typeof _currentScope === 'function') ? (_currentScope() || '') : (state && state.syncScope ? state.syncScope : '');
@@ -949,7 +959,46 @@ function save() {
       AppStorage.set(_scopeStorageKey('agendaProMax_state', activeScope), state);
     }
   } catch(_) {}
+  _saveLastAt = Date.now();
+  _savePending = false;
 }
+
+function _schedulePersist() {
+  if (!_savePending) return;
+  if (_saveTimer) return;
+  const now = Date.now();
+  const elapsed = now - _saveLastAt;
+  if (elapsed >= SAVE_MIN_INTERVAL_MS) {
+    _persistStateNow();
+    return;
+  }
+  _saveTimer = setTimeout(() => {
+    _saveTimer = null;
+    if (_savePending) _persistStateNow();
+  }, SAVE_MIN_INTERVAL_MS - elapsed);
+}
+
+function flushPendingSave() {
+  if (_saveTimer) {
+    clearTimeout(_saveTimer);
+    _saveTimer = null;
+  }
+  if (_savePending) _persistStateNow();
+}
+
+function save(force) {
+  _savePending = true;
+  if (force === true) {
+    flushPendingSave();
+    return;
+  }
+  _schedulePersist();
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushPendingSave();
+});
+window.addEventListener('beforeunload', flushPendingSave, { capture: true });
 
 // Migra dom2 → dom quando a semana vira (novo domingo)
 function checkWeekTransition(){
@@ -4011,6 +4060,7 @@ function init(){
   document.getElementById('rowExport')    ?.addEventListener('click', exportarDados);
   document.getElementById('rowImport')    ?.addEventListener('click', importarDados);
   document.getElementById('rowStats')     ?.addEventListener('click', ()=>openStats(true));
+  document.getElementById('rowVersion')   ?.addEventListener('click', openVersionStatus);
   document.getElementById('rowIntegrity') ?.addEventListener('click', verificarIntegridade);
   // ── Botão de pesquisa no header
   document.getElementById('searchBtn')?.addEventListener('click', openSearch);
@@ -4348,6 +4398,10 @@ function init(){
 
   // Lembrete de backup — avisa se passaram mais de 3 dias sem backup
   setTimeout(checkBackupReminder, 3000);
+  // Backup automático de proteção a cada 6h (além do backup manual do usuário).
+  setInterval(autoBackup, 6 * 60 * 60 * 1000);
+  // Gera um snapshot local logo após iniciar com app estável.
+  setTimeout(autoBackup, 12000);
 }
 
 // ══ VERIFICAÇÃO DIÁRIA DE PENDÊNCIAS ══
@@ -7377,6 +7431,38 @@ function openStats(fromSettings) {
   openSubScreen('📊 Estatísticas do sistema', html, null, null);
 }
 
+function openVersionStatus() {
+  let swControlled = false;
+  try {
+    swControlled = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+  } catch(_) {}
+  const safeVersion = _escHtml(String(APP_BUILD_VERSION || 'desconhecida'));
+  const html = `
+    <div style="padding:4px 0 12px;font-family:'Plus Jakarta Sans',sans-serif;">
+      <div style="background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.18);border-radius:14px;padding:16px 18px;">
+        <div style="font-size:10px;font-weight:900;color:rgba(180,220,240,.55);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;font-family:'Space Grotesk',sans-serif;">Versão e Atualização</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          ${[
+            ['Versão do app', safeVersion],
+            ['Service Worker', swControlled ? 'Ativo' : 'Inativo'],
+            ['Modo de atualização', 'Segura (com confirmação)'],
+            ['Backup automático', 'Ativo (a cada 6 horas)'],
+          ].map(([l,v]) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,140,180,.1);padding-bottom:8px;">
+              <span style="font-size:13px;font-weight:600;color:rgba(180,220,240,.7);font-family:'Plus Jakarta Sans',sans-serif;">${l}</span>
+              <span style="font-size:13px;font-weight:800;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;">${v}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;font-weight:600;color:rgba(180,220,240,.35);text-align:center;line-height:1.5;font-family:'Space Grotesk',sans-serif;">
+        Use este painel para validar rapidamente se o app está atualizado e estável.
+      </div>
+    </div>`;
+  closeSettings();
+  openSubScreen('🧭 Status da versão', html, null, null);
+}
+
 // ══════════════════════════════════════════════════════════════════
 // ══ VERIFICADOR DE INTEGRIDADE DE DADOS ══
 // ══════════════════════════════════════════════════════════════════
@@ -7549,6 +7635,7 @@ if (typeof iniciarVerificacaoPeriodica === 'function') {
 
 const APP_DATA_VERSION = 2;
 const _MIGRATION_KEY   = 'agendaProMax_dataVersion';
+const _MIGRATION_SNAPSHOT_PREFIX = 'agendaProMax_preMigration_';
 
 const _MIGRATIONS = {
   // v1 → v2: garante que todos os remédios têm campo 'ativo'
@@ -7570,12 +7657,23 @@ const _MIGRATIONS = {
   // 3: function(s) { /* ... */ return s; }
 };
 
+function _saveMigrationSnapshot(s, fromVersion, toVersion) {
+  try {
+    const key = _MIGRATION_SNAPSHOT_PREFIX + String(fromVersion) + '_to_' + String(toVersion) + '_' + Date.now();
+    const payload = _buildExportPayloadFromState(s || state || {});
+    AppStorage.set(key, payload);
+    const keys = (AppStorage.keys(_MIGRATION_SNAPSHOT_PREFIX) || []).sort();
+    while (keys.length > 3) AppStorage.remove(keys.shift());
+  } catch(_) {}
+}
+
 function _runMigrations(s) {
   let currentVersion = 0;
   try {
     currentVersion = parseInt(AppStorage.get(_MIGRATION_KEY, '0') || '0', 10);
   } catch(e) {}
   if (currentVersion >= APP_DATA_VERSION) return s;
+  _saveMigrationSnapshot(s, currentVersion, APP_DATA_VERSION);
 
   for (let v = currentVersion + 1; v <= APP_DATA_VERSION; v++) {
     if (typeof _MIGRATIONS[v] === 'function') {
@@ -9440,7 +9538,7 @@ function openHistoricoPaciente(){
   // ── 1. ATUALIZAÇÃO SEGURA COM BOTÃO (SEM LIMPEZA AUTOMÁTICA) ────
   // Detecta nova versão e mostra botão "Atualizar agora" sem apagar dados do usuário.
   (function _swSafeUpdateButton() {
-    const SW_BUILD_VERSION = '2026-03-22-5';
+    const SW_BUILD_VERSION = APP_BUILD_VERSION;
     const SW_URL = './sw.js?v=' + encodeURIComponent(SW_BUILD_VERSION);
     const BANNER_ID = '_swSafeUpdateBanner';
     let _swReg = null;
