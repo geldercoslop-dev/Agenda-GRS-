@@ -22,6 +22,7 @@ var state = {
   weekStartISO: '',
   profilePhoto: null,
   watermarkPhoto: null,
+  wallpaperPhoto: null,
   bucketPhotos: {},
   lastManualVarrerWeek: null,
   lastAutoVarrerWeek: null,

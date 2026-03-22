@@ -853,6 +853,7 @@
     /* ══ WATERMARK ══ */
     .watermarkWrap {
       display: none !important;
+    }
     .watermarkWrap img {
       width: 100%;
       height: auto;

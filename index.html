@@ -253,7 +253,7 @@
         <button class="cmdBtn" id="cmdFolders"><span class="ci-wrap"><span class="ci">📁</span></span><span class="cl">Pastas</span></button>
         <button class="cmdBtn" id="cmdZap"><span class="ci-wrap"><span class="ci"><svg style="width:clamp(18px,4.5vw,22px);height:clamp(18px,4.5vw,22px)" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M22.58 9.4A9.3 9.3 0 0016.02 7C11.14 7 7.17 10.97 7.17 15.85c0 1.56.41 3.08 1.19 4.42L7.1 25l4.84-1.27a9.35 9.35 0 004.08.93h.003c4.87 0 8.84-3.97 8.84-8.85a8.8 8.8 0 00-2.25-5.41zm-6.56 13.6h-.003a7.76 7.76 0 01-3.96-1.08l-.28-.17-2.92.77.78-2.85-.19-.29a7.73 7.73 0 01-1.18-4.13c0-4.28 3.48-7.76 7.77-7.76a7.7 7.7 0 017.76 7.77c0 4.28-3.49 7.76-7.77 7.76zm4.26-5.82c-.23-.12-1.38-.68-1.6-.76-.21-.08-.37-.12-.52.12-.16.23-.6.76-.74.92-.13.15-.27.17-.5.06-.23-.12-.97-.36-1.85-1.14-.68-.6-1.14-1.35-1.27-1.58-.13-.23-.01-.35.1-.47.1-.1.23-.27.35-.4.11-.14.15-.23.23-.38.07-.15.04-.28-.02-.4-.06-.12-.52-1.26-.72-1.72-.18-.45-.38-.39-.52-.4h-.44c-.16 0-.41.06-.62.29-.21.23-.82.8-.82 1.95s.84 2.26.96 2.42c.12.15 1.65 2.52 4 3.54.56.24 1 .39 1.34.49.56.18 1.07.16 1.48.1.45-.07 1.38-.57 1.58-1.11.19-.54.19-1.01.13-1.11-.06-.1-.21-.16-.44-.27z" fill="white"/></svg></span></span><span class="cl">Zap</span></button>
         <button class="cmdBtn" id="cmdBackup"><span class="ci-wrap"><span class="ci">💾</span></span><span class="cl">Backup</span></button>
-        <button class="cmdBtn" id="themeBtn"><span class="ci-wrap"><span class="ci"><span id="thIcon">💡</span></span></span><span class="cl">Tema</span></button>
+        <button class="cmdBtn" id="themeBtn"><span class="ci-wrap"><span class="ci"><span id="thIcon">🖼️</span></span></span><span class="cl">Papel</span></button>
         <button class="cmdBtn" id="cmdReport"><span class="ci-wrap"><span class="ci">📊</span></span><span class="cl">Relatório</span></button>
         <button class="cmdBtn" id="todayBtn"><span class="ci-wrap"><span class="ci"><svg style="width:clamp(18px,4.5vw,22px);height:clamp(18px,4.5vw,22px)" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#22c55e" opacity=".18"/><circle cx="12" cy="12" r="10" stroke="#22c55e" stroke-width="1.8"/><path d="M12 7v5l3 3" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span><span class="cl">Hoje</span></button>
       </div>
@@ -284,6 +284,11 @@
           <span class="sCardLabel">Foto de perfil</span>
           <span class="sCardSub">Altere aqui</span>
         </div>
+        <div class="sCard" id="rowWallpaper">
+          <span class="sCardIcon">🖼️</span>
+          <span class="sCardLabel">Papel de parede</span>
+          <span class="sCardSub">Tela inicial</span>
+        </div>
         <div class="sCard" id="rowStats" style="cursor:pointer;">
           <span class="sCardIcon">📊</span>
           <span class="sCardLabel">Estatísticas do sistema</span>
@@ -309,6 +314,8 @@
 
       <!-- Subform Foto de perfil — abre galeria diretamente -->
       <input type="file" id="fileProfile" accept="image/*" style="width:0;height:0;opacity:0;position:absolute;">
+      <!-- Input papel de parede -->
+      <input type="file" id="fileWallpaper" accept="image/*" style="width:0;height:0;opacity:0;position:absolute;">
       <!-- Input importar JSON -->
       <input type="file" id="fileImportJson" accept=".json,application/json" style="width:0;height:0;opacity:0;position:absolute;">
 
@@ -739,7 +746,7 @@
 
         <div class="sb-divider"></div>
         <div class="sb-section-label">Configurações</div>
-        <div class="sb-item" id="sb-theme" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(167,139,250,.08);"><span id="sbThIcon">💡</span></div><span class="sb-label">Tema</span></div>
+        <div class="sb-item" id="sb-theme" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(167,139,250,.08);"><span id="sbThIcon">🖼️</span></div><span class="sb-label">Papel de parede</span></div>
         <div class="sb-item" id="sb-sync" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(59,130,246,.1);">☁️</div><span class="sb-label">Sincronização</span></div>
         <div class="sb-item" id="sb-backup" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(244,114,182,.1);">💾</div><span class="sb-label">Backup</span></div>
         <div class="sb-item" id="sb-settings" onclick="closeSidebar()"><div class="sb-icon" style="background:rgba(148,163,184,.08);">⚙️</div><span class="sb-label">Configurações</span></div>
@@ -835,6 +842,8 @@ let currentBucket = 'seg';
 let currentView = 'home';
 let pendingPhoto = null;
 let pendingWmark = null;
+let pendingWallpaper = null;
+let reopenSettingsAfterWallpaperPick = false;
 
 function getSunday() {
   const d = new Date();
@@ -862,7 +871,7 @@ function defaultState() {
     folderOrder: ['pauta'],
     homeFolders: null, // null = usa SYSTEM_IDS por padrão; array = escolha do usuário
     tasks: {dom:[],seg:[],ter:[],qua:[],qui:[],sex:[],sab:[],dom2:[],pauta:[]},
-    dateTasks: {}, profilePhoto: null, watermarkPhoto: null,
+    dateTasks: {}, profilePhoto: null, watermarkPhoto: null, wallpaperPhoto: null,
     lastManualVarrerWeek: null,
     lastAutoVarrerWeek: null,
     lastDailyReviewDate: null,
@@ -1009,8 +1018,10 @@ function setTheme(t) {
   state.theme = t;
   document.body.setAttribute('data-theme', t);
   const thIcon = document.getElementById('thIcon');
-  thIcon.textContent = '💡';
-  thIcon.style.filter = t==='light' ? 'grayscale(1) brightness(0.5)' : 'none';
+  if (thIcon) {
+    thIcon.textContent = '💡';
+    thIcon.style.filter = t==='light' ? 'grayscale(1) brightness(0.5)' : 'none';
+  }
   save();
 }
 function toggleTheme() { setTheme(state.theme==='light'?'dark':'light'); }
@@ -2927,7 +2938,8 @@ function resizeImage(file,maxPx,quality,cb){
 // ══ SETTINGS ══
 function openSettings(){
   _setFooter(false);
-  pendingPhoto=null; pendingWmark=null;
+  pendingPhoto=null; pendingWmark=null; pendingWallpaper=null;
+  reopenSettingsAfterWallpaperPick = false;
   document.getElementById('inputUserName').value=state.userName||'';
   ['subName'].forEach(id=>document.getElementById(id).classList.add('hidden'));
   document.getElementById('sModalOverlay').classList.add('show');
@@ -2946,6 +2958,7 @@ function saveSettings(){
   if(firstName) state.userName=firstName;
   if(pendingPhoto){state.profilePhoto=pendingPhoto;document.getElementById('profileImg').src=pendingPhoto;}
   if(pendingWmark){ state.watermarkPhoto=pendingWmark; document.getElementById('watermarkImg').src=pendingWmark; }
+  if(pendingWallpaper){ state.wallpaperPhoto=pendingWallpaper; applyWallpaperPhoto(pendingWallpaper); }
   save(); updateHeader(); closeSettings();
   showToast('✅ Configurações salvas!');
 }
@@ -3293,6 +3306,26 @@ function closeSidebar(){
     }
   }
 
+  function applyWallpaperPhoto(dataUrl) {
+    const appRoot = document.querySelector('.app');
+    if (!appRoot) return;
+    const safe = safeImageUrl(dataUrl);
+    if (!safe) {
+      appRoot.style.backgroundImage = '';
+      appRoot.style.backgroundSize = '';
+      appRoot.style.backgroundPosition = '';
+      appRoot.style.backgroundRepeat = '';
+      document.body.classList.remove('has-wallpaper');
+      return;
+    }
+    const escaped = safe.replace(/"/g, '%22');
+    appRoot.style.backgroundImage = `linear-gradient(rgba(2,24,36,.28), rgba(2,24,36,.28)), url("${escaped}")`;
+    appRoot.style.backgroundSize = 'cover';
+    appRoot.style.backgroundPosition = 'center';
+    appRoot.style.backgroundRepeat = 'no-repeat';
+    document.body.classList.add('has-wallpaper');
+  }
+
 function init(){
   // Tarefa 4 — state nunca pode ser undefined ao entrar no render
   if (typeof state === 'undefined' || state === null || typeof state !== 'object') {
@@ -3306,9 +3339,12 @@ function init(){
   repairRemedioFolder();
   document.body.setAttribute('data-theme',state.theme);
   const _ti = document.getElementById('thIcon');
-  _ti.textContent = '💡';
-  _ti.style.filter = state.theme==='light' ? 'grayscale(1) brightness(0.5)' : 'none';
+  if (_ti) {
+    _ti.textContent = '🖼️';
+    _ti.style.filter = 'none';
+  }
   if(state.profilePhoto) document.getElementById('profileImg').src=state.profilePhoto;
+  applyWallpaperPhoto(state.wallpaperPhoto || '');
   if(state.watermarkPhoto){
     applyWatermarkPhoto(state.watermarkPhoto);
   }
@@ -3356,7 +3392,16 @@ function init(){
   document.getElementById('sb-rReceber')?.addEventListener('click',()=>{ closeSidebar(); generateContasReceberReport(); });
   document.getElementById('sb-rConsultas')?.addEventListener('click',()=>{ closeSidebar(); generateConsultasReport(); });
   document.getElementById('sb-rRemedios')?.addEventListener('click',()=>{ closeSidebar(); generateRemediosReport(); });
-  document.getElementById('sb-theme')?.addEventListener('click',()=>{ closeSidebar(); toggleTheme(); });
+  function openWallpaperPicker(){
+    const ov = document.getElementById('sModalOverlay');
+    reopenSettingsAfterWallpaperPick = !!(ov && ov.classList.contains('show'));
+    if(reopenSettingsAfterWallpaperPick) ov.classList.remove('show');
+    const fw = document.getElementById('fileWallpaper');
+    if(!fw) return;
+    fw.value = '';
+    setTimeout(()=>fw.click(), 80);
+  }
+  document.getElementById('sb-theme')?.addEventListener('click',()=>{ closeSidebar(); openWallpaperPicker(); });
   document.getElementById('sb-today')?.addEventListener('click',()=>{
     closeSidebar();
     const today=new Date(); const wkStart=parseLocalDate(state.weekStartISO);
@@ -3378,7 +3423,7 @@ function init(){
   if(_thIconEl) _sbThObs.observe(_thIconEl,{childList:true,subtree:true,characterData:true});
 
   // Header themeBtn still works (kept hidden but functional)
-  document.getElementById('themeBtn').addEventListener('click',toggleTheme);
+  document.getElementById('themeBtn')?.addEventListener('click',openWallpaperPicker);
   document.getElementById('settingsBtn').addEventListener('click',openSettings);
 
   // Day view footer
@@ -3481,6 +3526,7 @@ function init(){
     fp.value = '';
     setTimeout(()=>fp.click(), 80);
   });
+  document.getElementById('rowWallpaper')?.addEventListener('click', openWallpaperPicker);
   document.getElementById('rowManual').addEventListener('click',()=>{
     closeSettings();
     _setFooter(false);
@@ -3523,6 +3569,22 @@ function init(){
     });
   });
   document.getElementById('fileProfile').addEventListener('change', handleProfileFile);
+  function handleWallpaperFile(e){
+    const f=e.target.files[0];
+    if(reopenSettingsAfterWallpaperPick){
+      setTimeout(()=>document.getElementById('sModalOverlay')?.classList.add('show'), 100);
+    }
+    reopenSettingsAfterWallpaperPick = false;
+    if(!f) return;
+    resizeImage(f,1600,0.82,(data)=>{
+      pendingWallpaper=data;
+      state.wallpaperPhoto=data;
+      applyWallpaperPhoto(data);
+      save();
+      showToast('✅ Papel de parede atualizado!');
+    });
+  }
+  document.getElementById('fileWallpaper')?.addEventListener('change', handleWallpaperFile);
 
   // Manual
   document.getElementById('manualClose').addEventListener('click',()=>{
