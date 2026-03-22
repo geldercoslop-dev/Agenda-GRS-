@@ -53,6 +53,8 @@
     }).catch(function () {});
   }
 
+  var AUTO_RECOVERY_ENABLED = false; // modo tradicional: apenas recuperação manual
+
   function hardRecover(reason) {
     if (_alreadyRecoveredThisSession()) {
       _log('Recuperação já executada nesta sessão. Ignorando:', reason);
@@ -97,8 +99,10 @@
     }, 6500);
   }
 
-  // Recurso de script local falhou (ex.: arquivo não carregou) → recuperar.
+  // Recurso de script local falhou (ex.: arquivo não carregou).
+  // Em modo tradicional, não recupera automaticamente para evitar efeitos colaterais.
   window.addEventListener('error', function (evt) {
+    if (!AUTO_RECOVERY_ENABLED) return;
     try {
       var t = evt && evt.target;
       if (!t || t.tagName !== 'SCRIPT' || !t.src) return;
@@ -116,9 +120,11 @@
     if (currentUrl.searchParams.has(RECOVER_PARAM)) _setSessionRecovered();
   } catch (_) {}
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', _watchBootHealth, { once: true });
-  } else {
-    _watchBootHealth();
+  if (AUTO_RECOVERY_ENABLED) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', _watchBootHealth, { once: true });
+    } else {
+      _watchBootHealth();
+    }
   }
 })();
