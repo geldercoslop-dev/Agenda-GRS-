@@ -961,6 +961,72 @@ function load() {
   return defaultState();
 }
 
+function hasMeaningfulData(s) {
+  if (!s || typeof s !== 'object') return false;
+  const tasks = (s.tasks && typeof s.tasks === 'object') ? s.tasks : {};
+  const hasTasks = Object.values(tasks).some((arr) => Array.isArray(arr) && arr.length > 0);
+  const hasDateTasks = !!(s.dateTasks && typeof s.dateTasks === 'object' &&
+    Object.values(s.dateTasks).some((arr) => Array.isArray(arr) && arr.length > 0));
+  const hasFolders = Array.isArray(s.folders) && s.folders.length > 1; // >1 para ignorar só "Pauta"
+  const hasConsultas = Array.isArray(s.consultas) && s.consultas.length > 0;
+  const hasRemedios = Array.isArray(s.remedios) && s.remedios.length > 0;
+  const hasExtras = !!(
+    (Array.isArray(s._contas) && s._contas.length) ||
+    (Array.isArray(s._receber) && s._receber.length) ||
+    (Array.isArray(s._exames) && s._exames.length) ||
+    (Array.isArray(s._mercado) && s._mercado.length) ||
+    (Array.isArray(s._compras) && s._compras.length) ||
+    (Array.isArray(s._docs) && s._docs.length)
+  );
+  return hasTasks || hasDateTasks || hasFolders || hasConsultas || hasRemedios || hasExtras;
+}
+
+function _mergeLoadedState(raw) {
+  if (!raw || typeof raw !== 'object') return defaultState();
+  const d = defaultState();
+  const s = Object.assign({}, d, raw);
+  s.weekStartISO = getSunday(); // sempre semana atual
+  if (!Array.isArray(s.folders))    s.folders    = d.folders;
+  if (!Array.isArray(s.folderOrder))s.folderOrder= d.folderOrder;
+  if (!s.tasks || typeof s.tasks !== 'object') s.tasks = d.tasks;
+  for (const k of ['dom','seg','ter','qua','qui','sex','sab','dom2','pauta']) {
+    if (!Array.isArray(s.tasks[k])) s.tasks[k] = [];
+  }
+  if (!s.lastManualVarrerWeek) s.lastManualVarrerWeek = null;
+  if (!s.lastAutoVarrerWeek)   s.lastAutoVarrerWeek   = null;
+  if (!s.lastDailyReviewDate)  s.lastDailyReviewDate  = null;
+  if (!Array.isArray(s.consultas)) s.consultas = [];
+  if (!Array.isArray(s.remedios))  s.remedios  = [];
+  if (!s.bucketPhotos || typeof s.bucketPhotos !== 'object') s.bucketPhotos = {};
+  return s;
+}
+
+function recoverStateIfEmpty(currentState) {
+  try {
+    // Se já há conteúdo, não faz nada.
+    if (hasMeaningfulData(currentState)) return currentState;
+
+    // Tenta restaurar do backup automático mais recente.
+    const bkKeys = (AppStorage.keys('agendaProMax_backup_') || []).sort();
+    const lastKey = bkKeys[bkKeys.length - 1];
+    if (!lastKey) return currentState;
+
+    const rawBackup = AppStorage.get(lastKey, null);
+    if (!rawBackup || typeof rawBackup !== 'object') return currentState;
+    if (!hasMeaningfulData(rawBackup)) return currentState;
+
+    const restored = _mergeLoadedState(rawBackup);
+    save();
+    try {
+      localStorage.setItem('agendaProMax', JSON.stringify(restored));
+    } catch (_) {}
+    showToast('♻️ Dados recuperados do backup local.');
+    return restored;
+  } catch (_) {
+    return currentState;
+  }
+}
+
 // ══ UTILS ══
 function uid() { return Math.random().toString(36).substr(2,9); }
 function addDays(date, n) { const d = new Date(date); d.setDate(d.getDate()+n); return d; }
@@ -2659,6 +2725,10 @@ function doBackup(){
         <span style="font-size:18px;">📤</span>
         <span>Restaurar Backup</span>
       </button>
+      <button id="_bkRecoverLocal" style="padding:11px 16px;border-radius:12px;border:none;background:linear-gradient(135deg,#06b6d4,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;">♻️</span>
+        <span>Recuperar backup local</span>
+      </button>
       <button id="_bkCancel" style="padding:9px 16px;border-radius:12px;border:none;background:transparent;color:rgba(180,220,240,.45);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;cursor:pointer;width:100%;">Cancelar</button>
     </div>`;
   box.querySelector('#_bkConfirm').addEventListener('click',()=>{
@@ -2710,6 +2780,17 @@ function doBackup(){
       reader.readAsText(file);
     });
     inp.click();
+  });
+  box.querySelector('#_bkRecoverLocal').addEventListener('click',()=>{
+    const before = hasMeaningfulData(state);
+    const recovered = recoverStateIfEmpty(state);
+    close();
+    if (!before && hasMeaningfulData(recovered)) {
+      showToast('✅ Recuperação local concluída! Recarregando...');
+      setTimeout(()=>location.reload(), 900);
+    } else {
+      showToast('⚠️ Nenhum backup local encontrado para recuperar.');
+    }
   });
   box.querySelector('#_bkCancel').addEventListener('click',close);
 }
@@ -3332,6 +3413,7 @@ function init(){
     window.state = { consultas: [], tasks: {}, dateTasks: {}, folders: [] };
   }
   state=load();
+  state = recoverStateIfEmpty(state);
   // Garantia pós-load: se load() retornar algo inválido, aplica estado mínimo seguro
   if (typeof state === 'undefined' || state === null || typeof state !== 'object') {
     window.state = { consultas: [], tasks: {}, dateTasks: {}, folders: [] };
