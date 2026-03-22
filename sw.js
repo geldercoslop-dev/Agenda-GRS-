@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-Agenda Pro Max — Service Worker v39
+Agenda Pro Max — Service Worker v40
    Versão fixa — incrementar manualmente a cada deploy.
    ═══════════════════════════════════════════════════════ */
 
@@ -11,7 +11,8 @@ Agenda Pro Max — Service Worker v39
 //            v37 (2026-03) — adiciona catálogo interno de wallpapers
 //            v38 (2026-03) — adiciona base de feriados municipais ES e seletor por cidade
 //            v39 (2026-03) — alinhamento auto-update total (GitHub + Vercel + PWA)
-const CACHE_VERSION = "v39";
+//            v40 (2026-03) — pwaRescue para recuperar PWA antigo quebrado
+const CACHE_VERSION = "v40";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
 // Prefixo usado para identificar caches deste app e limpar apenas os deles
 const CACHE_PREFIX  = "agenda-cache-";
@@ -21,8 +22,24 @@ const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
+  "./variables.css",
+  "./app.css",
+  "./state.js",
+  "./storage.js",
+  "./logger.js",
+  "./validators.js",
+  "./sanitizer.js",
+  "./stateIntegrity.js",
+  "./stateManager.js",
+  "./syncQueue.js",
+  "./systemAudit.js",
+  "./agenda.js",
+  "./ui.js",
+  "./notificacoes.js",
+  "./sync.js",
   "./wallpapers.js",
   "./feriadosES.js",
+  "./pwaRescue.js",
   "./leo-192.png",
   "./leo-512.png"
 ];
