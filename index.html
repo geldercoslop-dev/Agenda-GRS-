@@ -1,6 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script>
+(function(){
+  try{
+    var raw = localStorage.getItem('agendaProMax');
+    var s = raw ? JSON.parse(raw) : null;
+    var theme = (s && s.theme) ? s.theme : 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.addEventListener('DOMContentLoaded', function(){
+      document.body.setAttribute('data-theme', theme);
+      // Restaurar wallpaper salvo para evitar flash de fundo
+      if(s && s.wallpaperUrl){
+        var st = document.createElement('style');
+        st.id = '_wpStyleEarly';
+        st.textContent = 'body{background-image:url("'+s.wallpaperUrl+'")!important;background-size:cover!important;background-position:center top!important;background-attachment:fixed!important}.app{background:transparent!important}';
+        document.head.appendChild(st);
+      }
+    });
+  }catch(e){}
+})();
+</script>
   <!-- ═══ Charset e Viewport ═══ -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-visual">
