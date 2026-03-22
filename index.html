@@ -1077,11 +1077,9 @@ function getGreeting() {
 function setTheme(t) {
   state.theme = t;
   document.body.setAttribute('data-theme', t);
-  const thIcon = document.getElementById('thIcon');
-  if(thIcon){ thIcon.textContent = '💡'; thIcon.style.filter = t==='light' ? 'grayscale(1) brightness(0.5)' : 'none'; }
+
   save();
 }
-function toggleTheme() { setTheme(state.theme==='light'?'dark':'light'); }
 
 // ══ DATE & GREETING ══
 function updateHeader() {
@@ -3360,8 +3358,7 @@ function init(){
   document.body.setAttribute('data-theme',state.theme);
   // Atualizar saudação com nome do usuário logo no boot
   if(typeof updateHeader === 'function') setTimeout(updateHeader, 0);
-  const _ti = document.getElementById('thIcon');
-  if(_ti){ _ti.textContent = '💡'; _ti.style.filter = state.theme==='light' ? 'grayscale(1) brightness(0.5)' : 'none'; }
+
   if(state.profilePhoto) document.getElementById('profileImg').src=state.profilePhoto;
   if(state.watermarkPhoto){
     applyWatermarkPhoto(state.watermarkPhoto);
@@ -3425,18 +3422,6 @@ function init(){
   document.getElementById('sb-settings')?.addEventListener('click',()=>{ closeSidebar(); openSettings(); });
   document.getElementById('sb-sync')?.addEventListener('click',()=>{ closeSidebar(); abrirPainelSync(); });
 
-  // Sync theme icon in sidebar
-  const _origToggleTheme = window.toggleTheme;
-  // (icon sync happens via existing thIcon logic, mirror to sbThIcon)
-  const _sbThObs = new MutationObserver(()=>{
-    const src=document.getElementById('thIcon');
-    const dst=document.getElementById('sbThIcon');
-    if(src&&dst) dst.textContent=src.textContent;
-  });
-  const _thIconEl=document.getElementById('thIcon');
-  if(_thIconEl) _sbThObs.observe(_thIconEl,{childList:true,subtree:true,characterData:true});
-
-  // Header themeBtn still works (kept hidden but functional)
   document.getElementById('wallpaperBtn')?.addEventListener('click', openWallpaperPicker);
   document.getElementById('settingsBtn').addEventListener('click',openSettings);
 
