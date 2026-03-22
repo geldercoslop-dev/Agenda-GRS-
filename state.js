@@ -18,6 +18,7 @@ var state = {
   folderOrder: [],
   homeFolders: null,
   theme: 'dark',
+  uiTextColor: '',
   userName: 'Usuário',
   weekStartISO: '',
   profilePhoto: null,

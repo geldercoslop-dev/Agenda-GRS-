@@ -58,8 +58,8 @@
       border-bottom: 1px solid rgba(99,102,241,.35);
       box-shadow: 0 4px 18px rgba(79,70,229,.35), 0 1px 0 rgba(255,255,255,.15);
     }
-    [data-theme="light"] .hdrGreeting { color: var(--text-white) !important; }
-    [data-theme="light"] .hdrSub { color: rgba(255,255,255,.75) !important; }
+    [data-theme="light"] .hdrGreeting { color: var(--custom-text, var(--text-white)) !important; }
+    [data-theme="light"] .hdrSub { color: var(--custom-muted, rgba(255,255,255,.75)) !important; }
     .profileWrap {
       flex-shrink: 0; width: 62px; height: 62px; border-radius: 18px; overflow: hidden;
       cursor: pointer; border: 1px solid rgba(255,255,255,.18);
@@ -69,10 +69,10 @@
     [data-theme="light"] .profileWrap { border-color: rgba(99,102,241,.3); }
     .profileWrap img { width:100%; height:100%; object-fit:cover; display:block; }
     .hdrCenter { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; padding-top: 10px; }
-    .hdrGreeting { font-family:'Space Grotesk',sans-serif; font-size:clamp(13px,3.6vw,17px); font-weight:800; color:#fff; letter-spacing:-.2px; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    [data-theme="light"] .hdrGreeting { color:#fff; }
-    .hdrSub { font-family:'Space Grotesk',sans-serif; font-size:clamp(10px,2.6vw,12px); font-weight:700; color:rgba(255,255,255,.5); text-transform:none; }
-    [data-theme="light"] .hdrSub { color:rgba(255,255,255,.55); }
+    .hdrGreeting { font-family:'Space Grotesk',sans-serif; font-size:clamp(13px,3.6vw,17px); font-weight:800; color:var(--custom-text, #fff); letter-spacing:-.2px; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    [data-theme="light"] .hdrGreeting { color:var(--custom-text, #fff); }
+    .hdrSub { font-family:'Space Grotesk',sans-serif; font-size:clamp(10px,2.6vw,12px); font-weight:700; color:var(--custom-muted, rgba(255,255,255,.5)); text-transform:none; }
+    [data-theme="light"] .hdrSub { color:var(--custom-muted, rgba(255,255,255,.55)); }
     .hdrRight { display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; min-width:80px; }
     .clockBg { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:5px 10px; display:flex; flex-direction:column; align-items:center; gap:3px; }
     [data-theme="light"] .clockBg { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.15); }
@@ -84,10 +84,10 @@
     /* Context badge — below clock, shows day name or folder name */
     .dayBadge {
       font-family:'Space Grotesk',sans-serif; font-size:clamp(8px,2.2vw,10px); font-weight:900;
-      letter-spacing:.8px; text-transform:uppercase; color:rgba(255,255,255,.7);
+      letter-spacing:.8px; text-transform:uppercase; color:var(--custom-text, rgba(255,255,255,.7));
       white-space:nowrap; text-align:right;
     }
-    [data-theme="light"] .dayBadge { color:rgba(255,255,255,.7); }
+    [data-theme="light"] .dayBadge { color:var(--custom-text, rgba(255,255,255,.7)); }
 
     /* ══ PROGRESS BAR ══ */
     .progressWrap {
@@ -96,8 +96,8 @@
       border-radius:99px; min-width:0;
     }
     [data-theme="light"] .progressWrap { background:transparent; border:none; }
-    .progressLabel { font-size:10px; font-weight:900; letter-spacing:1.2px; text-transform:uppercase; color:rgba(255,255,255,.5); flex-shrink:0; white-space:nowrap; }
-    [data-theme="light"] .progressLabel { color:rgba(15,25,80,.7); font-weight:900; }
+    .progressLabel { font-size:10px; font-weight:900; letter-spacing:1.2px; text-transform:uppercase; color:var(--custom-muted, rgba(255,255,255,.5)); flex-shrink:0; white-space:nowrap; }
+    [data-theme="light"] .progressLabel { color:var(--custom-muted, rgba(15,25,80,.7)); font-weight:900; }
 
     /* Outer shell — silver/glass container */
     .progressTrack {
@@ -165,8 +165,8 @@
       100% { background-position:-200% 0; }
     }
 
-    .progressPct { font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:900; color:var(--cyan); flex-shrink:0; min-width:36px; text-align:right; letter-spacing:-.3px; text-shadow:0 0 8px rgba(91,212,248,.6); }
-    [data-theme="light"] .progressPct { color:var(--cyan); text-shadow:none; }
+    .progressPct { font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:900; color:var(--custom-text, var(--cyan)); flex-shrink:0; min-width:36px; text-align:right; letter-spacing:-.3px; text-shadow:0 0 8px rgba(91,212,248,.6); }
+    [data-theme="light"] .progressPct { color:var(--custom-text, var(--cyan)); text-shadow:none; }
     .progressSpacer { flex:1; }
     .todayBtn {
       display:inline-flex; align-items:center; justify-content:center; gap:6px;

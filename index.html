@@ -289,6 +289,11 @@
           <span class="sCardLabel">Papel de parede</span>
           <span class="sCardSub">Tela inicial</span>
         </div>
+        <div class="sCard" id="rowTextColor">
+          <span class="sCardIcon">🔤</span>
+          <span class="sCardLabel">Cor das letras e números</span>
+          <span class="sCardSub">Contraste geral</span>
+        </div>
         <div class="sCard" id="rowStats" style="cursor:pointer;">
           <span class="sCardIcon">📊</span>
           <span class="sCardLabel">Estatísticas do sistema</span>
@@ -822,6 +827,7 @@
 <script src="./ui.js"></script>
 <script src="./notificacoes.js"></script>
 <script src="./sync.js"></script>
+<script src="./feriadosES.js"></script>
 <script src="./wallpapers.js"></script>
 
 
@@ -891,6 +897,7 @@ function parseLocalDate(isoStr) {
 function defaultState() {
   return {
     theme: 'dark', userName: 'Usuário',
+    uiTextColor: 'white',
     weekStartISO: getSunday(),
     folders: [{id:'pauta',name:'Pauta',emoji:'📋',parentId:null}],
     folderOrder: ['pauta'],
@@ -1116,6 +1123,63 @@ function setTheme(t) {
   save();
 }
 function toggleTheme() { setTheme(state.theme==='light'?'dark':'light'); }
+function getTextPaletteMap(){
+  return {
+    white:     { text:'#ffffff', muted:'rgba(255,255,255,.65)', clock:'#ffffff', label:'Branco' },
+    navy:      { text:'#0f172a', muted:'rgba(15,23,42,.65)', clock:'#0f172a', label:'Azul escuro' },
+    black:     { text:'#000000', muted:'rgba(0,0,0,.62)',     clock:'#000000', label:'Preto' },
+    red:       { text:'#dc2626', muted:'rgba(220,38,38,.62)', clock:'#dc2626', label:'Vermelho' },
+    beige:     { text:'#f5f5dc', muted:'rgba(245,245,220,.72)', clock:'#f5f5dc', label:'Bege' },
+    brown:     { text:'#7c2d12', muted:'rgba(124,45,18,.62)', clock:'#7c2d12', label:'Marrom' }
+  };
+}
+function applyTextPalette(paletteKey){
+  const map = getTextPaletteMap();
+  const pick = map[paletteKey] ? paletteKey : 'white';
+  state.uiTextColor = pick;
+  const cfg = map[pick];
+  const root = document.documentElement;
+  root.style.setProperty('--custom-text', cfg.text);
+  root.style.setProperty('--custom-muted', cfg.muted);
+  root.style.setProperty('--custom-clock', cfg.clock);
+}
+function openTextPalettePicker(){
+  const map = getTextPaletteMap();
+  const current = String(state.uiTextColor || 'white');
+  const { box, close } = _modalBase();
+  const options = Object.entries(map).map(([key, cfg])=>{
+    const selected = key===current;
+    return `<button class="_tpOpt" data-key="${escAttr(key)}" style="display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;border-radius:12px;border:${selected?'1.5px solid rgba(56,189,248,.85)':'1px solid rgba(255,255,255,.12)'};background:rgba(255,255,255,.06);cursor:pointer;">
+      <span style="width:18px;height:18px;border-radius:50%;background:${cfg.text};border:1px solid rgba(255,255,255,.35);display:inline-block;"></span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:800;color:#e8f4ff;flex:1;text-align:left;">${escHtml(cfg.label)}</span>
+      ${selected?'<span style="font-size:14px;">✅</span>':''}
+    </button>`;
+  }).join('');
+  box.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;">🔤 Cor das letras e números</div>
+      <button id="_tpCloseX" style="width:30px;height:30px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#e8f4ff;font-size:15px;cursor:pointer;">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;max-height:58vh;overflow:auto;">${options}</div>
+    <button id="_tpClose" style="margin-top:10px;width:100%;padding:8px;border:none;background:transparent;color:rgba(180,220,240,.5);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">Fechar</button>`;
+  box.querySelector('#_tpCloseX').addEventListener('click', close);
+  box.querySelector('#_tpClose').addEventListener('click', close);
+  box.querySelectorAll('._tpOpt').forEach((btn)=>{
+    btn.addEventListener('click', ()=>{
+      const key = btn.dataset.key || 'white';
+      applyTextPalette(key);
+      save();
+      updateHeader();
+      renderWeekStrip();
+      renderFolders();
+      renderDayView();
+      updateProgress();
+      showToast('✅ Cor de texto aplicada!');
+      close();
+    });
+  });
+}
+window.openTextPalettePicker = openTextPalettePicker;
 
 // ══ DATE & GREETING ══
 function updateHeader() {
@@ -1138,8 +1202,12 @@ function updateHeader() {
     const p2=v=>String(v).padStart(2,'0');
     const hh=p2(n.getHours()), mm=p2(n.getMinutes());
     const blink=n.getSeconds()%2===0;
-    const clr=light?'#ffffff':'#e2d4ff';
-    const glowClr=light?'rgba(255,255,255,0.4)':'rgba(200,160,255,0.5)';
+    const cssVars = getComputedStyle(document.documentElement);
+    const customClock = (cssVars.getPropertyValue('--custom-clock') || '').trim();
+    const clr = customClock || (light?'#ffffff':'#e2d4ff');
+    const glowClr = customClock
+      ? (light ? 'rgba(255,255,255,0.35)' : 'rgba(180,220,255,0.45)')
+      : (light?'rgba(255,255,255,0.4)':'rgba(200,160,255,0.5)');
     const colonOp=blink?'1':'0.25';
     // SVG inline text approach — mais limpo e bonito
     el.innerHTML=`
@@ -3444,6 +3512,7 @@ function init(){
     window.state = { consultas: [], tasks: {}, dateTasks: {}, folders: [] };
   }
   repairRemedioFolder();
+  applyTextPalette(state.uiTextColor || 'white');
   document.body.setAttribute('data-theme',state.theme);
   const _ti = document.getElementById('thIcon');
   if (_ti) {
@@ -3517,11 +3586,15 @@ function init(){
         <button id="_wpGallery" style="padding:12px 14px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;">
           <span style="font-size:17px;">📱</span><span>Buscar da galeria do celular</span>
         </button>
+        <button id="_wpTextColor" style="padding:12px 14px;border-radius:12px;border:none;background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:17px;">🔤</span><span>Cor das letras e números</span>
+        </button>
         <button id="_wpCancel" style="padding:9px 12px;border:none;background:transparent;color:rgba(180,220,240,.5);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">Cancelar</button>
       </div>`;
 
     box.querySelector('#_wpInternal').addEventListener('click', ()=>{ close(); openWallpaperCatalog(); });
     box.querySelector('#_wpGallery').addEventListener('click', ()=>{ close(); openWallpaperPicker(); });
+    box.querySelector('#_wpTextColor').addEventListener('click', ()=>{ close(); openTextPalettePicker(); });
     box.querySelector('#_wpCancel').addEventListener('click', close);
   }
 
@@ -3709,6 +3782,7 @@ function init(){
     setTimeout(()=>fp.click(), 80);
   });
   document.getElementById('rowWallpaper')?.addEventListener('click', openWallpaperSourcePicker);
+  document.getElementById('rowTextColor')?.addEventListener('click', openTextPalettePicker);
   document.getElementById('rowManual').addEventListener('click',()=>{
     closeSettings();
     _setFooter(false);
@@ -5421,14 +5495,37 @@ function _renderDocsOv(){
 function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ══ FERIADOS ══
-// Cidade selecionada (persiste via localStorage)
-window._feriadosCidade = window._feriadosCidade || AppStorage.get('feriadosCidade', 'linhares');
+function _normalizeCidadeSlug(v){
+  return String(v||'')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,'-')
+    .replace(/^-+|-+$/g,'');
+}
+
+function _getMunicipiosES(){
+  const raw = Array.isArray(window.ES_MUNICIPAL_HOLIDAYS) ? window.ES_MUNICIPAL_HOLIDAYS : [];
+  return raw
+    .map((c)=>({
+      slug: _normalizeCidadeSlug(c.slug || c.city),
+      city: String(c.city || '').trim(),
+      holidays: Array.isArray(c.holidays) ? c.holidays : []
+    }))
+    .filter((c)=>c.slug && c.city)
+    .sort((a,b)=>a.city.localeCompare(b.city, 'pt-BR'));
+}
+
+window._feriadosCidade = window._feriadosCidade || AppStorage.get('feriadosCidade', '');
+window._feriadosMunicipalPick = window._feriadosMunicipalPick || AppStorage.get('feriadosMunicipalPick', '__all__');
 
 function openFeriados(){
   const existing = document.getElementById('feriadosOv');
   if(existing){ existing.remove(); return; }
 
-  // ── Calcula Páscoa (algoritmo anônimo) ──
+  const municipiosES = _getMunicipiosES();
+  const cityBySlug = Object.fromEntries(municipiosES.map((c)=>[c.slug, c.city]));
+
   function calcPascoa(ano){
     const a=ano%19, b=Math.floor(ano/100), c=ano%100;
     const d=Math.floor(b/4), e=b%4, f=Math.floor((b+8)/25);
@@ -5441,254 +5538,95 @@ function openFeriados(){
     return new Date(ano, mes-1, dia);
   }
 
-  // ── Feriados municipais por cidade ──
-  function getMunicipais(ano, cidade, iso, addDays, p){
-    const cc = addDays(p, 60); // Corpus Christi
-    const sf = addDays(p, -2); // Sexta Santa
-    const cx = addDays(p, -47); // Carnaval (seg)
-    const cz = addDays(p, -45); // Cinzas
-    const nspPascoa = addDays(p, 8); // Nossa Sra da Penha (2ª dom após Páscoa = segunda após)
-    // Nossa Sra. da Penha: segunda-feira 8 dias após o domingo de Páscoa
-    const nspData = (()=>{ const d=new Date(p); d.setDate(d.getDate()+8); if(d.getDay()!==1){d.setDate(d.getDate()+(8-d.getDay())%7);} return d; })();
-
-    const map = {
-      linhares: [
-        { iso:`${ano}-01-20`, nome:'São Sebastião — Padroeiro de Linhares',      emoji:'🏹' },
-        { iso:`${ano}-06-13`, nome:'Santo Antônio',                               emoji:'⛪' },
-        { iso:`${ano}-09-08`, nome:'Aniversário de Linhares',                     emoji:'🎂' },
-        { iso:`${ano}-11-30`, nome:'São Lourenço (distritos)',                    emoji:'🕯️' },
-      ],
-      aracruz: [
-        { iso:`${ano}-04-03`, nome:'Aniversário de Aracruz',                      emoji:'🎂' },
-        { iso:iso(sf),        nome:'Sexta-feira da Paixão',                       emoji:'✝️' },
-        { iso:iso(cc),        nome:'Corpus Christi',                              emoji:'✝️' },
-        { iso:`${ano}-06-24`, nome:'São João Batista — Padroeiro de Aracruz',    emoji:'⛪' },
-      ],
-      'sao-mateus': [
-        { iso:`${ano}-09-21`, nome:'Aniversário de São Mateus',                   emoji:'🎂' },
-        { iso:`${ano}-12-27`, nome:'São Benedito',                                emoji:'⛪' },
-      ],
-      vitoria: [
-        { iso:iso(nspData),   nome:'Nossa Sra. da Penha',                         emoji:'🙏' },
-        { iso:`${ano}-05-23`, nome:'Colonização do Solo (municipal)',              emoji:'🌿' },
-        { iso:`${ano}-09-08`, nome:'Nossa Sra. da Vitória — Aniversário',        emoji:'🎂' },
-      ],
-      cariacica: [
-        { iso:iso(cc),        nome:'Corpus Christi',                              emoji:'✝️' },
-        { iso:`${ano}-06-24`, nome:'São João Batista — Aniversário de Cariacica', emoji:'🎂' },
-      ],
-      viana: [
-        { iso:iso(cz),        nome:'Quarta-feira de Cinzas',                      emoji:'✝️' },
-        { iso:`${ano}-04-08`, nome:'Nossa Sra. da Penha',                         emoji:'🙏' },
-        { iso:iso(cc),        nome:'Corpus Christi',                              emoji:'✝️' },
-        { iso:`${ano}-07-23`, nome:'Aniversário de Viana',                        emoji:'🎂' },
-        { iso:`${ano}-12-08`, nome:'Nossa Sra. da Conceição — Padroeira',        emoji:'👑' },
-      ],
-      guarapari: [
-        { iso:`${ano}-06-29`, nome:'São Pedro — Padroeiro',                       emoji:'⛪' },
-        { iso:`${ano}-09-19`, nome:'Aniversário de Guarapari',                    emoji:'🎂' },
-        { iso:`${ano}-11-20`, nome:'Consciência Negra (municipal)',                emoji:'✊' },
-        { iso:`${ano}-12-08`, nome:'Nossa Sra. da Conceição — Padroeira',        emoji:'👑' },
-      ],
-      'joao-neiva': [
-        { iso:`${ano}-04-28`, nome:'Nossa Sra. da Penha',                         emoji:'🙏' },
-        { iso:`${ano}-05-11`, nome:'Aniversário de João Neiva',                   emoji:'🎂' },
-      ],
-      ibiracu: [
-        { iso:iso(sf),        nome:'Sexta-feira da Paixão',                       emoji:'✝️' },
-        { iso:iso(cc),        nome:'Corpus Christi',                              emoji:'✝️' },
-        { iso:`${ano}-09-11`, nome:'Aniversário de Ibiraçu',                      emoji:'🎂' },
-        { iso:`${ano}-11-21`, nome:'Nossa Sra. da Saúde — Padroeira',            emoji:'🙏' },
-      ],
-      colatina: [
-        { iso:iso(cc),        nome:'Corpus Christi',                              emoji:'✝️' },
-        { iso:iso(addDays(cc,-11)), nome:'Sagrado Coração de Jesus',              emoji:'❤️' },
-        { iso:`${ano}-08-22`, nome:'Fundação de Colatina',                        emoji:'🎂' },
-      ],
-      marilandia: [
-        // Marilândia: feriados municipais não cadastrados em fontes oficiais verificadas
-        // Data de fundação: 30 de março
-        { iso:`${ano}-03-30`, nome:'Aniversário de Marilândia',                   emoji:'🎂' },
-        { iso:`${ano}-06-13`, nome:'Santo Antônio — Padroeiro',                  emoji:'⛪' },
-      ],
-    };
-    return (map[cidade] || []);
-  }
-
-  // ── Monta lista de feriados do ano ──
-  function getFeriados(ano, cidade){
+  function getBaseFeriados(ano){
     const p = calcPascoa(ano);
     const addDays = (d,n)=>{ const r=new Date(d); r.setDate(r.getDate()+n); return r; };
-    const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
-    const iso = d => `${ano}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-
-    const carnaval      = addDays(p, -47);
-    const sextaSanta    = addDays(p,  -2);
-    const corpusChristi = addDays(p,  60);
-    // Nossa Sra. da Penha ES: segunda-feira 8 dias após Páscoa
-    const nspES = (()=>{ const d=new Date(p); d.setDate(d.getDate()+8); return d; })();
-
-    const _segDom = (mes0) => {
+    const iso = (d)=>`${ano}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const segDom = (mes0) => {
       const d=new Date(ano,mes0,1); const dow=d.getDay();
       const first=dow===0?1:8-dow;
       return `${ano}-${String(mes0+1).padStart(2,'0')}-${String(first+7).padStart(2,'0')}`;
     };
-    const maes = _segDom(4);
-    const pais = _segDom(7);
+    const carnaval      = addDays(p, -47);
+    const sextaSanta    = addDays(p,  -2);
+    const corpusChristi = addDays(p,  60);
+    const nspES         = addDays(p,   8); // segunda pós-páscoa no ES
 
-    const municipais = getMunicipais(ano, cidade, iso, addDays, p).map(f=>({...f, tipo:'municipal'}));
-
-    const lista = [
-      // ══ NACIONAIS ══
-      { iso:`${ano}-01-01`, nome:'Confraternização Universal (Ano Novo)',   emoji:'🎆',  tipo:'nacional'    },
-      { iso:iso(carnaval),  nome:'Carnaval — segunda-feira',                emoji:'🎭',  tipo:'facultativo' },
-      { iso:iso(addDays(carnaval,1)), nome:'Carnaval — terça-feira',        emoji:'🎭',  tipo:'facultativo' },
-      { iso:iso(addDays(p,-45)),      nome:'Quarta-feira de Cinzas (meio-dia)', emoji:'✝️', tipo:'facultativo' },
-      { iso:iso(sextaSanta),nome:'Paixão de Cristo (Sexta-feira Santa)',    emoji:'✝️',  tipo:'nacional'    },
-      { iso:iso(p),         nome:'Páscoa',                                  emoji:'🐣',  tipo:'nacional'    },
-      { iso:`${ano}-04-21`, nome:'Tiradentes',                              emoji:'⛓️', tipo:'nacional'    },
-      { iso:`${ano}-05-01`, nome:'Dia do Trabalho',                         emoji:'👷',  tipo:'nacional'    },
-      { iso:iso(corpusChristi), nome:'Corpus Christi',                      emoji:'✝️',  tipo:'facultativo' },
-      { iso:`${ano}-09-07`, nome:'Independência do Brasil',                 emoji:'🇧🇷', tipo:'nacional'    },
-      { iso:`${ano}-10-12`, nome:'Nossa Sra. Aparecida',                    emoji:'🙏',  tipo:'nacional'    },
-      { iso:`${ano}-10-28`, nome:'Dia do Servidor Público',                 emoji:'📋',  tipo:'facultativo' },
-      { iso:`${ano}-11-02`, nome:'Finados',                                 emoji:'🕯️', tipo:'nacional'    },
-      { iso:`${ano}-11-15`, nome:'Proclamação da República',                emoji:'🇧🇷', tipo:'nacional'    },
-      { iso:`${ano}-11-20`, nome:'Consciência Negra',                       emoji:'✊',  tipo:'nacional'    },
-      { iso:`${ano}-12-24`, nome:'Véspera de Natal',                        emoji:'🎄',  tipo:'facultativo' },
-      { iso:`${ano}-12-25`, nome:'Natal',                                   emoji:'🎅',  tipo:'nacional'    },
-      { iso:`${ano}-12-31`, nome:'Véspera de Ano Novo',                     emoji:'🎆',  tipo:'facultativo' },
-      // ══ COMEMORATIVOS ══
-      { iso:maes,           nome:'Dia das Mães',                            emoji:'💐',  tipo:'comemorativo'},
-      { iso:`${ano}-06-12`, nome:'Dia dos Namorados',                       emoji:'❤️', tipo:'comemorativo'},
-      { iso:pais,           nome:'Dia dos Pais',                            emoji:'👔',  tipo:'comemorativo'},
-      { iso:`${ano}-10-15`, nome:'Dia dos Professores',                     emoji:'📚',  tipo:'comemorativo'},
-      // ══ ESTADUAIS — ESPÍRITO SANTO ══
-      { iso:iso(nspES),     nome:'Nossa Sra. da Penha (Padroeira do ES)',   emoji:'🙏',  tipo:'estadual'    },
-      { iso:`${ano}-05-23`, nome:'Colonização do Espírito Santo',           emoji:'🌿',  tipo:'estadual'    },
-      // ══ MUNICIPAIS ══
-      ...municipais,
+    return [
+      { id:'n-1',  iso:`${ano}-01-01`, nome:'Confraternização Universal (Ano Novo)', emoji:'🎆', tipo:'nacional' },
+      { id:'n-2',  iso:iso(carnaval), nome:'Carnaval — segunda-feira', emoji:'🎭', tipo:'facultativo' },
+      { id:'n-3',  iso:iso(addDays(carnaval,1)), nome:'Carnaval — terça-feira', emoji:'🎭', tipo:'facultativo' },
+      { id:'n-4',  iso:iso(addDays(p,-45)), nome:'Quarta-feira de Cinzas (meio-dia)', emoji:'✝️', tipo:'facultativo' },
+      { id:'n-5',  iso:iso(sextaSanta), nome:'Paixão de Cristo (Sexta-feira Santa)', emoji:'✝️', tipo:'nacional' },
+      { id:'n-6',  iso:iso(p), nome:'Páscoa', emoji:'🐣', tipo:'nacional' },
+      { id:'n-7',  iso:`${ano}-04-21`, nome:'Tiradentes', emoji:'⛓️', tipo:'nacional' },
+      { id:'n-8',  iso:`${ano}-05-01`, nome:'Dia do Trabalho', emoji:'👷', tipo:'nacional' },
+      { id:'n-9',  iso:iso(corpusChristi), nome:'Corpus Christi', emoji:'✝️', tipo:'facultativo' },
+      { id:'n-10', iso:`${ano}-09-07`, nome:'Independência do Brasil', emoji:'🇧🇷', tipo:'nacional' },
+      { id:'n-11', iso:`${ano}-10-12`, nome:'Nossa Sra. Aparecida', emoji:'🙏', tipo:'nacional' },
+      { id:'n-12', iso:`${ano}-10-28`, nome:'Dia do Servidor Público', emoji:'📋', tipo:'facultativo' },
+      { id:'n-13', iso:`${ano}-11-02`, nome:'Finados', emoji:'🕯️', tipo:'nacional' },
+      { id:'n-14', iso:`${ano}-11-15`, nome:'Proclamação da República', emoji:'🇧🇷', tipo:'nacional' },
+      { id:'n-15', iso:`${ano}-11-20`, nome:'Consciência Negra', emoji:'✊', tipo:'nacional' },
+      { id:'n-16', iso:`${ano}-12-24`, nome:'Véspera de Natal', emoji:'🎄', tipo:'facultativo' },
+      { id:'n-17', iso:`${ano}-12-25`, nome:'Natal', emoji:'🎅', tipo:'nacional' },
+      { id:'n-18', iso:`${ano}-12-31`, nome:'Véspera de Ano Novo', emoji:'🎆', tipo:'facultativo' },
+      { id:'c-1',  iso:segDom(4), nome:'Dia das Mães', emoji:'💐', tipo:'comemorativo' },
+      { id:'c-2',  iso:`${ano}-06-12`, nome:'Dia dos Namorados', emoji:'❤️', tipo:'comemorativo' },
+      { id:'c-3',  iso:segDom(7), nome:'Dia dos Pais', emoji:'👔', tipo:'comemorativo' },
+      { id:'c-4',  iso:`${ano}-10-15`, nome:'Dia dos Professores', emoji:'📚', tipo:'comemorativo' },
+      { id:'e-1',  iso:iso(nspES), nome:'Nossa Sra. da Penha (Padroeira do ES)', emoji:'🙏', tipo:'estadual' },
+      { id:'e-2',  iso:`${ano}-05-23`, nome:'Colonização do Espírito Santo', emoji:'🌿', tipo:'estadual' },
     ];
+  }
 
-    // Ordena por data
-    lista.sort((a,b)=>a.iso.localeCompare(b.iso));
+  function getMunicipaisSelecionados(ano, cidadeSlug, holidayPick){
+    if(!cidadeSlug) return [];
+    const city = municipiosES.find((c)=>c.slug===cidadeSlug);
+    if(!city) return [];
+    const all = city.holidays.map((h)=>({
+      id: `${cidadeSlug}:${h.id || `${h.month}-${h.day}`}`,
+      iso: `${ano}-${String(h.month).padStart(2,'0')}-${String(h.day).padStart(2,'0')}`,
+      nome: h.name || 'Feriado municipal',
+      emoji: h.emoji || '🏛️',
+      tipo: 'municipal',
+      cidade: city.city
+    }));
+    if(!holidayPick || holidayPick === '__all__') return all;
+    return all.filter((h)=>h.id===holidayPick);
+  }
 
-    return lista.map(f => ({...f, fmt: fmt(new Date(f.iso+'T12:00:00'))}));
+  function getFeriados(ano, cidadeSlug, holidayPick){
+    const base = getBaseFeriados(ano);
+    const municipais = getMunicipaisSelecionados(ano, cidadeSlug, holidayPick);
+    return [...base, ...municipais].sort((a,b)=>a.iso.localeCompare(b.iso));
   }
 
   const hoje = new Date();
   const hojeISO = hoje.toISOString().split('T')[0];
   const ano = hoje.getFullYear();
-  let cidadeAtual = window._feriadosCidade;
-
-  const CIDADES = {
-    'linhares':    'Linhares',
-    'aracruz':     'Aracruz',
-    'sao-mateus':  'São Mateus',
-    'vitoria':     'Vitória',
-    'cariacica':   'Cariacica',
-    'viana':       'Viana',
-    'guarapari':   'Guarapari',
-    'joao-neiva':  'João Neiva',
-    'ibiracu':     'Ibiraçu',
-    'colatina':    'Colatina',
-    'marilandia':  'Marilândia',
-  };
-
-  function renderFeriados(cidade){
-    cidadeAtual = cidade;
-    window._feriadosCidade = cidade;
-    AppStorage.set('feriadosCidade', cidade);
-    const fList = getFeriados(ano, cidade).filter(f => f.iso >= hojeISO);
-    const porMes2 = {};
-    fList.forEach(f => {
-      const d = new Date(f.iso+'T12:00:00');
-      const mes = d.getMonth();
-      if(!porMes2[mes]) porMes2[mes] = [];
-      porMes2[mes].push({...f, diaSemana: DIAS_PT[d.getDay()]});
-    });
-    const mesesOrdem2 = Object.keys(porMes2).map(Number).sort((a,b)=>a-b);
-    let html2 = '';
-    if(mesesOrdem2.length === 0){
-      html2 = '<div style="text-align:center;padding:40px 20px;color:rgba(180,220,240,.4);font-family:Space Grotesk,sans-serif;font-size:14px;">Nenhum feriado restante neste ano 🎉</div>';
-    } else {
-      mesesOrdem2.forEach(mes => {
-        html2 += `<div style="margin-bottom:6px;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;color:rgba(125,211,240,.55);text-transform:uppercase;padding:14px 0 8px 2px;">${MESES_PT[mes]}</div>`;
-        porMes2[mes].forEach((f,i) => {
-          const isHoje = f.iso === hojeISO;
-          const rowBg = isHoje ? 'background:rgba(0,160,200,.12);border:1px solid rgba(0,200,220,.22);' : (i%2===0 ? 'background:rgba(0,80,120,.18);' : 'background:rgba(0,80,120,.10);');
-          html2 += `<div style="${rowBg}border-radius:10px;padding:10px 13px;margin-bottom:5px;display:flex;align-items:center;gap:11px;"><div style="flex-shrink:0;min-width:46px;text-align:center;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:19px;font-weight:900;color:${isHoje?'#7dd3f0':'#e8f4ff'};line-height:1;">${f.fmt.split('/')[0]}</div><div style="font-family:\'Space Grotesk\',sans-serif;font-size:10px;font-weight:600;color:rgba(180,220,240,.5);text-transform:uppercase;letter-spacing:.04em;">${f.diaSemana}</div></div><div style="flex-shrink:0;font-size:20px;line-height:1;">${f.emoji}</div><div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;font-weight:700;color:${isHoje?'#7dd3f0':'#e8f4ff'};line-height:1.3;">${f.nome}${tipoBadge(f)}</div>${isHoje?'<div style="font-family:Space Grotesk,sans-serif;font-size:10px;color:rgba(125,211,240,.7);font-weight:600;margin-top:2px;">Hoje!</div>':''}</div></div>`;
-        });
-        html2 += '</div>';
-      });
-    }
-    const body = document.getElementById('_ferBody');
-    if(body) body.innerHTML = html2;
-    const cnt = document.getElementById('_ferCnt');
-    if(cnt) cnt.textContent = `${fList.length} restantes`;
-    const tit = document.getElementById('_ferTit');
-    if(tit) tit.textContent = `Feriados ${ano} — ${CIDADES[cidade]}/ES`;
-    document.querySelectorAll('._ferCidBtn').forEach(b => {
-      b.style.background = b.dataset.cidade === cidade ? 'rgba(0,160,200,.35)' : 'rgba(0,80,120,.25)';
-      b.style.border = b.dataset.cidade === cidade ? '1px solid rgba(0,200,220,.5)' : '1px solid rgba(0,140,180,.2)';
-    });
-  }
-
-  const feriados = getFeriados(ano, cidadeAtual).filter(f => f.iso >= hojeISO);
-
-  const DIAS_PT = ['dom','seg','ter','qua','qui','sex','sáb'];
+  const DIAS_SHORT = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
   const MESES_PT = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 
-  // Agrupa por mês (initial render)
-  const porMes = {};
-  feriados.forEach(f => {
-    const d = new Date(f.iso+'T12:00:00');
-    const mes = d.getMonth();
-    if(!porMes[mes]) porMes[mes] = [];
-    porMes[mes].push({...f, diaSemana: DIAS_PT[d.getDay()]});
-  });
-
-  // Tipo badge
-  function tipoBadge(f){
-    if(f.tipo==='nacional')     return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(59,130,246,.15);color:rgba(147,197,253,.9);border:1px solid rgba(59,130,246,.25);border-radius:5px;padding:1px 5px;margin-left:6px;">Nacional</span>';
-    if(f.tipo==='facultativo')  return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(148,163,184,.1);color:rgba(180,220,240,.6);border:1px solid rgba(148,163,184,.2);border-radius:5px;padding:1px 5px;margin-left:6px;">Facultativo</span>';
-    if(f.tipo==='estadual')     return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(52,211,153,.12);color:rgba(110,231,183,.9);border:1px solid rgba(52,211,153,.25);border-radius:5px;padding:1px 5px;margin-left:6px;">ES</span>';
-    if(f.tipo==='municipal')    return `<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(251,146,60,.12);color:rgba(253,186,116,.9);border:1px solid rgba(251,146,60,.25);border-radius:5px;padding:1px 5px;margin-left:6px;">${CIDADES[cidadeAtual]||'Municipal'}</span>`;
-    if(f.tipo==='comemorativo') return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(251,191,36,.12);color:rgba(253,224,71,.85);border:1px solid rgba(251,191,36,.2);border-radius:5px;padding:1px 5px;margin-left:6px;">Comemorativo</span>';
-    return '';
-  }
-
-  let html = '';
-  const mesesOrdem = Object.keys(porMes).map(Number).sort((a,b)=>a-b);
-
-  if(mesesOrdem.length === 0){
-    html = '<div style="text-align:center;padding:40px 20px;color:rgba(180,220,240,.4);font-family:Space Grotesk,sans-serif;font-size:14px;">Nenhum feriado restante neste ano 🎉</div>';
+  let cidadeAtual = _normalizeCidadeSlug(window._feriadosCidade || '');
+  if(cidadeAtual && !cityBySlug[cidadeAtual]) cidadeAtual = '';
+  let feriadoMunicipalPick = String(window._feriadosMunicipalPick || '__all__');
+  if(cidadeAtual){
+    const cityInit = municipiosES.find((c)=>c.slug===cidadeAtual);
+    if(cityInit){
+      const validIds = cityInit.holidays.map((h)=>`${cidadeAtual}:${h.id || `${h.month}-${h.day}`}`);
+      if(feriadoMunicipalPick !== '__all__' && !validIds.includes(feriadoMunicipalPick)){
+        feriadoMunicipalPick = '__all__';
+      }
+    } else {
+      feriadoMunicipalPick = '__all__';
+    }
   } else {
-    mesesOrdem.forEach(mes => {
-      html += `<div style="margin-bottom:6px;">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;color:rgba(125,211,240,.55);text-transform:uppercase;padding:14px 0 8px 2px;">${MESES_PT[mes]}</div>`;
-      porMes[mes].forEach((f,i) => {
-        const isHoje = f.iso === hojeISO;
-        const rowBg = isHoje ? 'background:rgba(0,160,200,.12);border:1px solid rgba(0,200,220,.22);' : (i%2===0 ? 'background:rgba(0,80,120,.18);' : 'background:rgba(0,80,120,.10);');
-        html += `<div style="${rowBg}border-radius:10px;padding:10px 13px;margin-bottom:5px;display:flex;align-items:center;gap:11px;">
-          <div style="flex-shrink:0;min-width:46px;text-align:center;">
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:900;color:${isHoje?'#7dd3f0':'#e8f4ff'};line-height:1;">${f.fmt.split('/')[0]}</div>
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:600;color:rgba(180,220,240,.5);text-transform:uppercase;letter-spacing:.04em;">${f.diaSemana}</div>
-          </div>
-          <div style="flex-shrink:0;font-size:20px;line-height:1;">${f.emoji}</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:${isHoje?'#7dd3f0':'#e8f4ff'};line-height:1.3;">${f.nome}${tipoBadge(f)}</div>
-            ${isHoje?'<div style="font-family:Space Grotesk,sans-serif;font-size:10px;color:rgba(125,211,240,.7);font-weight:600;margin-top:2px;">Hoje!</div>':''}
-          </div>
-        </div>`;
-      });
-      html += '</div>';
-    });
+    feriadoMunicipalPick = '__all__';
   }
 
-  // Gera botões de cidades
-  const cidBtns = Object.entries(CIDADES).map(([k,v]) =>
-    `<button class="_ferCidBtn" data-cidade="${k}" style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;border-radius:8px;padding:5px 10px;cursor:pointer;color:#e8f4ff;flex-shrink:0;white-space:nowrap;background:${k===cidadeAtual?'rgba(0,160,200,.35)':'rgba(0,80,120,.25)'};border:${k===cidadeAtual?'1px solid rgba(0,200,220,.5)':'1px solid rgba(0,140,180,.2)'};">${v}</button>`
+  const cityOptions = municipiosES.map((c)=>
+    `<option value="${escAttr(c.slug)}"${c.slug===cidadeAtual?' selected':''}>${escHtml(c.city)}</option>`
   ).join('');
 
   const ov = document.createElement('div');
@@ -5698,30 +5636,129 @@ function openFeriados(){
   ov.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid rgba(0,140,180,.2);flex-shrink:0;gap:8px;">
       <span style="font-size:18px;line-height:1;flex-shrink:0;margin-right:2px;">🎉</span>
-      <span id="_ferTit" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:#e8f4ff;">Feriados ${ano} — ${CIDADES[cidadeAtual]}/ES</span>
-      <span id="_ferCnt" style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;color:rgba(180,220,240,.45);flex-shrink:0;">${feriados.length} restantes</span>
+      <span id="_ferTit" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:#e8f4ff;">Feriados ${ano}</span>
+      <span id="_ferCnt" style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;color:rgba(180,220,240,.45);flex-shrink:0;">0 restantes</span>
       <button id="_ferBack" style="background:rgba(0,80,120,.3);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:#7dd3f0;font-size:17px;font-weight:900;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>
     </div>
-    <div style="overflow-x:auto;display:flex;gap:6px;padding:10px 14px 8px;border-bottom:1px solid rgba(0,140,180,.15);flex-shrink:0;background:rgba(0,0,0,.15);scrollbar-width:none;">
-      ${cidBtns}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px;border-bottom:1px solid rgba(0,140,180,.15);background:rgba(0,0,0,.14);">
+      <label style="display:flex;flex-direction:column;gap:4px;">
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;color:rgba(180,220,240,.6);text-transform:uppercase;">Selecionar cidade</span>
+        <select id="_ferCitySel" style="width:100%;padding:9px 10px;border-radius:10px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;outline:none;">
+          <option value="">Somente nacionais</option>
+          ${cityOptions}
+        </select>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:4px;">
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;color:rgba(180,220,240,.6);text-transform:uppercase;">Selecionar feriado</span>
+        <select id="_ferHolidaySel" style="width:100%;padding:9px 10px;border-radius:10px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;outline:none;">
+          <option value="__all__">Todos da cidade</option>
+        </select>
+      </label>
     </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px 7px;border-bottom:1px solid rgba(0,140,180,.1);flex-shrink:0;background:rgba(0,0,0,.1);">
-      <span style="font-size:9px;font-weight:700;background:rgba(59,130,246,.15);color:rgba(147,197,253,.9);border:1px solid rgba(59,130,246,.25);border-radius:5px;padding:2px 7px;">Nacional</span>
-      <span style="font-size:9px;font-weight:700;background:rgba(148,163,184,.1);color:rgba(180,220,240,.6);border:1px solid rgba(148,163,184,.2);border-radius:5px;padding:2px 7px;">Facultativo</span>
-      <span style="font-size:9px;font-weight:700;background:rgba(52,211,153,.12);color:rgba(110,231,183,.9);border:1px solid rgba(52,211,153,.25);border-radius:5px;padding:2px 7px;">Estadual ES</span>
-      <span style="font-size:9px;font-weight:700;background:rgba(251,146,60,.12);color:rgba(253,186,116,.9);border:1px solid rgba(251,146,60,.25);border-radius:5px;padding:2px 7px;">Municipal</span>
-      <span style="font-size:9px;font-weight:700;background:rgba(251,191,36,.12);color:rgba(253,224,71,.85);border:1px solid rgba(251,191,36,.2);border-radius:5px;padding:2px 7px;">Comemorativo</span>
-    </div>
-    <div id="_ferBody" style="flex:1;overflow-y:auto;padding:14px 16px 24px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
-      ${html}
-      <div style="margin-top:18px;padding:12px 14px;background:rgba(0,80,120,.15);border:1px solid rgba(0,140,180,.12);border-radius:10px;">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:rgba(180,220,240,.35);line-height:1.6;text-align:center;">Nacionais · Facultativos · Estaduais ES · Municipais por cidade · Datas móveis calculadas automaticamente</div>
-      </div>
-    </div>`;
+    <div id="_ferBody" style="flex:1;overflow-y:auto;padding:14px 16px 24px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;"></div>`;
   document.body.appendChild(ov);
+
+  const citySel = ov.querySelector('#_ferCitySel');
+  const holidaySel = ov.querySelector('#_ferHolidaySel');
+
+  function tipoBadge(f){
+    if(f.tipo==='nacional')     return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(59,130,246,.15);color:rgba(147,197,253,.9);border:1px solid rgba(59,130,246,.25);border-radius:5px;padding:1px 5px;margin-left:6px;">Nacional</span>';
+    if(f.tipo==='facultativo')  return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(148,163,184,.1);color:rgba(180,220,240,.6);border:1px solid rgba(148,163,184,.2);border-radius:5px;padding:1px 5px;margin-left:6px;">Facultativo</span>';
+    if(f.tipo==='estadual')     return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(52,211,153,.12);color:rgba(110,231,183,.9);border:1px solid rgba(52,211,153,.25);border-radius:5px;padding:1px 5px;margin-left:6px;">ES</span>';
+    if(f.tipo==='municipal')    return `<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(251,146,60,.12);color:rgba(253,186,116,.9);border:1px solid rgba(251,146,60,.25);border-radius:5px;padding:1px 5px;margin-left:6px;">${escHtml(f.cidade || 'Municipal')}</span>`;
+    if(f.tipo==='comemorativo') return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(251,191,36,.12);color:rgba(253,224,71,.85);border:1px solid rgba(251,191,36,.2);border-radius:5px;padding:1px 5px;margin-left:6px;">Comemorativo</span>';
+    return '';
+  }
+
+  function renderHolidaySelector(){
+    if(!cidadeAtual){
+      holidaySel.innerHTML = '<option value="__all__">Selecione uma cidade</option>';
+      holidaySel.disabled = true;
+      return;
+    }
+    const city = municipiosES.find((c)=>c.slug===cidadeAtual);
+    if(!city){
+      holidaySel.innerHTML = '<option value="__all__">Selecione uma cidade</option>';
+      holidaySel.disabled = true;
+      return;
+    }
+    const options = city.holidays.map((h)=>{
+      const id = `${cidadeAtual}:${h.id || `${h.month}-${h.day}`}`;
+      const selected = id===feriadoMunicipalPick ? ' selected' : '';
+      return `<option value="${escAttr(id)}"${selected}>${escHtml(h.name || 'Feriado municipal')}</option>`;
+    }).join('');
+    holidaySel.innerHTML = `<option value="__all__"${feriadoMunicipalPick==='__all__'?' selected':''}>Todos da cidade</option>${options}`;
+    holidaySel.disabled = false;
+  }
+
+  function renderFeriados(){
+    const lista = getFeriados(ano, cidadeAtual, feriadoMunicipalPick).filter((f)=>f.iso >= hojeISO);
+    const porMes = {};
+    lista.forEach((f)=>{
+      const d = new Date(f.iso + 'T12:00:00');
+      const mes = d.getMonth();
+      if(!porMes[mes]) porMes[mes] = [];
+      porMes[mes].push({
+        ...f,
+        fmtDia: String(d.getDate()).padStart(2,'0'),
+        diaSemana: DIAS_SHORT[d.getDay()]
+      });
+    });
+    const meses = Object.keys(porMes).map(Number).sort((a,b)=>a-b);
+    let html = '';
+    if(!meses.length){
+      html = '<div style="text-align:center;padding:40px 20px;color:rgba(180,220,240,.4);font-family:Space Grotesk,sans-serif;font-size:14px;">Nenhum feriado restante neste ano 🎉</div>';
+    } else {
+      meses.forEach((mes)=>{
+        html += `<div style="margin-bottom:6px;"><div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;color:rgba(125,211,240,.55);text-transform:uppercase;padding:14px 0 8px 2px;">${MESES_PT[mes]}</div>`;
+        porMes[mes].forEach((f,idx)=>{
+          const isHoje = f.iso === hojeISO;
+          const rowBg = isHoje ? 'background:rgba(0,160,200,.12);border:1px solid rgba(0,200,220,.22);' : (idx%2===0 ? 'background:rgba(0,80,120,.18);' : 'background:rgba(0,80,120,.10);');
+          html += `<div style="${rowBg}border-radius:10px;padding:10px 13px;margin-bottom:5px;display:flex;align-items:center;gap:11px;">
+            <div style="flex-shrink:0;min-width:46px;text-align:center;">
+              <div style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:900;color:${isHoje?'#7dd3f0':'#e8f4ff'};line-height:1;">${f.fmtDia}</div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:600;color:rgba(180,220,240,.5);text-transform:uppercase;letter-spacing:.04em;">${f.diaSemana}</div>
+            </div>
+            <div style="flex-shrink:0;font-size:20px;line-height:1;">${f.emoji || '📅'}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:${isHoje?'#7dd3f0':'#e8f4ff'};line-height:1.3;">${escHtml(f.nome)}${tipoBadge(f)}</div>
+              ${isHoje?'<div style="font-family:Space Grotesk,sans-serif;font-size:10px;color:rgba(125,211,240,.7);font-weight:600;margin-top:2px;">Hoje!</div>':''}
+            </div>
+          </div>`;
+        });
+        html += '</div>';
+      });
+    }
+    const body = document.getElementById('_ferBody');
+    if(body) body.innerHTML = html + `
+      <div style="margin-top:18px;padding:12px 14px;background:rgba(0,80,120,.15);border:1px solid rgba(0,140,180,.12);border-radius:10px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:rgba(180,220,240,.35);line-height:1.6;text-align:center;">Nacionais sempre visíveis · Município opcional por seleção de cidade e feriado</div>
+      </div>`;
+    const cnt = document.getElementById('_ferCnt');
+    if(cnt) cnt.textContent = `${lista.length} restantes`;
+  }
+
+  renderHolidaySelector();
+  renderFeriados();
+
   ov.querySelector('#_ferBack').onclick = () => { ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
-  ov.querySelectorAll('._ferCidBtn').forEach(b => {
-    b.onclick = () => renderFeriados(b.dataset.cidade);
+
+  citySel.addEventListener('change', ()=>{
+    cidadeAtual = _normalizeCidadeSlug(citySel.value || '');
+    feriadoMunicipalPick = '__all__';
+    window._feriadosCidade = cidadeAtual;
+    window._feriadosMunicipalPick = feriadoMunicipalPick;
+    AppStorage.set('feriadosCidade', cidadeAtual);
+    AppStorage.set('feriadosMunicipalPick', feriadoMunicipalPick);
+    renderHolidaySelector();
+    renderFeriados();
+  });
+
+  holidaySel.addEventListener('change', ()=>{
+    feriadoMunicipalPick = String(holidaySel.value || '__all__');
+    window._feriadosMunicipalPick = feriadoMunicipalPick;
+    AppStorage.set('feriadosMunicipalPick', feriadoMunicipalPick);
+    renderFeriados();
   });
 }
 
