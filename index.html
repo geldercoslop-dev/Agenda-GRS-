@@ -898,6 +898,8 @@ function defaultState() {
   return {
     theme: 'dark', userName: 'Usuário',
     uiTextColor: 'white',
+    autoTextContrast: false,
+    syncScope: '',
     weekStartISO: getSunday(),
     folders: [{id:'pauta',name:'Pauta',emoji:'📋',parentId:null}],
     folderOrder: ['pauta'],
@@ -937,6 +939,12 @@ function ensureSystemFolders(){
 
 function save() {
   AppStorage.saveState(state);
+  try {
+    const activeScope = (typeof _currentScope === 'function') ? (_currentScope() || '') : (state && state.syncScope ? state.syncScope : '');
+    if (activeScope) {
+      AppStorage.set(_scopeStorageKey('agendaProMax_state', activeScope), state);
+    }
+  } catch(_) {}
 }
 
 // Migra dom2 → dom quando a semana vira (novo domingo)
@@ -970,7 +978,21 @@ function checkWeekTransition(){
 }
 
 function load() {
-  const loaded = AppStorage.loadState();
+  const activeScope = (typeof _currentScope === 'function') ? (_currentScope() || '') : '';
+  let loaded = null;
+  if (activeScope) {
+    try { loaded = AppStorage.get(_scopeStorageKey('agendaProMax_state', activeScope), null); } catch(_) {}
+    // Migração segura: só reaproveita legado se ainda não houver escopo definido
+    // (evita mostrar dados de outro escopo no mesmo aparelho).
+    if (!loaded) {
+      const legacy = AppStorage.loadState();
+      if (legacy && typeof legacy === 'object' && (!legacy.syncScope || legacy.syncScope === activeScope)) {
+        loaded = legacy;
+      }
+    }
+  } else {
+    loaded = AppStorage.loadState();
+  }
   if (loaded) {
     const d = defaultState();
     const s = Object.assign({}, d, loaded);
@@ -984,6 +1006,8 @@ function load() {
     if (!s.lastManualVarrerWeek) s.lastManualVarrerWeek = null;
     if (!s.lastAutoVarrerWeek)   s.lastAutoVarrerWeek   = null;
     if (!s.lastDailyReviewDate)  s.lastDailyReviewDate  = null;
+    if (typeof s.autoTextContrast !== 'boolean') s.autoTextContrast = false;
+    s.syncScope = activeScope || (typeof s.syncScope === 'string' ? s.syncScope : '');
     if (!Array.isArray(s.consultas)) s.consultas = [];
     if (!Array.isArray(s.remedios))  s.remedios  = [];
     // bucketPhotos já vem dentro do objeto retornado por loadState
@@ -1027,12 +1051,100 @@ function _mergeLoadedState(raw) {
   if (!s.lastManualVarrerWeek) s.lastManualVarrerWeek = null;
   if (!s.lastAutoVarrerWeek)   s.lastAutoVarrerWeek   = null;
   if (!s.lastDailyReviewDate)  s.lastDailyReviewDate  = null;
+  if (typeof s.autoTextContrast !== 'boolean') s.autoTextContrast = false;
+  if (typeof s.syncScope !== 'string') s.syncScope = '';
   if (!Array.isArray(s.consultas)) s.consultas = [];
   if (!Array.isArray(s.remedios))  s.remedios  = [];
   if (!s.bucketPhotos || typeof s.bucketPhotos !== 'object') s.bucketPhotos = {};
   return s;
 }
 
+function _scopeStorageKey(base, scope) {
+  return String(base || '') + (scope ? ('__' + String(scope)) : '');
+}
+function _readScopedCollections(scope) {
+  const out = {};
+  const map = {
+    _docs: 'agendaProMax_docs',
+    _contas: 'agendaProMax_contas',
+    _receber: 'agendaProMax_receber',
+    _exames: 'agendaProMax_exames',
+    _compras: 'agendaProMax_compras',
+    _mercado: 'agendaProMax_mercado',
+    _photos: 'agendaProMax_photos',
+  };
+  Object.entries(map).forEach(([outKey, base]) => {
+    try {
+      const scoped = AppStorage.get(_scopeStorageKey(base, scope), null);
+      if (scoped !== null && scoped !== undefined) { out[outKey] = scoped; return; }
+      const fallback = AppStorage.get(base, null);
+      if (fallback !== null && fallback !== undefined) out[outKey] = fallback;
+    } catch(_) {}
+  });
+  return out;
+}
+function _writeScopedCollections(scope, data) {
+  const map = {
+    _docs: 'agendaProMax_docs',
+    _contas: 'agendaProMax_contas',
+    _receber: 'agendaProMax_receber',
+    _exames: 'agendaProMax_exames',
+    _compras: 'agendaProMax_compras',
+    _mercado: 'agendaProMax_mercado',
+    _photos: 'agendaProMax_photos',
+  };
+  Object.entries(map).forEach(([inKey, base]) => {
+    if (!(inKey in (data || {}))) return;
+    try { AppStorage.set(_scopeStorageKey(base, scope), data[inKey]); } catch(_) {}
+  });
+}
+function _switchStateToScope(scope) {
+  const targetScope = String(scope || '');
+  const currentScope = String((state && state.syncScope) || '');
+  if (currentScope === targetScope) return;
+
+  const snapshot = _buildExportPayloadFromState(state || {});
+  _writeScopedCollections(currentScope, snapshot);
+  try { AppStorage.set(_scopeStorageKey('agendaProMax_state', currentScope), snapshot); } catch(_) {}
+
+  const scopedState = AppStorage.get(_scopeStorageKey('agendaProMax_state', targetScope), null);
+  if (scopedState && typeof scopedState === 'object') {
+    state = _mergeLoadedState(scopedState);
+  } else {
+    state = defaultState();
+  }
+  state.syncScope = targetScope;
+
+  const scoped = _readScopedCollections(targetScope);
+  if (typeof scoped._docs !== 'undefined') _setScopedCollection('agendaProMax_docs', scoped._docs);
+  if (typeof scoped._contas !== 'undefined') _setScopedCollection('agendaProMax_contas', scoped._contas);
+  if (typeof scoped._receber !== 'undefined') _setScopedCollection('agendaProMax_receber', scoped._receber);
+  if (typeof scoped._exames !== 'undefined') _setScopedCollection('agendaProMax_exames', scoped._exames);
+  if (typeof scoped._compras !== 'undefined') _setScopedCollection('agendaProMax_compras', scoped._compras);
+  if (typeof scoped._mercado !== 'undefined') _setScopedCollection('agendaProMax_mercado', scoped._mercado);
+  if (typeof scoped._photos !== 'undefined') _setScopedCollection('agendaProMax_photos', scoped._photos);
+  save();
+}
+function clearUserDataForScopeSwitch() {
+  _switchStateToScope('');
+}
+function _getScopedCollection(baseKey, fallback) {
+  const scope = (state && typeof state.syncScope === 'string') ? state.syncScope : '';
+  if (scope) {
+    try {
+      const scoped = AppStorage.get(_scopeStorageKey(baseKey, scope), null);
+      if (scoped !== null && scoped !== undefined) return scoped;
+    } catch(_) {}
+  }
+  return AppStorage.get(baseKey, fallback);
+}
+function _setScopedCollection(baseKey, value) {
+  const scope = (state && typeof state.syncScope === 'string') ? state.syncScope : '';
+  if (scope) {
+    try { AppStorage.set(_scopeStorageKey(baseKey, scope), value); } catch(_) {}
+  }
+  AppStorage.set(baseKey, value);
+}
 function recoverStateIfEmpty(currentState) {
   try {
     // Se já há conteúdo, não faz nada.
@@ -2051,11 +2163,7 @@ function goHome(){
 }
 
 function closeQuickAddOverlay(){
-  const el = document.getElementById('quickAddOverlay');
-  if(el && el.style.display !== 'none'){
-    el.style.display = 'none';
-    if(typeof window._navPop === 'function') window._navPop();
-  }
+  _hideQuickAddOverlay();
 }
 
 // Barra de busca apenas na home
@@ -3563,6 +3671,15 @@ function init(){
   }
   state=load();
   state = recoverStateIfEmpty(state);
+  try {
+    if (typeof _currentScope === 'function') {
+      const targetScope = _currentScope() || '';
+      if (!state.syncScope) state.syncScope = targetScope;
+      if (targetScope && state.syncScope !== targetScope) {
+        _switchStateToScope(targetScope);
+      }
+    }
+  } catch(_) {}
   // Garantia pós-load: se load() retornar algo inválido, aplica estado mínimo seguro
   if (typeof state === 'undefined' || state === null || typeof state !== 'object') {
     window.state = { consultas: [], tasks: {}, dateTasks: {}, folders: [] };
@@ -4556,8 +4673,8 @@ function _markBackupDone(){
 }
 
 // ══ CONTAS A PAGAR ══
-function _getContas(){ return AppStorage.get('agendaProMax_contas', []); }
-function _saveContas(arr){ AppStorage.set('agendaProMax_contas', arr); }
+function _getContas(){ return _getScopedCollection('agendaProMax_contas', []); }
+function _saveContas(arr){ _setScopedCollection('agendaProMax_contas', arr); }
 
 function openContas(){
   _setFooter(false);
@@ -4841,8 +4958,8 @@ function _renderContasOv(){
 }
 
 // ══ A RECEBER ══
-function _getReceber(){ return AppStorage.get('agendaProMax_receber', []); }
-function _saveReceber(arr){ AppStorage.set('agendaProMax_receber', arr); }
+function _getReceber(){ return _getScopedCollection('agendaProMax_receber', []); }
+function _saveReceber(arr){ _setScopedCollection('agendaProMax_receber', arr); }
 
 function openReceber(){
   _setFooter(false);
@@ -5124,8 +5241,8 @@ function _renderReceberOv(){
     }
   });
 }
-function _getExames(){ return AppStorage.get('agendaProMax_exames', []); }
-function _saveExames(arr){ AppStorage.set('agendaProMax_exames', arr); }
+function _getExames(){ return _getScopedCollection('agendaProMax_exames', []); }
+function _saveExames(arr){ _setScopedCollection('agendaProMax_exames', arr); }
 
 function openExames(){
   _setFooter(false);
@@ -5259,8 +5376,8 @@ function _renderExamesOv(){
 }
 
 // ══ LISTA DE COMPRAS ══
-function _getCompras(){ return AppStorage.get('agendaProMax_compras', []); }
-function _saveCompras(arr){ AppStorage.set('agendaProMax_compras', arr); }
+function _getCompras(){ return _getScopedCollection('agendaProMax_compras', []); }
+function _saveCompras(arr){ _setScopedCollection('agendaProMax_compras', arr); }
 
 function openCompras(){
   const existing=document.getElementById('comprasOv');
@@ -5335,8 +5452,8 @@ function _renderComprasOv(){
 }
 
 // ══ MERCADO ══
-function _getMercado(){ return AppStorage.get('agendaProMax_mercado', []); }
-function _saveMercado(arr){ AppStorage.set('agendaProMax_mercado', arr); }
+function _getMercado(){ return _getScopedCollection('agendaProMax_mercado', []); }
+function _saveMercado(arr){ _setScopedCollection('agendaProMax_mercado', arr); }
 
 function openMercado(){
   _setFooter(false);
@@ -5422,8 +5539,8 @@ function _renderMercadoOv(){
 }
 
 // ══ DOCUMENTOS ══
-function _getDocs(){ return AppStorage.get('agendaProMax_docs', []); }
-function _saveDocs(arr){ AppStorage.set('agendaProMax_docs', arr); }
+function _getDocs(){ return _getScopedCollection('agendaProMax_docs', []); }
+function _saveDocs(arr){ _setScopedCollection('agendaProMax_docs', arr); }
 
 function openDocs(){
   _setFooter(false);
@@ -6440,7 +6557,7 @@ function openQuickAddTask(key, d, m, y){
     taskListEl.innerHTML = existingTasks.map((t,i)=>`
       <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.06);border-radius:10px;margin-bottom:6px;">
         <span onclick="toggleDateTask('${escAttr(key)}',${i})" style="cursor:pointer;font-size:16px;">${t.done?'✅':'⬜'}</span>
-        <span style="flex:1;font-family:'Space Grotesk',sans-serif;font-size:13px;color:${t.done?'rgba(255,255,255,.4)':'#fff'};text-decoration:${t.done?'line-through':''};font-weight:600;">${t.text}</span>
+        <span style="flex:1;font-family:'Space Grotesk',sans-serif;font-size:13px;color:${t.done?'rgba(255,255,255,.4)':'#fff'};text-decoration:${t.done?'line-through':''};font-weight:600;">${_escHtml((t && t.text != null) ? String(t.text) : '')}</span>
         <span onclick="removeDateTask('${escAttr(key)}',${i})" style="cursor:pointer;color:rgba(255,80,80,.7);font-size:14px;">✕</span>
       </div>`).join('');
   } else {
@@ -6813,19 +6930,15 @@ function exportarDados() {
 
 function _buildExportPayloadFromState(baseState){
   let exportData = { ...(baseState || {}) };
-  try {
-    const rawPhotos = AppStorage.get('agendaProMax_photos', null);
-    if (rawPhotos) exportData._photos = rawPhotos;
-  } catch(e) {}
-  try {
-    const rawDocs = AppStorage.get('agendaProMax_docs', null);
-    if (rawDocs) exportData._docs = rawDocs;
-  } catch(e) {}
-  try { const r=AppStorage.get('agendaProMax_contas',null); if(r) exportData._contas=r; }catch(e){}
-  try { const r=AppStorage.get('agendaProMax_receber',null); if(r) exportData._receber=r; }catch(e){}
-  try { const r=AppStorage.get('agendaProMax_exames',null); if(r) exportData._exames=r; }catch(e){}
-  try { const r=AppStorage.get('agendaProMax_compras',null); if(r) exportData._compras=r; }catch(e){}
-  try { const r=AppStorage.get('agendaProMax_mercado',null); if(r) exportData._mercado=r; }catch(e){}
+  const scope = String((exportData && exportData.syncScope) || (state && state.syncScope) || '');
+  const scoped = _readScopedCollections(scope);
+  if (scoped._photos) exportData._photos = scoped._photos;
+  if (scoped._docs) exportData._docs = scoped._docs;
+  if (scoped._contas) exportData._contas = scoped._contas;
+  if (scoped._receber) exportData._receber = scoped._receber;
+  if (scoped._exames) exportData._exames = scoped._exames;
+  if (scoped._compras) exportData._compras = scoped._compras;
+  if (scoped._mercado) exportData._mercado = scoped._mercado;
   exportData._exportedAt = new Date().toISOString();
   exportData._appVersion  = typeof APP_DATA_VERSION !== 'undefined' ? APP_DATA_VERSION : 1;
   exportData.weekStartISO = getSunday();
@@ -6864,23 +6977,15 @@ function importarDados() {
         );
         if (!confirmed) return;
 
-        // Restaurar fotos separadas se existirem no export
-        if (data._photos) {
-          try {
-            AppStorage.set('agendaProMax_photos', data._photos);
-          } catch(e) {}
-          delete data._photos;
-        }
-        // Restaurar documentos
-        if (data._docs) {
-          try { AppStorage.set('agendaProMax_docs', data._docs); }catch(e){}
-          delete data._docs;
-        }
-        if (data._contas) { AppStorage.set('agendaProMax_contas', data._contas); delete data._contas; }
-        if (data._receber){ AppStorage.set('agendaProMax_receber', data._receber); delete data._receber; }
-        if (data._exames) { AppStorage.set('agendaProMax_exames', data._exames); delete data._exames; }
-        if (data._compras){ AppStorage.set('agendaProMax_compras', data._compras); delete data._compras; }
-        if (data._mercado){ AppStorage.set('agendaProMax_mercado', data._mercado); delete data._mercado; }
+        const importScope = String(data.syncScope || state.syncScope || '');
+        _writeScopedCollections(importScope, data);
+        delete data._photos;
+        delete data._docs;
+        delete data._contas;
+        delete data._receber;
+        delete data._exames;
+        delete data._compras;
+        delete data._mercado;
         delete data._exportedAt;
         delete data._appVersion;
 
@@ -6947,23 +7052,7 @@ function _escHtml(s) {
 }
 
 function buildFullExportPayload(sourceState){
-  const exportData = { ...(sourceState || state || {}) };
-  try {
-    const rawPhotos = AppStorage.get('agendaProMax_photos', null);
-    if (rawPhotos) exportData._photos = rawPhotos;
-  } catch(_) {}
-  try {
-    const rawDocs = AppStorage.get('agendaProMax_docs', null);
-    if (rawDocs) exportData._docs = rawDocs;
-  } catch(_) {}
-  try { const r=AppStorage.get('agendaProMax_contas',null); if(r) exportData._contas=r; }catch(_){}
-  try { const r=AppStorage.get('agendaProMax_receber',null); if(r) exportData._receber=r; }catch(_){}
-  try { const r=AppStorage.get('agendaProMax_exames',null); if(r) exportData._exames=r; }catch(_){}
-  try { const r=AppStorage.get('agendaProMax_compras',null); if(r) exportData._compras=r; }catch(_){}
-  try { const r=AppStorage.get('agendaProMax_mercado',null); if(r) exportData._mercado=r; }catch(_){}
-  exportData._exportedAt = new Date().toISOString();
-  exportData._appVersion  = typeof APP_DATA_VERSION !== 'undefined' ? APP_DATA_VERSION : 1;
-  return exportData;
+  return _buildExportPayloadFromState(sourceState || state || {});
 }
 
 function _runSearch(query) {
@@ -6973,6 +7062,7 @@ function _runSearch(query) {
     container.innerHTML = '';
     return;
   }
+  const folderById = Object.fromEntries((state.folders || []).map((f)=>[f.id, f]));
 
   // ── Coleta resultados por categoria ──
   const cats = {
@@ -6990,7 +7080,7 @@ function _runSearch(query) {
   // Tarefas de pastas/semana
   Object.keys(state.tasks || {}).forEach(bid => {
     const arr = state.tasks[bid] || [];
-    const folder = state.folders.find(f => f.id === bid);
+    const folder = folderById[bid] || null;
     const day = DAYS.find(d => d.id === bid);
     const where = folder ? `${folder.emoji||'📁'} ${folder.name}` : (day ? day.name : bid);
     arr.forEach(t => {
@@ -7302,7 +7392,7 @@ function verificarIntegridade() {
     // 6. localStorage size estimate
     try {
       const raw = AppStorage.get('agendaProMax', '') || '';
-      const photos = AppStorage.get('agendaProMax_photos', '') || '';
+      const photos = _getScopedCollection('agendaProMax_photos', '') || '';
       const totalKB = Math.round((raw.length + photos.length) / 1024);
       if (totalKB > 4000) avisos.push(`localStorage: ~${totalKB} KB (perto do limite de 5 MB)`);
     } catch(e) {}
@@ -7402,12 +7492,24 @@ function _deleteTaskAnimated(rowEl, arr, bucketId, taskId) {
 // Wire do search button no header — feito em init() via wiring abaixo
 // Wire do overlay search
 document.getElementById('searchClose')?.addEventListener('click', closeSearch);
+let _searchDebounceTimer = null;
 document.getElementById('searchInput')?.addEventListener('input', (e) => {
-  _runSearch(e.target.value);
+  const v = e.target.value;
+  if (_searchDebounceTimer) clearTimeout(_searchDebounceTimer);
+  _searchDebounceTimer = setTimeout(() => {
+    _runSearch(v);
+  }, 140);
 });
 document.getElementById('searchInput')?.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeSearch();
 });
+
+if (typeof iniciarVerificacaoPeriodica === 'function') {
+  if (!window.__alertsPeriodicStarted) {
+    window.__alertsPeriodicStarted = true;
+    try { iniciarVerificacaoPeriodica(); } catch(_) {}
+  }
+}
 
 // ══════════════════════════════════════════════════════════════════
 // Incrementar APP_DATA_VERSION quando o schema do state mudar.
@@ -7706,6 +7808,7 @@ function openConsultaModal(editId){
   const iS     = `width:100%;padding:10px 12px;border-radius:10px;border:1px solid ${BDR};background:${FIELD};color:${TEXT};font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;outline:none;box-sizing:border-box;margin-bottom:10px;`;
   const LBL    = `font-size:10px;font-weight:800;color:${MUTED};margin-bottom:4px;text-transform:uppercase;letter-spacing:.6px;font-family:'Space Grotesk',sans-serif;`;
   const editing = editId?(state.consultas||[]).find(x=>x.id===editId):null;
+  if(typeof window._navPush === 'function') window._navPush();
 
   const ov=document.createElement('div');
   ov.id='consultaFormOv';
@@ -7913,7 +8016,7 @@ function openListaConsultas(){
     <div style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">${body}</div>`;
   document.body.appendChild(ov);
   ov.querySelector('#_lcBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
-  ov.querySelector('#_lcAdd').onclick=()=>{ ov.remove(); openConsultaModal(); };
+  ov.querySelector('#_lcAdd').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); openConsultaModal(); };
 }
 
 // ── Mini Relatório ao clicar na consulta ──

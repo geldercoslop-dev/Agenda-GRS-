@@ -36,6 +36,15 @@ var StateManager = (function () {
       else                     AppLog.log('stateManager.js', msg);
     }
   }
+  function _currentSyncScopeSafe() {
+    try {
+      if (typeof _currentScope === 'function') return _currentScope() || '';
+    } catch (_) {}
+    try {
+      if (typeof state !== 'undefined' && state && typeof state.syncScope === 'string') return state.syncScope || '';
+    } catch (_) {}
+    return '';
+  }
   function _warn(msg, extra) {
     if (typeof AppLog !== 'undefined') {
       if (extra !== undefined) AppLog.warn('stateManager.js', msg, extra);
@@ -117,6 +126,7 @@ var StateManager = (function () {
       return null;
     }
 
+    if (!data.syncScope) data.syncScope = _currentSyncScopeSafe();
     state.consultas.push(data);
     _sortConsultas();
     _persist('addConsulta');
@@ -163,6 +173,9 @@ var StateManager = (function () {
       return null;
     }
     Object.assign(state.consultas[idx], fields);
+    if (!state.consultas[idx].syncScope) {
+      state.consultas[idx].syncScope = _currentSyncScopeSafe();
+    }
     _sortConsultas();
     _persist('updateConsulta');
     _log('updateConsulta: id=' + id + ', campos=' + Object.keys(fields).join(','));
@@ -181,6 +194,9 @@ var StateManager = (function () {
       _err('restoreConsulta: obj inválido');
       return;
     }
+    if (!obj.syncScope) {
+      obj.syncScope = _currentSyncScopeSafe();
+    }
     // Clamp idx para evitar buraco no array
     var safeIdx = Math.min(idx, state.consultas.length);
     state.consultas.splice(safeIdx, 0, obj);
@@ -198,6 +214,7 @@ var StateManager = (function () {
     if (!obj || !obj.id) { _err('upsertConsulta: obj sem id'); return; }
 
     var idx = state.consultas.findIndex(function (c) { return c.id === obj.id; });
+    if (!obj.syncScope) obj.syncScope = _currentSyncScopeSafe();
     if (idx >= 0) {
       state.consultas[idx] = obj;
       _log('upsertConsulta (update): id=' + obj.id);

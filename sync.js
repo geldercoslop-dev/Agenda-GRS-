@@ -54,19 +54,35 @@
 const SYNC_CONFIG_KEY = 'agendaProMax_syncConfig';
 const SYNC_CURSOR_KEY = 'agendaProMax_syncCursor';
 const SYNC_DEVICE_KEY = 'agendaProMax_deviceId';
+const SYNC_SCOPE_KEY  = 'agendaProMax_syncScope';
 
 function _cfg() {
   try {
     const c = AppStorage.get(SYNC_CONFIG_KEY, null);
     if (!c) return null;
-    return (c.url && c.anonKey) ? c : null;
+    if (!(c.url && c.anonKey)) return null;
+    c.namespace = _sanitizeScopeToken(c.namespace || '');
+    if (!c.scope) {
+      c.scope = _syncScope(c.url, c.anonKey, c.namespace);
+      try { AppStorage.set(SYNC_CONFIG_KEY, c); } catch (_) {}
+      try { AppStorage.set(SYNC_SCOPE_KEY, c.scope); } catch (_) {}
+    }
+    return c;
   } catch { return null; }
 }
 
 function setSyncConfig(cfg) {
   try {
-    if (!cfg) AppStorage.remove(SYNC_CONFIG_KEY);
-    else      AppStorage.set(SYNC_CONFIG_KEY, cfg);
+    if (!cfg) {
+      AppStorage.remove(SYNC_CONFIG_KEY);
+      AppStorage.remove(SYNC_SCOPE_KEY);
+    } else {
+      var next = Object.assign({}, cfg);
+      next.namespace = _sanitizeScopeToken(next.namespace || '');
+      next.scope = _syncScope(next.url, next.anonKey, next.namespace);
+      AppStorage.set(SYNC_CONFIG_KEY, next);
+      AppStorage.set(SYNC_SCOPE_KEY, next.scope);
+    }
   } catch (e) { AppLog.warn("sync.js/setSyncConfig","Erro ao salvar config de sync",e); }
 }
 
@@ -77,6 +93,33 @@ function _deviceId() {
     AppStorage.set(SYNC_DEVICE_KEY, id);
   }
   return id;
+}
+
+function _sanitizeScopeToken(v) {
+  return String(v || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 64);
+}
+
+function _syncScope(url, anonKey, namespace) {
+  var ns = _sanitizeScopeToken(namespace || '');
+  var raw = String(url || '').trim().toLowerCase() + '|' + String(anonKey || '').trim().slice(0, 24) + '|' + ns;
+  var h = 2166136261;
+  for (var i = 0; i < raw.length; i++) {
+    h ^= raw.charCodeAt(i);
+    h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+    h = h >>> 0;
+  }
+  return 'sc_' + h.toString(16);
+}
+
+function _currentScope() {
+  var cfg = _cfg();
+  if (cfg && cfg.scope) return cfg.scope;
+  return AppStorage.get(SYNC_SCOPE_KEY, '');
 }
 
 // ──────────────────────────────────────────────────────────────────
@@ -102,6 +145,7 @@ function ensureSyncFields(item) {
   if (!item.id)        item.id        = _uuid();
   if (!item.updatedAt) item.updatedAt = Date.now();
   if (item.synced === undefined) item.synced = false;
+  if (!item.syncScope) item.syncScope = _currentScope();
   return item;
 }
 
@@ -113,7 +157,17 @@ function markDirty(item) {
   if (!item) return item;
   item.updatedAt = Date.now();
   item.synced    = false;
+  if (!item.syncScope) item.syncScope = _currentScope();
   return item;
+}
+
+function _isRowInScope(row) {
+  var cfg = _cfg();
+  var scope = _currentScope();
+  if (!cfg || !scope) return false;
+  var payload = (row && row.payload && typeof row.payload === 'object') ? row.payload : {};
+  var rowScope = payload.syncScope || '';
+  return rowScope === scope;
 }
 
 function _stripUnsafeKeysDeep(node, seen) {
@@ -240,6 +294,7 @@ async function syncPush(state, save) {
   if (!_cfg() || !navigator.onLine) return { pushed: 0 };
 
   const devId = _deviceId();
+  const scope = _currentScope();
   let pushed = 0;
 
   // ── tasks (buckets semanais + dateTasks + folders) ────────────
@@ -247,6 +302,7 @@ async function syncPush(state, save) {
 
   const _collectArr = (arr, bucketId) => {
     (arr || []).forEach(item => {
+      if (item && !item.syncScope) item.syncScope = scope;
       if (item && item.id && item.synced === false)
         dirtyTasks.push({ item, bucketId });
     });
@@ -265,6 +321,7 @@ async function syncPush(state, save) {
     });
   }
   (state.folders || []).forEach(f => {
+    if (f && !f.syncScope) f.syncScope = scope;
     if (f && f.id && f.synced === false)
       dirtyTasks.push({ item: f, bucketId: '__folders__' });
   });
@@ -286,6 +343,7 @@ async function syncPush(state, save) {
   // ── consultas ─────────────────────────────────────────────────
   const dirtyConsultas = (state.consultas || []).filter(c => c && c.id && c.synced === false);
   if (dirtyConsultas.length > 0) {
+    dirtyConsultas.forEach(function (c) { if (!c.syncScope) c.syncScope = scope; });
     const rows = dirtyConsultas.map(c => ({
       id:         c.id,
       data:       c.data || '',
@@ -302,6 +360,7 @@ async function syncPush(state, save) {
   // ── remedios ──────────────────────────────────────────────────
   const dirtyRemedios = (state.remedios || []).filter(r => r && r.id && r.synced === false);
   if (dirtyRemedios.length > 0) {
+    dirtyRemedios.forEach(function (r) { if (!r.syncScope) r.syncScope = scope; });
     const rows = dirtyRemedios.map(r => ({
       id:         r.id,
       data:       r.data || '',
@@ -343,6 +402,7 @@ async function syncPull(state, save, render) {
     let maxTs = cursors.tasks;
     rows.forEach(row => {
       if (!row.id) return;
+      if (!_isRowInScope(row)) return;
       pulled++;
       if (row.updated_at > maxTs) maxTs = row.updated_at;
 
@@ -410,6 +470,7 @@ async function syncPull(state, save, render) {
     let maxTs = cursors.consultas;
     rows.forEach(row => {
       if (!row.id) return;
+      if (!_isRowInScope(row)) return;
       pulled++;
       if (row.updated_at > maxTs) maxTs = row.updated_at;
       const remote   = _sanitizeInboundPayload('consulta', row.payload || {});
@@ -447,6 +508,7 @@ async function syncPull(state, save, render) {
     let maxTs = cursors.remedios;
     rows.forEach(row => {
       if (!row.id) return;
+      if (!_isRowInScope(row)) return;
       pulled++;
       if (row.updated_at > maxTs) maxTs = row.updated_at;
       const remote   = _sanitizeInboundPayload('remedio', row.payload || {});
@@ -665,13 +727,14 @@ async function initSync(state, save, render) {
  */
 async function syncDelete(table, id, bucketId = '') {
   if (!_cfg() || !navigator.onLine) return;
+  var scope = _currentScope();
   try {
     await _req('POST', table, [{
       id,
       data:       bucketId,
       updated_at: Date.now(),
       device_id:  _deviceId(),
-      payload:    { id },
+      payload:    { id, syncScope: scope },
       deleted:    true,
     }]);
   } catch (err) {
@@ -727,8 +790,11 @@ function abrirPainelSync() {
           style="width:100%;box-sizing:border-box;margin-top:5px;padding:9px 11px;background:#292524;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#f5f5f4;font-size:13px;outline:none;"/>
       </label>
 
-      <p style="margin:0 0 16px;font-size:11px;color:#44403c;">
+      <p style="margin:0 0 8px;font-size:11px;color:#44403c;">
         Device ID: <span style="font-size:10px;color:#78716c;font-family:monospace;">${devId.slice(0,20)}…</span>
+      </p>
+      <p style="margin:0 0 16px;font-size:11px;color:#44403c;">
+        Escopo de isolamento: <span style="font-size:10px;color:#a8a29e;font-family:monospace;">${_escAttr(String((cfg && cfg.scope) || _currentScope() || 'n/a'))}</span>
       </p>
 
       <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
@@ -752,6 +818,7 @@ function abrirPainelSync() {
     ov.querySelector('#_sDisco').addEventListener('click', () => {
       setSyncConfig(null);
       AppStorage.remove(SYNC_CURSOR_KEY);
+      AppStorage.remove(SYNC_DEVICE_KEY);
       ov.remove();
       if (typeof showToast === 'function') showToast('🔌 Sync desconectado');
     });
@@ -762,12 +829,19 @@ function abrirPainelSync() {
     const anonKey = ov.querySelector('#_sKey').value.trim();
     if (!url || !anonKey) { setStatus('Preencha URL e Anon Key.', '#f87171'); return; }
 
+    var prevScope = _currentScope();
     setSyncConfig({ url, anonKey });
+    AppStorage.remove(SYNC_CURSOR_KEY);
     setStatus('Verificando conexão…', '#60a5fa');
 
     try {
       await _req('GET', 'tasks', null, { limit: '1' });
       setStatus('✅ Conectado! Sincronizando…', '#34d399');
+      var nextScope = _currentScope();
+      if (typeof state !== 'undefined' && state && typeof state.syncScope !== 'string') state.syncScope = '';
+      if (typeof state !== 'undefined' && state && prevScope !== nextScope && typeof _switchStateToScope === 'function') {
+        _switchStateToScope(nextScope);
+      }
       if (typeof state !== 'undefined' && typeof save === 'function') {
         await initSync(state, save, typeof render === 'function' ? render : undefined);
       }
