@@ -9437,19 +9437,70 @@ function openHistoricoPaciente(){
   // PWA CORE — Service Worker · Online/Offline · Install · Prefetch
   // ══════════════════════════════════════════════════════════════════
 
-  // ── 1. ATUALIZAÇÃO TRADICIONAL E SEGURA DO SW ───────────────────
-  // Sem limpeza agressiva de cache/SW e sem reload forçado automático.
-  // Quando há nova versão, apenas avisamos; o app atualiza no próximo reabrir.
-  (function _swConservativeUpdate() {
-    const SW_BUILD_VERSION = '2026-03-22-4';
+  // ── 1. ATUALIZAÇÃO SEGURA COM BOTÃO (SEM LIMPEZA AUTOMÁTICA) ────
+  // Detecta nova versão e mostra botão "Atualizar agora" sem apagar dados do usuário.
+  (function _swSafeUpdateButton() {
+    const SW_BUILD_VERSION = '2026-03-22-5';
     const SW_URL = './sw.js?v=' + encodeURIComponent(SW_BUILD_VERSION);
+    const BANNER_ID = '_swSafeUpdateBanner';
     let _swReg = null;
-    let _warned = false;
 
-    function _notifyUpdateAvailable() {
-      if (_warned) return;
-      _warned = true;
-      try { showToast('🆕 Nova versão disponível. Feche e abra o app para atualizar com segurança.'); } catch(_) {}
+    function _hideBanner() {
+      const b = document.getElementById(BANNER_ID);
+      if (!b) return;
+      b.style.opacity = '0';
+      b.style.transform = 'translateX(-50%) translateY(20px)';
+      setTimeout(() => { if (b.parentNode) b.remove(); }, 220);
+    }
+
+    function _showSafeUpdateBanner() {
+      if (document.getElementById(BANNER_ID)) return;
+      const banner = document.createElement('div');
+      banner.id = BANNER_ID;
+      banner.setAttribute('role', 'alert');
+      banner.setAttribute('aria-live', 'polite');
+      banner.style.cssText = [
+        'position:fixed', 'bottom:80px', 'left:50%',
+        'transform:translateX(-50%) translateY(20px)',
+        'z-index:99998', 'background:rgba(10,25,47,.97)',
+        'border:1px solid rgba(99,102,241,.45)',
+        'border-radius:16px', 'padding:12px 16px',
+        'display:flex', 'align-items:center', 'gap:10px',
+        'max-width:360px', 'width:calc(100vw - 28px)',
+        'box-shadow:0 10px 30px rgba(0,0,0,.5)',
+        'opacity:0', 'transition:opacity .25s, transform .25s',
+        'font-family:Plus Jakarta Sans,sans-serif'
+      ].join(';');
+      banner.innerHTML = [
+        '<span style="font-size:19px;line-height:1;flex-shrink:0;">🆕</span>',
+        '<span style="flex:1;font-size:12px;font-weight:700;color:#e8f4ff;line-height:1.35;">Nova versão pronta. Atualize com segurança (sem apagar dados).</span>',
+        '<button id="_swSafeUpdateBtn" style="padding:8px 12px;border-radius:10px;border:none;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;font-family:Plus Jakarta Sans,sans-serif;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">Atualizar agora</button>',
+        '<button id="_swSafeDismiss" style="padding:4px 6px;border:none;background:transparent;color:rgba(165,180,252,.7);font-size:16px;line-height:1;cursor:pointer;">✕</button>'
+      ].join('');
+      document.body.appendChild(banner);
+      requestAnimationFrame(() => {
+        banner.style.opacity = '1';
+        banner.style.transform = 'translateX(-50%) translateY(0)';
+      });
+
+      banner.querySelector('#_swSafeDismiss')?.addEventListener('click', _hideBanner);
+      banner.querySelector('#_swSafeUpdateBtn')?.addEventListener('click', () => {
+        let reloaded = false;
+        const safeReload = () => {
+          if (reloaded) return;
+          reloaded = true;
+          window.location.reload();
+        };
+        if (_swReg && _swReg.waiting) {
+          navigator.serviceWorker.addEventListener('controllerchange', safeReload, { once: true });
+          try { _swReg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch(_) {}
+          setTimeout(safeReload, 2600);
+        } else if (_swReg) {
+          _swReg.update().catch(() => {}).finally(() => setTimeout(safeReload, 300));
+        } else {
+          safeReload();
+        }
+      });
     }
 
     function _checkForUpdate() {
@@ -9458,39 +9509,31 @@ function openHistoricoPaciente(){
     }
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register(SW_URL, {
-        updateViaCache: 'none'
-      }).then((reg) => {
+      navigator.serviceWorker.register(SW_URL, { updateViaCache: 'none' }).then((reg) => {
         _swReg = reg;
-
         _checkForUpdate();
         setInterval(_checkForUpdate, 60000);
-
         document.addEventListener('visibilitychange', () => {
           if (document.visibilityState === 'visible') _checkForUpdate();
         });
 
-        // Se já existe waiting no boot, apenas avisa (modo tradicional).
-        if (reg.waiting && navigator.serviceWorker.controller) _notifyUpdateAvailable();
-
+        if (reg.waiting && navigator.serviceWorker.controller) _showSafeUpdateBanner();
         reg.addEventListener('updatefound', () => {
           const nw = reg.installing;
           if (!nw) return;
           nw.addEventListener('statechange', () => {
             if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-              _notifyUpdateAvailable();
+              _showSafeUpdateBanner();
             }
           });
         });
-
         navigator.serviceWorker.addEventListener('message', (event) => {
-          if (event.data?.type === 'SW_UPDATED') {
-            _notifyUpdateAvailable();
+          if (event.data?.type === 'SW_UPDATED' && navigator.serviceWorker.controller) {
+            _showSafeUpdateBanner();
           }
         });
 
         agendarNotificacoesRemedios().catch(() => {});
-
       }).catch((err) => AppLog.warn('index.js/SW','Erro de registro do Service Worker', err.message));
     }
   })();
