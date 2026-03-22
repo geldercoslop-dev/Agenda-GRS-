@@ -1104,8 +1104,16 @@ function updateHeader() {
     const p2=v=>String(v).padStart(2,'0');
     const hh=p2(n.getHours()), mm=p2(n.getMinutes());
     const blink=n.getSeconds()%2===0;
-    const clr=light?'#32261c':'#ffffff';
-    const glowClr=light?'rgba(50,38,28,0.15)':'rgba(255,255,255,0.4)';
+    const wpContrast = (typeof state !== 'undefined') ? state.wallpaperContrast : null;
+    const hasWp = (typeof state !== 'undefined') && state.wallpaperUrl;
+    let clr, glowClr;
+    if(hasWp) {
+      clr = (wpContrast === 'light-text') ? '#ffffff' : '#1a1208';
+      glowClr = (wpContrast === 'light-text') ? 'rgba(255,255,255,0.3)' : 'rgba(30,20,5,0.2)';
+    } else {
+      clr = light ? '#32261c' : '#ffffff';
+      glowClr = light ? 'rgba(50,38,28,0.15)' : 'rgba(255,255,255,0.4)';
+    }
     const colonOp=blink?'1':'0.25';
     // SVG inline text approach — mais limpo e bonito
     el.innerHTML=`
@@ -3358,11 +3366,16 @@ function init(){
     applyWatermarkPhoto(state.watermarkPhoto);
   }
   // Léo fixo no footer (não editável pelo usuário)
+  // Léo no footer: copiar src diretamente do watermarkImg
   const _leoFooter = document.getElementById('leoFooterAvatar');
   const _leoOriginal = document.getElementById('watermarkImg');
   if(_leoFooter && _leoOriginal){
-    const _leoSrc = _leoOriginal.getAttribute('src') || _leoOriginal.src;
-    if(_leoSrc) _leoFooter.src = _leoSrc;
+    // Forçar src mesmo com watermarkWrap oculto
+    const _leoSrc = _leoOriginal.src || _leoOriginal.getAttribute('src');
+    if(_leoSrc && _leoSrc.length > 10) {
+      _leoFooter.src = _leoSrc;
+      _leoFooter.style.display = 'block';
+    }
   }
 
   window.openSidebar=openSidebar;
@@ -9626,6 +9639,11 @@ function applyWallpaper(id, dataUrl, theme, contrast) {
   // Aplicar background e contraste
   _applyWallpaperCSS(dataUrl, state.wallpaperContrast);
   save();
+  // Forçar redraw imediato do relógio (cor muda com wallpaper)
+  setTimeout(() => {
+    const clkEl = document.getElementById('hdrClockSvg');
+    if(clkEl) clkEl.dispatchEvent(new Event('redraw'));
+  }, 50);
 }
 
 function _applyWallpaperCSS(dataUrl, contrast) {
@@ -9703,10 +9721,112 @@ function _applyWallpaperCSS(dataUrl, contrast) {
     /* ── Progresso ── */
     #progressLabel { color: ${txtMuted} !important; }
     #progressPct   { color: ${lightText ? '#f97316' : '#d67828'} !important; }
-  `;
+
+    /* ── Busca: placeholder e ícone ── */
+    #topSearchInput span { color: ${txtMuted} !important; }
+    .searchLupa { color: ${lightText ? '#7dd3f0' : '#d67828'} !important; }
+
+    /* ── Dia ativo no weekstrip ── */
+    .wDay.active .wdNum { color: #f97316 !important; }
+    .wDay.active .wdName { color: rgba(249,115,22,.7) !important; }
+    .wdDot { background: rgba(249,115,22,.8) !important; }
+    .mCell.mHasTask::after { background: rgba(249,115,22,.8) !important; }
+
+    /* ── Mês header (collapsed strip) ── */
+    .monthHdrLabel { color: ${txtMain} !important; }
+    .monthDayName { color: ${txtDim} !important; }
+
+    /* ── Badge de tarefas nas pastas ── */
+    .folderBadge { background: #f97316 !important; color: #fff !important; }
+
+    /* ── Todas as Pastas modal: forçar texto claro sempre (fundo dark) ── */
+    #todasPastasOv .folderTile .fl { color: rgba(255,255,255,.9) !important; }
+    #todasPastasOv .folderTile .fi-wrap { 
+      background: rgba(255,255,255,.92) !important; 
+      border-color: rgba(255,255,255,.15) !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,.3) !important;
+    }
+    #pastasFrenteOv .folderTile .fl { color: rgba(255,255,255,.9) !important; }
+    #pastasFrenteOv .folderTile .fi-wrap { 
+      background: rgba(255,255,255,.92) !important;
+      border-color: rgba(255,255,255,.15) !important;
+    }
+
+    /* ── Texto de tarefas na lista ── */
+    .tText { color: ${txtMain} !important; }
+    .tCheck { color: rgba(249,115,22,.6) !important; }
+
+    /* ── DayView header ── */
+    .dayHdr, .dayHdrTitle { color: ${txtMain} !important; }
+
+    /* ── Scrollbar cards se existirem ── */
+    .bucketCard, .taskCard { background: ${cardBg} !important; }
+  \`;
 
   document.body.classList.toggle('wp-light-text', lightText);
   document.body.classList.toggle('wp-dark-text', !lightText);
+}
+function openWallpaperPicker() {
+  if(typeof window._navPush === 'function') window._navPush();
+  const existing = document.getElementById('wallpaperPickerOv');
+  if(existing) existing.remove();
+
+  const ov = document.createElement('div');
+  ov.id = 'wallpaperPickerOv';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;flex-direction:column;';
+
+  const currentWp = (typeof state !== 'undefined' && state.wallpaper) ? state.wallpaper : 'none';
+
+  ov.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0;">
+      <div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:#fff;">🖼️ Papel de Parede</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:2px;">Toque para aplicar</div>
+      </div>
+      <button id="_wpClose" style="background:rgba(255,255,255,.12);border:none;border-radius:10px;color:#fff;width:36px;height:36px;font-size:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;">
+      <div style="margin-bottom:14px;">
+        <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.4);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Sem papel de parede</div>
+        <div id="_wpNone" style="width:72px;height:46px;border-radius:10px;background:linear-gradient(135deg,#0d1b35,#1a2b48);border:2px solid ${currentWp==='none'?'#f97316':'rgba(255,255,255,.2)'};cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;">🚫</div>
+      </div>
+      <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.4);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Escolha um papel de parede</div>
+      <div id="_wpGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-bottom:20px;"></div>
+    </div>`;
+
+  document.body.appendChild(ov);
+
+  const grid = ov.querySelector('#_wpGrid');
+  WALLPAPER_PACK.forEach(wp => {
+    const cell = document.createElement('div');
+    const isActive = currentWp === wp.id;
+    cell.style.cssText = `position:relative;cursor:pointer;border-radius:12px;overflow:hidden;aspect-ratio:9/16;border:2px solid ${isActive?'#f97316':'rgba(255,255,255,.15)'};transition:border-color .15s;-webkit-tap-highlight-color:transparent;`;
+    cell.innerHTML = `
+      <img src="${wp.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
+      <div style="position:absolute;bottom:0;left:0;right:0;padding:4px 6px;background:linear-gradient(to top,rgba(0,0,0,.75),transparent);font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:700;color:#fff;line-height:1.3;">${wp.label}</div>
+      <div style="position:absolute;top:4px;right:4px;font-size:11px;">${wp.theme==='dark'?'🌙':'☀️'}</div>`;
+    cell.addEventListener('click', () => {
+      applyWallpaper(wp.id, wp.full, wp.theme, wp.contrast);
+      grid.querySelectorAll('[data-wpid]').forEach(d => d.style.borderColor = 'rgba(255,255,255,.15)');
+      cell.style.borderColor = '#f97316';
+      ov.querySelector('#_wpNone').style.borderColor = 'rgba(255,255,255,.2)';
+      if(typeof showToast === 'function') showToast('✅ ' + wp.label + ' aplicado!');
+    });
+    cell.dataset.wpid = wp.id;
+    grid.appendChild(cell);
+  });
+
+  ov.querySelector('#_wpNone').addEventListener('click', () => {
+    applyWallpaper('none', null, (typeof state!=='undefined'?state.theme:'dark'), null);
+    ov.querySelector('#_wpNone').style.borderColor = '#f97316';
+    grid.querySelectorAll('[data-wpid]').forEach(d => d.style.borderColor = 'rgba(255,255,255,.15)');
+    if(typeof showToast === 'function') showToast('✅ Papel de parede removido!');
+  });
+
+  ov.querySelector('#_wpClose').addEventListener('click', () => {
+    ov.remove();
+    if(typeof window._navPop === 'function') window._navPop();
+  });
 }
 
 </script>
