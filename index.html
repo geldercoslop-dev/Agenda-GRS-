@@ -987,6 +987,9 @@ function flushPendingSave() {
 }
 
 function save(force) {
+  _uiStateRev++;
+  _invalidateWarmCache();
+  _scheduleIdleWarmup();
   _savePending = true;
   if (force === true) {
     flushPendingSave();
@@ -1002,6 +1005,7 @@ window.addEventListener('beforeunload', flushPendingSave, { capture: true });
 
 const _UI_RENDER_METRICS_KEY = 'agendaProMax_renderMetrics';
 const _uiRerenderTimers = Object.create(null);
+let _uiStateRev = 0;
 const _uiRenderMetrics = (function(){
   const fallback = { screens: {} };
   try {
@@ -1061,6 +1065,96 @@ function _formatRenderMetricLine(screenKey){
   const m = ((_uiRenderMetrics.screens || {})[screenKey]) || null;
   if (!m || !m.samples) return '—';
   return `${Math.round(m.avgMs)}ms méd · ${Math.round(m.lastMs)}ms atual · ${m.lastCount} itens`;
+}
+const _uiWarmCache = { rev: -1, screens: {} };
+let _uiIdleWarmupPending = false;
+
+function _prepareConsultasWarmData() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const consultas = (state.consultas || []).slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+  const proximas = [];
+  const historico = [];
+  consultas.forEach((c) => {
+    const d = new Date(c.data + 'T' + c.hora);
+    if (d >= today) proximas.push(c);
+    else historico.push(c);
+  });
+  return { consultas, proximas, historico, total: consultas.length };
+}
+function _prepareRemediosWarmData() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const remedios = (state.remedios || []).slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+  const ativos = [];
+  const inativos = [];
+  remedios.forEach((r) => {
+    const fim = new Date(r.data + 'T' + r.hora);
+    fim.setDate(fim.getDate() + r.dias);
+    if (fim >= today) ativos.push(r);
+    else inativos.push(r);
+  });
+  return { remedios, ativos, inativos, total: remedios.length };
+}
+function _prepareMercadoWarmData() {
+  const items = (_getMercado() || []).slice();
+  let marcadosN = 0;
+  items.forEach((x) => { if (x && x.checked) marcadosN++; });
+  return { items, totalItems: items.length, marcadosN, pendentesCount: items.length - marcadosN };
+}
+function _prepareComprasWarmData() {
+  const items = (_getCompras() || []).slice();
+  let marcadosN = 0;
+  items.forEach((x) => { if (x && x.checked) marcadosN++; });
+  return { items, totalItems: items.length, marcadosN, pendentesCount: items.length - marcadosN };
+}
+function _prepareDocsWarmData() {
+  const docs = (_getDocs() || []).slice();
+  return { docs, total: docs.length };
+}
+function _runIdleWarmup() {
+  const targetRev = _uiStateRev;
+  const warmStart = _uiNowMs();
+  const screens = {
+    consultas: _prepareConsultasWarmData(),
+    remedios: _prepareRemediosWarmData(),
+    mercado: _prepareMercadoWarmData(),
+    compras: _prepareComprasWarmData(),
+    docs: _prepareDocsWarmData(),
+  };
+  if (targetRev !== _uiStateRev) return;
+  _uiWarmCache.rev = targetRev;
+  _uiWarmCache.screens = screens;
+  const total = (screens.consultas.total || 0) + (screens.remedios.total || 0) +
+    (screens.mercado.totalItems || 0) + (screens.compras.totalItems || 0) + (screens.docs.total || 0);
+  _recordRenderMetric('idleWarmup', warmStart, total);
+}
+function _scheduleIdleWarmup() {
+  if (_uiIdleWarmupPending) return;
+  _uiIdleWarmupPending = true;
+  const runner = () => {
+    _uiIdleWarmupPending = false;
+    _runIdleWarmup();
+  };
+  if (typeof requestIdleCallback === 'function') {
+    requestIdleCallback(runner, { timeout: 1800 });
+  } else {
+    setTimeout(runner, 500);
+  }
+}
+function _invalidateWarmCache() {
+  _uiWarmCache.rev = -1;
+  _uiWarmCache.screens = {};
+}
+function _getWarmData(screenKey, builderFn) {
+  if (_uiWarmCache.rev === _uiStateRev && _uiWarmCache.screens && _uiWarmCache.screens[screenKey]) {
+    return _uiWarmCache.screens[screenKey];
+  }
+  const data = builderFn();
+  if (_uiWarmCache.rev !== _uiStateRev || !_uiWarmCache.screens) {
+    _uiWarmCache.rev = _uiStateRev;
+    _uiWarmCache.screens = {};
+  }
+  _uiWarmCache.screens[screenKey] = data;
+  return data;
 }
 
 // Migra dom2 → dom quando a semana vira (novo domingo)
@@ -1260,6 +1354,9 @@ function _setScopedCollection(baseKey, value) {
     try { AppStorage.set(_scopeStorageKey(baseKey, scope), value); } catch(_) {}
   }
   AppStorage.set(baseKey, value);
+  _uiStateRev++;
+  _invalidateWarmCache();
+  _scheduleIdleWarmup();
 }
 function recoverStateIfEmpty(currentState) {
   try {
@@ -4451,6 +4548,7 @@ function init(){
 
   updateHeader();
   renderFolders();
+  _scheduleIdleWarmup();
   renderWeekStrip();
   updateProgress();
   initStripExpand();
@@ -5535,8 +5633,10 @@ function openCompras(){
 }
 
 function _renderComprasOv(){
+  const _comprasRenderStart = _uiNowMs();
   const old=document.getElementById('comprasOv'); if(old) old.remove();
-  const items=_getCompras();
+  const comprasWarm = _getWarmData('compras', _prepareComprasWarmData);
+  const items = (comprasWarm.items || []).slice();
   const BG='linear-gradient(160deg,#021824,#04355a)';
   const BDR='rgba(0,140,180,.18)'; const TEXT='#e8f4ff'; const MUTED='rgba(180,220,240,.5)'; const ACC='#7dd3f0';
 
@@ -5552,7 +5652,7 @@ function _renderComprasOv(){
     </div>`;
   }
 
-  const totalItems=items.length, marcadosN=marcados.length;
+  const totalItems=items.length, marcadosN=(typeof comprasWarm.marcadosN === 'number' ? comprasWarm.marcadosN : marcados.length);
 
   const ov=document.createElement('div'); ov.id='comprasOv';
   ov.style.cssText=`position:fixed;inset:0;background:${BG};backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:99997;display:flex;flex-direction:column;`;
@@ -5618,6 +5718,7 @@ function _renderComprasOv(){
     if(ck){ arr[parseInt(ck.dataset.idx)].checked=!arr[parseInt(ck.dataset.idx)].checked; _saveCompras(arr); _renderComprasOv(); }
     else if(dl){ arr.splice(parseInt(dl.dataset.idx),1); _saveCompras(arr); _renderComprasOv(); }
   });
+  _recordRenderMetric('compras', _comprasRenderStart, items.length);
 }
 
 // ══ MERCADO ══
@@ -5633,11 +5734,13 @@ function openMercado(){
 }
 
 function _renderMercadoOv(){
+  const _mercadoRenderStart = _uiNowMs();
   const old=document.getElementById('mercadoOv'); if(old) old.remove();
-  const items=_getMercado();
-  const marcadosN=items.filter(x=>x.checked).length;
-  const totalItems=items.length;
-  const pendentes=items.filter(x=>!x.checked);
+  const mercadoWarm = _getWarmData('mercado', _prepareMercadoWarmData);
+  const items = (mercadoWarm.items || []).slice();
+  const marcadosN = (typeof mercadoWarm.marcadosN === 'number') ? mercadoWarm.marcadosN : items.filter(x=>x.checked).length;
+  const totalItems = (typeof mercadoWarm.totalItems === 'number') ? mercadoWarm.totalItems : items.length;
+  const pendentes = items.filter(x=>!x.checked);
 
   const BG=`linear-gradient(160deg,#021824,#04355a)`;
   const TEXT='#e8f4ff'; const MUTED='rgba(180,220,240,.55)';
@@ -5725,6 +5828,7 @@ function _renderMercadoOv(){
     if(cb){ const arr=_getMercado(); arr[parseInt(cb.dataset.ci)].checked=cb.checked; _saveMercado(arr); _renderMercadoOv(); }
     else if(dl){ const arr=_getMercado(); arr.splice(parseInt(dl.dataset.di),1); _saveMercado(arr); _renderMercadoOv(); }
   });
+  _recordRenderMetric('mercado', _mercadoRenderStart, items.length);
 }
 
 // ══ DOCUMENTOS ══
@@ -5740,10 +5844,12 @@ function openDocs(){
 }
 
 function _renderDocsOv(){
+  const _docsRenderStart = _uiNowMs();
   const old = document.getElementById('docsOv');
   if(old) old.remove();
 
-  const docs = _getDocs();
+  const docsWarm = _getWarmData('docs', _prepareDocsWarmData);
+  const docs = (docsWarm.docs || []).slice();
   const BG   = 'linear-gradient(160deg,#021824,#04355a)';
   const BDR  = 'rgba(0,140,180,.18)';
   const FIELD= 'rgba(0,80,120,.28)';
@@ -5900,6 +6006,7 @@ function _renderDocsOv(){
       return;
     }
   });
+  _recordRenderMetric('docs', _docsRenderStart, docs.length);
 }
 
 // helper
@@ -7556,6 +7663,14 @@ function openVersionStatus() {
     swControlled = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
   } catch(_) {}
   const safeVersion = _escHtml(String(APP_BUILD_VERSION || 'desconhecida'));
+  const metricRows = [
+    ['Consultas (render)', _formatRenderMetricLine('consultas')],
+    ['Remédios (render)', _formatRenderMetricLine('remedios')],
+    ['Mercado (render)', _formatRenderMetricLine('mercado')],
+    ['Compras (render)', _formatRenderMetricLine('compras')],
+    ['Documentos (render)', _formatRenderMetricLine('docs')],
+    ['Pré-cálculo idle', _formatRenderMetricLine('idleWarmup')],
+  ];
   const html = `
     <div style="padding:4px 0 12px;font-family:'Plus Jakarta Sans',sans-serif;">
       <div style="background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.18);border-radius:14px;padding:16px 18px;">
@@ -7570,6 +7685,17 @@ function openVersionStatus() {
             <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,140,180,.1);padding-bottom:8px;">
               <span style="font-size:13px;font-weight:600;color:rgba(180,220,240,.7);font-family:'Plus Jakarta Sans',sans-serif;">${l}</span>
               <span style="font-size:13px;font-weight:800;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;">${v}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div style="margin-top:12px;background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.18);border-radius:14px;padding:16px 18px;">
+        <div style="font-size:10px;font-weight:900;color:rgba(180,220,240,.55);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;font-family:'Space Grotesk',sans-serif;">Performance local (tempo de render)</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          ${metricRows.map(([l,v]) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,140,180,.1);padding-bottom:8px;">
+              <span style="font-size:13px;font-weight:600;color:rgba(180,220,240,.7);font-family:'Plus Jakarta Sans',sans-serif;">${_escHtml(l)}</span>
+              <span style="font-size:13px;font-weight:800;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;text-align:right;">${_escHtml(String(v || '—'))}</span>
             </div>
           `).join('')}
         </div>
@@ -8196,6 +8322,7 @@ function openListaConsultas(){
   _setFooter(false);
   const existing=document.getElementById('listaConsultasOv');
   if(existing)existing.remove();
+  const _consultasRenderStart = _uiNowMs();
 
 
   // ── Paleta Relatório Semanal ──
@@ -8210,10 +8337,10 @@ function openListaConsultas(){
   const FIELD = 'rgba(0,80,120,.28)';
   const FBDR  = 'rgba(0,160,200,.14)';
 
-  const today=new Date(); today.setHours(0,0,0,0);
-  const consultas=(state.consultas||[]).slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
-  const proximas=consultas.filter(c=>{ const d=new Date(c.data+'T'+c.hora); return d>=today; });
-  const historico=consultas.filter(c=>{ const d=new Date(c.data+'T'+c.hora); return d<today; });
+  const consultasWarm = _getWarmData('consultas', _prepareConsultasWarmData);
+  const consultas = (consultasWarm.consultas || []).slice();
+  const proximas = (consultasWarm.proximas || []).slice();
+  const historico = (consultasWarm.historico || []).slice();
 
   // ── Formato padrão: Paciente • Especialidade • Data Hora ──
   function fmtConsultaLabel(c){
@@ -8308,6 +8435,7 @@ function openListaConsultas(){
   }
   ov.querySelector('#_lcBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_lcAdd').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); openConsultaModal(); };
+  _recordRenderMetric('consultas', _consultasRenderStart, consultas.length);
 }
 
 // ── Mini Relatório ao clicar na consulta ──
@@ -8797,6 +8925,7 @@ function openListaRemedios(){
 
   const existing=document.getElementById('listaRemediosOv');
   if(existing)existing.remove();
+  const _remediosRenderStart = _uiNowMs();
 
   // ── Paleta Relatório Semanal ──
   const TEXT  = '#e8f4ff';
@@ -8810,14 +8939,10 @@ function openListaRemedios(){
   const FIELD = 'rgba(0,80,120,.28)';
   const FBDR  = 'rgba(0,160,200,.14)';
 
-  const today=new Date(); today.setHours(0,0,0,0);
-  const remedios=(state.remedios||[]).slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
-  const ativos=remedios.filter(r=>{
-    const fim=new Date(r.data+'T'+r.hora); fim.setDate(fim.getDate()+r.dias); return fim>=today;
-  });
-  const inativos=remedios.filter(r=>{
-    const fim=new Date(r.data+'T'+r.hora); fim.setDate(fim.getDate()+r.dias); return fim<today;
-  });
+  const remediosWarm = _getWarmData('remedios', _prepareRemediosWarmData);
+  const remedios = (remediosWarm.remedios || []).slice();
+  const ativos = (remediosWarm.ativos || []).slice();
+  const inativos = (remediosWarm.inativos || []).slice();
 
   function cardHTML(r,isPast){
     const dataFmt=r.data?r.data.split('-').reverse().join('/'):'-';
@@ -8902,6 +9027,7 @@ function openListaRemedios(){
   }
   ov.querySelector('#_lrBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_lrAdd').onclick=()=>{ ov.remove(); openRemedioModal(); };
+  _recordRenderMetric('remedios', _remediosRenderStart, remedios.length);
 }
 
 function editRemedio(id){ document.getElementById('listaRemediosOv')?.remove(); openRemedioModal(id); }
