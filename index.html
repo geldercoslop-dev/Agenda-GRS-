@@ -827,7 +827,9 @@
 <script src="./stateIntegrity.js"></script>
 <script src="./stateManager.js"></script>
 <script src="./syncQueue.js"></script>
+<script src="./moduleCheck.js"></script>
 <script src="./systemAudit.js"></script>
+<script src="./diagnostics.js"></script>
 <script src="./agenda.js"></script>
 <script src="./ui.js"></script>
 <script src="./notificacoes.js"></script>
@@ -3789,7 +3791,12 @@ function closeSidebar(){
   document.getElementById('sidebar').classList.remove('open');
   const ov=document.getElementById('sidebarOverlay');
   ov.classList.remove('open');
-  setTimeout(()=>{ if(!ov.classList.contains('open')) ov.style.display='none'; },300);
+  // Garante que o overlay não intercepte cliques enquanto anima para fechar
+  ov.style.pointerEvents='none';
+  setTimeout(()=>{
+    if(!ov.classList.contains('open')) ov.style.display='none';
+    ov.style.pointerEvents='';
+  },300);
 }
 
 // ══ SWIPE SIDEBAR — qualquer lugar da tela ══
@@ -4886,6 +4893,12 @@ function checkBackupReminder(){
 
     // Só avisa se passaram mais de 3 dias (ou nunca fez backup)
     if (last && (now - parseInt(last)) < TRES_DIAS) return;
+
+    // Não interrompe o usuário se já houver um modal/overlay aberto.
+    if (document.querySelector('.modalOverlay, #sModalOverlay.show, #subScreenOverlay.show, #fModalOverlay.show, #quickAddOverlay[style*="display: flex"], #searchOverlay[style*="display: flex"]')) {
+      setTimeout(checkBackupReminder, 12000);
+      return;
+    }
 
     // Modal central — mesmo padrão visual do doBackup()
     const {box, close} = _modalBase();
