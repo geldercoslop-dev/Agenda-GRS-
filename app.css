@@ -1166,3 +1166,11 @@
   --progress-fill-color: #d67828;
   --progress-fill-shadow: rgba(214,120,40,0.45);
 }
+
+/* ══ Modal Todas as Pastas — sempre texto branco (fundo dark) ══ */
+#todasPastasOv .folderTile .fl { color:rgba(255,255,255,.88) !important; }
+#todasPastasOv .folderTile .fi-wrap { background:rgba(255,255,255,.95) !important; border-color:rgba(255,255,255,.2) !important; box-shadow:0 4px 12px rgba(0,0,0,.3) !important; }
+
+/* Lupa da busca */
+.searchLupa { color: #7dd3f0; }
+[data-theme="light"] .searchLupa { color: #d67828 !important; }

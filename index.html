@@ -146,9 +146,9 @@
         cursor:pointer;
         -webkit-tap-highlight-color:transparent;
       ">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;opacity:.6;">
-          <circle cx="11" cy="11" r="8" stroke="#7dd3f0" stroke-width="2.2"/>
-          <path d="M16.5 16.5 L21 21" stroke="#7dd3f0" stroke-width="2.2" stroke-linecap="round"/>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;opacity:.8;" class="searchLupa">
+          <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2.2"/>
+          <path d="M16.5 16.5 L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
         </svg>
         <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;color:rgba(232,244,255,.55);flex:1;letter-spacing:.1px;">Buscar tarefas, consultas, remédios…</span>
       </div>
@@ -1601,12 +1601,16 @@ function openTodasPastas(){
   if(typeof window._navPush === 'function') window._navPush();
   const {ov, box, close: _closeBase} = _modalBase();
   ov.id = 'todasPastasOv';
-  // Esconde rodapé (Léo + barra + botão) igual ao calendário expandido
+  // Esconde rodapé suavemente
   const _pr = document.getElementById('progressRow');
   if(_pr){ _pr.style.opacity='0'; _pr.style.pointerEvents='none'; _pr.style.transition='opacity .2s'; }
   const close = ()=>{
     _closeBase();
-    if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; }
+    // Restaura progressRow e sidebarFab ao fechar
+    if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; _pr.style.transition=''; }
+    const _fab = document.getElementById('sidebarFab');
+    if(_fab){ _fab.style.opacity='1'; _fab.style.pointerEvents='auto'; _fab.style.transform='scale(1)'; }
+    if(typeof window._navPop === 'function') window._navPop();
   };
 
   // Header fixo
@@ -3600,18 +3604,18 @@ function init(){
         _histDepth--;
         history.replaceState({app:'screen', depth:_histDepth},'');
       }
-      // Restaura TUDO se voltou pra home
+      // Sempre restaura opacity do progressRow — independente de currentView
+      // pois vários modais escondem via opacity e podem não restaurar
+      const _pr = document.getElementById('progressRow');
+      if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; _pr.style.transition=''; }
+
+      // Restaura tudo se voltou pra home
       if(typeof currentView !== 'undefined' && currentView === 'home'){
-        // progressRow
         if(typeof _setFooter === 'function') _setFooter(true);
-        const _pr = document.getElementById('progressRow');
-        if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; _pr.style.transition=''; }
-        // weekStripCard + weekStripWrap
         const _wsc = document.getElementById('weekStripCard');
         if(_wsc){ _wsc.classList.remove('hidden'); _wsc.style.display=''; _wsc.style.opacity=''; }
         const _wsw = document.getElementById('weekStripWrap');
         if(_wsw){ _wsw.classList.remove('hidden'); _wsw.style.display=''; _wsw.style.opacity=''; }
-        // sidebarFab (botão menu ☰)
         const _fab = document.getElementById('sidebarFab');
         if(_fab){ _fab.style.opacity='1'; _fab.style.pointerEvents='auto'; _fab.style.transform='scale(1)'; }
         if(typeof atualizarLupa === 'function') atualizarLupa('home');
@@ -3674,6 +3678,13 @@ function init(){
         const el=document.getElementById(oid);
         if(el){
           el.remove();
+          // Restaura progressRow e sidebarFab ao fechar overlay via botão Android
+          const _prOv = document.getElementById('progressRow');
+          if(_prOv){ _prOv.style.opacity=''; _prOv.style.pointerEvents=''; _prOv.style.transition=''; }
+          if(currentView==='home'){
+            const _fabOv = document.getElementById('sidebarFab');
+            if(_fabOv){ _fabOv.style.opacity='1'; _fabOv.style.pointerEvents='auto'; _fabOv.style.transform='scale(1)'; }
+          }
           // NÃO faz _histDepth++ nem pushState aqui.
           return;
         }
