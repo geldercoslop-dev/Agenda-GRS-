@@ -1078,8 +1078,7 @@ function setTheme(t) {
   state.theme = t;
   document.body.setAttribute('data-theme', t);
   const thIcon = document.getElementById('thIcon');
-  thIcon.textContent = '💡';
-  thIcon.style.filter = t==='light' ? 'grayscale(1) brightness(0.5)' : 'none';
+  if(thIcon){ thIcon.textContent = '💡'; thIcon.style.filter = t==='light' ? 'grayscale(1) brightness(0.5)' : 'none'; }
   save();
 }
 function toggleTheme() { setTheme(state.theme==='light'?'dark':'light'); }
@@ -3360,8 +3359,7 @@ function init(){
   repairRemedioFolder();
   document.body.setAttribute('data-theme',state.theme);
   const _ti = document.getElementById('thIcon');
-  _ti.textContent = '💡';
-  _ti.style.filter = state.theme==='light' ? 'grayscale(1) brightness(0.5)' : 'none';
+  if(_ti){ _ti.textContent = '💡'; _ti.style.filter = state.theme==='light' ? 'grayscale(1) brightness(0.5)' : 'none'; }
   if(state.profilePhoto) document.getElementById('profileImg').src=state.profilePhoto;
   if(state.watermarkPhoto){
     applyWatermarkPhoto(state.watermarkPhoto);

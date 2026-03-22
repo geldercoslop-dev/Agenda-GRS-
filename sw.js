@@ -8,7 +8,7 @@
 //            v34 (2026-03) — força limpeza de cache com caminhos /Agenda-GRS-/ antigos
 //            v35 (2026-03) — botão Fechar modal pastas + marcador cal 22px
 //            v36 (2026-03) — atualização PWA forçada + JS/CSS em network-first
-const CACHE_VERSION = "v44";
+const CACHE_VERSION = "v45";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
 // Prefixo usado para identificar caches deste app e limpar apenas os deles
 const CACHE_PREFIX  = "agenda-cache-";
