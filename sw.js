@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-Agenda Pro Max — Service Worker v38
+Agenda Pro Max — Service Worker v39
    Versão fixa — incrementar manualmente a cada deploy.
    ═══════════════════════════════════════════════════════ */
 
@@ -10,7 +10,8 @@ Agenda Pro Max — Service Worker v38
 //            v36 (2026-03) — atualização PWA forçada + JS/CSS em network-first
 //            v37 (2026-03) — adiciona catálogo interno de wallpapers
 //            v38 (2026-03) — adiciona base de feriados municipais ES e seletor por cidade
-const CACHE_VERSION = "v38";
+//            v39 (2026-03) — alinhamento auto-update total (GitHub + Vercel + PWA)
+const CACHE_VERSION = "v39";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
 // Prefixo usado para identificar caches deste app e limpar apenas os deles
 const CACHE_PREFIX  = "agenda-cache-";

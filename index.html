@@ -9417,88 +9417,39 @@ function openHistoricoPaciente(){
   // PWA CORE — Service Worker · Online/Offline · Install · Prefetch
   // ══════════════════════════════════════════════════════════════════
 
-  // ── 1. BANNER DE ATUALIZAÇÃO DO SW ─────────────────────────────
-  // Aparece quando uma nova versão é detectada.
-  // Não recarrega automaticamente — usuário decide quando atualizar.
-  (function _swUpdateBanner() {
-    const BANNER_ID = '_swUpdateBanner';
-    const SW_BUILD_VERSION = '2026-03-18-3';
+  // ── 1. ATUALIZAÇÃO AUTOMÁTICA DO SW ─────────────────────────────
+  // Nova versão publicada no GitHub/Vercel -> app atualiza sem clique manual.
+  (function _swAutoUpdate() {
+    const SW_BUILD_VERSION = '2026-03-22-1';
     const SW_URL = './sw.js?v=' + encodeURIComponent(SW_BUILD_VERSION);
     let _swReg = null;
+    let _reloadQueued = false;
 
-    function _showUpdateBanner() {
-      if (document.getElementById(BANNER_ID)) return;
-      const banner = document.createElement('div');
-      banner.id = BANNER_ID;
-      banner.setAttribute('role', 'alert');
-      banner.setAttribute('aria-live', 'polite');
-      banner.style.cssText = [
-        'position:fixed', 'bottom:80px', 'left:50%',
-        'transform:translateX(-50%) translateY(20px)',
-        'z-index:99998', 'background:rgba(10,25,47,.97)',
-        'border:1px solid rgba(99,102,241,.45)',
-        'border-radius:16px', 'padding:13px 18px',
-        'display:flex', 'align-items:center', 'gap:12px',
-        'max-width:320px', 'width:calc(100vw - 32px)',
-        'box-shadow:0 8px 32px rgba(0,0,0,.5)',
-        'opacity:0', 'transition:opacity .25s, transform .25s',
-        'font-family:Plus Jakarta Sans,sans-serif',
-      ].join(';');
-      banner.innerHTML = [
-        '<span style="font-size:20px;flex-shrink:0">🔄</span>',
-        '<span style="flex:1;font-size:13px;font-weight:700;color:#e8f4ff;line-height:1.4">',
-          'Nova versão disponível',
-        '</span>',
-        '<button id="_swUpdateBtn" style="',
-          'padding:8px 14px;border-radius:10px;border:none;',
-          'background:linear-gradient(135deg,#4f46e5,#6366f1);',
-          'color:#fff;font-family:Plus Jakarta Sans,sans-serif;',
-          'font-size:12px;font-weight:800;cursor:pointer;',
-          'white-space:nowrap;flex-shrink:0;',
-          '-webkit-tap-highlight-color:transparent;',
-        '">Atualizar</button>',
-        '<button id="_swUpdateDismiss" style="',
-          'padding:6px;border:none;background:transparent;',
-          'color:rgba(165,180,252,.5);cursor:pointer;',
-          'font-size:16px;line-height:1;flex-shrink:0;',
-          '-webkit-tap-highlight-color:transparent;',
-        '">✕</button>',
-      ].join('');
-      document.body.appendChild(banner);
-      requestAnimationFrame(() => {
-        banner.style.opacity = '1';
-        banner.style.transform = 'translateX(-50%) translateY(0)';
-      });
-      banner.querySelector('#_swUpdateBtn').addEventListener('click', () => {
-        let reloaded = false;
-        const _reloadSafely = () => {
-          if (reloaded) return;
-          reloaded = true;
-          window.location.reload();
-        };
+    function _reloadApp() {
+      if (_reloadQueued) return;
+      _reloadQueued = true;
+      try { showToast('🔄 Atualizando automaticamente...'); } catch(_) {}
+      setTimeout(() => window.location.reload(), 180);
+    }
 
-        // Se há SW waiting, ativa imediatamente e recarrega quando novo controller assumir.
-        if (_swReg && _swReg.waiting) {
-          navigator.serviceWorker.addEventListener('controllerchange', _reloadSafely, { once: true });
-          _swReg.waiting.postMessage({ type: 'SKIP_WAITING' });
-          setTimeout(_reloadSafely, 2500); // fallback
-        } else if (_swReg) {
-          // Sem waiting: força check e recarrega para pegar última versão.
-          _swReg.update().catch(() => {}).finally(() => setTimeout(_reloadSafely, 250));
-        } else {
-          _reloadSafely();
-        }
+    function _activateWaitingWorker() {
+      if (!_swReg || !_swReg.waiting) return false;
+      let done = false;
+      const _reloadSafely = () => {
+        if (done) return;
+        done = true;
+        _reloadApp();
+      };
+      navigator.serviceWorker.addEventListener('controllerchange', _reloadSafely, { once: true });
+      try { _swReg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch(_) {}
+      setTimeout(_reloadSafely, 2600); // fallback
+      return true;
+    }
 
-        banner.style.opacity = '0';
-        banner.style.transform = 'translateX(-50%) translateY(20px)';
-        setTimeout(() => {
-          if (banner.parentNode) banner.remove();
-        }, 250);
-      });
-      banner.querySelector('#_swUpdateDismiss').addEventListener('click', () => {
-        banner.style.opacity = '0';
-        banner.style.transform = 'translateX(-50%) translateY(20px)';
-        setTimeout(() => { if (banner.parentNode) banner.remove(); }, 280);
+    function _checkForUpdate() {
+      if (!_swReg) return;
+      _swReg.update().catch(() => {}).finally(() => {
+        _activateWaitingWorker();
       });
     }
 
@@ -9508,28 +9459,31 @@ function openHistoricoPaciente(){
       }).then((reg) => {
         _swReg = reg;
 
-        reg.update().catch(() => {});
-        setInterval(() => reg.update().catch(() => {}), 60000);
+        // Check inicial + checks periódicos
+        _checkForUpdate();
+        setInterval(_checkForUpdate, 45000);
 
         document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') reg.update().catch(() => {});
+          if (document.visibilityState === 'visible') _checkForUpdate();
         });
 
         // SW manda SW_UPDATED após activate + clients.claim()
         navigator.serviceWorker.addEventListener('message', (event) => {
-          if (event.data?.type === 'SW_UPDATED') {
-            _showUpdateBanner();
+          if (event.data?.type === 'SW_UPDATED' && navigator.serviceWorker.controller) {
+            _reloadApp();
           }
         });
 
-        // Se o SW foi instalado (waiting) enquanto o app estava aberto
-        if (reg.waiting) _showUpdateBanner();
+        // Se já existe waiting no boot
+        if (reg.waiting && navigator.serviceWorker.controller) _activateWaitingWorker();
+
+        // Nova versão instalada durante uso
         reg.addEventListener('updatefound', () => {
           const nw = reg.installing;
           if (!nw) return;
           nw.addEventListener('statechange', () => {
             if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-              _showUpdateBanner();
+              _activateWaitingWorker();
             }
           });
         });
