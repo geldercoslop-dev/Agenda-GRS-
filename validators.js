@@ -26,6 +26,12 @@ function validateDate(dateStr) {
     errors.push('Data fora dos limites válidos: ' + dateStr);
     return { valid: false, errors: errors };
   }
+  // Validação real de calendário (evita 31/02, 30/02, etc.)
+  var dt = new Date(y, m - 1, d);
+  if (dt.getFullYear() !== y || dt.getMonth() !== (m - 1) || dt.getDate() !== d) {
+    errors.push('Data inexistente no calendário: ' + dateStr);
+    return { valid: false, errors: errors };
+  }
   return { valid: true, errors: [] };
 }
 
