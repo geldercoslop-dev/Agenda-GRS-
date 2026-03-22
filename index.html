@@ -9437,40 +9437,24 @@ function openHistoricoPaciente(){
   // PWA CORE — Service Worker · Online/Offline · Install · Prefetch
   // ══════════════════════════════════════════════════════════════════
 
-  // ── 1. ATUALIZAÇÃO AUTOMÁTICA DO SW ─────────────────────────────
-  // Nova versão publicada no GitHub/Vercel -> app atualiza sem clique manual.
-  (function _swAutoUpdate() {
-    const SW_BUILD_VERSION = '2026-03-22-2';
+  // ── 1. ATUALIZAÇÃO TRADICIONAL E SEGURA DO SW ───────────────────
+  // Sem limpeza agressiva de cache/SW e sem reload forçado automático.
+  // Quando há nova versão, apenas avisamos; o app atualiza no próximo reabrir.
+  (function _swConservativeUpdate() {
+    const SW_BUILD_VERSION = '2026-03-22-4';
     const SW_URL = './sw.js?v=' + encodeURIComponent(SW_BUILD_VERSION);
     let _swReg = null;
-    let _reloadQueued = false;
+    let _warned = false;
 
-    function _reloadApp() {
-      if (_reloadQueued) return;
-      _reloadQueued = true;
-      try { showToast('🔄 Atualizando automaticamente...'); } catch(_) {}
-      setTimeout(() => window.location.reload(), 180);
-    }
-
-    function _activateWaitingWorker() {
-      if (!_swReg || !_swReg.waiting) return false;
-      let done = false;
-      const _reloadSafely = () => {
-        if (done) return;
-        done = true;
-        _reloadApp();
-      };
-      navigator.serviceWorker.addEventListener('controllerchange', _reloadSafely, { once: true });
-      try { _swReg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch(_) {}
-      setTimeout(_reloadSafely, 2600); // fallback
-      return true;
+    function _notifyUpdateAvailable() {
+      if (_warned) return;
+      _warned = true;
+      try { showToast('🆕 Nova versão disponível. Feche e abra o app para atualizar com segurança.'); } catch(_) {}
     }
 
     function _checkForUpdate() {
       if (!_swReg) return;
-      _swReg.update().catch(() => {}).finally(() => {
-        _activateWaitingWorker();
-      });
+      _swReg.update().catch(() => {});
     }
 
     if ('serviceWorker' in navigator) {
@@ -9479,33 +9463,30 @@ function openHistoricoPaciente(){
       }).then((reg) => {
         _swReg = reg;
 
-        // Check inicial + checks periódicos
         _checkForUpdate();
-        setInterval(_checkForUpdate, 45000);
+        setInterval(_checkForUpdate, 60000);
 
         document.addEventListener('visibilitychange', () => {
           if (document.visibilityState === 'visible') _checkForUpdate();
         });
 
-        // SW manda SW_UPDATED após activate + clients.claim()
-        navigator.serviceWorker.addEventListener('message', (event) => {
-          if (event.data?.type === 'SW_UPDATED' && navigator.serviceWorker.controller) {
-            _reloadApp();
-          }
-        });
+        // Se já existe waiting no boot, apenas avisa (modo tradicional).
+        if (reg.waiting && navigator.serviceWorker.controller) _notifyUpdateAvailable();
 
-        // Se já existe waiting no boot
-        if (reg.waiting && navigator.serviceWorker.controller) _activateWaitingWorker();
-
-        // Nova versão instalada durante uso
         reg.addEventListener('updatefound', () => {
           const nw = reg.installing;
           if (!nw) return;
           nw.addEventListener('statechange', () => {
             if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-              _activateWaitingWorker();
+              _notifyUpdateAvailable();
             }
           });
+        });
+
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data?.type === 'SW_UPDATED') {
+            _notifyUpdateAvailable();
+          }
         });
 
         agendarNotificacoesRemedios().catch(() => {});

@@ -40,16 +40,16 @@
 
 /* ── Tema claro: azul navy no header + fundo lavanda/periwinkle ── */
 [data-theme="light"] {
-  --bg0:           #c8cee8;   /* fundo principal — lavanda azulada (igual ao print) */
-  --bg1:           #d0d5ec;   /* cards, modais */
-  --bg2:           #bcc3e0;   /* sidebar */
-  --card:          #d8ddf0;   /* card interno */
+  --bg0:           #e6e0d7;   /* fundo areia quente — Warm Sand */
+  --bg1:           #fcfaf6;   /* cards, modais — off-white quente */
+  --bg2:           #41301e;   /* sidebar — marrom warm sand */
+  --card:          #fcfaf6;   /* card interno — off-white quente */
   --cardBorder:    rgba(50,70,150,.12);
-  --text:          #1a1e3a;   /* texto escuro azul navy */
+  --text:          #32261c;   /* texto marrom escuro — Warm Sand */
   --text-white:    #ffffff;
-  --muted:         rgba(30,45,120,.45);
-  --hdr-light-bg:  #1e2d6b;  /* azul navy para header/footer */
-  --accent:        #3b4fcf;   /* accent azul no light */
+  --muted:         rgba(130,115,94,.65);
+  --hdr-light-bg:  #41301e;  /* marrom warm sand para header/footer */
+  --accent:        #d67828;   /* accent dourado warm sand */
   --accent-2:      #5468e0;
   --sky-top:       #9da8d4;
   --sky-mid:       #8c98c8;
@@ -335,18 +335,19 @@ body {
 
 /* ── Header azul navy no tema light ─────────────────────── */
 [data-theme="light"] .hdr {
-  background: linear-gradient(135deg, #1e2d6b, #162258) !important;
-  border-bottom: 1px solid rgba(30,45,107,.4) !important;
-  box-shadow: 0 4px 18px rgba(20,35,100,.35), 0 1px 0 rgba(255,255,255,.1) !important;
+  background: var(--bg0) !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }
-[data-theme="light"] .hdrGreeting { color: #fff !important; }
-[data-theme="light"] .hdrSub { color: rgba(255,255,255,.8) !important; }
+[data-theme="light"] .hdrGreeting { color: #32261c !important; }
+[data-theme="light"] .hdrSub { color: rgba(50,38,28,.6) !important; }
 [data-theme="light"] .clockBg {
-  background: rgba(255,255,255,.15) !important;
-  border-color: rgba(255,255,255,.25) !important;
+  background: rgba(252,250,246,.92) !important;
+  border-color: rgba(65,48,30,.15) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1) !important;
 }
-[data-theme="light"] .dayBadge { color: rgba(255,255,255,.9) !important; }
-[data-theme="light"] .progressLabel { color: rgba(30,45,107,.85) !important; }
+[data-theme="light"] .dayBadge { color: rgba(50,38,28,.8) !important; }
+[data-theme="light"] .progressLabel { color: rgba(252,250,246,.7) !important; }
 /* Footer / bottomBar azul navy no light */
 [data-theme="light"] .bottomBar {
   background: linear-gradient(135deg, #1e2d6b, #162258) !important;
@@ -466,3 +467,21 @@ body {
   transition: opacity .15s;
 }
 .btn-primary:active { opacity: .8; }
+
+/* ══ Padronização visual light theme ══ */
+/* weekStripCard floating shadow */
+[data-theme="light"] #weekStripCard {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+[data-theme="light"] .wDay .wdName { color: #636e72 !important; }
+[data-theme="light"] .wDay .wdNum  { color: #2d3436 !important; }
+[data-theme="light"] #progressPct  { color: #d67828 !important; }
+[data-theme="light"] #progressLabel { color: rgba(255,255,255,.7) !important; }
+[data-theme="light"] .stripHandleHint { color: #636e72 !important; }
+
+/* FAB e progress fill — dourado no light, laranja no dark */
+:root, [data-theme="dark"] { --fab-color:#f97316; --fab-shadow:rgba(249,115,22,.55); --progress-fill-color:#f97316; --progress-fill-shadow:rgba(249,115,22,.5); }
+[data-theme="light"] { --fab-color:#d67828; --fab-shadow:rgba(214,120,40,.5); --progress-fill-color:#d67828; --progress-fill-shadow:rgba(214,120,40,.45); }
+

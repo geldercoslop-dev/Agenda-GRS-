@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-Agenda Pro Max — Service Worker v40
+Agenda Pro Max — Service Worker v42
    Versão fixa — incrementar manualmente a cada deploy.
    ═══════════════════════════════════════════════════════ */
 
@@ -12,7 +12,9 @@ Agenda Pro Max — Service Worker v40
 //            v38 (2026-03) — adiciona base de feriados municipais ES e seletor por cidade
 //            v39 (2026-03) — alinhamento auto-update total (GitHub + Vercel + PWA)
 //            v40 (2026-03) — pwaRescue para recuperar PWA antigo quebrado
-const CACHE_VERSION = "v40";
+//            v41 (2026-03) — fallback de navegação para recover-pwa.html
+//            v42 (2026-03) — atualização tradicional sem fallback agressivo
+const CACHE_VERSION = "v42";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
 // Prefixo usado para identificar caches deste app e limpar apenas os deles
 const CACHE_PREFIX  = "agenda-cache-";
