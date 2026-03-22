@@ -7,6 +7,9 @@
   /* ── Primary color ───────────────────────────────────── */
   --primary:      #4da3ff;   /* azul principal — botões e destaques */
 
+  /* ── Dark theme background image ────────────────────── */
+  --dark-bg-image: url('https://github.com/user-attachments/assets/4309cfa1-e6e9-4373-9f4d-da1b5dfde9eb');
+
   /* ── Backgrounds ─────────────────────────────────────── */
   --bg0:          #0d1b35;   /* fundo principal — azul marinho */
   --bg1:          #122040;   /* cards, modais */
@@ -484,3 +487,11 @@ body {
 /* FAB e progress fill — dourado no light, laranja no dark */
 :root, [data-theme="dark"] { --fab-color:#f97316; --fab-shadow:rgba(249,115,22,.55); --progress-fill-color:#f97316; --progress-fill-shadow:rgba(249,115,22,.5); }
 [data-theme="light"] { --fab-color:#d67828; --fab-shadow:rgba(214,120,40,.5); --progress-fill-color:#d67828; --progress-fill-shadow:rgba(214,120,40,.45); }
+
+/* ── Tema escuro: imagem de fundo ────────────────────────── */
+body[data-theme="dark"] .screen {
+  background: var(--dark-bg-image) center/cover no-repeat;
+}
+body[data-theme="dark"] .app {
+  background: transparent;
+}
