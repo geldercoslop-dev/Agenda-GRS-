@@ -1385,10 +1385,17 @@ function renderWeekStrip(){
     col.addEventListener('click',()=>openBucket(dayId));
     strip.appendChild(col);
   }
-  renderMonthGrid();
+  renderMonthGridIfVisible();
 }
 
 let viewMonthYear=null, viewMonthMonth=null;
+
+function renderMonthGridIfVisible(force){
+  const wrap=document.getElementById('weekStripWrap');
+  if(force || (wrap && wrap.classList.contains('expanded'))){
+    renderMonthGrid();
+  }
+}
 
 function renderMonthGrid(){
   const grid=document.getElementById('monthGrid');
@@ -1462,7 +1469,7 @@ function initStripExpand(){
     expanded = toExpand;
     wrap.classList.toggle('expanded', expanded);
     if(!expanded){ viewMonthYear=null; viewMonthMonth=null; }
-    renderMonthGrid();
+    renderMonthGridIfVisible(true);
     if(toExpand){
       if(_ov){ _ov.style.display='block'; requestAnimationFrame(()=>_ov.classList.add('open')); }
       if(_pr){ _pr.style.opacity='0'; _pr.style.pointerEvents='none'; _pr.style.transition='opacity .2s'; }
@@ -3275,17 +3282,21 @@ function resizeImage(file,maxPx,quality,cb){
 
 // ══ SETTINGS ══
 function openSettings(){
+  const sOv=document.getElementById('sModalOverlay');
+  if(sOv && !sOv.classList.contains('show') && typeof window._navPush === 'function') window._navPush();
   _setFooter(false);
   pendingPhoto=null; pendingWmark=null; pendingWallpaper=null;
   reopenSettingsAfterWallpaperPick = false;
   document.getElementById('inputUserName').value=state.userName||'';
   ['subName'].forEach(id=>document.getElementById(id).classList.add('hidden'));
-  document.getElementById('sModalOverlay').classList.add('show');
+  if(sOv) sOv.classList.add('show');
 
 }
 
-function closeSettings(){
-  document.getElementById('sModalOverlay').classList.remove('show');
+function closeSettings(skipNavPop){
+  const sOv=document.getElementById('sModalOverlay');
+  if(sOv) sOv.classList.remove('show');
+  if(!skipNavPop && typeof window._navPop==='function') window._navPop();
   _restoreHomeChrome();
 }
 
@@ -4102,7 +4113,7 @@ function init(){
         return;
       }
       if(document.getElementById('sModalOverlay')?.classList.contains('show')){
-        closeSettings();
+        closeSettings(true);
         _histDepth++;
         history.pushState({app:'screen', depth:_histDepth},'');
         return;
@@ -4137,7 +4148,7 @@ function init(){
       // NÃO re-empurra entry — apenas fecha o overlay.
       // Se re-empurrar, cria depth fantasma: o próximo "voltar" não faz nada e o
       // seguinte sai do app (o bug clássico galeria → pasta → sai do app).
-      const namedOvs=['pastasFrenteOv','todasPastasOv','watermarkTipOv','photoFullscreenOv','photoGalleryOv','consultaFormOv','remedioFormOv','listaConsultasOv','listaRemediosOv','historicoPacienteOv','feriadosOv','docsOv','contasOv','receberOv','examesOv','mercadoOv','inlineViewerOv','_syncModal'];
+      const namedOvs=['pastasFrenteOv','todasPastasOv','watermarkTipOv','photoFullscreenOv','photoGalleryOv','consultaFormOv','remedioFormOv','listaConsultasOv','listaRemediosOv','historicoPacienteOv','feriadosOv','docsOv','contasOv','receberOv','examesOv','mercadoOv','inlineViewerOv','_syncModal','_miniConsultaReportOv'];
       for(const oid of namedOvs){
         const el=document.getElementById(oid);
         if(el){
@@ -4147,9 +4158,10 @@ function init(){
           return;
         }
       }
+      const safeAutoCloseIds = new Set(['watermarkTipOv','_syncModal','_miniConsultaReportOv']);
       const dynFixed=[...document.querySelectorAll('body > div[style*="position:fixed"]')].reverse();
       for(const ov of dynFixed){
-        if(!ov.id){
+        if(!ov.id || safeAutoCloseIds.has(ov.id)){
           ov.remove();
           _restoreHomeChrome();
           // NÃO faz _histDepth++ nem pushState aqui.
@@ -6575,7 +6587,7 @@ function toggleDateTask(key, idx){
   save();
   const parts=key.split('-');
   openQuickAddTask(key, parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
-  renderMonthGrid(); updateProgress();
+  renderMonthGridIfVisible(); updateProgress();
 }
 
 function removeDateTask(key, idx){
@@ -6585,7 +6597,7 @@ function removeDateTask(key, idx){
   save();
   const parts=key.split('-');
   openQuickAddTask(key, parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
-  renderMonthGrid(); updateProgress();
+  renderMonthGridIfVisible(); updateProgress();
 }
 
 function _doQuickAdd(){
@@ -6609,7 +6621,7 @@ function _doQuickAdd(){
     if(!state.dateTasks[key]) state.dateTasks[key]=[];
     state.dateTasks[key].push(ensureSyncFields({ text:v, done:false, createdAt:Date.now() }));
     save();
-    renderMonthGrid();
+    renderMonthGridIfVisible();
     renderFolders();
     updateProgress();
   }
@@ -7036,13 +7048,10 @@ function closeSearch(skipNavPop) {
   }
 }
 
-function _highlight(text, query) {
-  if (!query) return _escHtml(text);
-  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return _escHtml(text).replace(
-    new RegExp(`(${escaped})`, 'gi'),
-    '<span class="searchHighlight">$1</span>'
-  );
+function _highlight(text, matcher) {
+  const safeText = _escHtml(text);
+  if (!matcher) return safeText;
+  return safeText.replace(matcher, '<span class="searchHighlight">$1</span>');
 }
 
 function _escHtml(s) {
@@ -7062,6 +7071,8 @@ function _runSearch(query) {
     container.innerHTML = '';
     return;
   }
+  const escapedQuery = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const highlightMatcher = new RegExp(`(${escapedQuery})`, 'gi');
   const folderById = Object.fromEntries((state.folders || []).map((f)=>[f.id, f]));
 
   // ── Coleta resultados por categoria ──
@@ -7248,7 +7259,7 @@ function _runSearch(query) {
         -webkit-tap-highlight-color:transparent;
         display:flex;align-items:center;justify-content:space-between;gap:12px;
       ">
-        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:rgba(232,244,255,.92);line-height:1.4;flex:1;">${_highlight(item.title, query)}</span>
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:rgba(232,244,255,.92);line-height:1.4;flex:1;">${_highlight(item.title, highlightMatcher)}</span>
         ${rightLabel ? `<span style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;color:#7dd3f0;flex-shrink:0;white-space:nowrap;">${_escHtml(rightLabel)}</span>` : ''}
       </div>`;
     });
@@ -7989,20 +8000,6 @@ function openListaConsultas(){
     </div>`;
   }
 
-  let body='';
-  if(proximas.length===0&&historico.length===0){
-    body=`<div style="text-align:center;padding:56px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;">Nenhuma consulta cadastrada</div>`;
-  } else {
-    if(proximas.length>0){
-      body+=`<div style="font-size:9px;font-weight:900;color:${ACCENT};text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-family:'Space Grotesk',sans-serif;">🏥 Próximas (${proximas.length})</div>`;
-      proximas.forEach(c=>{ body+=cardHTML(c,false); });
-    }
-    if(historico.length>0){
-      body+=`<div style="font-size:9px;font-weight:900;color:${MUTED};text-transform:uppercase;letter-spacing:1px;margin:18px 0 10px;font-family:'Space Grotesk',sans-serif;">Histórico (${historico.length})</div>`;
-      historico.forEach(c=>{ body+=cardHTML(c,true); });
-    }
-  }
-
   const ov=document.createElement('div');
   ov.id='listaConsultasOv';
   if(typeof window._navPush === 'function') window._navPush();
@@ -8013,8 +8010,65 @@ function openListaConsultas(){
       <button id="_lcAdd" style="background:var(--primary,#4da3ff);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Nova</button>
       <button id="_lcBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
-    <div style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">${body}</div>`;
+    <div id="_lcScroll" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;"></div>`;
   document.body.appendChild(ov);
+  const scroll=ov.querySelector('#_lcScroll');
+  const BATCH_SIZE=32;
+  const sections=[];
+  if(proximas.length>0){
+    sections.push({
+      title:`<div style="font-size:9px;font-weight:900;color:${ACCENT};text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-family:'Space Grotesk',sans-serif;">🏥 Próximas (${proximas.length})</div>`,
+      items:proximas,
+      isPast:false
+    });
+  }
+  if(historico.length>0){
+    sections.push({
+      title:`<div style="font-size:9px;font-weight:900;color:${MUTED};text-transform:uppercase;letter-spacing:1px;margin:18px 0 10px;font-family:'Space Grotesk',sans-serif;">Histórico (${historico.length})</div>`,
+      items:historico,
+      isPast:true
+    });
+  }
+  function renderConsultaChunk(fromSectionIdx, fromItemIdx){
+    if(!scroll) return;
+    let sectionIdx=fromSectionIdx;
+    let itemIdx=fromItemIdx;
+    let remaining=BATCH_SIZE;
+    let html='';
+    while(sectionIdx < sections.length && remaining > 0){
+      const section=sections[sectionIdx];
+      if(itemIdx===0) html += section.title;
+      while(itemIdx < section.items.length && remaining > 0){
+        html += cardHTML(section.items[itemIdx], section.isPast);
+        itemIdx++;
+        remaining--;
+      }
+      if(itemIdx >= section.items.length){
+        sectionIdx++;
+        itemIdx=0;
+      }
+    }
+    if(html) scroll.insertAdjacentHTML('beforeend', html);
+    return { sectionIdx, itemIdx };
+  }
+  if(sections.length===0){
+    scroll.innerHTML=`<div style="text-align:center;padding:56px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;">Nenhuma consulta cadastrada</div>`;
+  } else {
+    let cursor={ sectionIdx:0, itemIdx:0 };
+    cursor = renderConsultaChunk(cursor.sectionIdx, cursor.itemIdx) || cursor;
+    const onScroll=()=>{
+      if(!scroll) return;
+      if(cursor.sectionIdx >= sections.length){
+        scroll.removeEventListener('scroll', onScroll);
+        return;
+      }
+      const nearEnd=(scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight) < 220;
+      if(nearEnd){
+        cursor = renderConsultaChunk(cursor.sectionIdx, cursor.itemIdx) || cursor;
+      }
+    };
+    scroll.addEventListener('scroll', onScroll, { passive:true });
+  }
   ov.querySelector('#_lcBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_lcAdd').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); openConsultaModal(); };
 }
@@ -8031,7 +8085,11 @@ function _abrirMiniRelatorio(id){
   const MUTED='rgba(180,220,240,.55)';
   const ACCENT='#7dd3f0';
 
+  const existing=document.getElementById('_miniConsultaReportOv');
+  if(existing) existing.remove();
   const ov=document.createElement('div');
+  ov.id='_miniConsultaReportOv';
+  if(typeof window._navPush === 'function') window._navPush();
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:100000;display:flex;align-items:center;justify-content:center;padding:18px;';
 
   // Edição inline — campos com classe .editable
@@ -8076,8 +8134,17 @@ function _abrirMiniRelatorio(id){
     </div>`;
 
   document.body.appendChild(ov);
-  ov.querySelector('#_mrClose').onclick=()=>ov.remove();
-  ov.addEventListener('click',(e)=>{ if(e.target===ov) ov.remove(); });
+  const closeMini=(skipNavPop)=>{
+    document.removeEventListener('keydown', ov._onEsc);
+    if(ov && ov.parentNode) ov.remove();
+    if(!skipNavPop && typeof window._navPop==='function') window._navPop();
+  };
+  ov.querySelector('#_mrClose').onclick=()=>closeMini();
+  ov.addEventListener('click',(e)=>{ if(e.target===ov) closeMini(); });
+  ov._onEsc=(e)=>{
+    if(e.key==='Escape') closeMini();
+  };
+  document.addEventListener('keydown', ov._onEsc);
 
   let editMode=false;
   const fields=['#_mrPac','#_mrEspec','#_mrMedico','#_mrLocal','#_mrData','#_mrHora'];
@@ -8102,7 +8169,7 @@ function _abrirMiniRelatorio(id){
       data: ov.querySelector('#_mrData').value,
       hora: ov.querySelector('#_mrHora').value
     });
-    ov.remove();
+    closeMini(true);
     showToast('✅ Consulta atualizada!');
     // Reabrir lista atualizada
     setTimeout(()=>openListaConsultas(), 100);
