@@ -375,12 +375,21 @@ var AppStorage = (function () {
     var cacheKeys = Object.keys(cacheSnap).sort();
     var idbKeys2  = Object.keys(idbSnap).sort();
 
-    // Hash do snapshot inteiro de cada lado (chaves + valores em ordem)
-    var cachePayload = cacheKeys.map(function (k) { return k + '=' + cacheSnap[k]; }).join('|');
-    var idbPayload   = idbKeys2.map(function (k) { return k + '=' + idbSnap[k]; }).join('|');
+    // Hash incremental evita montar payload gigante em memória.
+    function _snapshotHash(keys, snap) {
+      var h = 5381;
+      for (var i = 0; i < keys.length; i++) {
+        var chunk = keys[i] + '=' + snap[keys[i]] + '|';
+        for (var j = 0; j < chunk.length; j++) {
+          h = ((h << 5) + h) ^ chunk.charCodeAt(j);
+          h = h >>> 0;
+        }
+      }
+      return h >>> 0;
+    }
 
-    var cacheHash = _hashStr(cachePayload);
-    var idbHash   = _hashStr(idbPayload);
+    var cacheHash = _snapshotHash(cacheKeys, cacheSnap);
+    var idbHash   = _snapshotHash(idbKeys2, idbSnap);
 
     if (cacheHash === idbHash) {
       _log('log', '_consistencyCheck', 'Cache ↔ IDB consistentes (hash=' + cacheHash + ')');
