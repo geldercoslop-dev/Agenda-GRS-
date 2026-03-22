@@ -1000,6 +1000,69 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('beforeunload', flushPendingSave, { capture: true });
 
+const _UI_RENDER_METRICS_KEY = 'agendaProMax_renderMetrics';
+const _uiRerenderTimers = Object.create(null);
+const _uiRenderMetrics = (function(){
+  const fallback = { screens: {} };
+  try {
+    const raw = AppStorage.get(_UI_RENDER_METRICS_KEY, null);
+    if (raw && typeof raw === 'object') {
+      const out = Object.assign({}, fallback, raw);
+      if (!out.screens || typeof out.screens !== 'object') out.screens = {};
+      return out;
+    }
+  } catch(_) {}
+  return fallback;
+})();
+let _uiRenderMetricsSaveTimer = null;
+
+function _uiNowMs() {
+  try {
+    if (typeof performance !== 'undefined' && typeof performance.now === 'function') return performance.now();
+  } catch(_) {}
+  return Date.now();
+}
+function _saveRenderMetricsSoon() {
+  if (_uiRenderMetricsSaveTimer) return;
+  _uiRenderMetricsSaveTimer = setTimeout(() => {
+    _uiRenderMetricsSaveTimer = null;
+    try { AppStorage.set(_UI_RENDER_METRICS_KEY, _uiRenderMetrics); } catch(_) {}
+  }, 220);
+}
+function _recordRenderMetric(screenKey, startMs, itemCount) {
+  if (!screenKey) return;
+  const elapsed = Math.max(0, _uiNowMs() - Number(startMs || 0));
+  const safeElapsed = Number(elapsed.toFixed(2));
+  const safeCount = Math.max(0, Number(itemCount || 0));
+  const map = _uiRenderMetrics.screens || (_uiRenderMetrics.screens = {});
+  const curr = map[screenKey] || { samples: 0, avgMs: 0, maxMs: 0, lastMs: 0, lastCount: 0, lastAt: 0 };
+  const nextSamples = curr.samples + 1;
+  const nextAvg = ((curr.avgMs * curr.samples) + safeElapsed) / nextSamples;
+  map[screenKey] = {
+    samples: nextSamples,
+    avgMs: Number(nextAvg.toFixed(2)),
+    maxMs: Number(Math.max(curr.maxMs || 0, safeElapsed).toFixed(2)),
+    lastMs: safeElapsed,
+    lastCount: safeCount,
+    lastAt: Date.now()
+  };
+  _saveRenderMetricsSoon();
+}
+function _scheduleOverlayRender(key, guardOverlayId, fn, delayMs){
+  if (!key || typeof fn !== 'function') return;
+  if (_uiRerenderTimers[key]) clearTimeout(_uiRerenderTimers[key]);
+  _uiRerenderTimers[key] = setTimeout(() => {
+    _uiRerenderTimers[key] = null;
+    if (guardOverlayId && !document.getElementById(guardOverlayId)) return;
+    fn();
+  }, Math.max(16, Number(delayMs || 64)));
+}
+function _formatRenderMetricLine(screenKey){
+  const m = ((_uiRenderMetrics.screens || {})[screenKey]) || null;
+  if (!m || !m.samples) return '—';
+  return `${Math.round(m.avgMs)}ms méd · ${Math.round(m.lastMs)}ms atual · ${m.lastCount} itens`;
+}
+
 // Migra dom2 → dom quando a semana vira (novo domingo)
 function checkWeekTransition(){
   const newSunday = getSunday();
