@@ -822,6 +822,7 @@
 <script src="./ui.js"></script>
 <script src="./notificacoes.js"></script>
 <script src="./sync.js"></script>
+<script src="./wallpapers.js"></script>
 
 
 <script>
@@ -844,6 +845,30 @@ let pendingPhoto = null;
 let pendingWmark = null;
 let pendingWallpaper = null;
 let reopenSettingsAfterWallpaperPick = false;
+
+function _defaultWallpaperCatalog() {
+  // Fallback seguro caso wallpapers.js não carregue por qualquer motivo
+  return [
+    { id: 'plain-dark', name: 'Padrão escuro', type: 'none' }
+  ];
+}
+
+function getWallpaperCatalog() {
+  try {
+    if (window.APP_WALLPAPERS && Array.isArray(window.APP_WALLPAPERS) && window.APP_WALLPAPERS.length) {
+      const list = window.APP_WALLPAPERS.map((item) => ({
+        id: item.id,
+        name: item.name,
+        type: 'preset',
+        full: item.full || '',
+        thumb: item.thumb || item.full || ''
+      }));
+      list.unshift({ id: 'plain-dark', name: 'Padrão escuro', type: 'none' });
+      return list;
+    }
+  } catch (_) {}
+  return _defaultWallpaperCatalog();
+}
 
 function getSunday() {
   const d = new Date();
@@ -3474,16 +3499,91 @@ function init(){
   document.getElementById('sb-rReceber')?.addEventListener('click',()=>{ closeSidebar(); generateContasReceberReport(); });
   document.getElementById('sb-rConsultas')?.addEventListener('click',()=>{ closeSidebar(); generateConsultasReport(); });
   document.getElementById('sb-rRemedios')?.addEventListener('click',()=>{ closeSidebar(); generateRemediosReport(); });
-  function openWallpaperPicker(){
+  function openWallpaperSourcePicker(){
     const ov = document.getElementById('sModalOverlay');
     reopenSettingsAfterWallpaperPick = !!(ov && ov.classList.contains('show'));
     if(reopenSettingsAfterWallpaperPick) ov.classList.remove('show');
+
+    const { box, close } = _modalBase();
+    box.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:12px;">
+        <div style="font-size:34px;line-height:1;margin-bottom:8px;">🖼️</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;">Papel de parede</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button id="_wpInternal" style="padding:12px 14px;border-radius:12px;border:none;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:17px;">🎨</span><span>Papéis do app</span>
+        </button>
+        <button id="_wpGallery" style="padding:12px 14px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:17px;">📱</span><span>Buscar da galeria do celular</span>
+        </button>
+        <button id="_wpCancel" style="padding:9px 12px;border:none;background:transparent;color:rgba(180,220,240,.5);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">Cancelar</button>
+      </div>`;
+
+    box.querySelector('#_wpInternal').addEventListener('click', ()=>{ close(); openWallpaperCatalog(); });
+    box.querySelector('#_wpGallery').addEventListener('click', ()=>{ close(); openWallpaperPicker(); });
+    box.querySelector('#_wpCancel').addEventListener('click', close);
+  }
+
+  function openWallpaperCatalog(){
+    const catalog = getWallpaperCatalog();
+    const { box, close } = _modalBase();
+    const active = String(state.wallpaperPhoto || '');
+    const cards = catalog.map((wp)=>{
+      const isActive = wp.type === 'none' ? !active : active === String(wp.full || '');
+      const preview = wp.type === 'none'
+        ? '<div style="width:100%;height:86px;border-radius:11px;background:linear-gradient(135deg,#021824,#04355a);border:1px dashed rgba(125,211,240,.35);"></div>'
+        : `<div style="width:100%;height:86px;border-radius:11px;background-image:url('${escAttr(wp.thumb||wp.full||'')}');background-size:cover;background-position:center;border:1px solid rgba(255,255,255,.14);"></div>`;
+      return `<button class="_wpCard" data-id="${escAttr(wp.id)}" style="position:relative;text-align:left;padding:8px;border-radius:12px;border:${isActive?'1.5px solid rgba(56,189,248,.9)':'1px solid rgba(255,255,255,.12)'};background:rgba(255,255,255,.06);cursor:pointer;">
+        ${preview}
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;color:#e8f4ff;padding:8px 4px 2px;">${escHtml(wp.name)}</div>
+        ${isActive?'<span style="position:absolute;top:6px;right:6px;font-size:15px;line-height:1;">✅</span>':''}
+      </button>`;
+    }).join('');
+
+    box.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;">🎨 Papéis do app</div>
+        <button id="_wpCloseX" style="width:30px;height:30px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#e8f4ff;font-size:15px;cursor:pointer;">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:58vh;overflow:auto;padding-right:2px;">${cards}</div>
+      <button id="_wpGalleryDirect" style="margin-top:10px;width:100%;padding:11px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">📱 Buscar da galeria do celular</button>
+      <button id="_wpClose" style="margin-top:7px;width:100%;padding:8px;border:none;background:transparent;color:rgba(180,220,240,.5);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">Fechar</button>`;
+
+    box.querySelector('#_wpCloseX').addEventListener('click', close);
+    box.querySelector('#_wpClose').addEventListener('click', close);
+    box.querySelector('#_wpGalleryDirect').addEventListener('click', ()=>{ close(); openWallpaperPicker(); });
+    box.querySelectorAll('._wpCard').forEach((btn)=>{
+      btn.addEventListener('click', ()=>{
+        const pick = catalog.find((w)=>w.id===btn.dataset.id);
+        if(!pick) return;
+        close();
+        if(pick.type === 'none'){
+          pendingWallpaper = '';
+          state.wallpaperPhoto = '';
+          applyWallpaperPhoto('');
+        } else {
+          pendingWallpaper = pick.full || '';
+          state.wallpaperPhoto = pendingWallpaper;
+          applyWallpaperPhoto(pendingWallpaper);
+        }
+        save();
+        showToast('✅ Papel de parede aplicado!');
+        if(reopenSettingsAfterWallpaperPick){
+          setTimeout(()=>document.getElementById('sModalOverlay')?.classList.add('show'), 120);
+        }
+        reopenSettingsAfterWallpaperPick = false;
+      });
+    });
+  }
+
+  function openWallpaperPicker(){
     const fw = document.getElementById('fileWallpaper');
     if(!fw) return;
     fw.value = '';
     setTimeout(()=>fw.click(), 80);
   }
-  document.getElementById('sb-theme')?.addEventListener('click',()=>{ closeSidebar(); openWallpaperPicker(); });
+  document.getElementById('sb-theme')?.addEventListener('click',()=>{ closeSidebar(); openWallpaperSourcePicker(); });
   document.getElementById('sb-today')?.addEventListener('click',()=>{
     closeSidebar();
     const today=new Date(); const wkStart=parseLocalDate(state.weekStartISO);
@@ -3505,7 +3605,7 @@ function init(){
   if(_thIconEl) _sbThObs.observe(_thIconEl,{childList:true,subtree:true,characterData:true});
 
   // Header themeBtn still works (kept hidden but functional)
-  document.getElementById('themeBtn')?.addEventListener('click',openWallpaperPicker);
+  document.getElementById('themeBtn')?.addEventListener('click',openWallpaperSourcePicker);
   document.getElementById('settingsBtn').addEventListener('click',openSettings);
 
   // Day view footer
@@ -3608,7 +3708,7 @@ function init(){
     fp.value = '';
     setTimeout(()=>fp.click(), 80);
   });
-  document.getElementById('rowWallpaper')?.addEventListener('click', openWallpaperPicker);
+  document.getElementById('rowWallpaper')?.addEventListener('click', openWallpaperSourcePicker);
   document.getElementById('rowManual').addEventListener('click',()=>{
     closeSettings();
     _setFooter(false);

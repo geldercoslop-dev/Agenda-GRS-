@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-  Agenda Pro Max — Service Worker v36
+ Agenda Pro Max — Service Worker v37
    Versão fixa — incrementar manualmente a cada deploy.
    ═══════════════════════════════════════════════════════ */
 
@@ -8,7 +8,8 @@
 //            v34 (2026-03) — força limpeza de cache com caminhos /Agenda-GRS-/ antigos
 //            v35 (2026-03) — botão Fechar modal pastas + marcador cal 22px
 //            v36 (2026-03) — atualização PWA forçada + JS/CSS em network-first
-const CACHE_VERSION = "v36";
+//            v37 (2026-03) — adiciona catálogo interno de wallpapers
+const CACHE_VERSION = "v37";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
 // Prefixo usado para identificar caches deste app e limpar apenas os deles
 const CACHE_PREFIX  = "agenda-cache-";
@@ -18,6 +19,7 @@ const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
+  "./wallpapers.js",
   "./leo-192.png",
   "./leo-512.png"
 ];
