@@ -484,3 +484,4 @@ body {
 /* FAB e progress fill — dourado no light, laranja no dark */
 :root, [data-theme="dark"] { --fab-color:#f97316; --fab-shadow:rgba(249,115,22,.55); --progress-fill-color:#f97316; --progress-fill-shadow:rgba(249,115,22,.5); }
 [data-theme="light"] { --fab-color:#d67828; --fab-shadow:rgba(214,120,40,.5); --progress-fill-color:#d67828; --progress-fill-shadow:rgba(214,120,40,.45); }
+

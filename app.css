@@ -14,7 +14,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html { font-size: clamp(14px, 3.8vw, 18px); overflow-x: hidden; }
     html, body { height: 100dvh; overflow: hidden; overscroll-behavior-y: none; }
-    body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; height: 100dvh; color: #fff; overflow-x: hidden; }
+    body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; height: 100dvh; color: #fff; overflow-x: hidden; background: var(--bg0); }
 
     
   /* Tema claro: variáveis de override em css/variables.css */
