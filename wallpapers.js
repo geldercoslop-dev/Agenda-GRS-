@@ -49,7 +49,7 @@
     { id: "rose-dream", name: "Rosa Dream", c1: "#2a0d1e", c2: "#5b1f48", c3: "#8a2f6f", accent: "#f9a8d4" }
   ];
 
-  window.WALLPAPER_CATALOG = WALLPAPER_PRESETS.map(function (spec) {
+  var catalog = WALLPAPER_PRESETS.map(function (spec) {
     var dataUrl = svgToDataUrl(buildWallpaperSvg(spec));
     return {
       id: spec.id,
@@ -58,4 +58,7 @@
       thumb: dataUrl
     };
   });
+  // Compatibilidade: o app usa APP_WALLPAPERS e alguns fluxos antigos usam WALLPAPER_CATALOG.
+  window.APP_WALLPAPERS = catalog;
+  window.WALLPAPER_CATALOG = catalog;
 })();

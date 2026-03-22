@@ -862,8 +862,11 @@ function _defaultWallpaperCatalog() {
 
 function getWallpaperCatalog() {
   try {
-    if (window.APP_WALLPAPERS && Array.isArray(window.APP_WALLPAPERS) && window.APP_WALLPAPERS.length) {
-      const list = window.APP_WALLPAPERS.map((item) => ({
+    const rawCatalog = (Array.isArray(window.WALLPAPER_CATALOG) && window.WALLPAPER_CATALOG.length)
+      ? window.WALLPAPER_CATALOG
+      : (Array.isArray(window.APP_WALLPAPERS) && window.APP_WALLPAPERS.length ? window.APP_WALLPAPERS : null);
+    if (rawCatalog) {
+      const list = rawCatalog.map((item) => ({
         id: item.id,
         name: item.name,
         type: 'preset',
@@ -1255,6 +1258,22 @@ function applyTextPalette(paletteKey){
   root.style.setProperty('--custom-text', cfg.text);
   root.style.setProperty('--custom-muted', cfg.muted);
   root.style.setProperty('--custom-clock', cfg.clock);
+  let dyn = document.getElementById('dynamicTextColorOverride');
+  if(!dyn){
+    dyn = document.createElement('style');
+    dyn.id = 'dynamicTextColorOverride';
+    document.head.appendChild(dyn);
+  }
+  dyn.textContent = `
+    .app, .app * { color: var(--custom-text) !important; }
+    .app .hdrSub,
+    .app .progressLabel,
+    .app .wdName,
+    .app .wdDotEmpty,
+    .app .emptyLabel { color: var(--custom-muted) !important; }
+    .app input::placeholder,
+    .app textarea::placeholder { color: var(--custom-muted) !important; }
+  `;
 }
 function _estimateImageBrightness(dataUrl){
   return new Promise((resolve)=>{
