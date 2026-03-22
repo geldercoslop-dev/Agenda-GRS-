@@ -907,6 +907,212 @@
 
 
 <script>
+
+
+function applyWallpaper(id, dataUrl, theme, contrast) {
+  state.wallpaper = id;
+  state.wallpaperUrl = dataUrl;
+  state.wallpaperContrast = contrast || WALLPAPER_CONTRAST[id] || null;
+  // Aplicar tema
+  if(theme && theme !== state.theme) {
+    setTheme(theme);
+  }
+  // Aplicar background e contraste
+  _applyWallpaperCSS(dataUrl, state.wallpaperContrast);
+  save();
+  // Forçar redraw imediato do relógio (cor muda com wallpaper)
+  setTimeout(() => {
+    const clkEl = document.getElementById('hdrClockSvg');
+    if(clkEl) clkEl.dispatchEvent(new Event('redraw'));
+  }, 50);
+}
+
+function _applyWallpaperCSS(dataUrl, contrast) {
+  let style = document.getElementById('_wallpaperStyle');
+  if(!style) {
+    style = document.createElement('style');
+    style.id = '_wallpaperStyle';
+    document.head.appendChild(style);
+  }
+
+  if(!dataUrl) {
+    style.textContent = `body { background-image: none !important; } .app { background: var(--bg0) !important; }`;
+    document.body.classList.remove('wp-light-text','wp-dark-text');
+    return;
+  }
+
+  // Cores para texto claro (wallpaper escuro)
+  const lightText = contrast === 'light-text';
+
+  // Texto principal
+  const txtMain   = lightText ? '#ffffff'              : '#1a1208';
+  const txtSub    = lightText ? 'rgba(255,255,255,.7)' : 'rgba(30,20,5,.65)';
+  const txtMuted  = lightText ? 'rgba(255,255,255,.45)': 'rgba(50,38,28,.55)';
+  const txtNum    = lightText ? 'rgba(230,235,255,.9)' : '#32261c';
+  const txtDim    = lightText ? 'rgba(180,200,230,.7)' : 'rgba(80,60,40,.65)';
+
+  // Cards semi-transparentes
+  const cardBg    = lightText ? 'rgba(15,25,50,.55)'   : 'rgba(255,252,246,.75)';
+  const cardBdr   = lightText ? 'rgba(255,255,255,.12)': 'rgba(65,48,30,.1)';
+  const cardShadow= lightText ? '0 6px 24px rgba(0,0,0,.4)' : '0 6px 24px rgba(65,48,30,.15)';
+
+  // Header/footer
+  const hdrBg     = lightText ? 'rgba(0,0,0,.45)'      : 'rgba(255,255,255,.45)';
+
+  style.textContent = `
+    body {
+      background-image: url("${dataUrl}") !important;
+      background-size: cover !important;
+      background-position: center top !important;
+      background-attachment: fixed !important;
+    }
+    .app { background: transparent !important; }
+
+    /* ── Header/Footer sobre wallpaper ── */
+    .hdr { background: ${hdrBg} !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; border-bottom: none !important; box-shadow: none !important; }
+    #progressRow { background: ${hdrBg} !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; }
+
+    /* ── Textos do header ── */
+    .hdrGreeting { color: ${txtMain} !important; font-weight:900 !important; }
+    .hdrSub      { color: ${txtSub} !important; }
+    .dayBadge    { color: ${txtMain} !important; }
+
+    /* ── Relógio ── */
+    .clockBg { background: ${cardBg} !important; border-color: ${cardBdr} !important; box-shadow: ${cardShadow} !important; }
+
+    /* ── Busca ── */
+    #topSearchInput { background: ${cardBg} !important; border-color: ${cardBdr} !important; box-shadow: ${cardShadow} !important; }
+    #topSearchInput span { color: ${txtMuted} !important; }
+    .searchLupa { color: ${lightText ? '#7dd3f0' : '#d67828'} !important; }
+
+    /* ── Calendário / semana ── */
+    #weekStripCard { background: ${cardBg} !important; border-color: ${cardBdr} !important; box-shadow: ${cardShadow} !important; }
+    .wDay .wdName  { color: ${txtDim} !important; }
+    .wDay .wdNum   { color: ${txtNum} !important; }
+    .mCell         { color: ${txtNum} !important; }
+    .mCell.mToday  { color: #f97316 !important; }
+    .monthHdrLabel { color: ${txtMain} !important; }
+    .monthDayName  { color: ${txtDim} !important; }
+    .stripHandleHint, .stripFeriadoHint { color: ${txtMuted} !important; }
+
+    /* ── Pastas ── */
+    .folderTile .fi-wrap { background: ${cardBg} !important; border-color: ${cardBdr} !important; box-shadow: ${cardShadow} !important; }
+    .folderTile .fl { color: ${txtMain} !important; }
+
+    /* ── Progresso ── */
+    #progressLabel { color: ${txtMuted} !important; }
+    #progressPct   { color: ${lightText ? '#f97316' : '#d67828'} !important; }
+
+    /* ── Busca: placeholder e ícone ── */
+    #topSearchInput span { color: ${txtMuted} !important; }
+    .searchLupa { color: ${lightText ? '#7dd3f0' : '#d67828'} !important; }
+
+    /* ── Dia ativo no weekstrip ── */
+    .wDay.active .wdNum { color: #f97316 !important; }
+    .wDay.active .wdName { color: rgba(249,115,22,.7) !important; }
+    .wdDot { background: rgba(249,115,22,.8) !important; }
+    .mCell.mHasTask::after { background: rgba(249,115,22,.8) !important; }
+
+    /* ── Mês header (collapsed strip) ── */
+    .monthHdrLabel { color: ${txtMain} !important; }
+    .monthDayName { color: ${txtDim} !important; }
+
+    /* ── Badge de tarefas nas pastas ── */
+    .folderBadge { background: #f97316 !important; color: #fff !important; }
+
+    /* ── Todas as Pastas modal: forçar texto claro sempre (fundo dark) ── */
+    #todasPastasOv .folderTile .fl { color: rgba(255,255,255,.9) !important; }
+    #todasPastasOv .folderTile .fi-wrap { 
+      background: rgba(255,255,255,.92) !important; 
+      border-color: rgba(255,255,255,.15) !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,.3) !important;
+    }
+    #pastasFrenteOv .folderTile .fl { color: rgba(255,255,255,.9) !important; }
+    #pastasFrenteOv .folderTile .fi-wrap { 
+      background: rgba(255,255,255,.92) !important;
+      border-color: rgba(255,255,255,.15) !important;
+    }
+
+    /* ── Texto de tarefas na lista ── */
+    .tText { color: ${txtMain} !important; }
+    .tCheck { color: rgba(249,115,22,.6) !important; }
+
+    /* ── DayView header ── */
+    .dayHdr, .dayHdrTitle { color: ${txtMain} !important; }
+
+    /* ── Scrollbar cards se existirem ── */
+    .bucketCard, .taskCard { background: ${cardBg} !important; }
+  \`;
+
+  document.body.classList.toggle('wp-light-text', lightText);
+  document.body.classList.toggle('wp-dark-text', !lightText);
+}
+function openWallpaperPicker() {
+  if(typeof window._navPush === 'function') window._navPush();
+  const existing = document.getElementById('wallpaperPickerOv');
+  if(existing) existing.remove();
+
+  const ov = document.createElement('div');
+  ov.id = 'wallpaperPickerOv';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;flex-direction:column;';
+
+  const currentWp = (typeof state !== 'undefined' && state.wallpaper) ? state.wallpaper : 'none';
+
+  ov.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0;">
+      <div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:#fff;">🖼️ Papel de Parede</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:2px;">Toque para aplicar</div>
+      </div>
+      <button id="_wpClose" style="background:rgba(255,255,255,.12);border:none;border-radius:10px;color:#fff;width:36px;height:36px;font-size:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;">
+      <div style="margin-bottom:14px;">
+        <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.4);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Sem papel de parede</div>
+        <div id="_wpNone" style="width:72px;height:46px;border-radius:10px;background:linear-gradient(135deg,#0d1b35,#1a2b48);border:2px solid ${currentWp==='none'?'#f97316':'rgba(255,255,255,.2)'};cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;">🚫</div>
+      </div>
+      <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.4);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Escolha um papel de parede</div>
+      <div id="_wpGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-bottom:20px;"></div>
+    </div>`;
+
+  document.body.appendChild(ov);
+
+  const grid = ov.querySelector('#_wpGrid');
+  WALLPAPER_PACK.forEach(wp => {
+    const cell = document.createElement('div');
+    const isActive = currentWp === wp.id;
+    cell.style.cssText = `position:relative;cursor:pointer;border-radius:12px;overflow:hidden;aspect-ratio:9/16;border:2px solid ${isActive?'#f97316':'rgba(255,255,255,.15)'};transition:border-color .15s;-webkit-tap-highlight-color:transparent;`;
+    cell.innerHTML = `
+      <img src="${wp.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
+      <div style="position:absolute;bottom:0;left:0;right:0;padding:4px 6px;background:linear-gradient(to top,rgba(0,0,0,.75),transparent);font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:700;color:#fff;line-height:1.3;">${wp.label}</div>
+      <div style="position:absolute;top:4px;right:4px;font-size:11px;">${wp.theme==='dark'?'🌙':'☀️'}</div>`;
+    cell.addEventListener('click', () => {
+      applyWallpaper(wp.id, wp.full, wp.theme, wp.contrast);
+      grid.querySelectorAll('[data-wpid]').forEach(d => d.style.borderColor = 'rgba(255,255,255,.15)');
+      cell.style.borderColor = '#f97316';
+      ov.querySelector('#_wpNone').style.borderColor = 'rgba(255,255,255,.2)';
+      if(typeof showToast === 'function') showToast('✅ ' + wp.label + ' aplicado!');
+    });
+    cell.dataset.wpid = wp.id;
+    grid.appendChild(cell);
+  });
+
+  ov.querySelector('#_wpNone').addEventListener('click', () => {
+    applyWallpaper('none', null, (typeof state!=='undefined'?state.theme:'dark'), null);
+    ov.querySelector('#_wpNone').style.borderColor = '#f97316';
+    grid.querySelectorAll('[data-wpid]').forEach(d => d.style.borderColor = 'rgba(255,255,255,.15)');
+    if(typeof showToast === 'function') showToast('✅ Papel de parede removido!');
+  });
+
+  ov.querySelector('#_wpClose').addEventListener('click', () => {
+    ov.remove();
+    if(typeof window._navPop === 'function') window._navPop();
+  });
+}
+
+
+</script>
+<script>
 // ══ CONSTANTS ══
 const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 const DIAS_PT = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
@@ -9584,210 +9790,7 @@ function quickCreateSubfolder() {
 
 
 
-<script>
 
-function applyWallpaper(id, dataUrl, theme, contrast) {
-  state.wallpaper = id;
-  state.wallpaperUrl = dataUrl;
-  state.wallpaperContrast = contrast || WALLPAPER_CONTRAST[id] || null;
-  // Aplicar tema
-  if(theme && theme !== state.theme) {
-    setTheme(theme);
-  }
-  // Aplicar background e contraste
-  _applyWallpaperCSS(dataUrl, state.wallpaperContrast);
-  save();
-  // Forçar redraw imediato do relógio (cor muda com wallpaper)
-  setTimeout(() => {
-    const clkEl = document.getElementById('hdrClockSvg');
-    if(clkEl) clkEl.dispatchEvent(new Event('redraw'));
-  }, 50);
-}
-
-function _applyWallpaperCSS(dataUrl, contrast) {
-  let style = document.getElementById('_wallpaperStyle');
-  if(!style) {
-    style = document.createElement('style');
-    style.id = '_wallpaperStyle';
-    document.head.appendChild(style);
-  }
-
-  if(!dataUrl) {
-    style.textContent = `body { background-image: none !important; } .app { background: var(--bg0) !important; }`;
-    document.body.classList.remove('wp-light-text','wp-dark-text');
-    return;
-  }
-
-  // Cores para texto claro (wallpaper escuro)
-  const lightText = contrast === 'light-text';
-
-  // Texto principal
-  const txtMain   = lightText ? '#ffffff'              : '#1a1208';
-  const txtSub    = lightText ? 'rgba(255,255,255,.7)' : 'rgba(30,20,5,.65)';
-  const txtMuted  = lightText ? 'rgba(255,255,255,.45)': 'rgba(50,38,28,.55)';
-  const txtNum    = lightText ? 'rgba(230,235,255,.9)' : '#32261c';
-  const txtDim    = lightText ? 'rgba(180,200,230,.7)' : 'rgba(80,60,40,.65)';
-
-  // Cards semi-transparentes
-  const cardBg    = lightText ? 'rgba(15,25,50,.55)'   : 'rgba(255,252,246,.75)';
-  const cardBdr   = lightText ? 'rgba(255,255,255,.12)': 'rgba(65,48,30,.1)';
-  const cardShadow= lightText ? '0 6px 24px rgba(0,0,0,.4)' : '0 6px 24px rgba(65,48,30,.15)';
-
-  // Header/footer
-  const hdrBg     = lightText ? 'rgba(0,0,0,.45)'      : 'rgba(255,255,255,.45)';
-
-  style.textContent = `
-    body {
-      background-image: url("${dataUrl}") !important;
-      background-size: cover !important;
-      background-position: center top !important;
-      background-attachment: fixed !important;
-    }
-    .app { background: transparent !important; }
-
-    /* ── Header/Footer sobre wallpaper ── */
-    .hdr { background: ${hdrBg} !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; border-bottom: none !important; box-shadow: none !important; }
-    #progressRow { background: ${hdrBg} !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; }
-
-    /* ── Textos do header ── */
-    .hdrGreeting { color: ${txtMain} !important; font-weight:900 !important; }
-    .hdrSub      { color: ${txtSub} !important; }
-    .dayBadge    { color: ${txtMain} !important; }
-
-    /* ── Relógio ── */
-    .clockBg { background: ${cardBg} !important; border-color: ${cardBdr} !important; box-shadow: ${cardShadow} !important; }
-
-    /* ── Busca ── */
-    #topSearchInput { background: ${cardBg} !important; border-color: ${cardBdr} !important; box-shadow: ${cardShadow} !important; }
-    #topSearchInput span { color: ${txtMuted} !important; }
-    .searchLupa { color: ${lightText ? '#7dd3f0' : '#d67828'} !important; }
-
-    /* ── Calendário / semana ── */
-    #weekStripCard { background: ${cardBg} !important; border-color: ${cardBdr} !important; box-shadow: ${cardShadow} !important; }
-    .wDay .wdName  { color: ${txtDim} !important; }
-    .wDay .wdNum   { color: ${txtNum} !important; }
-    .mCell         { color: ${txtNum} !important; }
-    .mCell.mToday  { color: #f97316 !important; }
-    .monthHdrLabel { color: ${txtMain} !important; }
-    .monthDayName  { color: ${txtDim} !important; }
-    .stripHandleHint, .stripFeriadoHint { color: ${txtMuted} !important; }
-
-    /* ── Pastas ── */
-    .folderTile .fi-wrap { background: ${cardBg} !important; border-color: ${cardBdr} !important; box-shadow: ${cardShadow} !important; }
-    .folderTile .fl { color: ${txtMain} !important; }
-
-    /* ── Progresso ── */
-    #progressLabel { color: ${txtMuted} !important; }
-    #progressPct   { color: ${lightText ? '#f97316' : '#d67828'} !important; }
-
-    /* ── Busca: placeholder e ícone ── */
-    #topSearchInput span { color: ${txtMuted} !important; }
-    .searchLupa { color: ${lightText ? '#7dd3f0' : '#d67828'} !important; }
-
-    /* ── Dia ativo no weekstrip ── */
-    .wDay.active .wdNum { color: #f97316 !important; }
-    .wDay.active .wdName { color: rgba(249,115,22,.7) !important; }
-    .wdDot { background: rgba(249,115,22,.8) !important; }
-    .mCell.mHasTask::after { background: rgba(249,115,22,.8) !important; }
-
-    /* ── Mês header (collapsed strip) ── */
-    .monthHdrLabel { color: ${txtMain} !important; }
-    .monthDayName { color: ${txtDim} !important; }
-
-    /* ── Badge de tarefas nas pastas ── */
-    .folderBadge { background: #f97316 !important; color: #fff !important; }
-
-    /* ── Todas as Pastas modal: forçar texto claro sempre (fundo dark) ── */
-    #todasPastasOv .folderTile .fl { color: rgba(255,255,255,.9) !important; }
-    #todasPastasOv .folderTile .fi-wrap { 
-      background: rgba(255,255,255,.92) !important; 
-      border-color: rgba(255,255,255,.15) !important;
-      box-shadow: 0 4px 12px rgba(0,0,0,.3) !important;
-    }
-    #pastasFrenteOv .folderTile .fl { color: rgba(255,255,255,.9) !important; }
-    #pastasFrenteOv .folderTile .fi-wrap { 
-      background: rgba(255,255,255,.92) !important;
-      border-color: rgba(255,255,255,.15) !important;
-    }
-
-    /* ── Texto de tarefas na lista ── */
-    .tText { color: ${txtMain} !important; }
-    .tCheck { color: rgba(249,115,22,.6) !important; }
-
-    /* ── DayView header ── */
-    .dayHdr, .dayHdrTitle { color: ${txtMain} !important; }
-
-    /* ── Scrollbar cards se existirem ── */
-    .bucketCard, .taskCard { background: ${cardBg} !important; }
-  \`;
-
-  document.body.classList.toggle('wp-light-text', lightText);
-  document.body.classList.toggle('wp-dark-text', !lightText);
-}
-function openWallpaperPicker() {
-  if(typeof window._navPush === 'function') window._navPush();
-  const existing = document.getElementById('wallpaperPickerOv');
-  if(existing) existing.remove();
-
-  const ov = document.createElement('div');
-  ov.id = 'wallpaperPickerOv';
-  ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;flex-direction:column;';
-
-  const currentWp = (typeof state !== 'undefined' && state.wallpaper) ? state.wallpaper : 'none';
-
-  ov.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0;">
-      <div>
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:#fff;">🖼️ Papel de Parede</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:2px;">Toque para aplicar</div>
-      </div>
-      <button id="_wpClose" style="background:rgba(255,255,255,.12);border:none;border-radius:10px;color:#fff;width:36px;height:36px;font-size:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;">✕</button>
-    </div>
-    <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;">
-      <div style="margin-bottom:14px;">
-        <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.4);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Sem papel de parede</div>
-        <div id="_wpNone" style="width:72px;height:46px;border-radius:10px;background:linear-gradient(135deg,#0d1b35,#1a2b48);border:2px solid ${currentWp==='none'?'#f97316':'rgba(255,255,255,.2)'};cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;">🚫</div>
-      </div>
-      <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.4);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Escolha um papel de parede</div>
-      <div id="_wpGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-bottom:20px;"></div>
-    </div>`;
-
-  document.body.appendChild(ov);
-
-  const grid = ov.querySelector('#_wpGrid');
-  WALLPAPER_PACK.forEach(wp => {
-    const cell = document.createElement('div');
-    const isActive = currentWp === wp.id;
-    cell.style.cssText = `position:relative;cursor:pointer;border-radius:12px;overflow:hidden;aspect-ratio:9/16;border:2px solid ${isActive?'#f97316':'rgba(255,255,255,.15)'};transition:border-color .15s;-webkit-tap-highlight-color:transparent;`;
-    cell.innerHTML = `
-      <img src="${wp.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
-      <div style="position:absolute;bottom:0;left:0;right:0;padding:4px 6px;background:linear-gradient(to top,rgba(0,0,0,.75),transparent);font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:700;color:#fff;line-height:1.3;">${wp.label}</div>
-      <div style="position:absolute;top:4px;right:4px;font-size:11px;">${wp.theme==='dark'?'🌙':'☀️'}</div>`;
-    cell.addEventListener('click', () => {
-      applyWallpaper(wp.id, wp.full, wp.theme, wp.contrast);
-      grid.querySelectorAll('[data-wpid]').forEach(d => d.style.borderColor = 'rgba(255,255,255,.15)');
-      cell.style.borderColor = '#f97316';
-      ov.querySelector('#_wpNone').style.borderColor = 'rgba(255,255,255,.2)';
-      if(typeof showToast === 'function') showToast('✅ ' + wp.label + ' aplicado!');
-    });
-    cell.dataset.wpid = wp.id;
-    grid.appendChild(cell);
-  });
-
-  ov.querySelector('#_wpNone').addEventListener('click', () => {
-    applyWallpaper('none', null, (typeof state!=='undefined'?state.theme:'dark'), null);
-    ov.querySelector('#_wpNone').style.borderColor = '#f97316';
-    grid.querySelectorAll('[data-wpid]').forEach(d => d.style.borderColor = 'rgba(255,255,255,.15)');
-    if(typeof showToast === 'function') showToast('✅ Papel de parede removido!');
-  });
-
-  ov.querySelector('#_wpClose').addEventListener('click', () => {
-    ov.remove();
-    if(typeof window._navPop === 'function') window._navPop();
-  });
-}
-
-</script>
 <script src="./bootController.js"></script>
 </body>
 </html>
