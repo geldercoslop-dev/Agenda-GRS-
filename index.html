@@ -424,7 +424,7 @@
         <p style="margin-top:8px"><b>SAÚDE:</b> Marcar consulta · Horário de remédios · Pesquisar paciente · Ativar alertas</p>
         <p style="margin-top:4px"><b>RELATÓRIOS:</b> Relatório da semana · Relatório de pendências · Relatório de consultas · Relatório de remédios · Estatísticas · Relatório para WhatsApp</p>
         <p style="margin-top:4px"><b>ORGANIZAÇÃO:</b> Tarefas de hoje · Gerenciar pastas</p>
-        <p style="margin-top:4px"><b>CONFIGURAÇÕES:</b> Tema · Sincronização · Backup · Configurações</p>
+        <p style="margin-top:4px"><b>CONFIGURAÇÕES:</b> Papel de Parede · Sincronização · Backup · Configurações</p>
       </div>
 
       <div class="manSection">
@@ -551,8 +551,8 @@
       </div>
 
       <div class="manSection">
-        <div class="manSecTitle">☀️ / 🌙 Tema Claro e Escuro</div>
-        <p>Toque no ícone <b>☀️ ou 🌙</b> no cabeçalho, ou use Menu ☰ → <b>Tema</b>. Alterna entre o tema <b>escuro (azul petróleo)</b> e o tema <b>claro (bege/dourado)</b>. A preferência é salva automaticamente e permanece na próxima abertura.</p>
+        <div class="manSecTitle">🖼️ Papel de Parede</div>
+        <p>Use Menu ☰ → <b>Papel de Parede</b> para escolher entre 21 opções de fundo. O tema claro ou escuro é aplicado automaticamente conforme o papel escolhido. A preferência é salva e mantida na próxima abertura.</p>
       </div>
 
       <div class="manSection">
@@ -3358,6 +3358,8 @@ function init(){
   }
   repairRemedioFolder();
   document.body.setAttribute('data-theme',state.theme);
+  // Atualizar saudação com nome do usuário logo no boot
+  if(typeof updateHeader === 'function') setTimeout(updateHeader, 0);
   const _ti = document.getElementById('thIcon');
   if(_ti){ _ti.textContent = '💡'; _ti.style.filter = state.theme==='light' ? 'grayscale(1) brightness(0.5)' : 'none'; }
   if(state.profilePhoto) document.getElementById('profileImg').src=state.profilePhoto;
