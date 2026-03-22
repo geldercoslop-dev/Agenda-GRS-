@@ -21,6 +21,7 @@ const CACHE_PREFIX  = "agenda-cache-";
 const CORE_ASSETS = [
   "./",
   "./index.html",
+  "./recover-pwa.html",
   "./manifest.json",
   "./variables.css",
   "./app.css",

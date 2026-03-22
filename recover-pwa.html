@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Recuperar Agenda PWA</title>
+  <style>
+    body{
+      margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(160deg,#021824,#04355a);color:#e8f4ff;
+      font-family:"Plus Jakarta Sans",Arial,sans-serif;padding:20px;box-sizing:border-box;
+    }
+    .card{
+      width:min(420px,100%);background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.25);
+      border-radius:18px;padding:22px;box-shadow:0 14px 38px rgba(0,0,0,.45);
+    }
+    h1{margin:0 0 8px;font-size:18px;font-family:"Space Grotesk",Arial,sans-serif}
+    p{margin:0 0 12px;font-size:14px;line-height:1.5;color:rgba(232,244,255,.9)}
+    .muted{font-size:12px;color:rgba(180,220,240,.72)}
+    .btn{
+      width:100%;margin-top:12px;padding:12px 14px;border:none;border-radius:12px;cursor:pointer;
+      background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;font-weight:800;font-size:14px;
+    }
+    #status{margin-top:10px;font-size:13px;color:#a5b4fc}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔧 Recuperação do PWA</h1>
+    <p>Esta rotina corrige travamentos de botões e telas após atualizações antigas do app.</p>
+    <p class="muted">Seus dados locais da agenda são preservados. Apenas cache e service worker serão renovados.</p>
+    <button id="run" class="btn">Executar recuperação agora</button>
+    <div id="status">Pronto para iniciar.</div>
+  </div>
+
+  <script>
+    (function () {
+      var statusEl = document.getElementById('status');
+      var runBtn = document.getElementById('run');
+
+      function setStatus(msg){ if(statusEl) statusEl.textContent = msg; }
+
+      function clearAppCaches() {
+        if (!('caches' in window)) return Promise.resolve();
+        return caches.keys().then(function(keys){
+          return Promise.all(keys
+            .filter(function(k){ return String(k).indexOf('agenda-cache-') === 0; })
+            .map(function(k){ return caches.delete(k); })
+          );
+        }).catch(function(){});
+      }
+
+      function unregisterWorkers() {
+        if (!('serviceWorker' in navigator)) return Promise.resolve();
+        return navigator.serviceWorker.getRegistrations().then(function(regs){
+          return Promise.all(regs.map(function(r){ return r.unregister(); }));
+        }).catch(function(){});
+      }
+
+      function goBackToApp() {
+        var target = '/?_pwa_recover=' + Date.now();
+        try {
+          var u = new URL(window.location.href);
+          u.pathname = '/';
+          u.search = '?_pwa_recover=' + Date.now();
+          target = u.toString();
+        } catch (_) {}
+        window.location.replace(target);
+      }
+
+      function run() {
+        runBtn.disabled = true;
+        setStatus('Limpando service worker antigo...');
+        unregisterWorkers()
+          .then(function(){
+            setStatus('Limpando cache antigo...');
+            return clearAppCaches();
+          })
+          .then(function(){
+            setStatus('Aplicando atualização...');
+            setTimeout(goBackToApp, 250);
+          })
+          .catch(function(){
+            setStatus('Falha parcial. Tentando abrir a agenda...');
+            setTimeout(goBackToApp, 350);
+          });
+      }
+
+      runBtn.addEventListener('click', run);
+      setTimeout(run, 450);
+    })();
+  </script>
+</body>
+</html>
