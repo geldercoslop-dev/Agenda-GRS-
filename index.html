@@ -1143,6 +1143,42 @@ function applyTextPalette(paletteKey){
   root.style.setProperty('--custom-muted', cfg.muted);
   root.style.setProperty('--custom-clock', cfg.clock);
 }
+function _estimateImageBrightness(dataUrl){
+  return new Promise((resolve)=>{
+    if(!dataUrl){ resolve(null); return; }
+    try{
+      const img = new Image();
+      img.onload = function(){
+        try{
+          const w = 24, h = 24;
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          const ctx = c.getContext('2d');
+          if(!ctx){ resolve(null); return; }
+          ctx.drawImage(img, 0, 0, w, h);
+          const px = ctx.getImageData(0,0,w,h).data;
+          let sum = 0, n = 0;
+          for(let i=0; i<px.length; i+=4){
+            const r = px[i], g = px[i+1], b = px[i+2];
+            const lum = 0.2126*r + 0.7152*g + 0.0722*b;
+            sum += lum; n++;
+          }
+          resolve(n ? (sum/n) : null);
+        } catch(_){ resolve(null); }
+      };
+      img.onerror = ()=>resolve(null);
+      img.src = dataUrl;
+    } catch(_){ resolve(null); }
+  });
+}
+async function autoPickTextPaletteForWallpaper(dataUrl){
+  const lum = await _estimateImageBrightness(dataUrl);
+  // Limiares simples para contraste estável em mobile
+  if(lum === null) return null;
+  if(lum >= 170) return 'black';
+  if(lum >= 120) return 'navy';
+  return 'white';
+}
 function openTextPalettePicker(){
   const map = getTextPaletteMap();
   const current = String(state.uiTextColor || 'white');
@@ -1989,6 +2025,13 @@ function goHome(){
   if(_wsc){ _wsc.style.display=''; _wsc.style.visibility=''; _wsc.style.opacity=''; }
   const _cov = document.getElementById('calExpandOverlay');
   if(_cov){ _cov.classList.remove('open'); _cov.style.display='none'; _cov.style.pointerEvents='none'; _cov.style.opacity='0'; }
+  const _searchOv = document.getElementById('searchOverlay');
+  if(_searchOv){ _searchOv.style.display='none'; }
+  const _qaOv = document.getElementById('quickAddOverlay');
+  if(_qaOv){ _qaOv.style.display='none'; }
+  const _syncOv = document.getElementById('_syncModal');
+  if(_syncOv){ _syncOv.remove(); }
+
   document.getElementById('bottomBar').classList.remove('hidden');
   const _fab2=document.getElementById('sidebarFab');
   if(_fab2){ _fab2.style.opacity='1'; _fab2.style.pointerEvents='auto'; _fab2.style.transform='scale(1)'; }
@@ -2001,6 +2044,18 @@ function goHome(){
   atualizarLupa('home');
   renderWeekStrip();
   renderFolders();
+  // Mantém histórico/back sincronizado quando forçamos volta para home
+  if(typeof history !== 'undefined'){
+    try { history.replaceState({app:'screen', depth:1}, ''); } catch(_){}
+  }
+}
+
+function closeQuickAddOverlay(){
+  const el = document.getElementById('quickAddOverlay');
+  if(el && el.style.display !== 'none'){
+    el.style.display = 'none';
+    if(typeof window._navPop === 'function') window._navPop();
+  }
 }
 
 // Barra de busca apenas na home
@@ -2861,6 +2916,7 @@ function doBackup(){
           try { localStorage.setItem('agendaProMax', JSON.stringify(state)); } catch(_){}
           // Depois salva via AppStorage (IDB em background)
           save();
+          try { if (typeof checkStateIntegrity === 'function') checkStateIntegrity(); } catch(_) {}
           _markBackupDone();
           close();
           showToast('✅ Backup restaurado! Recarregando...');
@@ -3620,11 +3676,19 @@ function init(){
         <button id="_wpCloseX" style="width:30px;height:30px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#e8f4ff;font-size:15px;cursor:pointer;">✕</button>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:58vh;overflow:auto;padding-right:2px;">${cards}</div>
-      <button id="_wpGalleryDirect" style="margin-top:10px;width:100%;padding:11px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">📱 Buscar da galeria do celular</button>
+      <button id="_wpAutoContrast" style="margin-top:10px;width:100%;padding:11px;border-radius:12px;border:none;background:${state.autoTextContrast?'linear-gradient(135deg,#16a34a,#15803d)':'linear-gradient(135deg,#f59e0b,#d97706)'};color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">${state.autoTextContrast?'✅ Auto-contraste: ligado':'⚙️ Auto-contraste: desligado'}</button>
+      <button id="_wpGalleryDirect" style="margin-top:8px;width:100%;padding:11px;border-radius:12px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">📱 Buscar da galeria do celular</button>
       <button id="_wpClose" style="margin-top:7px;width:100%;padding:8px;border:none;background:transparent;color:rgba(180,220,240,.5);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">Fechar</button>`;
 
     box.querySelector('#_wpCloseX').addEventListener('click', close);
     box.querySelector('#_wpClose').addEventListener('click', close);
+    box.querySelector('#_wpAutoContrast').addEventListener('click', ()=>{
+      state.autoTextContrast = !state.autoTextContrast;
+      save();
+      showToast(state.autoTextContrast ? '✅ Auto-contraste ligado' : '⚙️ Auto-contraste desligado');
+      close();
+      openWallpaperCatalog();
+    });
     box.querySelector('#_wpGalleryDirect').addEventListener('click', ()=>{ close(); openWallpaperPicker(); });
     box.querySelectorAll('._wpCard').forEach((btn)=>{
       btn.addEventListener('click', ()=>{
@@ -3640,7 +3704,14 @@ function init(){
           state.wallpaperPhoto = pendingWallpaper;
           applyWallpaperPhoto(pendingWallpaper);
         }
-        save();
+        if(state.autoTextContrast){
+          autoPickTextPaletteForWallpaper(state.wallpaperPhoto || '').then((best)=>{
+            if(best){ applyTextPalette(best); }
+            save();
+          });
+        } else {
+          save();
+        }
         showToast('✅ Papel de parede aplicado!');
         if(reopenSettingsAfterWallpaperPick){
           setTimeout(()=>document.getElementById('sModalOverlay')?.classList.add('show'), 120);
@@ -3836,6 +3907,11 @@ function init(){
       pendingWallpaper=data;
       state.wallpaperPhoto=data;
       applyWallpaperPhoto(data);
+      if(state.autoTextContrast){
+        autoPickTextPaletteForWallpaper(data).then((best)=>{
+          if(best){ applyTextPalette(best); }
+        }).catch(()=>{});
+      }
       save();
       showToast('✅ Papel de parede atualizado!');
     });
@@ -3927,11 +4003,24 @@ function init(){
         return;
       }
 
+      const _qa = document.getElementById('quickAddOverlay');
+      if(_qa && _qa.style.display !== 'none'){
+        _qa.style.display = 'none';
+        _restoreHomeChrome();
+        return;
+      }
+      const _sr = document.getElementById('searchOverlay');
+      if(_sr && _sr.style.display !== 'none'){
+        _sr.style.display = 'none';
+        _restoreHomeChrome();
+        return;
+      }
+
       // Overlays abertos com _navPush: o popstate já consumiu a entry deles.
       // NÃO re-empurra entry — apenas fecha o overlay.
       // Se re-empurrar, cria depth fantasma: o próximo "voltar" não faz nada e o
       // seguinte sai do app (o bug clássico galeria → pasta → sai do app).
-      const namedOvs=['pastasFrenteOv','todasPastasOv','watermarkTipOv','photoFullscreenOv','photoGalleryOv','consultaFormOv','remedioFormOv','listaConsultasOv','listaRemediosOv','historicoPacienteOv','feriadosOv','docsOv','contasOv','receberOv','examesOv','mercadoOv','inlineViewerOv'];
+      const namedOvs=['pastasFrenteOv','todasPastasOv','watermarkTipOv','photoFullscreenOv','photoGalleryOv','consultaFormOv','remedioFormOv','listaConsultasOv','listaRemediosOv','historicoPacienteOv','feriadosOv','docsOv','contasOv','receberOv','examesOv','mercadoOv','inlineViewerOv','_syncModal'];
       for(const oid of namedOvs){
         const el=document.getElementById(oid);
         if(el){
@@ -4078,8 +4167,8 @@ function init(){
   // Quick add task modal events
   document.getElementById('quickAddBtn').addEventListener('click', _doQuickAdd);
   document.getElementById('quickAddInput').addEventListener('keydown',(e)=>{ if(e.key==='Enter') _doQuickAdd(); });
-  document.getElementById('quickAddClose').addEventListener('click',()=>{ document.getElementById('quickAddOverlay').style.display='none'; });
-  document.getElementById('quickAddOverlay').addEventListener('click',(e)=>{ if(e.target===document.getElementById('quickAddOverlay')) document.getElementById('quickAddOverlay').style.display='none'; });
+  document.getElementById('quickAddClose').addEventListener('click', closeQuickAddOverlay);
+  document.getElementById('quickAddOverlay').addEventListener('click',(e)=>{ if(e.target===document.getElementById('quickAddOverlay')) closeQuickAddOverlay(); });
   document.getElementById('calNext').addEventListener('click',()=>{calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalModal();});
   document.getElementById('calAddBtn').addEventListener('click',calAddTask);
   document.getElementById('calTaskInput').addEventListener('keydown',(e)=>{if(e.key==='Enter')calAddTask();});
@@ -4419,7 +4508,7 @@ function autoBackup(){
     // Manter apenas os últimos 4 backups automáticos
     const bkKeys=AppStorage.keys('agendaProMax_backup_').sort();
     while(bkKeys.length>4){ AppStorage.remove(bkKeys.shift()); }
-    showToast('💾 Backup automático salvo!');
+    // backup automático silencioso
   } catch(e){}
 }
 
@@ -5521,7 +5610,7 @@ window._feriadosMunicipalPick = window._feriadosMunicipalPick || AppStorage.get(
 
 function openFeriados(){
   const existing = document.getElementById('feriadosOv');
-  if(existing){ existing.remove(); return; }
+  if(existing){ return; }
 
   const municipiosES = _getMunicipiosES();
   const cityBySlug = Object.fromEntries(municipiosES.map((c)=>[c.slug, c.city]));
@@ -5550,7 +5639,7 @@ function openFeriados(){
     const carnaval      = addDays(p, -47);
     const sextaSanta    = addDays(p,  -2);
     const corpusChristi = addDays(p,  60);
-    const nspES         = addDays(p,   8); // segunda pós-páscoa no ES
+    const nspES         = addDays(p,   8);
 
     return [
       { id:'n-1',  iso:`${ano}-01-01`, nome:'Confraternização Universal (Ano Novo)', emoji:'🎆', tipo:'nacional' },
@@ -5640,13 +5729,14 @@ function openFeriados(){
       <span id="_ferCnt" style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;color:rgba(180,220,240,.45);flex-shrink:0;">0 restantes</span>
       <button id="_ferBack" style="background:rgba(0,80,120,.3);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:#7dd3f0;font-size:17px;font-weight:900;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px;border-bottom:1px solid rgba(0,140,180,.15);background:rgba(0,0,0,.14);">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px 8px;border-bottom:1px solid rgba(0,140,180,.15);background:rgba(0,0,0,.14);">
       <label style="display:flex;flex-direction:column;gap:4px;">
         <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;color:rgba(180,220,240,.6);text-transform:uppercase;">Selecionar cidade</span>
         <select id="_ferCitySel" style="width:100%;padding:9px 10px;border-radius:10px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;outline:none;">
           <option value="">Somente nacionais</option>
           ${cityOptions}
         </select>
+        <input id="_ferCitySearch" type="search" placeholder="Buscar cidade..." style="margin-top:6px;width:100%;padding:8px 10px;border-radius:10px;border:1px solid rgba(0,160,200,.18);background:rgba(0,80,120,.2);color:#e8f4ff;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;outline:none;" />
       </label>
       <label style="display:flex;flex-direction:column;gap:4px;">
         <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;color:rgba(180,220,240,.6);text-transform:uppercase;">Selecionar feriado</span>
@@ -5659,6 +5749,7 @@ function openFeriados(){
   document.body.appendChild(ov);
 
   const citySel = ov.querySelector('#_ferCitySel');
+  const citySearch = ov.querySelector('#_ferCitySearch');
   const holidaySel = ov.querySelector('#_ferHolidaySel');
 
   function tipoBadge(f){
@@ -5691,10 +5782,9 @@ function openFeriados(){
     holidaySel.disabled = false;
   }
 
-  function renderFeriados(){
-    const lista = getFeriados(ano, cidadeAtual, feriadoMunicipalPick).filter((f)=>f.iso >= hojeISO);
+  function _renderHolidayRows(items){
     const porMes = {};
-    lista.forEach((f)=>{
+    items.forEach((f)=>{
       const d = new Date(f.iso + 'T12:00:00');
       const mes = d.getMonth();
       if(!porMes[mes]) porMes[mes] = [];
@@ -5705,30 +5795,45 @@ function openFeriados(){
       });
     });
     const meses = Object.keys(porMes).map(Number).sort((a,b)=>a-b);
-    let html = '';
     if(!meses.length){
-      html = '<div style="text-align:center;padding:40px 20px;color:rgba(180,220,240,.4);font-family:Space Grotesk,sans-serif;font-size:14px;">Nenhum feriado restante neste ano 🎉</div>';
-    } else {
-      meses.forEach((mes)=>{
-        html += `<div style="margin-bottom:6px;"><div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;color:rgba(125,211,240,.55);text-transform:uppercase;padding:14px 0 8px 2px;">${MESES_PT[mes]}</div>`;
-        porMes[mes].forEach((f,idx)=>{
-          const isHoje = f.iso === hojeISO;
-          const rowBg = isHoje ? 'background:rgba(0,160,200,.12);border:1px solid rgba(0,200,220,.22);' : (idx%2===0 ? 'background:rgba(0,80,120,.18);' : 'background:rgba(0,80,120,.10);');
-          html += `<div style="${rowBg}border-radius:10px;padding:10px 13px;margin-bottom:5px;display:flex;align-items:center;gap:11px;">
-            <div style="flex-shrink:0;min-width:46px;text-align:center;">
-              <div style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:900;color:${isHoje?'#7dd3f0':'#e8f4ff'};line-height:1;">${f.fmtDia}</div>
-              <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:600;color:rgba(180,220,240,.5);text-transform:uppercase;letter-spacing:.04em;">${f.diaSemana}</div>
-            </div>
-            <div style="flex-shrink:0;font-size:20px;line-height:1;">${f.emoji || '📅'}</div>
-            <div style="flex:1;min-width:0;">
-              <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:${isHoje?'#7dd3f0':'#e8f4ff'};line-height:1.3;">${escHtml(f.nome)}${tipoBadge(f)}</div>
-              ${isHoje?'<div style="font-family:Space Grotesk,sans-serif;font-size:10px;color:rgba(125,211,240,.7);font-weight:600;margin-top:2px;">Hoje!</div>':''}
-            </div>
-          </div>`;
-        });
-        html += '</div>';
-      });
+      return '<div style="text-align:center;padding:24px 20px;color:rgba(180,220,240,.4);font-family:Space Grotesk,sans-serif;font-size:13px;">Sem itens neste bloco.</div>';
     }
+    let html = '';
+    meses.forEach((mes)=>{
+      html += `<div style="margin-bottom:6px;"><div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;color:rgba(125,211,240,.55);text-transform:uppercase;padding:14px 0 8px 2px;">${MESES_PT[mes]}</div>`;
+      porMes[mes].forEach((f,idx)=>{
+        const isHoje = f.iso === hojeISO;
+        const rowBg = isHoje ? 'background:rgba(0,160,200,.12);border:1px solid rgba(0,200,220,.22);' : (idx%2===0 ? 'background:rgba(0,80,120,.18);' : 'background:rgba(0,80,120,.10);');
+        html += `<div style="${rowBg}border-radius:10px;padding:10px 13px;margin-bottom:5px;display:flex;align-items:center;gap:11px;">
+          <div style="flex-shrink:0;min-width:46px;text-align:center;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:900;color:${isHoje?'#7dd3f0':'#e8f4ff'};line-height:1;">${f.fmtDia}</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:600;color:rgba(180,220,240,.5);text-transform:uppercase;letter-spacing:.04em;">${f.diaSemana}</div>
+          </div>
+          <div style="flex-shrink:0;font-size:20px;line-height:1;">${f.emoji || '📅'}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:${isHoje?'#7dd3f0':'#e8f4ff'};line-height:1.3;">${escHtml(f.nome)}${tipoBadge(f)}</div>
+            ${isHoje?'<div style="font-family:Space Grotesk,sans-serif;font-size:10px;color:rgba(125,211,240,.7);font-weight:600;margin-top:2px;">Hoje!</div>':''}
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    });
+    return html;
+  }
+
+  function renderFeriados(){
+    const lista = getFeriados(ano, cidadeAtual, feriadoMunicipalPick).filter((f)=>f.iso >= hojeISO);
+    const nacionais = lista.filter((f)=>f.tipo!=='municipal');
+    const municipais = lista.filter((f)=>f.tipo==='municipal');
+
+    let html = '';
+    html += `<div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:rgba(147,197,253,.9);padding:2px 0 8px;">Nacionais e gerais</div>`;
+    html += _renderHolidayRows(nacionais);
+    if(cidadeAtual){
+      html += `<div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:rgba(253,186,116,.9);padding:8px 0 8px;">Municipais da cidade</div>`;
+      html += _renderHolidayRows(municipais);
+    }
+
     const body = document.getElementById('_ferBody');
     if(body) body.innerHTML = html + `
       <div style="margin-top:18px;padding:12px 14px;background:rgba(0,80,120,.15);border:1px solid rgba(0,140,180,.12);border-radius:10px;">
@@ -5752,6 +5857,17 @@ function openFeriados(){
     AppStorage.set('feriadosMunicipalPick', feriadoMunicipalPick);
     renderHolidaySelector();
     renderFeriados();
+  });
+
+  citySearch?.addEventListener('input', ()=>{
+    const q = _normalizeCidadeSlug(citySearch.value || '');
+    const opts = Array.from(citySel.options || []);
+    opts.forEach((opt)=>{
+      if(!opt.value){ opt.hidden = false; return; }
+      const slug = _normalizeCidadeSlug(opt.value);
+      const txt = _normalizeCidadeSlug(opt.textContent || '');
+      opt.hidden = !!q && !(slug.includes(q) || txt.includes(q));
+    });
   });
 
   holidaySel.addEventListener('change', ()=>{
@@ -6265,9 +6381,21 @@ function renderCalTaskArea(){
 let _quickAddKey=null;
 let _quickAddBucket=null;
 
+function _showQuickAddOverlay(){
+  const overlay = document.getElementById('quickAddOverlay');
+  if(!overlay) return;
+  if(overlay.style.display !== 'flex' && typeof window._navPush === 'function') window._navPush();
+  overlay.style.display = 'flex';
+}
+function _hideQuickAddOverlay(){
+  const overlay = document.getElementById('quickAddOverlay');
+  if(!overlay || overlay.style.display === 'none') return;
+  overlay.style.display = 'none';
+  if(typeof window._navPop === 'function') window._navPop();
+}
+
 
 function openQuickAddForCurrentBucket(){
-  const overlay = document.getElementById('quickAddOverlay');
   const label = document.getElementById('quickAddLabel');
   const input = document.getElementById('quickAddInput');
   const dayEntry = DAYS.find(d=>d.id===currentBucket);
@@ -6286,14 +6414,13 @@ function openQuickAddForCurrentBucket(){
   input.value = '';
   _quickAddKey = null;
   _quickAddBucket = currentBucket;
-  overlay.style.display = 'flex';
+  _showQuickAddOverlay();
   setTimeout(()=>input.focus(), 150);
 }
 
 function openQuickAddTask(key, d, m, y){
   const MESES_PT=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   _quickAddKey = key;
-  const overlay = document.getElementById('quickAddOverlay');
   const label = document.getElementById('quickAddLabel');
   const input = document.getElementById('quickAddInput');
   label.textContent = '📅 ' + d + ' de ' + MESES_PT[m] + ' ' + y;
@@ -6321,7 +6448,7 @@ function openQuickAddTask(key, d, m, y){
     taskListEl.innerHTML='';
   }
 
-  overlay.style.display = 'flex';
+  _showQuickAddOverlay();
   setTimeout(()=>input.focus(), 150);
 }
 
@@ -6370,7 +6497,7 @@ function _doQuickAdd(){
     updateProgress();
   }
   showToast('✅ Tarefa adicionada!');
-  document.getElementById('quickAddOverlay').style.display='none';
+  _hideQuickAddOverlay();
   input.value='';
 }
 
@@ -6666,22 +6793,8 @@ function exportarDados() {
       const fileName = `agenda-pro-max-${ts}.json`;
 
       // Incluir dados e fotos juntos no export completo
-      let exportData = { ...state };
-      try {
-        const rawPhotos = AppStorage.get('agendaProMax_photos', null);
-        if (rawPhotos) exportData._photos = rawPhotos;
-      } catch(e) {}
-      try {
-        const rawDocs = AppStorage.get('agendaProMax_docs', null);
-        if (rawDocs) exportData._docs = rawDocs;
-      } catch(e) {}
-      try { const r=AppStorage.get('agendaProMax_contas',null); if(r) exportData._contas=r; }catch(e){}
-      try { const r=AppStorage.get('agendaProMax_receber',null); if(r) exportData._receber=r; }catch(e){}
-      try { const r=AppStorage.get('agendaProMax_exames',null); if(r) exportData._exames=r; }catch(e){}
-      try { const r=AppStorage.get('agendaProMax_compras',null); if(r) exportData._compras=r; }catch(e){}
-      try { const r=AppStorage.get('agendaProMax_mercado',null); if(r) exportData._mercado=r; }catch(e){}
-      exportData._exportedAt = new Date().toISOString();
-      exportData._appVersion  = typeof APP_DATA_VERSION !== 'undefined' ? APP_DATA_VERSION : 1;
+      const exportData = _buildExportPayloadFromState(state);
+      exportData.weekStartISO = getSunday();
 
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
       const url  = URL.createObjectURL(blob);
@@ -6696,6 +6809,27 @@ function exportarDados() {
     // Restaurar card
     if (btn) btn.innerHTML = '<span class="sCardIcon">📤</span><span class="sCardLabel">Exportar dados</span><span class="sCardSub">Salvar JSON</span>';
   }, 80);
+}
+
+function _buildExportPayloadFromState(baseState){
+  let exportData = { ...(baseState || {}) };
+  try {
+    const rawPhotos = AppStorage.get('agendaProMax_photos', null);
+    if (rawPhotos) exportData._photos = rawPhotos;
+  } catch(e) {}
+  try {
+    const rawDocs = AppStorage.get('agendaProMax_docs', null);
+    if (rawDocs) exportData._docs = rawDocs;
+  } catch(e) {}
+  try { const r=AppStorage.get('agendaProMax_contas',null); if(r) exportData._contas=r; }catch(e){}
+  try { const r=AppStorage.get('agendaProMax_receber',null); if(r) exportData._receber=r; }catch(e){}
+  try { const r=AppStorage.get('agendaProMax_exames',null); if(r) exportData._exames=r; }catch(e){}
+  try { const r=AppStorage.get('agendaProMax_compras',null); if(r) exportData._compras=r; }catch(e){}
+  try { const r=AppStorage.get('agendaProMax_mercado',null); if(r) exportData._mercado=r; }catch(e){}
+  exportData._exportedAt = new Date().toISOString();
+  exportData._appVersion  = typeof APP_DATA_VERSION !== 'undefined' ? APP_DATA_VERSION : 1;
+  exportData.weekStartISO = getSunday();
+  return exportData;
 }
 
 function importarDados() {
@@ -6751,7 +6885,10 @@ function importarDados() {
         delete data._appVersion;
 
         Object.assign(state, data);
+        state.weekStartISO = getSunday();
         save();
+        try { if (typeof checkStateIntegrity === 'function') checkStateIntegrity(); } catch(_) {}
+        try { save(); } catch(_) {}
         closeSettings();
         showToast('✅ Dados importados!');
         setTimeout(() => location.reload(), 800);
@@ -6774,20 +6911,24 @@ function openSearch() {
   if(_pr){ _pr.style.opacity='0'; _pr.style.pointerEvents='none'; _pr.style.transition='opacity .15s'; }
   const input   = document.getElementById('searchInput');
   if (!overlay) return;
+  if (typeof window._navPush === 'function') window._navPush();
   overlay.style.display = 'flex';
   input.value = '';
   document.getElementById('searchResults').innerHTML = '';
   setTimeout(() => input.focus(), 100);
 }
 
-function closeSearch() {
+function closeSearch(skipNavPop) {
   const overlay = document.getElementById('searchOverlay');
   // Restaura rodapé apenas se estiver na home
   if(typeof currentView !== 'undefined' && currentView === 'home'){
     const _pr = document.getElementById('progressRow');
     if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; }
   }
-  if (overlay) overlay.style.display = 'none';
+  if (overlay && overlay.style.display !== 'none') {
+    overlay.style.display = 'none';
+    if (!skipNavPop && typeof window._navPop === 'function') window._navPop();
+  }
 }
 
 function _highlight(text, query) {
@@ -6803,6 +6944,26 @@ function _escHtml(s) {
   return String(s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function buildFullExportPayload(sourceState){
+  const exportData = { ...(sourceState || state || {}) };
+  try {
+    const rawPhotos = AppStorage.get('agendaProMax_photos', null);
+    if (rawPhotos) exportData._photos = rawPhotos;
+  } catch(_) {}
+  try {
+    const rawDocs = AppStorage.get('agendaProMax_docs', null);
+    if (rawDocs) exportData._docs = rawDocs;
+  } catch(_) {}
+  try { const r=AppStorage.get('agendaProMax_contas',null); if(r) exportData._contas=r; }catch(_){}
+  try { const r=AppStorage.get('agendaProMax_receber',null); if(r) exportData._receber=r; }catch(_){}
+  try { const r=AppStorage.get('agendaProMax_exames',null); if(r) exportData._exames=r; }catch(_){}
+  try { const r=AppStorage.get('agendaProMax_compras',null); if(r) exportData._compras=r; }catch(_){}
+  try { const r=AppStorage.get('agendaProMax_mercado',null); if(r) exportData._mercado=r; }catch(_){}
+  exportData._exportedAt = new Date().toISOString();
+  exportData._appVersion  = typeof APP_DATA_VERSION !== 'undefined' ? APP_DATA_VERSION : 1;
+  return exportData;
 }
 
 function _runSearch(query) {
@@ -6833,10 +6994,11 @@ function _runSearch(query) {
     const day = DAYS.find(d => d.id === bid);
     const where = folder ? `${folder.emoji||'📁'} ${folder.name}` : (day ? day.name : bid);
     arr.forEach(t => {
-      if (t.text.toLowerCase().includes(q)) {
+      const tText = (t && t.text != null) ? String(t.text) : '';
+      if (tText.toLowerCase().includes(q)) {
         cats.tarefas.items.push({
           icon:'✅', iconCls:'task',
-          title: t.text, sub: where,
+          title: tText, sub: where,
           action:()=>{ closeSearch(); openBucket(bid); }
         });
       }
@@ -6846,12 +7008,13 @@ function _runSearch(query) {
   // Tarefas do calendário (dateTasks)
   Object.entries(state.dateTasks || {}).forEach(([dk, arr]) => {
     (arr||[]).forEach(t => {
-      if (t.text.toLowerCase().includes(q)) {
+      const tText = (t && t.text != null) ? String(t.text) : '';
+      if (tText.toLowerCase().includes(q)) {
         const df = dk.split('-').reverse().join('/');
         const [dy, dm, dd] = dk.split('-').map(Number);
         cats.calendario.items.push({
           icon:'📅', iconCls:'cal',
-          title: t.text, sub: df,
+          title: tText, sub: df,
           badge: df, badgeCls:'blue',
           action:()=>{ closeSearch(); openQuickAddTask(dk, dd, dm-1, dy); }
         });
@@ -7447,25 +7610,34 @@ if (typeof DIAGNOSTIC_MODE !== 'undefined' && DIAGNOSTIC_MODE === true) {
       try { renderFolders();    } catch(e){}
       try { updateProgress();   } catch(e){}
     }
+    let _lastSyncKickAt = 0;
+    function _kickSync(){
+      if (!navigator.onLine) return;
+      const now = Date.now();
+      // Evita rajadas (foreground + online + intervalo)
+      if (now - _lastSyncKickAt < 30000) return;
+      _lastSyncKickAt = now;
+      initSync(state, save, _renderAll);
+    }
 
     // 1. Sync ao abrir o app
-    setTimeout(() => initSync(state, save, _renderAll), 1500);
+    setTimeout(_kickSync, 1500);
 
     // 2. Sync ao voltar online
     window.addEventListener('online', () => {
-      initSync(state, save, _renderAll);
+      _kickSync();
     });
 
     // 2.1 Sync ao voltar para foreground (resumo de alterações remotas)
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && navigator.onLine) {
-        initSync(state, save, _renderAll);
+        _kickSync();
       }
     });
 
     // 3. Sync periódico a cada 5 minutos
     setInterval(() => {
-      if (navigator.onLine) initSync(state, save, _renderAll);
+      _kickSync();
     }, 5 * 60 * 1000);
   })();
 }); // fim de waitForStorageReady().then()

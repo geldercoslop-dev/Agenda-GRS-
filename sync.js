@@ -330,14 +330,12 @@ async function syncPull(state, save, render) {
   if (!_cfg() || !navigator.onLine) return { pulled: 0, merged: 0 };
 
   const cursors = _getCursors();
-  const devId = _deviceId();
   let pulled = 0, merged = 0;
 
   // ── tasks ─────────────────────────────────────────────────────
   {
     const rows = await _req('GET', 'tasks', null, {
       'updated_at': `gt.${cursors.tasks}`,
-      'device_id':  `eq.${devId}`,
       'order':      'updated_at.asc',
       'limit':      '1000',
     });
@@ -405,7 +403,6 @@ async function syncPull(state, save, render) {
   {
     const rows = await _req('GET', 'consultas', null, {
       'updated_at': `gt.${cursors.consultas}`,
-      'device_id':  `eq.${devId}`,
       'order':      'updated_at.asc',
       'limit':      '500',
     });
@@ -443,7 +440,6 @@ async function syncPull(state, save, render) {
   {
     const rows = await _req('GET', 'remedios', null, {
       'updated_at': `gt.${cursors.remedios}`,
-      'device_id':  `eq.${devId}`,
       'order':      'updated_at.asc',
       'limit':      '500',
     });
@@ -702,6 +698,13 @@ function abrirPainelSync() {
   const dotColor   = connected ? '#34d399' : '#78716c';
   const statusText = connected ? '● Conectado' : '○ Desconectado';
 
+  function _escAttr(v) {
+    return String(v || '')
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
   ov.innerHTML = `
     <div style="background:#1c1917;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:26px 22px;width:min(400px,100%);box-shadow:0 24px 60px rgba(0,0,0,.6);">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
@@ -714,13 +717,13 @@ function abrirPainelSync() {
 
       <label style="display:block;margin-bottom:10px;">
         <span style="font-size:10px;font-weight:700;color:#a8a29e;text-transform:uppercase;letter-spacing:.5px;">URL do Projeto</span>
-        <input id="_sUrl" type="url" placeholder="https://xxxx.supabase.co" value="${cfg?.url || ''}"
+        <input id="_sUrl" type="url" placeholder="https://xxxx.supabase.co" value="${_escAttr(cfg?.url || '')}"
           style="width:100%;box-sizing:border-box;margin-top:5px;padding:9px 11px;background:#292524;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#f5f5f4;font-size:13px;outline:none;"/>
       </label>
 
       <label style="display:block;margin-bottom:18px;">
         <span style="font-size:10px;font-weight:700;color:#a8a29e;text-transform:uppercase;letter-spacing:.5px;">Anon Key</span>
-        <input id="_sKey" type="password" placeholder="eyJhbGciOiJIUzI1NiIs…" value="${cfg?.anonKey || ''}"
+        <input id="_sKey" type="password" placeholder="eyJhbGciOiJIUzI1NiIs…" value="${_escAttr(cfg?.anonKey || '')}"
           style="width:100%;box-sizing:border-box;margin-top:5px;padding:9px 11px;background:#292524;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#f5f5f4;font-size:13px;outline:none;"/>
       </label>
 

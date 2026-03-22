@@ -19,6 +19,7 @@ var state = {
   homeFolders: null,
   theme: 'dark',
   uiTextColor: '',
+  autoTextContrast: false,
   userName: 'Usuário',
   weekStartISO: '',
   profilePhoto: null,
