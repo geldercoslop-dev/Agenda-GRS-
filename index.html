@@ -17,7 +17,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Agenda Pro Max">
   <meta http-equiv="Permissions-Policy" content="microphone=(self)">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'">
 
   <!-- ═══ Manifest e Ícones ═══ -->
   <link rel="manifest" href="./manifest.json?v=2026-03-22-3">
@@ -1395,6 +1395,8 @@ function escAttr(s) { return escHtml(s).replace(/`/g, '&#096;'); }
 function safeImageUrl(rawUrl) {
   const val = String(rawUrl || '').trim();
   if (!val) return '';
+  // Defensivo: bloqueia placeholders/template strings acidentais persistidos em state.
+  if (/[{}]/.test(val) || /\$\{|%7B|%7D/i.test(val)) return '';
   if (val.startsWith('data:image/')) return val;
   if (val.startsWith('blob:')) return val;
   try {
@@ -3870,10 +3872,12 @@ function closeSidebar(){
   function applyWatermarkPhoto(dataUrl) {
     const wImg = document.getElementById('watermarkImg');
     const wWrap = document.getElementById('watermarkWrap');
-    if (wImg) wImg.src = dataUrl;
+    const safe = safeImageUrl(dataUrl);
+    if (!safe) return;
+    if (wImg) wImg.src = safe;
     if (wWrap) {
       wWrap.style.display = '';
-      detectWatermarkBg(dataUrl, (hasTrans) => {
+      detectWatermarkBg(safe, (hasTrans) => {
         if (hasTrans) {
           // Sem fundo: imagem livre (padrão mascote)
           wWrap.classList.remove('has-bg');
@@ -3918,6 +3922,9 @@ function init(){
   }
   state=load();
   state = recoverStateIfEmpty(state);
+  state.profilePhoto = safeImageUrl(state.profilePhoto || '') || null;
+  state.watermarkPhoto = safeImageUrl(state.watermarkPhoto || '') || null;
+  state.wallpaperPhoto = safeImageUrl(state.wallpaperPhoto || '') || '';
   try {
     if (typeof _currentScope === 'function') {
       const targetScope = _currentScope() || '';
@@ -3939,7 +3946,7 @@ function init(){
     _ti.textContent = '🖼️';
     _ti.style.filter = 'none';
   }
-  if(state.profilePhoto) document.getElementById('profileImg').src=state.profilePhoto;
+  if(state.profilePhoto) document.getElementById('profileImg').src=safeImageUrl(state.profilePhoto);
   applyWallpaperPhoto(state.wallpaperPhoto || '');
   if(state.watermarkPhoto){
     applyWatermarkPhoto(state.watermarkPhoto);
