@@ -187,7 +187,7 @@
       margin-top: 0;
       margin-bottom: 0;
     }
-    .weekStripWrap.expanded { max-height: 400px; }
+    .weekStripWrap.expanded { max-height: 430px; }
     .weekStrip { display:grid; grid-template-columns:repeat(8,1fr); gap:3px; padding:12px 8px 6px; }
     /* Quando expandido, mostra grade 7-col do mês */
     .monthGrid {
@@ -306,8 +306,8 @@
     [data-theme="light"] .mCell.mActive { background:transparent; color:#f97316; border:1.5px solid rgba(249,115,22,.85); }
     .mCell.mEmpty { cursor:default; pointer-events:none; }
     .mCell.mHasTask::after {
-      content:''; position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
-      width:2px; height:2px; border-radius:50%; background:rgba(249,115,22,.85);
+      content:''; position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
+      width:1px; height:1px; border-radius:50%; background:rgba(249,115,22,.85); opacity:.9;
     }
     .mCell.mToday.mHasTask::after { background:rgba(255,255,255,.7); }
 
@@ -428,9 +428,9 @@
     /* Overlay do calendário expandido — mesmo efeito do sidebar */
     #calExpandOverlay {
       display:none; position:fixed; inset:0; z-index:899;
-      background:rgba(0,0,0,.35);
-      backdrop-filter:blur(8px);
-      -webkit-backdrop-filter:blur(8px);
+      background:rgba(0,0,0,.42);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
       opacity:0; transition:opacity .3s ease;
       pointer-events:none;
     }
@@ -974,8 +974,8 @@
     }
     .calCell.selected { background:linear-gradient(135deg,var(--purple-dark),var(--color-pink)); color:#fff; }
     .calCell.hasTask::after {
-      content:''; position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
-      width:2px; height:2px; border-radius:50%; background:rgba(249,115,22,.85);
+      content:''; position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
+      width:1px; height:1px; border-radius:50%; background:rgba(249,115,22,.85); opacity:.9;
     }
     .calCell.today.hasTask::after { background:#f97316; }
     .calCell.selected.hasTask::after { background:rgba(255,255,255,.7); }
@@ -1054,8 +1054,13 @@
 }
 
 /* ══ PESQUISA GLOBAL ══ */
-#weekStripCard { transition: max-height .3s cubic-bezier(.4,0,.2,1), opacity .3s, margin .3s; }
+#weekStripCard { position:relative; min-height:150px; transition: max-height .3s cubic-bezier(.4,0,.2,1), opacity .3s, margin .3s; }
 #weekStripCard.hidden { display:none !important; }
+#weekStripCard.expanded-overlay { overflow:visible !important; z-index:910 !important; }
+#weekStripCard.expanded-overlay .weekStripWrap.expanded {
+  position:absolute; left:0; right:0; top:0; z-index:3;
+  box-shadow:0 16px 40px rgba(0,0,0,.45);
+}
 
 /* Dica visual de swipe para cima nas pastas */
 .folderSwipeHint {
