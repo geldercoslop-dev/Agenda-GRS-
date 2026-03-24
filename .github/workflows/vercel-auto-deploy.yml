@@ -1,0 +1,37 @@
+name: Vercel Auto Deploy (Production)
+
+on:
+  push:
+    branches:
+      - main
+      - cursor/an-lise-de-projeto-abrangente-6b68
+  workflow_dispatch:
+
+concurrency:
+  group: vercel-production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel production deploy hook
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$VERCEL_DEPLOY_HOOK_URL" ]; then
+            echo "::error::Secret VERCEL_DEPLOY_HOOK_URL não configurado no GitHub."
+            echo "::error::Crie um Deploy Hook de Production no Vercel e salve a URL em Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+          echo "Disparando deploy automático na Vercel..."
+          http_code="$(curl -sS -o /tmp/vercel-hook-response.txt -w "%{http_code}" -X POST "$VERCEL_DEPLOY_HOOK_URL")"
+          cat /tmp/vercel-hook-response.txt || true
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::error::Falha ao disparar deploy na Vercel (HTTP $http_code)."
+            exit 1
+          fi
+
+          echo "Deploy automático disparado com sucesso."
