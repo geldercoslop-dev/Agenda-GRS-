@@ -17,7 +17,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Agenda Pro Max">
   <meta http-equiv="Permissions-Policy" content="microphone=(self)">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'">
 
   <!-- ═══ Manifest e Ícones ═══ -->
   <link rel="manifest" href="./manifest.json?v=2026-03-22-3">
@@ -298,6 +298,11 @@
           <span class="sCardIcon">📊</span>
           <span class="sCardLabel">Estatísticas do sistema</span>
           <span class="sCardSub">Seu uso</span>
+        </div>
+        <div class="sCard" id="rowVersion" style="cursor:pointer;">
+          <span class="sCardIcon">🧭</span>
+          <span class="sCardLabel">Status da versão</span>
+          <span class="sCardSub">Sistema e atualização</span>
         </div>
         <div class="sCard" id="rowManual">
           <span class="sCardIcon">📖</span>
@@ -822,7 +827,9 @@
 <script src="./stateIntegrity.js"></script>
 <script src="./stateManager.js"></script>
 <script src="./syncQueue.js"></script>
+<script src="./moduleCheck.js"></script>
 <script src="./systemAudit.js"></script>
+<script src="./diagnostics.js"></script>
 <script src="./agenda.js"></script>
 <script src="./ui.js"></script>
 <script src="./notificacoes.js"></script>
@@ -852,6 +859,11 @@ let pendingPhoto = null;
 let pendingWmark = null;
 let pendingWallpaper = null;
 let reopenSettingsAfterWallpaperPick = false;
+const APP_BUILD_VERSION = '2026-03-22-6';
+const SAVE_MIN_INTERVAL_MS = 140;
+let _saveTimer = null;
+let _savePending = false;
+let _saveLastAt = 0;
 
 function _defaultWallpaperCatalog() {
   // Fallback seguro caso wallpapers.js não carregue por qualquer motivo
@@ -941,7 +953,7 @@ function ensureSystemFolders(){
   });
 }
 
-function save() {
+function _persistStateNow() {
   AppStorage.saveState(state);
   try {
     const activeScope = (typeof _currentScope === 'function') ? (_currentScope() || '') : (state && state.syncScope ? state.syncScope : '');
@@ -949,6 +961,202 @@ function save() {
       AppStorage.set(_scopeStorageKey('agendaProMax_state', activeScope), state);
     }
   } catch(_) {}
+  _saveLastAt = Date.now();
+  _savePending = false;
+}
+
+function _schedulePersist() {
+  if (!_savePending) return;
+  if (_saveTimer) return;
+  const now = Date.now();
+  const elapsed = now - _saveLastAt;
+  if (elapsed >= SAVE_MIN_INTERVAL_MS) {
+    _persistStateNow();
+    return;
+  }
+  _saveTimer = setTimeout(() => {
+    _saveTimer = null;
+    if (_savePending) _persistStateNow();
+  }, SAVE_MIN_INTERVAL_MS - elapsed);
+}
+
+function flushPendingSave() {
+  if (_saveTimer) {
+    clearTimeout(_saveTimer);
+    _saveTimer = null;
+  }
+  if (_savePending) _persistStateNow();
+}
+
+function save(force) {
+  _uiStateRev++;
+  _invalidateWarmCache();
+  _scheduleIdleWarmup();
+  _savePending = true;
+  if (force === true) {
+    flushPendingSave();
+    return;
+  }
+  _schedulePersist();
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushPendingSave();
+});
+window.addEventListener('beforeunload', flushPendingSave, { capture: true });
+
+const _UI_RENDER_METRICS_KEY = 'agendaProMax_renderMetrics';
+const _uiRerenderTimers = Object.create(null);
+let _uiStateRev = 0;
+const _uiRenderMetrics = (function(){
+  const fallback = { screens: {} };
+  try {
+    const raw = AppStorage.get(_UI_RENDER_METRICS_KEY, null);
+    if (raw && typeof raw === 'object') {
+      const out = Object.assign({}, fallback, raw);
+      if (!out.screens || typeof out.screens !== 'object') out.screens = {};
+      return out;
+    }
+  } catch(_) {}
+  return fallback;
+})();
+let _uiRenderMetricsSaveTimer = null;
+
+function _uiNowMs() {
+  try {
+    if (typeof performance !== 'undefined' && typeof performance.now === 'function') return performance.now();
+  } catch(_) {}
+  return Date.now();
+}
+function _saveRenderMetricsSoon() {
+  if (_uiRenderMetricsSaveTimer) return;
+  _uiRenderMetricsSaveTimer = setTimeout(() => {
+    _uiRenderMetricsSaveTimer = null;
+    try { AppStorage.set(_UI_RENDER_METRICS_KEY, _uiRenderMetrics); } catch(_) {}
+  }, 220);
+}
+function _recordRenderMetric(screenKey, startMs, itemCount) {
+  if (!screenKey) return;
+  const elapsed = Math.max(0, _uiNowMs() - Number(startMs || 0));
+  const safeElapsed = Number(elapsed.toFixed(2));
+  const safeCount = Math.max(0, Number(itemCount || 0));
+  const map = _uiRenderMetrics.screens || (_uiRenderMetrics.screens = {});
+  const curr = map[screenKey] || { samples: 0, avgMs: 0, maxMs: 0, lastMs: 0, lastCount: 0, lastAt: 0 };
+  const nextSamples = curr.samples + 1;
+  const nextAvg = ((curr.avgMs * curr.samples) + safeElapsed) / nextSamples;
+  map[screenKey] = {
+    samples: nextSamples,
+    avgMs: Number(nextAvg.toFixed(2)),
+    maxMs: Number(Math.max(curr.maxMs || 0, safeElapsed).toFixed(2)),
+    lastMs: safeElapsed,
+    lastCount: safeCount,
+    lastAt: Date.now()
+  };
+  _saveRenderMetricsSoon();
+}
+function _scheduleOverlayRender(key, guardOverlayId, fn, delayMs){
+  if (!key || typeof fn !== 'function') return;
+  if (_uiRerenderTimers[key]) clearTimeout(_uiRerenderTimers[key]);
+  _uiRerenderTimers[key] = setTimeout(() => {
+    _uiRerenderTimers[key] = null;
+    if (guardOverlayId && !document.getElementById(guardOverlayId)) return;
+    fn();
+  }, Math.max(16, Number(delayMs || 64)));
+}
+function _formatRenderMetricLine(screenKey){
+  const m = ((_uiRenderMetrics.screens || {})[screenKey]) || null;
+  if (!m || !m.samples) return '—';
+  return `${Math.round(m.avgMs)}ms méd · ${Math.round(m.lastMs)}ms atual · ${m.lastCount} itens`;
+}
+const _uiWarmCache = { rev: -1, screens: {} };
+let _uiIdleWarmupPending = false;
+
+function _prepareConsultasWarmData() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const consultas = (state.consultas || []).slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+  const proximas = [];
+  const historico = [];
+  consultas.forEach((c) => {
+    const d = new Date(c.data + 'T' + c.hora);
+    if (d >= today) proximas.push(c);
+    else historico.push(c);
+  });
+  return { consultas, proximas, historico, total: consultas.length };
+}
+function _prepareRemediosWarmData() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const remedios = (state.remedios || []).slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+  const ativos = [];
+  const inativos = [];
+  remedios.forEach((r) => {
+    const fim = new Date(r.data + 'T' + r.hora);
+    fim.setDate(fim.getDate() + r.dias);
+    if (fim >= today) ativos.push(r);
+    else inativos.push(r);
+  });
+  return { remedios, ativos, inativos, total: remedios.length };
+}
+function _prepareMercadoWarmData() {
+  const items = (_getMercado() || []).slice();
+  let marcadosN = 0;
+  items.forEach((x) => { if (x && x.checked) marcadosN++; });
+  return { items, totalItems: items.length, marcadosN, pendentesCount: items.length - marcadosN };
+}
+function _prepareComprasWarmData() {
+  const items = (_getCompras() || []).slice();
+  let marcadosN = 0;
+  items.forEach((x) => { if (x && x.checked) marcadosN++; });
+  return { items, totalItems: items.length, marcadosN, pendentesCount: items.length - marcadosN };
+}
+function _prepareDocsWarmData() {
+  const docs = (_getDocs() || []).slice();
+  return { docs, total: docs.length };
+}
+function _runIdleWarmup() {
+  const targetRev = _uiStateRev;
+  const warmStart = _uiNowMs();
+  const screens = {
+    consultas: _prepareConsultasWarmData(),
+    remedios: _prepareRemediosWarmData(),
+    mercado: _prepareMercadoWarmData(),
+    compras: _prepareComprasWarmData(),
+    docs: _prepareDocsWarmData(),
+  };
+  if (targetRev !== _uiStateRev) return;
+  _uiWarmCache.rev = targetRev;
+  _uiWarmCache.screens = screens;
+  const total = (screens.consultas.total || 0) + (screens.remedios.total || 0) +
+    (screens.mercado.totalItems || 0) + (screens.compras.totalItems || 0) + (screens.docs.total || 0);
+  _recordRenderMetric('idleWarmup', warmStart, total);
+}
+function _scheduleIdleWarmup() {
+  if (_uiIdleWarmupPending) return;
+  _uiIdleWarmupPending = true;
+  const runner = () => {
+    _uiIdleWarmupPending = false;
+    _runIdleWarmup();
+  };
+  if (typeof requestIdleCallback === 'function') {
+    requestIdleCallback(runner, { timeout: 1800 });
+  } else {
+    setTimeout(runner, 500);
+  }
+}
+function _invalidateWarmCache() {
+  _uiWarmCache.rev = -1;
+  _uiWarmCache.screens = {};
+}
+function _getWarmData(screenKey, builderFn) {
+  if (_uiWarmCache.rev === _uiStateRev && _uiWarmCache.screens && _uiWarmCache.screens[screenKey]) {
+    return _uiWarmCache.screens[screenKey];
+  }
+  const data = builderFn();
+  if (_uiWarmCache.rev !== _uiStateRev || !_uiWarmCache.screens) {
+    _uiWarmCache.rev = _uiStateRev;
+    _uiWarmCache.screens = {};
+  }
+  _uiWarmCache.screens[screenKey] = data;
+  return data;
 }
 
 // Migra dom2 → dom quando a semana vira (novo domingo)
@@ -1148,6 +1356,9 @@ function _setScopedCollection(baseKey, value) {
     try { AppStorage.set(_scopeStorageKey(baseKey, scope), value); } catch(_) {}
   }
   AppStorage.set(baseKey, value);
+  _uiStateRev++;
+  _invalidateWarmCache();
+  _scheduleIdleWarmup();
 }
 function recoverStateIfEmpty(currentState) {
   try {
@@ -1184,6 +1395,8 @@ function escAttr(s) { return escHtml(s).replace(/`/g, '&#096;'); }
 function safeImageUrl(rawUrl) {
   const val = String(rawUrl || '').trim();
   if (!val) return '';
+  // Defensivo: bloqueia placeholders/template strings acidentais persistidos em state.
+  if (/[{}]/.test(val) || /\$\{|%7B|%7D/i.test(val)) return '';
   if (val.startsWith('data:image/')) return val;
   if (val.startsWith('blob:')) return val;
   try {
@@ -3580,7 +3793,12 @@ function closeSidebar(){
   document.getElementById('sidebar').classList.remove('open');
   const ov=document.getElementById('sidebarOverlay');
   ov.classList.remove('open');
-  setTimeout(()=>{ if(!ov.classList.contains('open')) ov.style.display='none'; },300);
+  // Garante que o overlay não intercepte cliques enquanto anima para fechar
+  ov.style.pointerEvents='none';
+  setTimeout(()=>{
+    if(!ov.classList.contains('open')) ov.style.display='none';
+    ov.style.pointerEvents='';
+  },300);
 }
 
 // ══ SWIPE SIDEBAR — qualquer lugar da tela ══
@@ -3654,10 +3872,12 @@ function closeSidebar(){
   function applyWatermarkPhoto(dataUrl) {
     const wImg = document.getElementById('watermarkImg');
     const wWrap = document.getElementById('watermarkWrap');
-    if (wImg) wImg.src = dataUrl;
+    const safe = safeImageUrl(dataUrl);
+    if (!safe) return;
+    if (wImg) wImg.src = safe;
     if (wWrap) {
       wWrap.style.display = '';
-      detectWatermarkBg(dataUrl, (hasTrans) => {
+      detectWatermarkBg(safe, (hasTrans) => {
         if (hasTrans) {
           // Sem fundo: imagem livre (padrão mascote)
           wWrap.classList.remove('has-bg');
@@ -3702,6 +3922,9 @@ function init(){
   }
   state=load();
   state = recoverStateIfEmpty(state);
+  state.profilePhoto = safeImageUrl(state.profilePhoto || '') || null;
+  state.watermarkPhoto = safeImageUrl(state.watermarkPhoto || '') || null;
+  state.wallpaperPhoto = safeImageUrl(state.wallpaperPhoto || '') || '';
   try {
     if (typeof _currentScope === 'function') {
       const targetScope = _currentScope() || '';
@@ -3723,7 +3946,7 @@ function init(){
     _ti.textContent = '🖼️';
     _ti.style.filter = 'none';
   }
-  if(state.profilePhoto) document.getElementById('profileImg').src=state.profilePhoto;
+  if(state.profilePhoto) document.getElementById('profileImg').src=safeImageUrl(state.profilePhoto);
   applyWallpaperPhoto(state.wallpaperPhoto || '');
   if(state.watermarkPhoto){
     applyWatermarkPhoto(state.watermarkPhoto);
@@ -4011,6 +4234,7 @@ function init(){
   document.getElementById('rowExport')    ?.addEventListener('click', exportarDados);
   document.getElementById('rowImport')    ?.addEventListener('click', importarDados);
   document.getElementById('rowStats')     ?.addEventListener('click', ()=>openStats(true));
+  document.getElementById('rowVersion')   ?.addEventListener('click', openVersionStatus);
   document.getElementById('rowIntegrity') ?.addEventListener('click', verificarIntegridade);
   // ── Botão de pesquisa no header
   document.getElementById('searchBtn')?.addEventListener('click', openSearch);
@@ -4338,6 +4562,7 @@ function init(){
 
   updateHeader();
   renderFolders();
+  _scheduleIdleWarmup();
   renderWeekStrip();
   updateProgress();
   initStripExpand();
@@ -4348,6 +4573,10 @@ function init(){
 
   // Lembrete de backup — avisa se passaram mais de 3 dias sem backup
   setTimeout(checkBackupReminder, 3000);
+  // Backup automático de proteção a cada 6h (além do backup manual do usuário).
+  setInterval(autoBackup, 6 * 60 * 60 * 1000);
+  // Gera um snapshot local logo após iniciar com app estável.
+  setTimeout(autoBackup, 12000);
 }
 
 // ══ VERIFICAÇÃO DIÁRIA DE PENDÊNCIAS ══
@@ -4671,6 +4900,12 @@ function checkBackupReminder(){
 
     // Só avisa se passaram mais de 3 dias (ou nunca fez backup)
     if (last && (now - parseInt(last)) < TRES_DIAS) return;
+
+    // Não interrompe o usuário se já houver um modal/overlay aberto.
+    if (document.querySelector('.modalOverlay, #sModalOverlay.show, #subScreenOverlay.show, #fModalOverlay.show, #quickAddOverlay[style*="display: flex"], #searchOverlay[style*="display: flex"]')) {
+      setTimeout(checkBackupReminder, 12000);
+      return;
+    }
 
     // Modal central — mesmo padrão visual do doBackup()
     const {box, close} = _modalBase();
@@ -5418,8 +5653,10 @@ function openCompras(){
 }
 
 function _renderComprasOv(){
+  const _comprasRenderStart = _uiNowMs();
   const old=document.getElementById('comprasOv'); if(old) old.remove();
-  const items=_getCompras();
+  const comprasWarm = _getWarmData('compras', _prepareComprasWarmData);
+  const items = (comprasWarm.items || []).slice();
   const BG='linear-gradient(160deg,#021824,#04355a)';
   const BDR='rgba(0,140,180,.18)'; const TEXT='#e8f4ff'; const MUTED='rgba(180,220,240,.5)'; const ACC='#7dd3f0';
 
@@ -5435,7 +5672,7 @@ function _renderComprasOv(){
     </div>`;
   }
 
-  const totalItems=items.length, marcadosN=marcados.length;
+  const totalItems=items.length, marcadosN=(typeof comprasWarm.marcadosN === 'number' ? comprasWarm.marcadosN : marcados.length);
 
   const ov=document.createElement('div'); ov.id='comprasOv';
   ov.style.cssText=`position:fixed;inset:0;background:${BG};backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:99997;display:flex;flex-direction:column;`;
@@ -5449,9 +5686,7 @@ function _renderComprasOv(){
       <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:${MUTED};">${pendentes.length} item${pendentes.length!==1?'ns':''} restante${pendentes.length!==1?'s':''}</span>
       <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:rgba(34,197,94,.7);">${marcadosN}/${totalItems} marcados</span>
     </div>`:''}
-    <div id="_cpBody" style="flex:1;overflow-y:auto;padding:0 16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
-      ${items.length===0?`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;"><div style="font-size:40px;margin-bottom:12px;">🛒</div><div style="font-size:14px;font-weight:700;margin-bottom:6px;">Lista vazia</div><div style="font-size:12px;opacity:.7;">Adicione itens abaixo</div></div>`:items.map((it,i)=>itemRow(it,i)).join('')}
-    </div>
+    <div id="_cpBody" style="flex:1;overflow-y:auto;padding:0 16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;"></div>
 
     <!-- Input rápido fixo no rodapé -->
     <div style="padding:12px 16px;background:rgba(0,80,120,.3);border-top:1px solid ${BDR};display:flex;gap:8px;flex-shrink:0;">
@@ -5461,6 +5696,28 @@ function _renderComprasOv(){
     </div>`;
 
   document.body.appendChild(ov);
+  const cpBody = ov.querySelector('#_cpBody');
+  if (items.length===0) {
+    cpBody.innerHTML = `<div style="text-align:center;padding:48px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;"><div style="font-size:40px;margin-bottom:12px;">🛒</div><div style="font-size:14px;font-weight:700;margin-bottom:6px;">Lista vazia</div><div style="font-size:12px;opacity:.7;">Adicione itens abaixo</div></div>`;
+  } else {
+    const CP_BATCH=72;
+    let cpIdx=0;
+    const renderCpChunk=()=>{
+      if(!cpBody) return;
+      let html='';
+      const end=Math.min(cpIdx+CP_BATCH, items.length);
+      for(let i=cpIdx;i<end;i++) html += itemRow(items[i], i);
+      if(html) cpBody.insertAdjacentHTML('beforeend', html);
+      cpIdx=end;
+    };
+    renderCpChunk();
+    const onCpScroll=()=>{
+      if(cpIdx>=items.length){ cpBody.removeEventListener('scroll', onCpScroll); return; }
+      const nearEnd=(cpBody.scrollHeight - cpBody.scrollTop - cpBody.clientHeight) < 220;
+      if(nearEnd) renderCpChunk();
+    };
+    cpBody.addEventListener('scroll', onCpScroll, { passive:true });
+  }
 
   function addItem(){
     const nome=ov.querySelector('#_cpInput').value.trim();
@@ -5475,12 +5732,13 @@ function _renderComprasOv(){
   ov.querySelector('#_cpInput').addEventListener('keydown',e=>{if(e.key==='Enter')addItem();});
   if(ov.querySelector('#_cpClearDone')) ov.querySelector('#_cpClearDone').onclick=()=>{ _saveCompras(_getCompras().filter(x=>!x.checked)); _renderComprasOv(); };
 
-  ov.querySelector('#_cpBody').addEventListener('click',e=>{
+  cpBody.addEventListener('click',e=>{
     const ck=e.target.closest('.cpCheck'), dl=e.target.closest('.cpDel');
     const arr=_getCompras();
     if(ck){ arr[parseInt(ck.dataset.idx)].checked=!arr[parseInt(ck.dataset.idx)].checked; _saveCompras(arr); _renderComprasOv(); }
     else if(dl){ arr.splice(parseInt(dl.dataset.idx),1); _saveCompras(arr); _renderComprasOv(); }
   });
+  _recordRenderMetric('compras', _comprasRenderStart, items.length);
 }
 
 // ══ MERCADO ══
@@ -5496,11 +5754,13 @@ function openMercado(){
 }
 
 function _renderMercadoOv(){
+  const _mercadoRenderStart = _uiNowMs();
   const old=document.getElementById('mercadoOv'); if(old) old.remove();
-  const items=_getMercado();
-  const marcadosN=items.filter(x=>x.checked).length;
-  const totalItems=items.length;
-  const pendentes=items.filter(x=>!x.checked);
+  const mercadoWarm = _getWarmData('mercado', _prepareMercadoWarmData);
+  const items = (mercadoWarm.items || []).slice();
+  const marcadosN = (typeof mercadoWarm.marcadosN === 'number') ? mercadoWarm.marcadosN : items.filter(x=>x.checked).length;
+  const totalItems = (typeof mercadoWarm.totalItems === 'number') ? mercadoWarm.totalItems : items.length;
+  const pendentes = items.filter(x=>!x.checked);
 
   const BG=`linear-gradient(160deg,#021824,#04355a)`;
   const TEXT='#e8f4ff'; const MUTED='rgba(180,220,240,.55)';
@@ -5528,9 +5788,7 @@ function _renderMercadoOv(){
       <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:${MUTED};">${pendentes.length} item${pendentes.length!==1?'ns':''} restante${pendentes.length!==1?'s':''}</span>
       <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:rgba(34,197,94,.7);">${marcadosN}/${totalItems} marcados</span>
     </div>`:''}
-    <div id="_mkBody" style="flex:1;overflow-y:auto;padding:0 16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
-      ${items.length===0?`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;"><div style="font-size:40px;margin-bottom:12px;">🛍️</div><div style="font-size:14px;font-weight:700;margin-bottom:6px;">Lista vazia</div><div style="font-size:12px;opacity:.7;">Adicione itens abaixo</div></div>`:items.map((it,i)=>itemRow(it,i)).join('')}
-    </div>
+    <div id="_mkBody" style="flex:1;overflow-y:auto;padding:0 16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;"></div>
     <!-- Input rápido fixo no rodapé -->
     <div style="padding:12px 16px;background:rgba(0,80,120,.3);border-top:1px solid ${BDR};display:flex;gap:8px;flex-shrink:0;align-items:center;">
       <input id="_mkQtd" type="text" maxlength="10" placeholder="Qtd" style="width:54px;padding:10px 8px;border-radius:10px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;outline:none;text-align:center;flex-shrink:0;">
@@ -5541,6 +5799,28 @@ function _renderMercadoOv(){
       </button>
     </div>`;
   document.body.appendChild(ov);
+  const mkBody = ov.querySelector('#_mkBody');
+  if (items.length===0) {
+    mkBody.innerHTML = `<div style="text-align:center;padding:48px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;"><div style="font-size:40px;margin-bottom:12px;">🛍️</div><div style="font-size:14px;font-weight:700;margin-bottom:6px;">Lista vazia</div><div style="font-size:12px;opacity:.7;">Adicione itens abaixo</div></div>`;
+  } else {
+    const MK_BATCH=60;
+    let mkIdx=0;
+    const renderMkChunk=()=>{
+      if(!mkBody) return;
+      let html='';
+      const end=Math.min(mkIdx+MK_BATCH, items.length);
+      for(let i=mkIdx;i<end;i++) html += itemRow(items[i], i);
+      if(html) mkBody.insertAdjacentHTML('beforeend', html);
+      mkIdx=end;
+    };
+    renderMkChunk();
+    const onMkScroll=()=>{
+      if(mkIdx>=items.length){ mkBody.removeEventListener('scroll', onMkScroll); return; }
+      const nearEnd=(mkBody.scrollHeight - mkBody.scrollTop - mkBody.clientHeight) < 240;
+      if(nearEnd) renderMkChunk();
+    };
+    mkBody.addEventListener('scroll', onMkScroll, { passive:true });
+  }
   ov.querySelector('#_mkBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   if(ov.querySelector('#_mkClearDone')) ov.querySelector('#_mkClearDone').onclick=()=>{ _saveMercado(_getMercado().filter(x=>!x.checked)); _renderMercadoOv(); };
   ov.querySelector('#_mkAdd').onclick=()=>{
@@ -5568,6 +5848,7 @@ function _renderMercadoOv(){
     if(cb){ const arr=_getMercado(); arr[parseInt(cb.dataset.ci)].checked=cb.checked; _saveMercado(arr); _renderMercadoOv(); }
     else if(dl){ const arr=_getMercado(); arr.splice(parseInt(dl.dataset.di),1); _saveMercado(arr); _renderMercadoOv(); }
   });
+  _recordRenderMetric('mercado', _mercadoRenderStart, items.length);
 }
 
 // ══ DOCUMENTOS ══
@@ -5583,10 +5864,12 @@ function openDocs(){
 }
 
 function _renderDocsOv(){
+  const _docsRenderStart = _uiNowMs();
   const old = document.getElementById('docsOv');
   if(old) old.remove();
 
-  const docs = _getDocs();
+  const docsWarm = _getWarmData('docs', _prepareDocsWarmData);
+  const docs = (docsWarm.docs || []).slice();
   const BG   = 'linear-gradient(160deg,#021824,#04355a)';
   const BDR  = 'rgba(0,140,180,.18)';
   const FIELD= 'rgba(0,80,120,.28)';
@@ -5613,14 +5896,6 @@ function _renderDocsOv(){
     </div>`;
   }
 
-  const listaHTML = docs.length === 0
-    ? `<div style="text-align:center;padding:48px 20px 32px;color:${MUTED};font-family:'Space Grotesk',sans-serif;">
-        <div style="font-size:40px;margin-bottom:12px;">🪪</div>
-        <div style="font-size:14px;font-weight:700;margin-bottom:6px;">Nenhum documento salvo</div>
-        <div style="font-size:12px;opacity:.7;">Toque em <b>+ Novo</b> para cadastrar</div>
-       </div>`
-    : docs.map((d,i)=>cardHTML(d,i)).join('');
-
   const ov = document.createElement('div');
   ov.id = 'docsOv';
   if(typeof window._navPush === 'function') window._navPush();
@@ -5631,9 +5906,7 @@ function _renderDocsOv(){
       <button id="_docsNew" style="background:${ACCENT_SOLID};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
       <button id="_docsBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
-    <div id="_docsBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
-      ${listaHTML}
-    </div>
+    <div id="_docsBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;"></div>
 
     <!-- ── Formulário (oculto) ── -->
     <div id="_docsForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
@@ -5665,6 +5938,32 @@ function _renderDocsOv(){
     </div>`;
 
   document.body.appendChild(ov);
+  const docsBody = ov.querySelector('#_docsBody');
+  if (docs.length===0) {
+    docsBody.innerHTML = `<div style="text-align:center;padding:48px 20px 32px;color:${MUTED};font-family:'Space Grotesk',sans-serif;">
+      <div style="font-size:40px;margin-bottom:12px;">🪪</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px;">Nenhum documento salvo</div>
+      <div style="font-size:12px;opacity:.7;">Toque em <b>+ Novo</b> para cadastrar</div>
+     </div>`;
+  } else {
+    const DOC_BATCH=44;
+    let docIdx=0;
+    const renderDocChunk=()=>{
+      if(!docsBody) return;
+      let html='';
+      const end=Math.min(docIdx+DOC_BATCH, docs.length);
+      for(let i=docIdx;i<end;i++) html += cardHTML(docs[i], i);
+      if(html) docsBody.insertAdjacentHTML('beforeend', html);
+      docIdx=end;
+    };
+    renderDocChunk();
+    const onDocScroll=()=>{
+      if(docIdx>=docs.length){ docsBody.removeEventListener('scroll', onDocScroll); return; }
+      const nearEnd=(docsBody.scrollHeight - docsBody.scrollTop - docsBody.clientHeight) < 220;
+      if(nearEnd) renderDocChunk();
+    };
+    docsBody.addEventListener('scroll', onDocScroll, { passive:true });
+  }
 
   // ── Navegação ──
   let _editIdx = null;
@@ -5714,7 +6013,7 @@ function _renderDocsOv(){
   };
 
   // Editar / Excluir via delegação
-  ov.querySelector('#_docsBody').addEventListener('click', e => {
+  docsBody.addEventListener('click', e => {
     const editBtn = e.target.closest('.docEdit');
     const delBtn  = e.target.closest('.docDel');
     if(editBtn){ showForm(parseInt(editBtn.dataset.idx)); return; }
@@ -5727,6 +6026,7 @@ function _renderDocsOv(){
       return;
     }
   });
+  _recordRenderMetric('docs', _docsRenderStart, docs.length);
 }
 
 // helper
@@ -5755,7 +6055,7 @@ function _getMunicipiosES(){
 }
 
 window._feriadosCidade = window._feriadosCidade || AppStorage.get('feriadosCidade', '');
-window._feriadosMunicipalPick = window._feriadosMunicipalPick || AppStorage.get('feriadosMunicipalPick', '__all__');
+window._feriadosMunicipalPick = window._feriadosMunicipalPick || '__all__';
 
 function openFeriados(){
   const existing = document.getElementById('feriadosOv');
@@ -5818,7 +6118,7 @@ function openFeriados(){
     ];
   }
 
-  function getMunicipaisSelecionados(ano, cidadeSlug, holidayPick){
+  function getMunicipaisSelecionados(ano, cidadeSlug){
     if(!cidadeSlug) return [];
     const city = municipiosES.find((c)=>c.slug===cidadeSlug);
     if(!city) return [];
@@ -5830,13 +6130,12 @@ function openFeriados(){
       tipo: 'municipal',
       cidade: city.city
     }));
-    if(!holidayPick || holidayPick === '__all__') return all;
-    return all.filter((h)=>h.id===holidayPick);
+    return all;
   }
 
-  function getFeriados(ano, cidadeSlug, holidayPick){
+  function getFeriados(ano, cidadeSlug){
     const base = getBaseFeriados(ano);
-    const municipais = getMunicipaisSelecionados(ano, cidadeSlug, holidayPick);
+    const municipais = getMunicipaisSelecionados(ano, cidadeSlug);
     return [...base, ...municipais].sort((a,b)=>a.iso.localeCompare(b.iso));
   }
 
@@ -5848,21 +6147,6 @@ function openFeriados(){
 
   let cidadeAtual = _normalizeCidadeSlug(window._feriadosCidade || '');
   if(cidadeAtual && !cityBySlug[cidadeAtual]) cidadeAtual = '';
-  let feriadoMunicipalPick = String(window._feriadosMunicipalPick || '__all__');
-  if(cidadeAtual){
-    const cityInit = municipiosES.find((c)=>c.slug===cidadeAtual);
-    if(cityInit){
-      const validIds = cityInit.holidays.map((h)=>`${cidadeAtual}:${h.id || `${h.month}-${h.day}`}`);
-      if(feriadoMunicipalPick !== '__all__' && !validIds.includes(feriadoMunicipalPick)){
-        feriadoMunicipalPick = '__all__';
-      }
-    } else {
-      feriadoMunicipalPick = '__all__';
-    }
-  } else {
-    feriadoMunicipalPick = '__all__';
-  }
-
   const cityOptions = municipiosES.map((c)=>
     `<option value="${escAttr(c.slug)}"${c.slug===cidadeAtual?' selected':''}>${escHtml(c.city)}</option>`
   ).join('');
@@ -5878,7 +6162,7 @@ function openFeriados(){
       <span id="_ferCnt" style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;color:rgba(180,220,240,.45);flex-shrink:0;">0 restantes</span>
       <button id="_ferBack" style="background:rgba(0,80,120,.3);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:#7dd3f0;font-size:17px;font-weight:900;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px 8px;border-bottom:1px solid rgba(0,140,180,.15);background:rgba(0,0,0,.14);">
+    <div style="display:flex;flex-direction:column;gap:8px;padding:10px 14px 8px;border-bottom:1px solid rgba(0,140,180,.15);background:rgba(0,0,0,.14);">
       <label style="display:flex;flex-direction:column;gap:4px;">
         <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;color:rgba(180,220,240,.6);text-transform:uppercase;">Selecionar cidade</span>
         <select id="_ferCitySel" style="width:100%;padding:9px 10px;border-radius:10px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;outline:none;">
@@ -5887,19 +6171,12 @@ function openFeriados(){
         </select>
         <input id="_ferCitySearch" type="search" placeholder="Buscar cidade..." style="margin-top:6px;width:100%;padding:8px 10px;border-radius:10px;border:1px solid rgba(0,160,200,.18);background:rgba(0,80,120,.2);color:#e8f4ff;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;outline:none;" />
       </label>
-      <label style="display:flex;flex-direction:column;gap:4px;">
-        <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;color:rgba(180,220,240,.6);text-transform:uppercase;">Selecionar feriado</span>
-        <select id="_ferHolidaySel" style="width:100%;padding:9px 10px;border-radius:10px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;outline:none;">
-          <option value="__all__">Todos da cidade</option>
-        </select>
-      </label>
     </div>
     <div id="_ferBody" style="flex:1;overflow-y:auto;padding:14px 16px 24px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;"></div>`;
   document.body.appendChild(ov);
 
   const citySel = ov.querySelector('#_ferCitySel');
   const citySearch = ov.querySelector('#_ferCitySearch');
-  const holidaySel = ov.querySelector('#_ferHolidaySel');
 
   function tipoBadge(f){
     if(f.tipo==='nacional')     return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(59,130,246,.15);color:rgba(147,197,253,.9);border:1px solid rgba(59,130,246,.25);border-radius:5px;padding:1px 5px;margin-left:6px;">Nacional</span>';
@@ -5908,27 +6185,6 @@ function openFeriados(){
     if(f.tipo==='municipal')    return `<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(251,146,60,.12);color:rgba(253,186,116,.9);border:1px solid rgba(251,146,60,.25);border-radius:5px;padding:1px 5px;margin-left:6px;">${escHtml(f.cidade || 'Municipal')}</span>`;
     if(f.tipo==='comemorativo') return '<span style="font-size:9px;font-weight:700;letter-spacing:.04em;background:rgba(251,191,36,.12);color:rgba(253,224,71,.85);border:1px solid rgba(251,191,36,.2);border-radius:5px;padding:1px 5px;margin-left:6px;">Comemorativo</span>';
     return '';
-  }
-
-  function renderHolidaySelector(){
-    if(!cidadeAtual){
-      holidaySel.innerHTML = '<option value="__all__">Selecione uma cidade</option>';
-      holidaySel.disabled = true;
-      return;
-    }
-    const city = municipiosES.find((c)=>c.slug===cidadeAtual);
-    if(!city){
-      holidaySel.innerHTML = '<option value="__all__">Selecione uma cidade</option>';
-      holidaySel.disabled = true;
-      return;
-    }
-    const options = city.holidays.map((h)=>{
-      const id = `${cidadeAtual}:${h.id || `${h.month}-${h.day}`}`;
-      const selected = id===feriadoMunicipalPick ? ' selected' : '';
-      return `<option value="${escAttr(id)}"${selected}>${escHtml(h.name || 'Feriado municipal')}</option>`;
-    }).join('');
-    holidaySel.innerHTML = `<option value="__all__"${feriadoMunicipalPick==='__all__'?' selected':''}>Todos da cidade</option>${options}`;
-    holidaySel.disabled = false;
   }
 
   function _renderHolidayRows(items){
@@ -5971,40 +6227,29 @@ function openFeriados(){
   }
 
   function renderFeriados(){
-    const lista = getFeriados(ano, cidadeAtual, feriadoMunicipalPick).filter((f)=>f.iso >= hojeISO);
-    const nacionais = lista.filter((f)=>f.tipo!=='municipal');
-    const municipais = lista.filter((f)=>f.tipo==='municipal');
+    const lista = getFeriados(ano, cidadeAtual).filter((f)=>f.iso >= hojeISO);
 
     let html = '';
-    html += `<div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:rgba(147,197,253,.9);padding:2px 0 8px;">Nacionais e gerais</div>`;
-    html += _renderHolidayRows(nacionais);
-    if(cidadeAtual){
-      html += `<div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:rgba(253,186,116,.9);padding:8px 0 8px;">Municipais da cidade</div>`;
-      html += _renderHolidayRows(municipais);
-    }
+    html += `<div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:rgba(147,197,253,.9);padding:2px 0 8px;">Lista única de feriados</div>`;
+    html += _renderHolidayRows(lista);
 
     const body = document.getElementById('_ferBody');
     if(body) body.innerHTML = html + `
       <div style="margin-top:18px;padding:12px 14px;background:rgba(0,80,120,.15);border:1px solid rgba(0,140,180,.12);border-radius:10px;">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:rgba(180,220,240,.35);line-height:1.6;text-align:center;">Nacionais sempre visíveis · Município opcional por seleção de cidade e feriado</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:rgba(180,220,240,.35);line-height:1.6;text-align:center;">Nacionais e estaduais sempre incluídos · Municipais variam conforme a cidade selecionada</div>
       </div>`;
     const cnt = document.getElementById('_ferCnt');
     if(cnt) cnt.textContent = `${lista.length} restantes`;
   }
 
-  renderHolidaySelector();
   renderFeriados();
 
   ov.querySelector('#_ferBack').onclick = () => { ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
 
   citySel.addEventListener('change', ()=>{
     cidadeAtual = _normalizeCidadeSlug(citySel.value || '');
-    feriadoMunicipalPick = '__all__';
     window._feriadosCidade = cidadeAtual;
-    window._feriadosMunicipalPick = feriadoMunicipalPick;
     AppStorage.set('feriadosCidade', cidadeAtual);
-    AppStorage.set('feriadosMunicipalPick', feriadoMunicipalPick);
-    renderHolidaySelector();
     renderFeriados();
   });
 
@@ -6019,12 +6264,6 @@ function openFeriados(){
     });
   });
 
-  holidaySel.addEventListener('change', ()=>{
-    feriadoMunicipalPick = String(holidaySel.value || '__all__');
-    window._feriadosMunicipalPick = feriadoMunicipalPick;
-    AppStorage.set('feriadosMunicipalPick', feriadoMunicipalPick);
-    renderFeriados();
-  });
 }
 
 // ══ FOLDER MODAL ══
@@ -7377,6 +7616,57 @@ function openStats(fromSettings) {
   openSubScreen('📊 Estatísticas do sistema', html, null, null);
 }
 
+function openVersionStatus() {
+  let swControlled = false;
+  try {
+    swControlled = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+  } catch(_) {}
+  const safeVersion = _escHtml(String(APP_BUILD_VERSION || 'desconhecida'));
+  const metricRows = [
+    ['Consultas (render)', _formatRenderMetricLine('consultas')],
+    ['Remédios (render)', _formatRenderMetricLine('remedios')],
+    ['Mercado (render)', _formatRenderMetricLine('mercado')],
+    ['Compras (render)', _formatRenderMetricLine('compras')],
+    ['Documentos (render)', _formatRenderMetricLine('docs')],
+    ['Pré-cálculo idle', _formatRenderMetricLine('idleWarmup')],
+  ];
+  const html = `
+    <div style="padding:4px 0 12px;font-family:'Plus Jakarta Sans',sans-serif;">
+      <div style="background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.18);border-radius:14px;padding:16px 18px;">
+        <div style="font-size:10px;font-weight:900;color:rgba(180,220,240,.55);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;font-family:'Space Grotesk',sans-serif;">Versão e Atualização</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          ${[
+            ['Versão do app', safeVersion],
+            ['Service Worker', swControlled ? 'Ativo' : 'Inativo'],
+            ['Modo de atualização', 'Segura (com confirmação)'],
+            ['Backup automático', 'Ativo (a cada 6 horas)'],
+          ].map(([l,v]) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,140,180,.1);padding-bottom:8px;">
+              <span style="font-size:13px;font-weight:600;color:rgba(180,220,240,.7);font-family:'Plus Jakarta Sans',sans-serif;">${l}</span>
+              <span style="font-size:13px;font-weight:800;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;">${v}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div style="margin-top:12px;background:rgba(4,53,90,.45);border:1px solid rgba(0,140,180,.18);border-radius:14px;padding:16px 18px;">
+        <div style="font-size:10px;font-weight:900;color:rgba(180,220,240,.55);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;font-family:'Space Grotesk',sans-serif;">Performance local (tempo de render)</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          ${metricRows.map(([l,v]) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,140,180,.1);padding-bottom:8px;">
+              <span style="font-size:13px;font-weight:600;color:rgba(180,220,240,.7);font-family:'Plus Jakarta Sans',sans-serif;">${_escHtml(l)}</span>
+              <span style="font-size:13px;font-weight:800;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;text-align:right;">${_escHtml(String(v || '—'))}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;font-weight:600;color:rgba(180,220,240,.35);text-align:center;line-height:1.5;font-family:'Space Grotesk',sans-serif;">
+        Use este painel para validar rapidamente se o app está atualizado e estável.
+      </div>
+    </div>`;
+  closeSettings();
+  openSubScreen('🧭 Status da versão', html, null, null);
+}
+
 // ══════════════════════════════════════════════════════════════════
 // ══ VERIFICADOR DE INTEGRIDADE DE DADOS ══
 // ══════════════════════════════════════════════════════════════════
@@ -7549,6 +7839,7 @@ if (typeof iniciarVerificacaoPeriodica === 'function') {
 
 const APP_DATA_VERSION = 2;
 const _MIGRATION_KEY   = 'agendaProMax_dataVersion';
+const _MIGRATION_SNAPSHOT_PREFIX = 'agendaProMax_preMigration_';
 
 const _MIGRATIONS = {
   // v1 → v2: garante que todos os remédios têm campo 'ativo'
@@ -7570,12 +7861,23 @@ const _MIGRATIONS = {
   // 3: function(s) { /* ... */ return s; }
 };
 
+function _saveMigrationSnapshot(s, fromVersion, toVersion) {
+  try {
+    const key = _MIGRATION_SNAPSHOT_PREFIX + String(fromVersion) + '_to_' + String(toVersion) + '_' + Date.now();
+    const payload = _buildExportPayloadFromState(s || state || {});
+    AppStorage.set(key, payload);
+    const keys = (AppStorage.keys(_MIGRATION_SNAPSHOT_PREFIX) || []).sort();
+    while (keys.length > 3) AppStorage.remove(keys.shift());
+  } catch(_) {}
+}
+
 function _runMigrations(s) {
   let currentVersion = 0;
   try {
     currentVersion = parseInt(AppStorage.get(_MIGRATION_KEY, '0') || '0', 10);
   } catch(e) {}
   if (currentVersion >= APP_DATA_VERSION) return s;
+  _saveMigrationSnapshot(s, currentVersion, APP_DATA_VERSION);
 
   for (let v = currentVersion + 1; v <= APP_DATA_VERSION; v++) {
     if (typeof _MIGRATIONS[v] === 'function') {
@@ -7979,6 +8281,7 @@ function openListaConsultas(){
   _setFooter(false);
   const existing=document.getElementById('listaConsultasOv');
   if(existing)existing.remove();
+  const _consultasRenderStart = _uiNowMs();
 
 
   // ── Paleta Relatório Semanal ──
@@ -7993,10 +8296,10 @@ function openListaConsultas(){
   const FIELD = 'rgba(0,80,120,.28)';
   const FBDR  = 'rgba(0,160,200,.14)';
 
-  const today=new Date(); today.setHours(0,0,0,0);
-  const consultas=(state.consultas||[]).slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
-  const proximas=consultas.filter(c=>{ const d=new Date(c.data+'T'+c.hora); return d>=today; });
-  const historico=consultas.filter(c=>{ const d=new Date(c.data+'T'+c.hora); return d<today; });
+  const consultasWarm = _getWarmData('consultas', _prepareConsultasWarmData);
+  const consultas = (consultasWarm.consultas || []).slice();
+  const proximas = (consultasWarm.proximas || []).slice();
+  const historico = (consultasWarm.historico || []).slice();
 
   // ── Formato padrão: Paciente • Especialidade • Data Hora ──
   function fmtConsultaLabel(c){
@@ -8091,6 +8394,7 @@ function openListaConsultas(){
   }
   ov.querySelector('#_lcBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_lcAdd').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); openConsultaModal(); };
+  _recordRenderMetric('consultas', _consultasRenderStart, consultas.length);
 }
 
 // ── Mini Relatório ao clicar na consulta ──
@@ -8580,6 +8884,7 @@ function openListaRemedios(){
 
   const existing=document.getElementById('listaRemediosOv');
   if(existing)existing.remove();
+  const _remediosRenderStart = _uiNowMs();
 
   // ── Paleta Relatório Semanal ──
   const TEXT  = '#e8f4ff';
@@ -8593,14 +8898,10 @@ function openListaRemedios(){
   const FIELD = 'rgba(0,80,120,.28)';
   const FBDR  = 'rgba(0,160,200,.14)';
 
-  const today=new Date(); today.setHours(0,0,0,0);
-  const remedios=(state.remedios||[]).slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
-  const ativos=remedios.filter(r=>{
-    const fim=new Date(r.data+'T'+r.hora); fim.setDate(fim.getDate()+r.dias); return fim>=today;
-  });
-  const inativos=remedios.filter(r=>{
-    const fim=new Date(r.data+'T'+r.hora); fim.setDate(fim.getDate()+r.dias); return fim<today;
-  });
+  const remediosWarm = _getWarmData('remedios', _prepareRemediosWarmData);
+  const remedios = (remediosWarm.remedios || []).slice();
+  const ativos = (remediosWarm.ativos || []).slice();
+  const inativos = (remediosWarm.inativos || []).slice();
 
   function cardHTML(r,isPast){
     const dataFmt=r.data?r.data.split('-').reverse().join('/'):'-';
@@ -8625,20 +8926,6 @@ function openListaRemedios(){
     </div>`;
   }
 
-  let body='';
-  if(ativos.length===0&&inativos.length===0){
-    body=`<div style="text-align:center;padding:56px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;">Nenhum remédio cadastrado</div>`;
-  } else {
-    if(ativos.length>0){
-      body+=`<div style="font-size:9px;font-weight:900;color:${ACCENT};text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-family:'Space Grotesk',sans-serif;">💊 Em Tratamento (${ativos.length})</div>`;
-      ativos.forEach(r=>{ body+=cardHTML(r,false); });
-    }
-    if(inativos.length>0){
-      body+=`<div style="font-size:9px;font-weight:900;color:${MUTED};text-transform:uppercase;letter-spacing:1px;margin:18px 0 10px;font-family:'Space Grotesk',sans-serif;">Histórico (${inativos.length})</div>`;
-      inativos.forEach(r=>{ body+=cardHTML(r,true); });
-    }
-  }
-
   const ov=document.createElement('div');
   ov.id='listaRemediosOv';
   if(typeof window._navPush === 'function') window._navPush();
@@ -8649,10 +8936,57 @@ function openListaRemedios(){
       <button id="_lrAdd" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
       <button id="_lrBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
-    <div style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">${body}</div>`;
+    <div id="_lrBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;"></div>`;
   document.body.appendChild(ov);
+  const lrBody=ov.querySelector('#_lrBody');
+  const sections=[];
+  if(ativos.length>0){
+    sections.push({
+      title:`<div style="font-size:9px;font-weight:900;color:${ACCENT};text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-family:'Space Grotesk',sans-serif;">💊 Em Tratamento (${ativos.length})</div>`,
+      items:ativos,
+      isPast:false
+    });
+  }
+  if(inativos.length>0){
+    sections.push({
+      title:`<div style="font-size:9px;font-weight:900;color:${MUTED};text-transform:uppercase;letter-spacing:1px;margin:18px 0 10px;font-family:'Space Grotesk',sans-serif;">Histórico (${inativos.length})</div>`,
+      items:inativos,
+      isPast:true
+    });
+  }
+  if(sections.length===0){
+    lrBody.innerHTML=`<div style="text-align:center;padding:56px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;">Nenhum remédio cadastrado</div>`;
+  } else {
+    const LR_BATCH=32;
+    let sectionIdx=0;
+    let itemIdx=0;
+    function renderRemedioChunk(){
+      if(!lrBody) return;
+      let remaining=LR_BATCH;
+      let html='';
+      while(sectionIdx<sections.length && remaining>0){
+        const sec=sections[sectionIdx];
+        if(itemIdx===0) html += sec.title;
+        while(itemIdx<sec.items.length && remaining>0){
+          html += cardHTML(sec.items[itemIdx], sec.isPast);
+          itemIdx++;
+          remaining--;
+        }
+        if(itemIdx>=sec.items.length){ sectionIdx++; itemIdx=0; }
+      }
+      if(html) lrBody.insertAdjacentHTML('beforeend', html);
+    }
+    renderRemedioChunk();
+    const onLrScroll=()=>{
+      if(sectionIdx>=sections.length){ lrBody.removeEventListener('scroll', onLrScroll); return; }
+      const nearEnd=(lrBody.scrollHeight - lrBody.scrollTop - lrBody.clientHeight) < 220;
+      if(nearEnd) renderRemedioChunk();
+    };
+    lrBody.addEventListener('scroll', onLrScroll, { passive:true });
+  }
   ov.querySelector('#_lrBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_lrAdd').onclick=()=>{ ov.remove(); openRemedioModal(); };
+  _recordRenderMetric('remedios', _remediosRenderStart, remedios.length);
 }
 
 function editRemedio(id){ document.getElementById('listaRemediosOv')?.remove(); openRemedioModal(id); }
@@ -9440,7 +9774,7 @@ function openHistoricoPaciente(){
   // ── 1. ATUALIZAÇÃO SEGURA COM BOTÃO (SEM LIMPEZA AUTOMÁTICA) ────
   // Detecta nova versão e mostra botão "Atualizar agora" sem apagar dados do usuário.
   (function _swSafeUpdateButton() {
-    const SW_BUILD_VERSION = '2026-03-22-5';
+    const SW_BUILD_VERSION = APP_BUILD_VERSION;
     const SW_URL = './sw.js?v=' + encodeURIComponent(SW_BUILD_VERSION);
     const BANNER_ID = '_swSafeUpdateBanner';
     let _swReg = null;

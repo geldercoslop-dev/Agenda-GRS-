@@ -306,8 +306,8 @@
     [data-theme="light"] .mCell.mActive { background:transparent; color:#f97316; border:1.5px solid rgba(249,115,22,.85); }
     .mCell.mEmpty { cursor:default; pointer-events:none; }
     .mCell.mHasTask::after {
-      content:''; position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
-      width:4px; height:4px; border-radius:50%; background:rgba(249,115,22,.85);
+      content:''; position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
+      width:3px; height:3px; border-radius:50%; background:rgba(249,115,22,.85);
     }
     .mCell.mToday.mHasTask::after { background:rgba(255,255,255,.7); }
 
@@ -318,11 +318,11 @@
     [data-theme="light"] .wDay.active .wdName { color:#fff; }
     .wDay .wdNum { font-family:'Space Grotesk',sans-serif; font-size:clamp(12px,3.4vw,15px); font-weight:700; color:rgba(255,255,255,.75); width:clamp(24px,7vw,30px); height:clamp(24px,7vw,30px); display:flex; align-items:center; justify-content:center; border-radius:7px; }
     [data-theme="light"] .wDay .wdNum { color:#32261c !important; font-weight:900; }
-    .wDay.active .wdNum { background:#ffffff; color:#f97316; border:none; box-shadow:0 2px 10px rgba(0,0,0,.35), 0 0 0 1.5px rgba(249,115,22,.6); font-weight:900; }
-    .wDay .wdDot { width:4px; height:4px; border-radius:50%; background:rgba(249,115,22,.85); }
+    .wDay.active .wdNum { background:transparent; color:#f97316; border:1.5px solid rgba(249,115,22,.85); box-shadow:0 0 5px rgba(249,115,22,.25); }
+    .wDay .wdDot { width:3px; height:3px; border-radius:50%; background:rgba(249,115,22,.85); }
     .wDay.active .wdDot { background:#f97316; }
     [data-theme="light"] .wDay .wdDot { background:rgba(234,88,12,.8); }
-    .wDay .wdDotEmpty { width:4px; height:4px; }
+    .wDay .wdDotEmpty { width:3px; height:3px; }
 
     /* ══ VIEWS ══ */
     .view { display:none; flex:1; min-height:0; flex-direction:column; position:relative; }
@@ -974,8 +974,8 @@
     }
     .calCell.selected { background:linear-gradient(135deg,var(--purple-dark),var(--color-pink)); color:#fff; }
     .calCell.hasTask::after {
-      content:''; position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
-      width:4px; height:4px; border-radius:50%; background:rgba(249,115,22,.85);
+      content:''; position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
+      width:3px; height:3px; border-radius:50%; background:rgba(249,115,22,.85);
     }
     .calCell.today.hasTask::after { background:#f97316; }
     .calCell.selected.hasTask::after { background:rgba(255,255,255,.7); }
