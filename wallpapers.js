@@ -41,12 +41,29 @@
 
   // Para adicionar novos papeis internos, inclua aqui um novo objeto.
   var WALLPAPER_PRESETS = [
-    { id: "aurora-blue", name: "Aurora Azul", c1: "#021824", c2: "#0b3a67", c3: "#1d4f91", accent: "#38bdf8" },
-    { id: "violet-night", name: "Noite Violeta", c1: "#120b2c", c2: "#31206d", c3: "#512d8c", accent: "#c084fc" },
-    { id: "emerald-mist", name: "Bruma Esmeralda", c1: "#04221d", c2: "#0c4f48", c3: "#166b61", accent: "#34d399" },
-    { id: "sunset-orange", name: "Por do Sol", c1: "#2a1207", c2: "#7b2f16", c3: "#b45309", accent: "#fb923c" },
-    { id: "graphite-cyan", name: "Grafite Ciano", c1: "#111827", c2: "#1f2937", c3: "#0b4a6f", accent: "#22d3ee" },
-    { id: "rose-dream", name: "Rosa Dream", c1: "#2a0d1e", c2: "#5b1f48", c3: "#8a2f6f", accent: "#f9a8d4" }
+    // Solidos
+    { id: "solid-night",      name: "Solido Noturno",   c1: "#0b1220", c2: "#0b1220", c3: "#0b1220", accent: "#60a5fa" },
+    { id: "solid-ocean",      name: "Solido Oceano",    c1: "#0f3d5e", c2: "#0f3d5e", c3: "#0f3d5e", accent: "#22d3ee" },
+    { id: "solid-forest",     name: "Solido Floresta",  c1: "#134e4a", c2: "#134e4a", c3: "#134e4a", accent: "#34d399" },
+    { id: "solid-wine",       name: "Solido Vinho",     c1: "#4c1d36", c2: "#4c1d36", c3: "#4c1d36", accent: "#f472b6" },
+    { id: "solid-slate",      name: "Solido Grafite",   c1: "#1f2937", c2: "#1f2937", c3: "#1f2937", accent: "#93c5fd" },
+    { id: "solid-amber",      name: "Solido Ambar",     c1: "#5b3a07", c2: "#5b3a07", c3: "#5b3a07", accent: "#f59e0b" },
+
+    // Gradientes
+    { id: "aurora-blue",      name: "Aurora Azul",      c1: "#021824", c2: "#0b3a67", c3: "#1d4f91", accent: "#38bdf8" },
+    { id: "violet-night",     name: "Noite Violeta",    c1: "#120b2c", c2: "#31206d", c3: "#512d8c", accent: "#c084fc" },
+    { id: "emerald-mist",     name: "Bruma Esmeralda",  c1: "#04221d", c2: "#0c4f48", c3: "#166b61", accent: "#34d399" },
+    { id: "sunset-orange",    name: "Por do Sol",       c1: "#2a1207", c2: "#7b2f16", c3: "#b45309", accent: "#fb923c" },
+    { id: "graphite-cyan",    name: "Grafite Ciano",    c1: "#111827", c2: "#1f2937", c3: "#0b4a6f", accent: "#22d3ee" },
+    { id: "rose-dream",       name: "Rosa Dream",       c1: "#2a0d1e", c2: "#5b1f48", c3: "#8a2f6f", accent: "#f9a8d4" },
+    { id: "sky-lagoon",       name: "Lagoa Azul",       c1: "#082f49", c2: "#0e7490", c3: "#0ea5e9", accent: "#67e8f9" },
+    { id: "mint-breeze",      name: "Brisa Menta",      c1: "#052e2b", c2: "#0f766e", c3: "#14b8a6", accent: "#99f6e4" },
+    { id: "plum-neon",        name: "Neon Ameixa",      c1: "#1f1235", c2: "#4c1d95", c3: "#7c3aed", accent: "#c4b5fd" },
+    { id: "dawn-cream",       name: "Aurora Creme",     c1: "#302118", c2: "#8b5e3c", c3: "#d4a373", accent: "#fde68a" },
+
+    // Visual 3D/bolhas
+    { id: "3d-ice",           name: "3D Gelo",          c1: "#0b1d2c", c2: "#1d3f5a", c3: "#2c6a8e", accent: "#bae6fd" },
+    { id: "3d-nebula",        name: "3D Nebulosa",      c1: "#1a1333", c2: "#3b2778", c3: "#5b21b6", accent: "#ddd6fe" }
   ];
 
   var catalog = WALLPAPER_PRESETS.map(function (spec) {

@@ -1,0 +1,37 @@
+name: Auto Merge Feature Branch to Main
+
+on:
+  push:
+    branches:
+      - cursor/an-lise-de-projeto-abrangente-6b68
+  workflow_dispatch:
+
+concurrency:
+  group: auto-merge-feature-main
+  cancel-in-progress: true
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge feature branch into main
+        run: |
+          git fetch origin main
+          git checkout main
+          git pull origin main
+          git merge --no-ff origin/cursor/an-lise-de-projeto-abrangente-6b68 -m "Auto-merge: sync feature branch into main"
+
+      - name: Push merged main
+        run: git push origin main

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-Agenda Pro Max — Service Worker v42
+Agenda Pro Max — Service Worker v44
    Versão fixa — incrementar manualmente a cada deploy.
    ═══════════════════════════════════════════════════════ */
 
@@ -14,7 +14,8 @@ Agenda Pro Max — Service Worker v42
 //            v40 (2026-03) — pwaRescue para recuperar PWA antigo quebrado
 //            v41 (2026-03) — fallback de navegação para recover-pwa.html
 //            v42 (2026-03) — atualização tradicional sem fallback agressivo
-const CACHE_VERSION = "v43";
+//            v44 (2026-03) — ajustes visuais: feriados, wallpapers, marcadores
+const CACHE_VERSION = "v44";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
 // Prefixo usado para identificar caches deste app e limpar apenas os deles
 const CACHE_PREFIX  = "agenda-cache-";

@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - cursor/an-lise-de-projeto-abrangente-6b68
   workflow_dispatch:
 
 concurrency:
