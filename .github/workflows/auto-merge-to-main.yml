@@ -35,3 +35,23 @@ jobs:
 
       - name: Push merged main
         run: git push origin main
+
+      - name: Trigger Vercel production deploy hook
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$VERCEL_DEPLOY_HOOK_URL" ]; then
+            echo "::error::Secret VERCEL_DEPLOY_HOOK_URL não configurado no GitHub."
+            exit 1
+          fi
+
+          echo "Disparando deploy automático na Vercel após auto-merge..."
+          http_code="$(curl -sS -o /tmp/vercel-hook-response.txt -w "%{http_code}" -X POST "$VERCEL_DEPLOY_HOOK_URL")"
+          cat /tmp/vercel-hook-response.txt || true
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::error::Falha ao disparar deploy na Vercel (HTTP $http_code)."
+            exit 1
+          fi
+
+          echo "Deploy automático na Vercel disparado com sucesso."
