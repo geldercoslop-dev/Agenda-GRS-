@@ -20,7 +20,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'">
 
   <!-- ═══ Manifest e Ícones ═══ -->
-  <link rel="manifest" href="./manifest.json?v=2026-03-22-7">
+  <link rel="manifest" href="./manifest.json?v=2026-03-22-8">
   <link rel="apple-touch-icon" href="./leo-192.png">
   <link rel="icon" type="image/png" sizes="192x192" href="./leo-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="./leo-512.png">
@@ -859,7 +859,7 @@ let pendingPhoto = null;
 let pendingWmark = null;
 let pendingWallpaper = null;
 let reopenSettingsAfterWallpaperPick = false;
-const APP_BUILD_VERSION = '2026-03-22-7';
+const APP_BUILD_VERSION = '2026-03-22-8';
 const SAVE_MIN_INTERVAL_MS = 140;
 let _saveTimer = null;
 let _savePending = false;
@@ -1668,6 +1668,7 @@ function renderMonthGrid(){
 function initStripExpand(){
   const wrap   = document.getElementById('weekStripWrap');
   const handle = document.getElementById('stripHandle');
+  const card   = document.getElementById('weekStripCard');
   if(!wrap || !handle) return;
 
   let expanded = false;
@@ -1691,6 +1692,11 @@ function initStripExpand(){
       wrap.style.visibility='';
       wrap.style.opacity='';
     }
+    if(card){
+      card.classList.remove('expanded-overlay');
+      card.style.zIndex = '';
+    }
+    document.body.classList.remove('cal-expanded');
   }
 
   function toggle(toExpand){
@@ -1699,6 +1705,11 @@ function initStripExpand(){
     if(!expanded){ viewMonthYear=null; viewMonthMonth=null; }
     renderMonthGridIfVisible(true);
     if(toExpand){
+      if(card){
+        card.classList.add('expanded-overlay');
+        card.style.zIndex = '910';
+      }
+      document.body.classList.add('cal-expanded');
       if(_ov){ _ov.style.display='block'; requestAnimationFrame(()=>_ov.classList.add('open')); }
       if(_pr){ _pr.style.opacity='0'; _pr.style.pointerEvents='none'; _pr.style.transition='opacity .2s'; }
     } else {
