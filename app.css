@@ -1221,3 +1221,42 @@
 .searchLupa { color: #7dd3f0; }
 [data-theme="light"] .searchLupa { color: #d67828 !important; }
 
+/* ══ Botões padronizados (sem afetar ícones/fundos gerais) ══ */
+.btnU{
+  background:linear-gradient(135deg,#0ea5e9,#0284c7) !important;
+  border:1px solid rgba(125,211,240,.35) !important;
+  border-radius:10px !important;
+  color:#fff !important;
+  font-family:'Space Grotesk',sans-serif !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+  line-height:1 !important;
+  letter-spacing:.01em !important;
+  padding:6px 12px !important;
+  min-height:31px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:5px !important;
+  text-align:center !important;
+  box-shadow:0 4px 12px rgba(2,132,199,.28) !important;
+}
+.btnU:active{ transform:translateY(1px) scale(.985); }
+.btnU--icon{
+  width:38px !important;
+  min-width:38px !important;
+  height:31px !important;
+  padding:0 !important;
+  font-size:15px !important;
+}
+.btnU--ghost{
+  background:rgba(0,80,120,.26) !important;
+  border:1px solid rgba(0,160,200,.22) !important;
+  box-shadow:none !important;
+}
+.btnU--danger{
+  background:linear-gradient(135deg,#ef4444,#dc2626) !important;
+  border:1px solid rgba(248,113,113,.45) !important;
+  box-shadow:0 4px 12px rgba(220,38,38,.25) !important;
+}
+

@@ -5688,10 +5688,10 @@ function _renderComprasOv(){
     <div id="_cpBody" style="flex:1;overflow-y:auto;padding:0 16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;"></div>
 
     <!-- Input rápido fixo no rodapé -->
-    <div style="padding:12px 16px;background:rgba(0,80,120,.3);border-top:1px solid ${BDR};display:flex;gap:8px;flex-shrink:0;">
+    <div style="padding:12px 16px;background:rgba(0,80,120,.3);border-top:1px solid ${BDR};display:flex;gap:8px;flex-shrink:0;align-items:center;">
       <input id="_cpInput" type="text" maxlength="80" placeholder="Adicionar item…" style="flex:1;padding:11px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:rgba(0,80,120,.28);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;outline:none;">
       <input id="_cpQtd" type="text" maxlength="10" placeholder="Qtd" style="width:60px;padding:11px 8px;border-radius:12px;border:1.5px solid rgba(0,140,180,.2);background:rgba(0,80,120,.18);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;outline:none;text-align:center;">
-      <button id="_cpAdd" style="background:#0ea5e9;border:none;border-radius:12px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;padding:0 16px;cursor:pointer;flex-shrink:0;">+</button>
+      <button id="_cpAdd" class="btnU btnU--icon" style="flex-shrink:0;">+</button>
     </div>`;
 
   document.body.appendChild(ov);
@@ -5790,12 +5790,12 @@ function _renderMercadoOv(){
     <div id="_mkBody" style="flex:1;overflow-y:auto;padding:0 16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;"></div>
     <!-- Input rápido fixo no rodapé -->
     <div style="padding:12px 16px;background:rgba(0,80,120,.3);border-top:1px solid ${BDR};display:flex;gap:8px;flex-shrink:0;align-items:center;">
-      <input id="_mkQtd" type="text" maxlength="10" placeholder="Qtd" style="width:54px;padding:10px 8px;border-radius:10px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;outline:none;text-align:center;flex-shrink:0;">
       <input id="_mkNome" type="text" maxlength="60" placeholder="Descrição…" style="flex:1;min-width:0;padding:10px 11px;border-radius:10px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;outline:none;">
-      <button id="_mkAdd" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;width:42px;height:42px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>
-      <button id="_mkVoice" style="background:rgba(255,255,255,.07);border:1.5px solid rgba(0,140,180,.25);border-radius:10px;color:rgba(255,255,255,.85);width:42px;height:42px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <input id="_mkQtd" type="text" maxlength="10" placeholder="Qtd" style="width:54px;padding:10px 8px;border-radius:10px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;outline:none;text-align:center;flex-shrink:0;">
+      <button id="_mkVoice" class="btnU btnU--icon" style="flex-shrink:0;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="9" y="2" width="6" height="11" rx="3" stroke="rgba(255,255,255,.85)" stroke-width="2"/><path d="M5 11a7 7 0 0014 0" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="18" x2="12" y2="22" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
+      <button id="_mkAdd" class="btnU btnU--icon" style="flex-shrink:0;">+</button>
     </div>`;
   document.body.appendChild(ov);
   const mkBody = ov.querySelector('#_mkBody');
@@ -5835,10 +5835,10 @@ function _renderMercadoOv(){
     const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
     const sr=new SR(); sr.lang='pt-BR'; sr.interimResults=false; sr.maxAlternatives=1;
     const btn=ov.querySelector('#_mkVoice');
-    btn.style.background='rgba(239,68,68,.25)'; btn.style.borderColor='rgba(239,68,68,.5)';
-    sr.onresult=e=>{ ov.querySelector('#_mkNome').value=e.results[0][0].transcript; btn.style.background='rgba(255,255,255,.07)'; btn.style.borderColor='rgba(0,140,180,.25)'; };
-    sr.onerror=()=>{ btn.style.background='rgba(255,255,255,.07)'; btn.style.borderColor='rgba(0,140,180,.25)'; };
-    sr.onend=()=>{ btn.style.background='rgba(255,255,255,.07)'; btn.style.borderColor='rgba(0,140,180,.25)'; };
+    btn.style.transform='scale(.96)';
+    sr.onresult=e=>{ ov.querySelector('#_mkNome').value=e.results[0][0].transcript; btn.style.transform=''; };
+    sr.onerror=()=>{ btn.style.transform=''; };
+    sr.onend=()=>{ btn.style.transform=''; };
     sr.start();
   };
   ov.querySelector('#_mkBody').addEventListener('click',e=>{
