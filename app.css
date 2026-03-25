@@ -306,10 +306,10 @@
     [data-theme="light"] .mCell.mActive { background:transparent; color:#f97316; border:1.5px solid rgba(249,115,22,.85); }
     .mCell.mEmpty { cursor:default; pointer-events:none; }
     .mCell.mHasTask::after {
-      content:''; position:absolute; bottom:4px; left:50%; transform:translateX(-50%);
-      width:1px !important; height:1px !important; border-radius:50%;
-      min-width:1px !important; min-height:1px !important; max-width:1px !important; max-height:1px !important;
-      background:rgba(249,115,22,.85); opacity:.95;
+      content:''; position:absolute; bottom:3px; left:50%; margin-left:-1px; transform:none !important;
+      width:2px !important; height:2px !important; border-radius:50%;
+      min-width:2px !important; min-height:2px !important; max-width:2px !important; max-height:2px !important;
+      background:rgba(249,115,22,.82); opacity:1;
       box-shadow:none !important; filter:none !important; outline:none !important; border:none !important;
     }
     .mCell.mToday.mHasTask::after { background:rgba(255,255,255,.7); }
@@ -323,16 +323,16 @@
     [data-theme="light"] .wDay .wdNum { color:#32261c !important; font-weight:900; }
     .wDay.active .wdNum { background:transparent; color:#f97316; border:1.5px solid rgba(249,115,22,.85); box-shadow:0 0 5px rgba(249,115,22,.25); }
     .wDay .wdDot {
-      width:1px !important; height:1px !important; border-radius:50%;
-      min-width:1px !important; min-height:1px !important; max-width:1px !important; max-height:1px !important;
-      background:rgba(249,115,22,.85);
+      width:2px !important; height:2px !important; border-radius:50%;
+      min-width:2px !important; min-height:2px !important; max-width:2px !important; max-height:2px !important;
+      background:rgba(249,115,22,.82);
       box-shadow:none !important; filter:none !important; outline:none !important; border:none !important;
     }
     .wDay.active .wdDot { background:#f97316; }
     [data-theme="light"] .wDay .wdDot { background:rgba(234,88,12,.8); }
     .wDay .wdDotEmpty {
-      width:1px !important; height:1px !important;
-      min-width:1px !important; min-height:1px !important; max-width:1px !important; max-height:1px !important;
+      width:2px !important; height:2px !important;
+      min-width:2px !important; min-height:2px !important; max-width:2px !important; max-height:2px !important;
       box-shadow:none !important; filter:none !important; outline:none !important; border:none !important;
     }
 
@@ -986,10 +986,10 @@
     }
     .calCell.selected { background:linear-gradient(135deg,var(--purple-dark),var(--color-pink)); color:#fff; }
     .calCell.hasTask::after {
-      content:''; position:absolute; bottom:4px; left:50%; transform:translateX(-50%);
-      width:1px !important; height:1px !important; border-radius:50%;
-      min-width:1px !important; min-height:1px !important; max-width:1px !important; max-height:1px !important;
-      background:rgba(249,115,22,.85); opacity:.9;
+      content:''; position:absolute; bottom:3px; left:50%; margin-left:-1px; transform:none !important;
+      width:2px !important; height:2px !important; border-radius:50%;
+      min-width:2px !important; min-height:2px !important; max-width:2px !important; max-height:2px !important;
+      background:rgba(249,115,22,.82); opacity:1;
       box-shadow:none !important; filter:none !important; outline:none !important; border:none !important;
     }
     .calCell.today.hasTask::after { background:#f97316; }
