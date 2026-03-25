@@ -762,10 +762,6 @@
     </div>
 
     <!-- ══ FOOTER PROGRESS BAR ══ -->
-    <!-- Gradiente decorativo — só visual, não empurra conteúdo -->
-    <div style="position:fixed;bottom:0;left:0;right:0;height:110px;z-index:9996;pointer-events:none;
-      background:linear-gradient(to top, rgba(5,14,31,.58) 33%, transparent 100%);"></div>
-
     <div id="progressRow" style="
       position:fixed;bottom:0;left:0;right:0;z-index:900;
     ">
@@ -785,7 +781,7 @@
         ">
 
         <!-- Barra de progresso -->
-        <div style="position:absolute;left:95px;right:90px;bottom:12px;
+        <div style="position:absolute;left:104px;right:98px;bottom:12px;
                     display:flex;flex-direction:column;gap:4px;padding-bottom:15px;">
           <!-- Linha 1: Progresso + % alinhados -->
           <div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px;">
@@ -4048,14 +4044,11 @@ function init(){
     box.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;">🎨 Papel de parede</div>
-        <button id="_wpCloseX" style="width:30px;height:30px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#e8f4ff;font-size:15px;cursor:pointer;">✕</button>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:58vh;overflow:auto;padding-right:2px;">${cards}</div>
       <button id="_wpAutoContrast" style="margin-top:10px;width:100%;padding:11px;border-radius:12px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">${state.autoTextContrast?'✅ Auto-contraste: ligado':'⚙️ Auto-contraste: desligado'}</button>
       <button id="_wpGalleryDirect" style="margin-top:8px;width:100%;padding:11px;border-radius:12px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">📱 Galeria de fotos</button>
-      <button id="_wpClose" style="margin-top:7px;width:100%;padding:8px;border:none;background:transparent;color:rgba(180,220,240,.5);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">Fechar</button>`;
-
-    box.querySelector('#_wpCloseX').addEventListener('click', close);
+      <button id="_wpClose" style="margin-top:8px;width:100%;padding:11px;border-radius:12px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">✖ Fechar</button>`;
     box.querySelector('#_wpClose').addEventListener('click', close);
     box.querySelector('#_wpAutoContrast').addEventListener('click', ()=>{
       state.autoTextContrast = !state.autoTextContrast;
