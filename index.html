@@ -789,7 +789,7 @@
             <span class="progressPct" id="progressPct" style="font-size:8px;font-weight:900;color:rgba(249,115,22,.9);letter-spacing:.5px;">0%</span>
           </div>
           <!-- Linha 2: barra ocupa tudo -->
-          <div style="height:13px;border-radius:99px;background:rgba(255,255,255,.1);box-shadow:inset 0 1px 3px rgba(0,0,0,.4);padding:2px;position:relative;overflow:visible;">
+          <div style="height:13px;border-radius:99px;background:rgba(4,53,90,.55);border:1px solid rgba(0,160,200,.2);box-shadow:none;padding:2px;position:relative;overflow:visible;">
             <div class="progressFill" id="progressFill" style="width:0%">
               <span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:10px;line-height:1;z-index:2;filter:drop-shadow(0 0 4px rgba(255,255,255,.8));">⚡</span>
             </div>
@@ -4006,18 +4006,18 @@ function init(){
         <div style="font-size:34px;line-height:1;margin-bottom:8px;">🖼️</div>
         <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;">Papel de parede</div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <button id="_wpInternal" style="padding:12px 14px;border-radius:12px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;">
-          <span style="font-size:17px;">🎨</span><span>Papel de parede</span>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:stretch;">
+        <button id="_wpInternal" style="padding:8px 6px;border-radius:11px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;line-height:1.1;text-align:center;">
+          <span style="font-size:16px;line-height:1;">🎨</span><span>Papel</span>
         </button>
-        <button id="_wpGallery" style="padding:12px 14px;border-radius:12px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;">
-          <span style="font-size:17px;">📱</span><span>Galeria de fotos</span>
+        <button id="_wpGallery" style="padding:8px 6px;border-radius:11px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;line-height:1.1;text-align:center;">
+          <span style="font-size:16px;line-height:1;">📱</span><span>Galeria</span>
         </button>
-        <button id="_wpTextColor" style="padding:12px 14px;border-radius:12px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;">
-          <span style="font-size:17px;">🔤</span><span>Cor das fontes</span>
+        <button id="_wpTextColor" style="padding:8px 6px;border-radius:11px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;line-height:1.1;text-align:center;">
+          <span style="font-size:16px;line-height:1;">🔤</span><span>Fontes</span>
         </button>
-        <button id="_wpCancel" style="padding:9px 12px;border:none;background:transparent;color:rgba(180,220,240,.5);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">Cancelar</button>
-      </div>`;
+      </div>
+      <button id="_wpCancel" style="margin-top:8px;width:100%;padding:9px 12px;border-radius:11px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;">Fechar</button>`;
 
     box.querySelector('#_wpInternal').addEventListener('click', ()=>{ close(); openWallpaperCatalog(); });
     box.querySelector('#_wpGallery').addEventListener('click', ()=>{ close(); openWallpaperPicker(); });
@@ -4046,9 +4046,11 @@ function init(){
         <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;">🎨 Papel de parede</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:58vh;overflow:auto;padding-right:2px;">${cards}</div>
-      <button id="_wpAutoContrast" style="margin-top:10px;width:100%;padding:11px;border-radius:12px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">${state.autoTextContrast?'✅ Auto-contraste: ligado':'⚙️ Auto-contraste: desligado'}</button>
-      <button id="_wpGalleryDirect" style="margin-top:8px;width:100%;padding:11px;border-radius:12px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">📱 Galeria de fotos</button>
-      <button id="_wpClose" style="margin-top:8px;width:100%;padding:11px;border-radius:12px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:12px;cursor:pointer;">✖ Fechar</button>`;
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;align-items:stretch;">
+        <button id="_wpAutoContrast" style="padding:8px 6px;border-radius:11px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;line-height:1.1;text-align:center;">${state.autoTextContrast?'✅ Auto':'⚙️ Auto'}</button>
+        <button id="_wpGalleryDirect" style="padding:8px 6px;border-radius:11px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;line-height:1.1;text-align:center;"><span style="font-size:15px;line-height:1;">📱</span><span>Galeria</span></button>
+        <button id="_wpClose" style="padding:8px 6px;border-radius:11px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;line-height:1.1;text-align:center;"><span style="font-size:15px;line-height:1;">✖</span><span>Fechar</span></button>
+      </div>`;
     box.querySelector('#_wpClose').addEventListener('click', close);
     box.querySelector('#_wpAutoContrast').addEventListener('click', ()=>{
       state.autoTextContrast = !state.autoTextContrast;
@@ -5548,8 +5550,8 @@ function _renderExamesOv(){
   ov.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
       <span style="font-size:24px;line-height:1;flex-shrink:0;margin-right:8px;display:flex;align-items:center;">🩺</span><span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:${TEXT};display:flex;align-items:center;">Exames</span>
-      <button id="_exNew" style="background:${ACCENT};border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
-      <button id="_exBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+      <button id="_exNew" style="background:rgba(0,80,120,.26);border:1px solid rgba(0,160,200,.22);border-radius:11px;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:7px 12px;cursor:pointer;flex-shrink:0;line-height:1;">＋ Novo</button>
+      <button id="_exBack" style="background:rgba(0,80,120,.26);border:1px solid rgba(0,160,200,.22);border-radius:11px;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:7px 12px;cursor:pointer;flex-shrink:0;line-height:1;">✖ Fechar</button>
     </div>
     <div id="_exBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
       ${exames.length===0?`<div style="text-align:center;padding:48px 20px;color:${MUTED};font-family:'Space Grotesk',sans-serif;"><div style="font-size:40px;margin-bottom:12px;">🩺</div><div style="font-size:14px;font-weight:700;margin-bottom:6px;">Nenhum exame cadastrado</div><div style="font-size:12px;opacity:.7;">Toque em + Novo para cadastrar</div></div>`:exames.map((e,i)=>cardH(e,i)).join('')}
@@ -8313,8 +8315,8 @@ function openListaConsultas(){
   ov.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.25);border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
       <span style="font-size:24px;line-height:1;flex-shrink:0;margin-right:8px;display:flex;align-items:center;">🏥</span><span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:${TEXT};display:flex;align-items:center;">Consultas</span>
-      <button id="_lcAdd" style="background:var(--primary,#4da3ff);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Nova</button>
-      <button id="_lcBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+      <button id="_lcAdd" style="background:rgba(0,80,120,.26);border:1px solid rgba(0,160,200,.22);border-radius:11px;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:7px 12px;cursor:pointer;flex-shrink:0;line-height:1;">＋ Nova</button>
+      <button id="_lcBack" style="background:rgba(0,80,120,.26);border:1px solid rgba(0,160,200,.22);border-radius:11px;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:7px 12px;cursor:pointer;flex-shrink:0;line-height:1;">✖ Fechar</button>
     </div>
     <div id="_lcScroll" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;"></div>`;
   document.body.appendChild(ov);
@@ -8916,8 +8918,8 @@ function openListaRemedios(){
   ov.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:${HDR};border-bottom:1px solid ${BDR};flex-shrink:0;gap:8px;">
       <span style="font-size:24px;line-height:1;flex-shrink:0;margin-right:8px;display:flex;align-items:center;">💊</span><span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:${TEXT};display:flex;align-items:center;">Remédios</span>
-      <button id="_lrAdd" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
-      <button id="_lrBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">Fechar</button>
+      <button id="_lrAdd" style="background:rgba(0,80,120,.26);border:1px solid rgba(0,160,200,.22);border-radius:11px;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:7px 12px;cursor:pointer;flex-shrink:0;line-height:1;">＋ Novo</button>
+      <button id="_lrBack" style="background:rgba(0,80,120,.26);border:1px solid rgba(0,160,200,.22);border-radius:11px;color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:7px 12px;cursor:pointer;flex-shrink:0;line-height:1;">✖ Fechar</button>
     </div>
     <div id="_lrBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;"></div>`;
   document.body.appendChild(ov);

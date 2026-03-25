@@ -310,6 +310,7 @@
       width:1px !important; height:1px !important; border-radius:50%;
       min-width:1px !important; min-height:1px !important; max-width:1px !important; max-height:1px !important;
       background:rgba(249,115,22,.85); opacity:.95;
+      box-shadow:none !important; filter:none !important; outline:none !important; border:none !important;
     }
     .mCell.mToday.mHasTask::after { background:rgba(255,255,255,.7); }
 
@@ -325,12 +326,14 @@
       width:1px !important; height:1px !important; border-radius:50%;
       min-width:1px !important; min-height:1px !important; max-width:1px !important; max-height:1px !important;
       background:rgba(249,115,22,.85);
+      box-shadow:none !important; filter:none !important; outline:none !important; border:none !important;
     }
     .wDay.active .wdDot { background:#f97316; }
     [data-theme="light"] .wDay .wdDot { background:rgba(234,88,12,.8); }
     .wDay .wdDotEmpty {
       width:1px !important; height:1px !important;
       min-width:1px !important; min-height:1px !important; max-width:1px !important; max-height:1px !important;
+      box-shadow:none !important; filter:none !important; outline:none !important; border:none !important;
     }
 
     /* ══ VIEWS ══ */
@@ -984,9 +987,10 @@
     .calCell.selected { background:linear-gradient(135deg,var(--purple-dark),var(--color-pink)); color:#fff; }
     .calCell.hasTask::after {
       content:''; position:absolute; bottom:4px; left:50%; transform:translateX(-50%);
-      width:2px !important; height:2px !important; border-radius:50%;
-      min-width:2px; min-height:2px; max-width:2px; max-height:2px;
+      width:1px !important; height:1px !important; border-radius:50%;
+      min-width:1px !important; min-height:1px !important; max-width:1px !important; max-height:1px !important;
       background:rgba(249,115,22,.85); opacity:.9;
+      box-shadow:none !important; filter:none !important; outline:none !important; border:none !important;
     }
     .calCell.today.hasTask::after { background:#f97316; }
     .calCell.selected.hasTask::after { background:rgba(255,255,255,.7); }
