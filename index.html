@@ -192,8 +192,8 @@
     <!-- ══ HOME VIEW ══ -->
     <div class="view show" id="homeView">
       <div class="homeBody">
-        <div id="homeDashboard" class="homeDashboard"></div>
-        <div class="folderGrid" id="folderGrid" data-legacy-hidden="1" style="display:none !important;"></div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.28);padding:16px 6px 12px;display:none;">Acesso Rápido</div>
+        <div class="folderGrid" id="folderGrid"></div>
       </div>
     </div>
 
@@ -1957,148 +1957,38 @@ function makeTile(f, isSub, children){
 }
 function renderFolders(){
   const grid=document.getElementById('folderGrid');
-  if(grid){
-    grid.innerHTML='';
-    grid.style.display='none';
-  }
-  renderHomeDashboard();
-}
+  if(!grid) return;
+  grid.innerHTML='';
+  const byId=Object.fromEntries(state.folders.map(f=>[f.id,f]));
+  SYSTEM_IDS.forEach(id=>{ if(!state.folderOrder.includes(id)&&state.folders.find(f=>f.id===id)) state.folderOrder.push(id); });
+  const order=(state.folderOrder||[]).filter((id,i,a)=>a.indexOf(id)===i&&byId[id]);
+  state.folders.forEach(f=>{if(!order.includes(f.id))order.push(f.id);});
 
-let _dashboardBatteryLevel = null;
-let _dashboardBatteryCharging = false;
-let _dashboardTicker = null;
-let _dashboardBatteryHooked = false;
+  // Pastas da frente: usa homeFolders se definido, senão usa SYSTEM_IDS (padrão)
+  let homeIds = state.homeFolders && state.homeFolders.length > 0
+    ? state.homeFolders.filter(id=>byId[id])
+    : SYSTEM_IDS.filter(id=>byId[id]);
 
-function _dashboardTodayStats(){
-  const wkStart=parseLocalDate(state.weekStartISO);
-  const today=new Date(); today.setHours(0,0,0,0);
-  let dayId='seg';
-  for(let i=0;i<8;i++){
-    const d=addDays(wkStart,i); d.setHours(0,0,0,0);
-    if(d.getTime()===today.getTime()){ dayId=DAYS[i].id; break; }
-  }
-  const arr=(state.tasks[dayId]||[]);
-  const done=arr.filter(t=>t.done).length;
-  const pending=Math.max(0, arr.length-done);
-  return { dayId, total:arr.length, done, pending };
-}
+  // Garante que só mostra no máximo 7 (8ª célula é o botão +)
+  const visible = homeIds.slice(0, 7);
 
-function _dashboardWeatherMock(){
-  const h=(new Date()).getHours();
-  if(h>=6 && h<12) return { icon:'🌤️', label:'Clima', sub:'Manhã amena', temp:'25°' };
-  if(h>=12 && h<18) return { icon:'☀️', label:'Clima', sub:'Tarde', temp:'30°' };
-  if(h>=18 && h<22) return { icon:'🌥️', label:'Clima', sub:'Anoitecendo', temp:'24°' };
-  return { icon:'🌙', label:'Clima', sub:'Noite', temp:'21°' };
-}
+  visible.forEach(id=>{
+    const f=byId[id]; if(!f) return;
+    const children=state.folders.filter(c=>c.parentId===id);
+    grid.appendChild(makeTile(f, false, children));
+  });
 
-async function _ensureDashboardBattery(){
-  if(_dashboardBatteryHooked || !navigator.getBattery) return;
-  try{
-    const bat = await navigator.getBattery();
-    const sync = ()=>{
-      _dashboardBatteryLevel = bat.level;
-      _dashboardBatteryCharging = !!bat.charging;
-      _refreshDashboardData();
-    };
-    bat.addEventListener('levelchange', sync);
-    bat.addEventListener('chargingchange', sync);
-    _dashboardBatteryHooked = true;
-    sync();
-  } catch(_){}
-}
-
-function _refreshDashboardData(){
-  const root=document.getElementById('homeDashboard');
-  if(!root) return;
-  const stats=_dashboardTodayStats();
-  const weather=_dashboardWeatherMock();
-  const batteryEl=document.getElementById('_dashBatteryVal');
-  const tasksEl=document.getElementById('_dashTasksVal');
-  const tasksSub=document.getElementById('_dashTasksSub');
-  const weatherTemp=document.getElementById('_dashWeatherTemp');
-  const weatherSub=document.getElementById('_dashWeatherSub');
-  if(tasksEl) tasksEl.textContent = String(stats.pending);
-  if(tasksSub) tasksSub.textContent = `${stats.done} concluídas · ${stats.total} total`;
-  if(weatherTemp) weatherTemp.textContent = weather.temp;
-  if(weatherSub) weatherSub.textContent = weather.sub;
-  if(batteryEl){
-    if(typeof _dashboardBatteryLevel === 'number'){
-      const pct=Math.round(_dashboardBatteryLevel*100);
-      batteryEl.textContent = `${pct}%${_dashboardBatteryCharging?' ⚡':''}`;
-    } else {
-      batteryEl.textContent = '--%';
-    }
-  }
-}
-
-function _wireDashboardActions(){
-  const goToday = ()=>{
-    const wkStart=parseLocalDate(state.weekStartISO);
-    const today=new Date();
-    const diff=Math.floor((today-wkStart)/86400000);
-    if(diff>=0&&diff<8) openBucket(DAYS[diff].id);
-  };
-  document.getElementById('_dashWeather')?.addEventListener('click', ()=>showToast('🌤️ Monitor de clima em preparação'));
-  document.getElementById('_dashTasks')?.addEventListener('click', goToday);
-  document.getElementById('_dashWallpaper')?.addEventListener('click', openWallpaperSourcePicker);
-  document.getElementById('_dashSettings')?.addEventListener('click', openSettings);
-  document.getElementById('_dashBackup')?.addEventListener('click', doBackup);
-  document.getElementById('_dashBattery')?.addEventListener('click', ()=>showToast('🔋 Bateria do aparelho'));
-  document.getElementById('_dashFolders')?.addEventListener('click', openTodasPastas);
-  document.getElementById('_dashMenu')?.addEventListener('click', openSidebar);
-}
-
-function renderHomeDashboard(){
-  const root=document.getElementById('homeDashboard');
-  if(!root) return;
-  const weather=_dashboardWeatherMock();
-  const stats=_dashboardTodayStats();
-  const wallpaper = safeImageUrl(state.wallpaperPhoto||'');
-  root.innerHTML = `
-    <div class="dashRow">
-      <button class="dashCard dashTall" id="_dashWeather">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span class="dashLabel">${weather.label}</span>
-          <span class="dashIcon">${weather.icon}</span>
-        </div>
-        <div class="dashValue" id="_dashWeatherTemp">${weather.temp}</div>
-        <div class="dashSub" id="_dashWeatherSub">${weather.sub}</div>
-      </button>
-      <button class="dashCard dashTall" id="_dashTasks">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span class="dashLabel">Tarefas de hoje</span>
-          <span class="dashIcon">📋</span>
-        </div>
-        <div class="dashValue" id="_dashTasksVal">${stats.pending}</div>
-        <div class="dashSub" id="_dashTasksSub">${stats.done} concluídas · ${stats.total} total</div>
-      </button>
-      <button class="dashCard dashTall" id="_dashWallpaper">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span class="dashLabel">Papel de parede</span>
-          <span class="dashIcon">🖼️</span>
-        </div>
-        <div class="dashWallpaperPreview" style="${wallpaper?`background-image:url('${escAttr(wallpaper)}');`:''}"></div>
-        <div class="dashSub">${wallpaper?'Toque para alterar':'Nenhum aplicado'}</div>
-      </button>
+  // Botão "+" — 8ª célula
+  const plusBtn = document.createElement('div');
+  plusBtn.className = 'folderTile';
+  plusBtn.innerHTML = `
+    <div class="fi-wrap" style="background:rgba(249,115,22,.12);border:2px dashed rgba(249,115,22,.55);">
+      <div class="fi" style="font-size:26px;font-weight:900;color:rgba(249,115,22,.9);line-height:1;">+</div>
     </div>
-    <div class="dashRow">
-      <button class="dashCard" id="_dashSettings"><span class="dashLabel">Configurações</span><span class="dashValue" style="font-size:18px;">⚙️</span><span class="dashSub">Ajustes</span></button>
-      <button class="dashCard" id="_dashBackup"><span class="dashLabel">Backup</span><span class="dashValue" style="font-size:18px;">💾</span><span class="dashSub">Exportar/restaurar</span></button>
-      <button class="dashCard" id="_dashBattery"><span class="dashLabel">Bateria</span><span class="dashValue" id="_dashBatteryVal" style="font-size:18px;">--%</span><span class="dashSub">Monitor</span></button>
-    </div>
-    <div class="dashRow">
-      <button class="dashCard dashWide" id="_dashFolders"><span class="dashLabel">Pastas</span><span class="dashValue" style="font-size:18px;">📁</span><span class="dashSub">Abrir todas as pastas</span></button>
-      <button class="dashCard" id="_dashMenu"><span class="dashLabel">Menu</span><span class="dashValue" style="font-size:18px;">☰</span><span class="dashSub">Acesso rápido</span></button>
-    </div>
+    <div class="fl" style="color:rgba(249,115,22,.75);">Mais</div>
   `;
-  _wireDashboardActions();
-  _refreshDashboardData();
-  _ensureDashboardBattery();
-  if(!_dashboardTicker){
-    _dashboardTicker = setInterval(()=>{
-      if(typeof currentView!=='undefined' && currentView==='home') _refreshDashboardData();
-    }, 30000);
-  }
+  plusBtn.addEventListener('click', openTodasPastas);
+  grid.appendChild(plusBtn);
 }
 
 // ══ PASTAS DA FRENTE — escolha do usuário ══

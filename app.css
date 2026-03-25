@@ -340,34 +340,6 @@
       padding: 2px 4px 4px;
       place-items: start center;
     }
-    .homeDashboard { display:flex; flex-direction:column; gap:10px; margin:0 0 14px; }
-    .dashRow { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
-    .dashCard {
-      border:1px solid rgba(255,255,255,.12);
-      background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
-      border-radius:18px;
-      padding:12px 12px 10px;
-      min-height:84px;
-      display:flex; flex-direction:column; justify-content:space-between;
-      box-shadow:0 8px 24px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.12);
-      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
-      cursor:pointer; -webkit-tap-highlight-color:transparent;
-    }
-    .dashCard:active { transform:scale(.985); }
-    .dashLabel { font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:800; color:rgba(232,244,255,.75); letter-spacing:.2px; }
-    .dashValue { font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:900; color:#fff; line-height:1; }
-    .dashSub { font-family:'Plus Jakarta Sans',sans-serif; font-size:10px; font-weight:700; color:rgba(180,220,240,.55); }
-    .dashIcon { font-size:18px; line-height:1; }
-    .dashWide { grid-column: span 2; }
-    .dashTall { min-height:96px; }
-    [data-theme="light"] .dashCard {
-      background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.8));
-      border:1px solid rgba(30,45,110,.16);
-      box-shadow:0 8px 22px rgba(15,25,55,.12), inset 0 1px 0 rgba(255,255,255,.7);
-    }
-    [data-theme="light"] .dashLabel { color:rgba(30,45,110,.75); }
-    [data-theme="light"] .dashValue { color:#0f172a; }
-    [data-theme="light"] .dashSub { color:rgba(30,45,110,.5); }
 
     .folderTile {
       width: 100%;
