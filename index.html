@@ -178,14 +178,12 @@
       <div class="monthGrid" id="monthGrid"></div>
       <!-- Handle de arraste — EMBAIXO -->
       <div class="stripHandle" id="stripHandle">
-        <button id="feriadosShortcut" onclick="openFeriados()" style="background:none;border:none;padding:0;margin:0;cursor:pointer;display:flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;">
-          <span style="font-size:12px;line-height:1;pointer-events:none;">🎉</span>
-          <span class="stripHandleHint stripFeriadoHint" style="pointer-events:none;">Feriado · clique aqui</span>
+        <button id="feriadosShortcut" onclick="openFeriados()" style="background:linear-gradient(135deg,rgba(14,165,233,.16),rgba(2,132,199,.2));border:1px solid rgba(125,211,240,.28);padding:6px 11px;margin:0;cursor:pointer;display:flex;align-items:center;gap:7px;-webkit-tap-highlight-color:transparent;border-radius:12px;box-shadow:0 3px 10px rgba(0,0,0,.18);">
+          <span style="font-size:13px;line-height:1;pointer-events:none;">🎊</span>
+          <span class="stripHandleHint stripFeriadoHint" style="pointer-events:none;">Feriados</span>
         </button>
-        <div style="display:flex;align-items:center;gap:6px;pointer-events:none;">
-          <span class="stripHandleArrow" id="stripHandleArrow" style="color:rgba(249,115,22,.75);font-weight:900;">▾</span>
-          <span class="stripHandleHint" id="stripHandleHintText">Arraste para ver o mês</span>
-          <span class="stripHandleArrow" id="stripHandleArrow2" style="color:rgba(249,115,22,.75);font-weight:900;">▾</span>
+        <div style="display:flex;align-items:center;gap:8px;pointer-events:none;">
+          <span class="stripHandleArrow" id="stripHandleArrow" style="color:rgba(125,211,240,.9);font-weight:900;">↕</span>
         </div>
       </div>
     </div>
@@ -6272,14 +6270,15 @@ function openFeriados(){
   if(typeof window._navPush === 'function') window._navPush();
   ov.style.cssText = 'position:fixed;inset:0;background:linear-gradient(160deg,#021824,#04355a);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:99997;display:flex;flex-direction:column;';
   ov.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid rgba(0,140,180,.2);flex-shrink:0;gap:8px;">
-      <span style="font-size:18px;line-height:1;flex-shrink:0;margin-right:2px;">🎉</span>
-      <span id="_ferTit" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:#e8f4ff;">Feriados ${ano}</span>
-      <span id="_ferCnt" style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;color:rgba(180,220,240,.45);flex-shrink:0;">0 restantes</span>
-      <button id="_ferBack" style="background:rgba(0,80,120,.3);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:#7dd3f0;font-size:17px;font-weight:900;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 12px;background:rgba(0,80,120,.3);border-bottom:1px solid rgba(0,140,180,.2);flex-shrink:0;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
+        <span style="font-size:20px;line-height:1;flex-shrink:0;">🎊</span>
+        <span id="_ferTit" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;flex:1;color:#e8f4ff;">Feriados ${ano}</span>
+      </div>
+      <button id="_ferBack" style="background:rgba(0,80,120,.4);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:#7dd3f0;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;flex-shrink:0;">← Voltar</button>
     </div>
-    <div style="display:flex;flex-direction:column;gap:8px;padding:10px 14px 8px;border-bottom:1px solid rgba(0,140,180,.15);background:rgba(0,0,0,.14);">
-      <label style="display:flex;flex-direction:column;gap:4px;">
+    <div style="display:flex;flex-direction:column;gap:12px;padding:14px 14px 12px;border-bottom:1px solid rgba(0,140,180,.15);background:rgba(0,0,0,.14);">
+      <label style="display:flex;flex-direction:column;gap:10px;">
         <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;color:rgba(180,220,240,.6);text-transform:uppercase;">Selecionar cidade</span>
         <select id="_ferCitySel" style="width:100%;padding:9px 10px;border-radius:10px;border:1px solid rgba(0,160,200,.22);background:rgba(0,80,120,.26);color:#e8f4ff;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;outline:none;">
           <option value="">Cidades</option>
@@ -6352,8 +6351,6 @@ function openFeriados(){
       <div style="margin-top:18px;padding:12px 14px;background:rgba(0,80,120,.15);border:1px solid rgba(0,140,180,.12);border-radius:10px;">
         <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:rgba(180,220,240,.35);line-height:1.6;text-align:center;">Nacionais e estaduais sempre incluídos · Municipais variam conforme a cidade selecionada</div>
       </div>`;
-    const cnt = document.getElementById('_ferCnt');
-    if(cnt) cnt.textContent = `${lista.length} restantes`;
   }
 
   renderFeriados();

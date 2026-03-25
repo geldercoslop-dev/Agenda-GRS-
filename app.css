@@ -198,17 +198,17 @@
     .weekStripWrap.expanded .weekStrip { display:none; }
     /* Handle de arraste — EMBAIXO */
     .stripHandle {
-      display:flex; align-items:center; justify-content:space-between; gap:8px;
-      padding:14px 14px 16px; cursor:pointer; flex-shrink:0;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:12px 14px 14px; cursor:pointer; flex-shrink:0;
     }
     .stripHandle::before {
       content:''; display:none;
     }
     .stripHandleHint {
-      font-family:'Plus Jakarta Sans',sans-serif; font-size:11px; font-weight:700;
-      color:rgba(255,255,255,.88); letter-spacing:.3px;
+      font-family:'Plus Jakarta Sans',sans-serif; font-size:10px; font-weight:700;
+      color:rgba(180,220,240,.74); letter-spacing:.22px;
       pointer-events:none; white-space:nowrap;
-      text-shadow: 0 1px 4px rgba(0,0,0,.6);
+      text-shadow:none;
     }
     .stripHandleArrow {
       font-size:22px; line-height:1; pointer-events:none;
@@ -230,7 +230,7 @@
       50%       { transform: translateX(4px); }
     }
     [data-theme="light"] .stripHandleHint { color:#1e2d6b; }
-    /* Quando expandido: "Arraste" some, feriados e setas ficam */
+    /* Quando expandido: dica de arraste some, atalho de feriados permanece */
     .weekStripWrap.expanded .stripHandleHint { display:none; }
     .weekStripWrap.expanded .stripFeriadoHint { display:inline !important; }
     .weekStripWrap.expanded #feriadosShortcut { display:flex !important; }
