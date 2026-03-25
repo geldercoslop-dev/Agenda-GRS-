@@ -1220,3 +1220,42 @@
 /* Lupa da busca */
 .searchLupa { color: #7dd3f0; }
 [data-theme="light"] .searchLupa { color: #d67828 !important; }
+
+/* ══ PADRÃO GLOBAL DE BOTÕES (premium azul) ══ */
+:root{
+  --btn-premium-a:#0ea5e9;
+  --btn-premium-b:#0284c7;
+  --btn-premium-bd:rgba(125,211,240,.38);
+  --btn-premium-tx:#eaf7ff;
+  --btn-premium-shadow:0 4px 12px rgba(2,132,199,.30);
+}
+
+button{
+  background:linear-gradient(135deg,var(--btn-premium-a),var(--btn-premium-b)) !important;
+  border:1px solid var(--btn-premium-bd) !important;
+  color:var(--btn-premium-tx) !important;
+  border-radius:10px !important;
+  font-family:'Space Grotesk',sans-serif !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+  letter-spacing:.01em !important;
+  line-height:1.05 !important;
+  text-align:center !important;
+  box-shadow:var(--btn-premium-shadow) !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:6px !important;
+  padding:6px 12px !important;
+  box-sizing:border-box !important;
+}
+button:active{
+  transform:translateY(1px) scale(.985) !important;
+}
+
+/* Botão fixo do menu no mesmo padrão global */
+#sidebarFab{
+  background:linear-gradient(135deg,var(--btn-premium-a),var(--btn-premium-b)) !important;
+  border:1px solid var(--btn-premium-bd) !important;
+  box-shadow:var(--btn-premium-shadow) !important;
+}
