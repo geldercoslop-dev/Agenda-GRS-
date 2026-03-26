@@ -5059,9 +5059,11 @@ function _renderContasOv(){
 
     <!-- Formulário -->
     <div id="_contasForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
-      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
-        <button id="_cfBack" style="background:rgba(0,80,120,.4);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
-        <span id="_cfTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};">Nova Conta</span>
+      <div style="display:flex;align-items:center;gap:8px;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+        <span id="_cfTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;display:flex;align-items:center;">Cadastro</span>
+        <button id="_cfBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Voltar</button>
+        <button id="_cfNew" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Novo</button>
+        <button id="_cfSave" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Salvar</button>
       </div>
       <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
         <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Nome da Conta *</div>
@@ -5097,7 +5099,7 @@ function _renderContasOv(){
         </label>
         <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Observação</div>
         <textarea id="_cfObs" rows="2" maxlength="200" placeholder="Opcional — banco, número da conta, site…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;resize:none;line-height:1.5;margin-bottom:22px;"></textarea>
-        <button id="_cfSave" style="width:100%;padding:14px;border-radius:13px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;cursor:pointer;">✔ Salvar</button>
+        
       </div>
     </div>`;
 
@@ -5140,7 +5142,7 @@ function _renderContasOv(){
   function showCForm(idx){
     _cEditIdx=idx; _cfParcelasTemp=[];
     const f=ov.querySelector('#_contasForm'); f.style.display='flex';
-    ov.querySelector('#_cfTitle').textContent=idx!==null?'Editar Conta':'Nova Conta';
+    ov.querySelector('#_cfTitle').textContent='Cadastro';
     const arr=_getContas();
     if(idx!==null){
       const c=arr[idx];
@@ -5178,6 +5180,7 @@ function _renderContasOv(){
   ov.querySelector('#_contasBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_contasNew').onclick=()=>showCForm(null);
   ov.querySelector('#_cfBack').onclick=()=>{ ov.querySelector('#_contasForm').style.display='none'; };
+  ov.querySelector('#_cfNew').onclick=()=>{ ov.querySelector('#_contasForm').style.display='none'; showCForm(null); };
   ov.querySelector('#_cfSave').onclick=()=>{
     const nome=ov.querySelector('#_cfNome').value.trim();
     if(!nome){showToast('⚠️ Informe o nome da conta!');return;}
@@ -5327,9 +5330,11 @@ function _renderReceberOv(){
 
     <!-- Formulário -->
     <div id="_recForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
-      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
-        <button id="_rfBack" style="background:rgba(0,80,120,.4);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
-        <span id="_rfTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};">Novo Lançamento</span>
+      <div style="display:flex;align-items:center;gap:8px;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+        <span id="_rfTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;display:flex;align-items:center;">Cadastro</span>
+        <button id="_rfBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Voltar</button>
+        <button id="_rfNew" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Novo</button>
+        <button id="_rfSave" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Salvar</button>
       </div>
       <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
         <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Nome / Descrição *</div>
@@ -5358,7 +5363,7 @@ function _renderReceberOv(){
 
         <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Observação</div>
         <textarea id="_rfObs" rows="2" maxlength="200" placeholder="Opcional — cliente, contrato, referência…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;resize:none;line-height:1.5;margin-bottom:22px;"></textarea>
-        <button id="_rfSave" style="width:100%;padding:14px;border-radius:13px;border:none;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;cursor:pointer;">✔ Salvar</button>
+        
       </div>
     </div>`;
 
@@ -5408,7 +5413,7 @@ function _renderReceberOv(){
     _rEditIdx = idx;
     _rfParcelasTemp = [];
     const f = ov.querySelector('#_recForm'); f.style.display='flex';
-    ov.querySelector('#_rfTitle').textContent = idx!==null?'Editar Lançamento':'Novo Lançamento';
+    ov.querySelector('#_rfTitle').textContent = 'Cadastro';
     const arr = _getReceber();
     if(idx!==null){
       const c = arr[idx];
@@ -5453,6 +5458,7 @@ function _renderReceberOv(){
   ov.querySelector('#_recBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_recNew').onclick=()=>showRForm(null);
   ov.querySelector('#_rfBack').onclick=()=>{ ov.querySelector('#_recForm').style.display='none'; };
+  ov.querySelector('#_rfNew').onclick=()=>{ ov.querySelector('#_recForm').style.display='none'; showRForm(null); };
 
   ov.querySelector('#_rfSave').onclick=()=>{
     const nome = ov.querySelector('#_rfNome').value.trim();
@@ -5559,11 +5565,9 @@ function _renderExamesOv(){
 
     <!-- Formulário -->
     <div id="_exForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
-      <div style="display:flex;align-items:center;gap:8px;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
-        <span id="_efTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;display:flex;align-items:center;">Cadastro</span>
-        <button id="_efBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Voltar</button>
-        <button id="_efNew" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Novo</button>
-        <button id="_efSave" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;"><span id="_efSaveLbl">Salvar</span></button>
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+        <button id="_efBack" style="background:rgba(0,80,120,.4);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
+        <span id="_efTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};">Cadastro</span>
       </div>
       <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
         <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Tipo do Exame *</div>
@@ -5585,9 +5589,10 @@ function _renderExamesOv(){
         <div id="_efFotoThumbs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
         <input type="file" id="_efFotoCamI" accept="image/*" capture="environment" style="display:none;">
         <input type="file" id="_efFotoGalI" accept="image/*" style="display:none;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:22px;">
           <button id="_efFotoCamBtn" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">📸</span><span>Câmera</span></button>
           <button id="_efFotoGalBtn" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">🖼️</span><span>Galeria</span></button>
+          <button id="_efSave" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">✔</span><span id="_efSaveLbl">Salvar</span></button>
         </div>
       </div>
     </div>`;
@@ -5608,7 +5613,7 @@ function _renderExamesOv(){
   function showEForm(idx){
     _eEditIdx=idx; _efFotos=[];
     const f=ov.querySelector('#_exForm'); f.style.display='flex';
-    ov.querySelector('#_efTitle').textContent='Cadastro';
+    ov.querySelector('#_efTitle').textContent=idx!==null?'Editar Exame':'Cadastro';
     const arr=_getExames().sort((a,b)=>(b.data||'').localeCompare(a.data||''));
     if(idx!==null){ const e=arr[idx]; ov.querySelector('#_efTipo').value=e.tipo||''; ov.querySelector('#_efData').value=e.data||''; ov.querySelector('#_efPac').value=e.paciente||''; ov.querySelector('#_efResult').value=e.resultado||''; _efFotos=[...(e.fotos||[])]; renderFotoThumbs(); }
     else { ov.querySelector('#_efTipo').value=''; ov.querySelector('#_efData').value=new Date().toISOString().split('T')[0]; ov.querySelector('#_efPac').value=''; ov.querySelector('#_efResult').value=''; renderFotoThumbs(); }
@@ -5620,7 +5625,6 @@ function _renderExamesOv(){
   ov.querySelector('#_exBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_exNew').onclick=()=>showEForm(null);
   ov.querySelector('#_efBack').onclick=()=>{ ov.querySelector('#_exForm').style.display='none'; };
-  ov.querySelector('#_efNew').onclick=()=>showEForm(null);
   ov.querySelector('#_efFotoCamBtn').onclick=()=>ov.querySelector('#_efFotoCamI').click();
   ov.querySelector('#_efFotoGalBtn').onclick=()=>ov.querySelector('#_efFotoGalI').click();
   ov.querySelector('#_efFotoCamI').addEventListener('change',function(){ addFoto(this.files[0]); });
@@ -5911,11 +5915,11 @@ function _renderDocsOv(){
 
     <!-- ── Formulário (oculto) ── -->
     <div id="_docsForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <button id="_docsFormBack" style="background:rgba(0,80,120,.4);border:1px solid rgba(0,160,200,.22);border-radius:10px;color:${ACC};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;">← Voltar</button>
-          <span id="_docsFormTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};">Novo Documento</span>
-        </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+        <span id="_docsFormTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;display:flex;align-items:center;">Cadastro</span>
+        <button id="_docsFormBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Voltar</button>
+        <button id="_docsFormNew" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Novo</button>
+        <button id="_dSave" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Salvar</button>
       </div>
       <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
 
@@ -5934,7 +5938,7 @@ function _renderDocsOv(){
           placeholder="Opcional — Ex: vence em dez/2027, banco Itaú, conta corrente..."
           style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:rgba(0,80,120,.28);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:500;outline:none;resize:none;line-height:1.5;margin-bottom:22px;"></textarea>
 
-        <button id="_dSave" style="width:100%;padding:14px;border-radius:13px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:-.2px;">✔ Salvar</button>
+        
       </div>
     </div>`;
 
@@ -5976,12 +5980,12 @@ function _renderDocsOv(){
     const docs2 = _getDocs();
     if(editIdx !== null){
       const d = docs2[editIdx];
-      ov.querySelector('#_docsFormTitle').textContent = 'Editar Documento';
+      ov.querySelector('#_docsFormTitle').textContent = 'Cadastro';
       ov.querySelector('#_dNome').value = d.nome || '';
       ov.querySelector('#_dNum').value  = d.numero || '';
       ov.querySelector('#_dObs').value  = d.obs || '';
     } else {
-      ov.querySelector('#_docsFormTitle').textContent = 'Novo Documento';
+      ov.querySelector('#_docsFormTitle').textContent = 'Cadastro';
       ov.querySelector('#_dNome').value = '';
       ov.querySelector('#_dNum').value  = '';
       ov.querySelector('#_dObs').value  = '';
@@ -5997,6 +6001,7 @@ function _renderDocsOv(){
   ov.querySelector('#_docsBack').onclick    = () => { ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_docsNew').onclick     = () => showForm(null);
   ov.querySelector('#_docsFormBack').onclick= () => hideForm();
+  ov.querySelector('#_docsFormNew').onclick = () => { hideForm(); showForm(null); };
 
   // Salvar
   ov.querySelector('#_dSave').onclick = () => {
@@ -8135,11 +8140,10 @@ function openConsultaModal(editId){
   ov.style.cssText=`position:fixed;inset:0;background:${BG};backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:99993;display:flex;flex-direction:column;`;
   ov.innerHTML=`
     <!-- Header -->
-    <div style="display:flex;align-items:center;gap:8px;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
-      <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;display:flex;align-items:center;">Cadastro</span>
-      <button id="_cClose" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Voltar</button>
-      <button id="_cNew" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Novo</button>
-      <button id="_cSave" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Salvar</button>
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <span style="font-size:22px;line-height:1;flex-shrink:0;">🏥</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:${TEXT};flex:1;letter-spacing:-.2px;">Cadastro</span>
+      <button id="_cClose" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Fechar</button>
     </div>
     <!-- Corpo com scroll -->
     <div style="flex:1;overflow-y:auto;padding:20px 16px 36px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
@@ -8186,13 +8190,16 @@ function openConsultaModal(editId){
       <input type="file" id="_csFotoCam" accept="image/*" capture="environment" style="display:none;">
       <input type="file" id="_csFotoGal" accept="image/*" style="display:none;">
 
-      <!-- Botões de foto: Câmera, Galeria -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <!-- Botões de ação: Câmera, Galeria, Salvar -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
         <button id="_csFotoCamBtn" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;">
           <span style="font-size:15px;line-height:1;">📸</span><span>Câmera</span>
         </button>
         <button id="_csFotoGalBtn" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;">
           <span style="font-size:15px;line-height:1;">🖼️</span><span>Galeria</span>
+        </button>
+        <button id="_cSave" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;">
+          <span style="font-size:15px;line-height:1;">✔</span><span>${editing?'Salvar':'Agendar'}</span>
         </button>
       </div>
 
@@ -8201,7 +8208,6 @@ function openConsultaModal(editId){
   if(!editing) ov.querySelector('#_cData').value=new Date().toISOString().split('T')[0];
   if(editing){ ov.querySelector('#_cData').value=editing.data||''; ov.querySelector('#_cHora').value=editing.hora||''; }
   ov.querySelector('#_cClose').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
-  ov.querySelector('#_cNew').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); openConsultaModal(); };
 
   // Foto consulta
   let _csFotoData=null;
@@ -8586,11 +8592,10 @@ function openRemedioModal(editId){
   ov.style.cssText=`position:fixed;inset:0;background:${BG};backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:99993;display:flex;flex-direction:column;`;
   ov.innerHTML=`
     <!-- Header -->
-    <div style="display:flex;align-items:center;gap:8px;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
-      <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;display:flex;align-items:center;">Cadastro</span>
-      <button id="_rmClose" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Voltar</button>
-      <button id="_rmNew" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Novo</button>
-      <button id="_rmSave" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Salvar</button>
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <span style="font-size:22px;line-height:1;flex-shrink:0;">💊</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:${TEXT};flex:1;letter-spacing:-.2px;">Cadastro</span>
+      <button id="_rmClose" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Fechar</button>
     </div>
     <!-- Corpo com scroll -->
     <div style="flex:1;overflow-y:auto;padding:20px 16px 36px;scrollbar-width:thin;scrollbar-color:rgba(0,160,200,.3) transparent;">
@@ -8677,13 +8682,16 @@ function openRemedioModal(editId){
       <input type="file" id="_rmFotoCam" accept="image/*" capture="environment" style="display:none;">
       <input type="file" id="_rmFotoGal" accept="image/*" style="display:none;">
 
-      <!-- Botões de foto: Câmera, Galeria -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <!-- Botões de ação: Câmera, Galeria, Salvar -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
         <button id="_rmFotoCamBtn" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;">
           <span style="font-size:15px;line-height:1;">📸</span><span>Câmera</span>
         </button>
         <button id="_rmFotoGalBtn" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;">
           <span style="font-size:15px;line-height:1;">🖼️</span><span>Galeria</span>
+        </button>
+        <button id="_rmSave" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;">
+          <span style="font-size:15px;line-height:1;">✔</span><span>${editing?'Salvar':'Adicionar'}</span>
         </button>
       </div>
 
@@ -8751,7 +8759,6 @@ function openRemedioModal(editId){
   if(editing)updateRadioStyle();
 
   ov.querySelector('#_rmClose').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
-  ov.querySelector('#_rmNew').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); openRemedioModal(); };
 
   // Foto da receita
   let _rmFotoData=null;
