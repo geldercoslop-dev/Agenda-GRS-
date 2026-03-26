@@ -853,7 +853,7 @@ let pendingPhoto = null;
 let pendingWmark = null;
 let pendingWallpaper = null;
 let reopenSettingsAfterWallpaperPick = false;
-const APP_BUILD_VERSION = '2026-03-26-1';
+const APP_BUILD_VERSION = '2026-03-26-2';
 const SAVE_MIN_INTERVAL_MS = 140;
 let _saveTimer = null;
 let _savePending = false;
@@ -5059,45 +5059,44 @@ function _renderContasOv(){
 
     <!-- Formulário -->
     <div id="_contasForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
-      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
         <span style="font-size:22px;line-height:1;flex-shrink:0;">💳</span>
         <span id="_cfTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:16px;color:${TEXT};flex:1;letter-spacing:-.2px;">Cadastro</span>
-        <button id="_cfClose" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Fechar</button>
       </div>
-      <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Nome da Conta *</div>
-        <input id="_cfNome" type="text" maxlength="60" placeholder="Ex: Aluguel, Luz, Internet, Cartão Nubank…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;outline:none;margin-bottom:14px;">
+      <div style="flex:1;overflow-y:auto;padding:14px 16px 24px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;">Nome da Conta *</div>
+        <input id="_cfNome" type="text" maxlength="60" placeholder="Ex: Aluguel, Luz, Internet…" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(0,140,180,.2);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;outline:none;margin-bottom:10px;">
 
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
           <div>
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Valor (R$) *</div>
-            <input id="_cfValor" type="text" inputmode="decimal" maxlength="12" placeholder="0,00" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;outline:none;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;">Valor (R$) *</div>
+            <input id="_cfValor" type="text" inputmode="decimal" maxlength="12" placeholder="0,00" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(0,140,180,.2);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;outline:none;">
           </div>
           <div>
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Qtd Parcelas</div>
-            <input id="_cfQtd" type="number" min="1" max="99" value="1" placeholder="1" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;outline:none;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;">Qtd Parcelas</div>
+            <input id="_cfQtd" type="number" min="1" max="99" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(0,140,180,.2);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;outline:none;">
           </div>
           <div>
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">1º Vencto</div>
-            <input id="_cfVenc" type="date" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;">1º Vencto</div>
+            <input id="_cfVenc" type="date" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(0,140,180,.2);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:12px;outline:none;">
           </div>
         </div>
 
         <!-- Preview parcelas (aparece quando qtd > 1) -->
-        <div id="_cfParcelasPreview" style="display:none;margin-bottom:14px;">
-          <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:8px;">✏️ Confirmar / Ajustar Parcelas</div>
-          <div id="_cfParcelasLista" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <div id="_cfParcelasPreview" style="display:none;margin-bottom:10px;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">✏️ Confirmar / Ajustar Parcelas</div>
+          <div id="_cfParcelasLista" style="display:flex;flex-direction:column;gap:4px;"></div>
         </div>
 
-        <label style="display:flex;align-items:center;gap:12px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.22);border-radius:12px;padding:13px 14px;margin-bottom:14px;cursor:pointer;">
-          <input type="checkbox" id="_cfFixa" style="width:18px;height:18px;accent-color:#a78bfa;cursor:pointer;">
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:8px;margin-bottom:14px;align-items:start;">
+          <label style="display:flex;align-items:center;gap:8px;background:${FIELD};border:1px solid rgba(0,140,180,.2);border-radius:10px;padding:9px 12px;cursor:pointer;white-space:nowrap;">
+            <input type="checkbox" id="_cfFixa" style="width:16px;height:16px;accent-color:${ACCENT};cursor:pointer;">
+            <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:${TEXT};">Conta fixa / Todo mês</span>
+          </label>
           <div>
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;color:#c4b5fd;">Conta Fixa</div>
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:rgba(196,181,253,.6);margin-top:2px;">Repete todo mês — lembrete automático</div>
+            <textarea id="_cfObs" rows="2" maxlength="200" placeholder="Observação…" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(0,140,180,.2);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:12px;outline:none;resize:none;line-height:1.4;"></textarea>
           </div>
-        </label>
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Observação</div>
-        <textarea id="_cfObs" rows="2" maxlength="200" placeholder="Opcional — banco, número da conta, site…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;resize:none;line-height:1.5;margin-bottom:22px;"></textarea>
+        </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
           <button id="_cfBack" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">←</span><span>Voltar</span></button>
@@ -5174,7 +5173,7 @@ function _renderContasOv(){
       ov.querySelector('#_cfFixa').checked=false; ov.querySelector('#_cfObs').value='';
       ov.querySelector('#_cfParcelasPreview').style.display='none';
     }
-    setTimeout(()=>ov.querySelector('#_cfNome').focus(),120);
+    
   }
 
   ['_cfQtd','_cfValor','_cfVenc'].forEach(id=>{
@@ -5183,7 +5182,6 @@ function _renderContasOv(){
 
   ov.querySelector('#_contasBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_contasNew').onclick=()=>showCForm(null);
-  ov.querySelector('#_cfClose').onclick=()=>{ ov.querySelector('#_contasForm').style.display='none'; };
   ov.querySelector('#_cfBack').onclick=()=>{ ov.querySelector('#_contasForm').style.display='none'; };
   ov.querySelector('#_cfNew').onclick=()=>{ ov.querySelector('#_contasForm').style.display='none'; showCForm(null); };
   ov.querySelector('#_cfSave').onclick=()=>{
@@ -5335,38 +5333,37 @@ function _renderReceberOv(){
 
     <!-- Formulário -->
     <div id="_recForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
-      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
         <span style="font-size:22px;line-height:1;flex-shrink:0;">💰</span>
         <span id="_rfTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:16px;color:${TEXT};flex:1;letter-spacing:-.2px;">Cadastro</span>
-        <button id="_rfClose" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Fechar</button>
       </div>
-      <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Nome / Descrição *</div>
-        <input id="_rfNome" type="text" maxlength="60" placeholder="Ex: Mensalidade João, Serviço Empresa X…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;outline:none;margin-bottom:14px;">
+      <div style="flex:1;overflow-y:auto;padding:14px 16px 24px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;">Nome / Descrição *</div>
+        <input id="_rfNome" type="text" maxlength="60" placeholder="Ex: Mensalidade, Serviço…" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(0,140,180,.2);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;outline:none;margin-bottom:10px;">
 
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
           <div>
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Valor (R$) *</div>
-            <input id="_rfValor" type="text" inputmode="decimal" maxlength="12" placeholder="0,00" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;outline:none;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;">Valor (R$) *</div>
+            <input id="_rfValor" type="text" inputmode="decimal" maxlength="12" placeholder="0,00" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(0,140,180,.2);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;outline:none;">
           </div>
           <div>
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Qtd Parcelas</div>
-            <input id="_rfQtd" type="number" min="1" max="99" value="1" placeholder="1" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;outline:none;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;">Qtd Parcelas</div>
+            <input id="_rfQtd" type="number" min="1" max="99" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(0,140,180,.2);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;outline:none;">
           </div>
           <div>
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">1º Vencto</div>
-            <input id="_rfVenc" type="date" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;">1º Vencto</div>
+            <input id="_rfVenc" type="date" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(0,140,180,.2);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:12px;outline:none;">
           </div>
         </div>
 
         <!-- Preview parcelas (aparece quando qtd > 1) -->
-        <div id="_rfParcelasPreview" style="display:none;margin-bottom:14px;">
-          <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:8px;">✏️ Confirmar / Ajustar Parcelas</div>
-          <div id="_rfParcelasLista" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <div id="_rfParcelasPreview" style="display:none;margin-bottom:10px;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">✏️ Confirmar / Ajustar Parcelas</div>
+          <div id="_rfParcelasLista" style="display:flex;flex-direction:column;gap:4px;"></div>
         </div>
 
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Observação</div>
-        <textarea id="_rfObs" rows="2" maxlength="200" placeholder="Opcional — cliente, contrato, referência…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;resize:none;line-height:1.5;margin-bottom:22px;"></textarea>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;">Observação</div>
+        <textarea id="_rfObs" rows="2" maxlength="200" placeholder="Opcional…" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(0,140,180,.2);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:12px;outline:none;resize:none;line-height:1.4;margin-bottom:14px;"></textarea>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
           <button id="_rfBack" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">←</span><span>Voltar</span></button>
@@ -5453,7 +5450,7 @@ function _renderReceberOv(){
       ov.querySelector('#_rfObs').value='';
       ov.querySelector('#_rfParcelasPreview').style.display='none';
     }
-    setTimeout(()=>ov.querySelector('#_rfNome').focus(),120);
+    
   }
 
   // Auto-atualiza preview ao mudar qtd/valor/venc1
@@ -5466,7 +5463,6 @@ function _renderReceberOv(){
 
   ov.querySelector('#_recBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_recNew').onclick=()=>showRForm(null);
-  ov.querySelector('#_rfClose').onclick=()=>{ ov.querySelector('#_recForm').style.display='none'; };
   ov.querySelector('#_rfBack').onclick=()=>{ ov.querySelector('#_recForm').style.display='none'; };
   ov.querySelector('#_rfNew').onclick=()=>{ ov.querySelector('#_recForm').style.display='none'; showRForm(null); };
 
@@ -5627,7 +5623,7 @@ function _renderExamesOv(){
     const arr=_getExames().sort((a,b)=>(b.data||'').localeCompare(a.data||''));
     if(idx!==null){ const e=arr[idx]; ov.querySelector('#_efTipo').value=e.tipo||''; ov.querySelector('#_efData').value=e.data||''; ov.querySelector('#_efPac').value=e.paciente||''; ov.querySelector('#_efResult').value=e.resultado||''; _efFotos=[...(e.fotos||[])]; renderFotoThumbs(); }
     else { ov.querySelector('#_efTipo').value=''; ov.querySelector('#_efData').value=new Date().toISOString().split('T')[0]; ov.querySelector('#_efPac').value=''; ov.querySelector('#_efResult').value=''; renderFotoThumbs(); }
-    setTimeout(()=>ov.querySelector('#_efTipo').focus(),120);
+    
   }
 
   function addFoto(file){ if(!file)return; resizeImage(file,900,0.8,url=>{ _efFotos.push(url); renderFotoThumbs(); }); }
@@ -5925,27 +5921,26 @@ function _renderDocsOv(){
 
     <!-- ── Formulário (oculto) ── -->
     <div id="_docsForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
-      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
         <span style="font-size:22px;line-height:1;flex-shrink:0;">🪪</span>
         <span id="_docsFormTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:16px;color:${TEXT};flex:1;letter-spacing:-.2px;">Cadastro</span>
-        <button id="_docsFormClose" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Fechar</button>
       </div>
-      <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
+      <div style="flex:1;overflow-y:auto;padding:14px 16px 24px;">
 
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Nome do Documento *</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;">Nome do Documento *</div>
         <input id="_dNome" type="text" maxlength="60"
-          placeholder="Ex: Senha Wi-Fi, Cartão SUS, Email, CPF, RG…"
-          style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:rgba(0,80,120,.28);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;outline:none;margin-bottom:16px;">
+          placeholder="Ex: Senha Wi-Fi, CPF, RG…"
+          style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(0,140,180,.2);background:rgba(0,80,120,.28);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;outline:none;margin-bottom:10px;">
 
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Número / Código *</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;">Número / Código *</div>
         <input id="_dNum" type="text" maxlength="120"
-          placeholder="Ex: 000.000.000-00, 192.168.0.1, senha123..."
-          style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:rgba(0,80,120,.28);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:900;outline:none;letter-spacing:.04em;margin-bottom:16px;">
+          placeholder="Ex: 000.000.000-00, senha123..."
+          style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(0,140,180,.2);background:rgba(0,80,120,.28);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;outline:none;letter-spacing:.04em;margin-bottom:10px;">
 
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Observação</div>
-        <textarea id="_dObs" rows="3" maxlength="300"
-          placeholder="Opcional — Ex: vence em dez/2027, banco Itaú, conta corrente..."
-          style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:rgba(0,80,120,.28);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:500;outline:none;resize:none;line-height:1.5;margin-bottom:22px;"></textarea>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;">Observação</div>
+        <textarea id="_dObs" rows="2" maxlength="300"
+          placeholder="Opcional…"
+          style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid rgba(0,140,180,.2);background:rgba(0,80,120,.28);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;outline:none;resize:none;line-height:1.4;margin-bottom:14px;"></textarea>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
           <button id="_docsFormBack" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">←</span><span>Voltar</span></button>
@@ -6003,7 +5998,7 @@ function _renderDocsOv(){
       ov.querySelector('#_dNum').value  = '';
       ov.querySelector('#_dObs').value  = '';
     }
-    setTimeout(()=>ov.querySelector('#_dNome').focus(), 120);
+    
   }
 
   function hideForm(){
@@ -6013,7 +6008,6 @@ function _renderDocsOv(){
 
   ov.querySelector('#_docsBack').onclick    = () => { ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_docsNew').onclick     = () => showForm(null);
-  ov.querySelector('#_docsFormClose').onclick= () => hideForm();
   ov.querySelector('#_docsFormBack').onclick= () => hideForm();
   ov.querySelector('#_docsFormNew').onclick = () => { hideForm(); showForm(null); };
 
@@ -6809,7 +6803,6 @@ function openQuickAddForCurrentBucket(){
   _quickAddKey = null;
   _quickAddBucket = currentBucket;
   _showQuickAddOverlay();
-  setTimeout(()=>input.focus(), 150);
 }
 
 function openQuickAddTask(key, d, m, y){
@@ -6843,7 +6836,6 @@ function openQuickAddTask(key, d, m, y){
   }
 
   _showQuickAddOverlay();
-  setTimeout(()=>input.focus(), 150);
 }
 
 function toggleDateTask(key, idx){
@@ -7297,7 +7289,6 @@ function openSearch() {
   overlay.style.display = 'flex';
   input.value = '';
   document.getElementById('searchResults').innerHTML = '';
-  setTimeout(() => input.focus(), 100);
 }
 
 function closeSearch(skipNavPop) {
@@ -9789,7 +9780,7 @@ function openHistoricoPaciente(){
       const b = document.getElementById(BANNER_ID);
       if (!b) return;
       b.style.opacity = '0';
-      b.style.transform = 'translateX(-50%) translateY(20px)';
+      b.style.transform = 'translate(-50%,-50%) scale(.92)';
       setTimeout(() => { if (b.parentNode) b.remove(); }, 220);
     }
 
@@ -9800,8 +9791,8 @@ function openHistoricoPaciente(){
       banner.setAttribute('role', 'alert');
       banner.setAttribute('aria-live', 'polite');
       banner.style.cssText = [
-        'position:fixed', 'bottom:80px', 'left:50%',
-        'transform:translateX(-50%) translateY(20px)',
+        'position:fixed', 'top:50%', 'left:50%',
+        'transform:translate(-50%,-50%) scale(.92)',
         'z-index:99998', 'background:rgba(10,25,47,.97)',
         'border:1px solid rgba(99,102,241,.45)',
         'border-radius:16px', 'padding:12px 16px',
@@ -9820,7 +9811,7 @@ function openHistoricoPaciente(){
       document.body.appendChild(banner);
       requestAnimationFrame(() => {
         banner.style.opacity = '1';
-        banner.style.transform = 'translateX(-50%) translateY(0)';
+        banner.style.transform = 'translate(-50%,-50%) scale(1)';
       });
 
       banner.querySelector('#_swSafeDismiss')?.addEventListener('click', _hideBanner);
@@ -9890,15 +9881,18 @@ function openHistoricoPaciente(){
       banner.setAttribute('role', 'status');
       banner.setAttribute('aria-live', 'polite');
       banner.style.cssText = [
-        'position:fixed', 'top:0', 'left:0', 'right:0',
+        'position:fixed', 'top:50%', 'left:50%',
+        'transform:translate(-50%,-50%) scale(.92)',
         'z-index:99997',
-        'background:linear-gradient(90deg,rgba(30,15,5,.97),rgba(50,25,5,.97))',
-        'border-bottom:1px solid rgba(245,158,11,.35)',
-        'padding:9px 16px',
+        'background:rgba(30,15,5,.97)',
+        'border:1px solid rgba(245,158,11,.35)',
+        'border-radius:16px',
+        'padding:12px 16px',
         'display:flex', 'align-items:center', 'gap:10px',
+        'max-width:320px', 'width:calc(100vw - 32px)',
         'font-family:Plus Jakarta Sans,sans-serif',
-        'transform:translateY(-100%)',
-        'transition:transform .3s ease',
+        'opacity:0',
+        'transition:opacity .3s, transform .3s',
       ].join(';');
       banner.innerHTML = [
         '<span style="font-size:16px;flex-shrink:0">📵</span>',
@@ -9919,13 +9913,13 @@ function openHistoricoPaciente(){
         s.textContent = '@keyframes _offlinePulse{0%,100%{opacity:1}50%{opacity:.25}}';
         document.head.appendChild(s);
       }
-      requestAnimationFrame(() => { banner.style.transform = 'translateY(0)'; });
+      requestAnimationFrame(() => { banner.style.opacity = '1'; banner.style.transform = 'translate(-50%,-50%) scale(1)'; });
     }
 
     function _hide() {
       const banner = document.getElementById(BANNER_ID);
       if (!banner) return;
-      banner.style.transform = 'translateY(-100%)';
+      banner.style.opacity = '0'; banner.style.transform = 'translate(-50%,-50%) scale(.92)';
       setTimeout(() => { if (banner.parentNode) banner.remove(); }, 320);
     }
 
@@ -10335,7 +10329,6 @@ function quickCreateSubfolder() {
     showToast('📂 Subpasta "'+name+'" criada!');
   });
   inp.addEventListener('keydown', e=>{ if(e.key==='Enter') saveBtn.click(); });
-  setTimeout(()=>inp.focus(), 120);
 }
 
 
