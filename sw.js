@@ -17,7 +17,8 @@ Agenda Pro Max — Service Worker v46
 //            v44 (2026-03) — ajustes visuais: feriados, wallpapers, marcadores
 //            v45 (2026-03) — expansão do calendário em overlay fixo + novos wallpapers 3D/imagem
 //            v46 (2026-03) — bump de cache para garantir atualização no PWA instalado
-const CACHE_VERSION = "v46";
+//            v47 (2026-03) — refinamento de botões cadastro + forçar atualização
+const CACHE_VERSION = "v47";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
 // Prefixo usado para identificar caches deste app e limpar apenas os deles
 const CACHE_PREFIX  = "agenda-cache-";
