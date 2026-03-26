@@ -1045,8 +1045,8 @@
 
 /* ══ UNDO TOAST ══ */
 .undoToast {
-  position:fixed; bottom:80px; left:50%;
-  transform:translateX(-50%) translateY(24px);
+  position:fixed; top:50%; left:50%;
+  transform:translate(-50%,-50%) scale(.92);
   z-index:99995;
   background:rgba(10,25,47,.97);
   border:1px solid rgba(99,102,241,.4);
@@ -1058,7 +1058,7 @@
   opacity:0; transition:opacity .22s, transform .22s;
   pointer-events:none;
 }
-.undoToast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+.undoToast.show { opacity:1; transform:translate(-50%,-50%) scale(1); pointer-events:auto; }
 .undoToastMsg { flex:1; font-size:13px; font-weight:700; color:#e8f4ff; }
 .undoToastBtn {
   padding:6px 13px; border-radius:9px; border:none;
