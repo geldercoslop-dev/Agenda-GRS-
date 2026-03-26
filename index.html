@@ -5059,11 +5059,10 @@ function _renderContasOv(){
 
     <!-- Formulário -->
     <div id="_contasForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
-      <div style="display:flex;align-items:center;gap:8px;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
-        <span id="_cfTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;display:flex;align-items:center;">Cadastro</span>
-        <button id="_cfBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Voltar</button>
-        <button id="_cfNew" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Novo</button>
-        <button id="_cfSave" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Salvar</button>
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+        <span style="font-size:22px;line-height:1;flex-shrink:0;">💳</span>
+        <span id="_cfTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:16px;color:${TEXT};flex:1;letter-spacing:-.2px;">Cadastro</span>
+        <button id="_cfClose" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Fechar</button>
       </div>
       <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
         <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Nome da Conta *</div>
@@ -5099,7 +5098,12 @@ function _renderContasOv(){
         </label>
         <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Observação</div>
         <textarea id="_cfObs" rows="2" maxlength="200" placeholder="Opcional — banco, número da conta, site…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;resize:none;line-height:1.5;margin-bottom:22px;"></textarea>
-        
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
+          <button id="_cfBack" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">←</span><span>Voltar</span></button>
+          <button id="_cfNew" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">+</span><span>Novo</span></button>
+          <button id="_cfSave" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">✔</span><span>Salvar</span></button>
+        </div>
       </div>
     </div>`;
 
@@ -5179,6 +5183,7 @@ function _renderContasOv(){
 
   ov.querySelector('#_contasBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_contasNew').onclick=()=>showCForm(null);
+  ov.querySelector('#_cfClose').onclick=()=>{ ov.querySelector('#_contasForm').style.display='none'; };
   ov.querySelector('#_cfBack').onclick=()=>{ ov.querySelector('#_contasForm').style.display='none'; };
   ov.querySelector('#_cfNew').onclick=()=>{ ov.querySelector('#_contasForm').style.display='none'; showCForm(null); };
   ov.querySelector('#_cfSave').onclick=()=>{
@@ -5330,11 +5335,10 @@ function _renderReceberOv(){
 
     <!-- Formulário -->
     <div id="_recForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
-      <div style="display:flex;align-items:center;gap:8px;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
-        <span id="_rfTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;display:flex;align-items:center;">Cadastro</span>
-        <button id="_rfBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Voltar</button>
-        <button id="_rfNew" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Novo</button>
-        <button id="_rfSave" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Salvar</button>
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+        <span style="font-size:22px;line-height:1;flex-shrink:0;">💰</span>
+        <span id="_rfTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:16px;color:${TEXT};flex:1;letter-spacing:-.2px;">Cadastro</span>
+        <button id="_rfClose" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Fechar</button>
       </div>
       <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
         <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Nome / Descrição *</div>
@@ -5363,7 +5367,12 @@ function _renderReceberOv(){
 
         <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;">Observação</div>
         <textarea id="_rfObs" rows="2" maxlength="200" placeholder="Opcional — cliente, contrato, referência…" style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:${FIELD};color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;resize:none;line-height:1.5;margin-bottom:22px;"></textarea>
-        
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
+          <button id="_rfBack" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">←</span><span>Voltar</span></button>
+          <button id="_rfNew" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">+</span><span>Novo</span></button>
+          <button id="_rfSave" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">✔</span><span>Salvar</span></button>
+        </div>
       </div>
     </div>`;
 
@@ -5457,6 +5466,7 @@ function _renderReceberOv(){
 
   ov.querySelector('#_recBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_recNew').onclick=()=>showRForm(null);
+  ov.querySelector('#_rfClose').onclick=()=>{ ov.querySelector('#_recForm').style.display='none'; };
   ov.querySelector('#_rfBack').onclick=()=>{ ov.querySelector('#_recForm').style.display='none'; };
   ov.querySelector('#_rfNew').onclick=()=>{ ov.querySelector('#_recForm').style.display='none'; showRForm(null); };
 
@@ -5915,11 +5925,10 @@ function _renderDocsOv(){
 
     <!-- ── Formulário (oculto) ── -->
     <div id="_docsForm" style="display:none;position:absolute;inset:0;background:${BG};z-index:2;flex-direction:column;">
-      <div style="display:flex;align-items:center;gap:8px;padding:13px 14px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
-        <span id="_docsFormTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:${TEXT};flex:1;display:flex;align-items:center;">Cadastro</span>
-        <button id="_docsFormBack" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Voltar</button>
-        <button id="_docsFormNew" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Novo</button>
-        <button id="_dSave" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Salvar</button>
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(0,80,120,.3);border-bottom:1px solid ${BDR};flex-shrink:0;">
+        <span style="font-size:22px;line-height:1;flex-shrink:0;">🪪</span>
+        <span id="_docsFormTitle" style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:16px;color:${TEXT};flex:1;letter-spacing:-.2px;">Cadastro</span>
+        <button id="_docsFormClose" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Fechar</button>
       </div>
       <div style="flex:1;overflow-y:auto;padding:18px 16px 32px;">
 
@@ -5938,7 +5947,11 @@ function _renderDocsOv(){
           placeholder="Opcional — Ex: vence em dez/2027, banco Itaú, conta corrente..."
           style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid rgba(0,140,180,.25);background:rgba(0,80,120,.28);color:${TEXT};font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:500;outline:none;resize:none;line-height:1.5;margin-bottom:22px;"></textarea>
 
-        
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
+          <button id="_docsFormBack" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">←</span><span>Voltar</span></button>
+          <button id="_docsFormNew" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">+</span><span>Novo</span></button>
+          <button id="_dSave" type="button" style="padding:8px 4px;border-radius:10px;border:1px solid rgba(125,211,240,.35);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;height:34px;"><span style="font-size:15px;line-height:1;">✔</span><span>Salvar</span></button>
+        </div>
       </div>
     </div>`;
 
@@ -6000,6 +6013,7 @@ function _renderDocsOv(){
 
   ov.querySelector('#_docsBack').onclick    = () => { ov.remove(); if(typeof window._navPop==='function') window._navPop(); _restoreHomeChrome(); };
   ov.querySelector('#_docsNew').onclick     = () => showForm(null);
+  ov.querySelector('#_docsFormClose').onclick= () => hideForm();
   ov.querySelector('#_docsFormBack').onclick= () => hideForm();
   ov.querySelector('#_docsFormNew').onclick = () => { hideForm(); showForm(null); };
 
