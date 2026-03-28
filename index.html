@@ -2440,6 +2440,7 @@ function renderDayView(){
       '<div style="display:inline-flex;align-items:center;justify-content:center;gap:7px;">'+
         '<span style="font-size:18px;line-height:1;display:flex;align-items:center;">📷</span>'+
         '<span style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;letter-spacing:-.1px;color:#818cf8;line-height:1;display:flex;align-items:center;">Galeria de fotos da pasta</span>'+
+        '<span style="font-family:Space Grotesk,sans-serif;font-weight:800;font-size:11px;color:#a5b4fc;background:rgba(99,102,241,.18);border-radius:20px;padding:2px 7px;line-height:1.5;">'+_pCount+'</span>'+
       '</div>';
     photoRow.addEventListener('click',()=>openBucketPhotoGallery(currentBucket));
     listArea.appendChild(photoRow);
@@ -6360,38 +6361,45 @@ function openBucketPhotoGallery(bucketId){
   ov.id='photoGalleryOv'; // ID fixo — o botão voltar detecta e fecha corretamente
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.93);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:99995;display:flex;flex-direction:column;';
 
+  // Colunas responsivas: 4 em mobile, 6 em telas maiores
+  const cols = window.innerWidth >= 640 ? 6 : 4;
   ov.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0;">
       <div style="display:flex;align-items:center;gap:10px;">
         <button id="_pgBack" style="background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.35);border-radius:10px;color:#fb923c;font-size:18px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;">‹</button>
-        <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:22px;line-height:1;">📷</span><span style="font-family:Space Grotesk,sans-serif;font-weight:800;font-size:16px;color:#fff;letter-spacing:-.3px;">Galeria</span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:22px;line-height:1;">📷</span><span style="font-family:Space Grotesk,sans-serif;font-weight:800;font-size:16px;color:#fff;letter-spacing:-.3px;">Galeria</span><span style="font-family:Space Grotesk,sans-serif;font-weight:800;font-size:11px;color:#a5b4fc;background:rgba(99,102,241,.18);border-radius:20px;padding:2px 7px;">${photos.length}</span></div>
       </div>
     </div>
-    <div id="_pgGrid" style="flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:8px;"></div>
+    <div id="_pgGrid" style="flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(${cols},1fr);gap:3px;padding:6px;"></div>
   `;
   document.body.appendChild(ov);
   ov.querySelector('#_pgBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
 
   const grid=ov.querySelector('#_pgGrid');
-  photos.forEach((p)=>{
+  photos.forEach((p, idx)=>{
     const cell=document.createElement('div');
-    cell.style.cssText='position:relative;aspect-ratio:1;overflow:hidden;border-radius:10px;cursor:pointer;';
+    cell.style.cssText='position:relative;aspect-ratio:1;overflow:hidden;border-radius:6px;cursor:pointer;background:rgba(255,255,255,.05);';
     const img=document.createElement('img');
     img.src=safeImageUrl(p.url);
     img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
-    img.addEventListener('click',()=>openPhotoFullscreen(p, bucketId, ov));
+    img.loading='lazy';
+    img.decoding='async';
+    // Listener na célula inteira para área de toque maior
+    cell.addEventListener('click',()=>openPhotoFullscreen(photos, idx, bucketId));
     cell.appendChild(img);
     grid.appendChild(cell);
   });
 }
 
-function openPhotoFullscreen(photo, bucketId, galleryOv){
+function openPhotoFullscreen(photos, startIndex, bucketId){
   // Remove fullscreen anterior se existir
   const existing = document.getElementById('photoFullscreenOv');
   if(existing) existing.remove();
 
   // Empurra entry no history para o botão voltar Android funcionar
   if(typeof window._navPush === 'function') window._navPush();
+
+  let currentIndex = startIndex;
 
   const ov=document.createElement('div');
   ov.id='photoFullscreenOv'; // ID fixo — botão voltar detecta e fecha, voltando para a galeria
@@ -6400,25 +6408,67 @@ function openPhotoFullscreen(photo, bucketId, galleryOv){
     <div style="position:absolute;top:14px;left:14px;">
       <button id="_pfBack" style="background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.35);border-radius:10px;color:#fb923c;font-size:18px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;">‹</button>
     </div>
-    <div style="position:absolute;top:14px;right:14px;">
+    <div style="position:absolute;top:14px;right:14px;display:flex;align-items:center;gap:8px;">
+      <span id="_pfCount" style="font-family:Space Grotesk,sans-serif;font-size:12px;color:rgba(255,255,255,.45);"></span>
       <button id="_pfDel" style="background:rgba(255,50,50,.2);border:1px solid rgba(255,50,50,.35);border-radius:10px;color:#ff6b6b;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;font-family:Space Grotesk,sans-serif;">🗑 Excluir</button>
     </div>
-    <img loading="lazy" decoding="async" src="${escAttr(safeImageUrl(photo.url))}" style="max-width:95vw;max-height:82vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);">
-    <div style="margin-top:12px;font-size:11px;color:rgba(255,255,255,.4);font-family:Space Grotesk,sans-serif;">${new Date(photo.ts).toLocaleString('pt-BR')}</div>
+    <button id="_pfPrev" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;font-size:24px;width:44px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s;z-index:1;">‹</button>
+    <img id="_pfImg" loading="lazy" decoding="async" src="" style="max-width:95vw;max-height:82vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);user-select:none;-webkit-user-drag:none;touch-action:pinch-zoom;">
+    <div id="_pfDate" style="margin-top:12px;font-size:11px;color:rgba(255,255,255,.4);font-family:Space Grotesk,sans-serif;"></div>
+    <button id="_pfNext" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;font-size:24px;width:44px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s;z-index:1;">›</button>
   `;
   document.body.appendChild(ov);
+
+  function _showPhoto(idx){
+    const p=photos[idx];
+    ov.querySelector('#_pfImg').src=safeImageUrl(p.url);
+    ov.querySelector('#_pfDate').textContent=new Date(p.ts).toLocaleString('pt-BR');
+    ov.querySelector('#_pfCount').textContent=(idx+1)+'/'+photos.length;
+    ov.querySelector('#_pfPrev').style.visibility=idx>0?'visible':'hidden';
+    ov.querySelector('#_pfNext').style.visibility=idx<photos.length-1?'visible':'hidden';
+    currentIndex=idx;
+  }
+  _showPhoto(currentIndex);
+
+  function _cleanup(){ document.removeEventListener('keydown',_onKey); }
+
   // Voltar da foto → volta para a galeria
-  ov.querySelector('#_pfBack').onclick=()=>{ ov.remove(); if(typeof window._navPop==='function') window._navPop(); };
+  ov.querySelector('#_pfBack').onclick=()=>{ ov.remove(); _cleanup(); if(typeof window._navPop==='function') window._navPop(); };
+  ov.querySelector('#_pfPrev').onclick=()=>{ if(currentIndex>0) _showPhoto(currentIndex-1); };
+  ov.querySelector('#_pfNext').onclick=()=>{ if(currentIndex<photos.length-1) _showPhoto(currentIndex+1); };
+
   ov.querySelector('#_pfDel').onclick=()=>{
     if(!confirm('Excluir esta imagem?')) return;
+    const photo=photos[currentIndex];
     if(!state.bucketPhotos) state.bucketPhotos={};
     if(!state.bucketPhotos[bucketId]) state.bucketPhotos[bucketId]=[];
     state.bucketPhotos[bucketId]=state.bucketPhotos[bucketId].filter(x=>x.id!==photo.id);
-    save(); renderDayView(); ov.remove();
+    save(); renderDayView(); ov.remove(); _cleanup();
     // Reabre a galeria atualizada
     openBucketPhotoGallery(bucketId);
     showToast('🗑 Imagem excluída.');
   };
+
+  // Suporte a swipe (deslizar para navegar entre fotos)
+  let _touchStartX=0, _touchStartY=0;
+  ov.addEventListener('touchstart',(e)=>{ _touchStartX=e.touches[0].clientX; _touchStartY=e.touches[0].clientY; },{passive:true});
+  ov.addEventListener('touchend',(e)=>{
+    const dx=e.changedTouches[0].clientX-_touchStartX;
+    const dy=e.changedTouches[0].clientY-_touchStartY;
+    // Só navega se o swipe horizontal for maior que o vertical
+    if(Math.abs(dx) > Math.abs(dy)*1.5 && Math.abs(dx) > 40){
+      if(dx<0 && currentIndex<photos.length-1) _showPhoto(currentIndex+1);
+      else if(dx>0 && currentIndex>0) _showPhoto(currentIndex-1);
+    }
+  },{passive:true});
+
+  // Suporte a teclado (setas e Escape)
+  function _onKey(e){
+    if(e.key==='ArrowRight' && currentIndex<photos.length-1) _showPhoto(currentIndex+1);
+    else if(e.key==='ArrowLeft' && currentIndex>0) _showPhoto(currentIndex-1);
+    else if(e.key==='Escape'){ ov.remove(); _cleanup(); if(typeof window._navPop==='function') window._navPop(); }
+  }
+  document.addEventListener('keydown',_onKey);
 }
 
 function initFolderModal(){
