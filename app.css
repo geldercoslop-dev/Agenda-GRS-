@@ -384,9 +384,9 @@
       border-radius: 13px;
       display: flex; align-items: center; justify-content: center;
       position: relative;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.14);
-      box-shadow: 0 4px 18px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18);
+      background: #f5efe6;
+      border: 1px solid rgba(180,150,100,0.22);
+      box-shadow: 0 4px 18px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.6);
       backdrop-filter: blur(10px);
       transition: box-shadow .15s, border-color .15s;
       margin-bottom: 0;
@@ -1215,7 +1215,7 @@
 
 /* ══ Modal Todas as Pastas — sempre texto branco (fundo dark) ══ */
 #todasPastasOv .folderTile .fl { color:rgba(255,255,255,.88) !important; }
-#todasPastasOv .folderTile .fi-wrap { background:rgba(255,255,255,.95) !important; border-color:rgba(255,255,255,.2) !important; box-shadow:0 4px 12px rgba(0,0,0,.3) !important; }
+#todasPastasOv .folderTile .fi-wrap { background:#f5efe6 !important; border-color:rgba(180,150,100,.25) !important; box-shadow:0 4px 12px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.7) !important; }
 
 /* Lupa da busca */
 .searchLupa { color: #7dd3f0; }
