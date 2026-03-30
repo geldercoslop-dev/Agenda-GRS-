@@ -312,6 +312,11 @@
           <span class="sCardLabel">Verificar dados</span>
           <span class="sCardSub">Integridade</span>
         </div>
+        <div class="sCard" id="rowShareApp" style="cursor:pointer;">
+          <span class="sCardIcon">📲</span>
+          <span class="sCardLabel">Compartilhar app</span>
+          <span class="sCardSub">QR Code + link</span>
+        </div>
       </div>
 
       <!-- Subform Nome -->
@@ -3509,8 +3514,10 @@ function resizeImage(file,maxPx,quality,cb){
       ctx.drawImage(img,0,0,w,h);
       cb(isPng?c.toDataURL('image/png'):c.toDataURL('image/jpeg',quality));
     };
+    img.onerror=()=>{ showToast('❌ Erro ao carregar imagem.'); };
     img.src=e.target.result;
   };
+  reader.onerror=()=>{ showToast('❌ Erro ao ler arquivo.'); };
   reader.readAsDataURL(file);
 }
 
@@ -4236,6 +4243,7 @@ function init(){
   document.getElementById('rowStats')     ?.addEventListener('click', ()=>openStats(true));
   document.getElementById('rowVersion')   ?.addEventListener('click', openVersionStatus);
   document.getElementById('rowIntegrity') ?.addEventListener('click', verificarIntegridade);
+  document.getElementById('rowShareApp')  ?.addEventListener('click', openShareAppModal);
   // ── Botão de pesquisa no header
   document.getElementById('searchBtn')?.addEventListener('click', openSearch);
   document.getElementById('topSearchInput')?.addEventListener('click', openSearch);
@@ -4392,7 +4400,7 @@ function init(){
       // NÃO re-empurra entry — apenas fecha o overlay.
       // Se re-empurrar, cria depth fantasma: o próximo "voltar" não faz nada e o
       // seguinte sai do app (o bug clássico galeria → pasta → sai do app).
-      const namedOvs=['pastasFrenteOv','todasPastasOv','watermarkTipOv','photoFullscreenOv','photoGalleryOv','consultaFormOv','remedioFormOv','listaConsultasOv','listaRemediosOv','historicoPacienteOv','feriadosOv','docsOv','contasOv','receberOv','examesOv','mercadoOv','inlineViewerOv','_syncModal','_miniConsultaReportOv'];
+      const namedOvs=['pastasFrenteOv','todasPastasOv','watermarkTipOv','photoFullscreenOv','photoGalleryOv','consultaFormOv','remedioFormOv','listaConsultasOv','listaRemediosOv','historicoPacienteOv','feriadosOv','docsOv','contasOv','receberOv','examesOv','mercadoOv','inlineViewerOv','_syncModal','_miniConsultaReportOv','_shareAppOv'];
       for(const oid of namedOvs){
         const el=document.getElementById(oid);
         if(el){
@@ -6379,14 +6387,20 @@ function openBucketPhotoGallery(bucketId){
   photos.forEach((p, idx)=>{
     const cell=document.createElement('div');
     cell.style.cssText='position:relative;aspect-ratio:1;overflow:hidden;border-radius:6px;cursor:pointer;background:rgba(255,255,255,.05);';
-    const img=document.createElement('img');
-    img.src=safeImageUrl(p.url);
-    img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
-    img.loading='lazy';
-    img.decoding='async';
+    const safeUrl = safeImageUrl(p.url);
+    if(safeUrl){
+      const img=document.createElement('img');
+      // NÃO usar loading=lazy dentro de overlay fixo — em Android PWA o browser
+      // trata o container como fora da viewport e nunca carrega a imagem.
+      img.src=safeUrl;
+      img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
+      img.onerror=()=>{ img.style.display='none'; cell.style.background='rgba(255,80,80,.12)'; };
+      cell.appendChild(img);
+    } else {
+      cell.style.background='rgba(255,80,80,.12)';
+    }
     // Listener na célula inteira para área de toque maior
     cell.addEventListener('click',()=>openPhotoFullscreen(photos, idx, bucketId));
-    cell.appendChild(img);
     grid.appendChild(cell);
   });
 }
@@ -6413,7 +6427,7 @@ function openPhotoFullscreen(photos, startIndex, bucketId){
       <button id="_pfDel" style="background:rgba(255,50,50,.2);border:1px solid rgba(255,50,50,.35);border-radius:10px;color:#ff6b6b;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;font-family:Space Grotesk,sans-serif;">🗑 Excluir</button>
     </div>
     <button id="_pfPrev" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;font-size:24px;width:44px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s;z-index:1;">‹</button>
-    <img id="_pfImg" loading="lazy" decoding="async" src="" style="max-width:95vw;max-height:82vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);user-select:none;-webkit-user-drag:none;touch-action:pinch-zoom;">
+    <img id="_pfImg" src="" style="max-width:95vw;max-height:82vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);user-select:none;-webkit-user-drag:none;touch-action:pinch-zoom;">
     <div id="_pfDate" style="margin-top:12px;font-size:11px;color:rgba(255,255,255,.4);font-family:Space Grotesk,sans-serif;"></div>
     <button id="_pfNext" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;font-size:24px;width:44px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s;z-index:1;">›</button>
   `;
@@ -7712,6 +7726,160 @@ function openVersionStatus() {
     </div>`;
   closeSettings();
   openSubScreen('🧭 Status da versão', html, null, null);
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// ══ COMPARTILHAR APP — QR CODE ══
+// ══════════════════════════════════════════════════════════════════
+function openShareAppModal() {
+  // Fecha settings
+  document.getElementById('sModalOverlay')?.classList.remove('show');
+
+  const appUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
+
+  const existing = document.getElementById('_shareAppOv');
+  if (existing) existing.remove();
+  if (typeof window._navPush === 'function') window._navPush();
+
+  const ov = document.createElement('div');
+  ov.id = '_shareAppOv';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.93);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:99990;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;';
+
+  ov.innerHTML = `
+    <div style="width:100%;max-width:380px;padding:20px 16px 32px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:16px;">
+      <!-- Header -->
+      <div style="width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <button id="_saBack" style="background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.35);border-radius:10px;color:#fb923c;font-size:18px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;">‹</button>
+        <span style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:15px;color:#e8f4ff;letter-spacing:-.2px;">📲 Compartilhar App</span>
+        <div style="width:36px;"></div>
+      </div>
+
+      <!-- Descrição -->
+      <p style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:rgba(180,220,240,.65);text-align:center;margin:0;line-height:1.5;">
+        Escaneie o QR Code com a câmera do celular<br>para abrir e instalar o app.
+      </p>
+
+      <!-- QR Code area -->
+      <div id="_saQrWrap" style="background:#fff;border-radius:16px;padding:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,0,0,.5);">
+        <canvas id="_saQrCanvas" width="200" height="200"></canvas>
+      </div>
+
+      <!-- URL display -->
+      <div id="_saUrlBox" style="width:100%;background:rgba(0,60,100,.35);border:1px solid rgba(0,160,210,.2);border-radius:12px;padding:10px 14px;box-sizing:border-box;display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="_sayCopyUrl()">
+        <span style="font-size:14px;">🔗</span>
+        <span id="_saUrlTxt" style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:#7dd3f0;word-break:break-all;flex:1;">${appUrl}</span>
+        <span style="font-size:14px;opacity:.6;">📋</span>
+      </div>
+      <div id="_saUrlHint" style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:rgba(180,220,240,.4);margin-top:-8px;">Toque para copiar o link</div>
+
+      <!-- Botões de ação -->
+      <div style="width:100%;display:flex;flex-direction:column;gap:8px;">
+        <button id="_saCopyBtn" onclick="_sayCopyUrl()" style="width:100%;padding:12px;border-radius:14px;border:none;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          📋 Copiar link
+        </button>
+        <button id="_saShareBtn" style="width:100%;padding:12px;border-radius:14px;border:none;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          📤 Compartilhar via...
+        </button>
+        <button id="_saZapBtn" style="width:100%;padding:12px;border-radius:14px;border:none;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          💬 Enviar pelo ZAP
+        </button>
+      </div>
+
+      <!-- Instruções -->
+      <div style="width:100%;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:12px;padding:12px 14px;box-sizing:border-box;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:900;color:#a5b4fc;margin-bottom:8px;letter-spacing:.5px;">COMO INSTALAR</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:11px;color:rgba(180,220,240,.7);line-height:1.7;">
+          📱 <b>Android:</b> Abra o link no Chrome → menu ⋮ → <i>"Adicionar à tela inicial"</i><br>
+          🍎 <b>iPhone:</b> Abra no Safari → botão compartilhar ↑ → <i>"Adicionar à Tela de Início"</i>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(ov);
+
+  // Fecha overlay
+  const _close = () => {
+    ov.remove();
+    if (typeof window._navPop === 'function') window._navPop();
+  };
+  ov.querySelector('#_saBack').onclick = _close;
+
+  // Gera QR Code usando API pública sem dependência
+  _generateQrCode(appUrl, document.getElementById('_saQrCanvas'));
+
+  // Copiar link
+  window._sayCopyUrl = function() {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(appUrl).then(() => showToast('✅ Link copiado!')).catch(() => _saFallbackCopy(appUrl));
+    } else {
+      _saFallbackCopy(appUrl);
+    }
+  };
+
+  function _saFallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); showToast('✅ Link copiado!'); } catch(_) { showToast('Copie o link manualmente.'); }
+    document.body.removeChild(ta);
+  }
+
+  // Compartilhar nativo
+  ov.querySelector('#_saShareBtn').onclick = () => {
+    if (navigator.share) {
+      navigator.share({ title: 'Agenda GRS', text: 'Acesse o app Agenda GRS!', url: appUrl }).catch(() => {});
+    } else {
+      _sayCopyUrl();
+    }
+  };
+
+  // WhatsApp
+  ov.querySelector('#_saZapBtn').onclick = () => {
+    const msg = encodeURIComponent('📲 Acesse o app *Agenda GRS* pelo link:\n' + appUrl + '\n\nAbra no Chrome (Android) ou Safari (iPhone) e instale na tela inicial!');
+    window.open('https://wa.me/?text=' + msg, '_blank');
+  };
+}
+
+// Gera QR Code em canvas usando algorítmo interno (sem CDN externo)
+function _generateQrCode(text, canvas) {
+  // Usa API gratuita do goqr.me como imagem — fallback simples e confiável
+  const size = 200;
+  const ctx = canvas.getContext('2d');
+  canvas.width = size; canvas.height = size;
+
+  // Exibe placeholder enquanto carrega
+  ctx.fillStyle = '#f3f4f6';
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = '#6366f1';
+  ctx.font = 'bold 13px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Gerando QR...', size/2, size/2);
+
+  const encoded = encodeURIComponent(text);
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encoded}&format=png&margin=0&qzone=1&color=1a1a2e&bgcolor=ffffff`;
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    ctx.clearRect(0, 0, size, size);
+    ctx.drawImage(img, 0, 0, size, size);
+  };
+  img.onerror = () => {
+    // Fallback: mostra URL em texto se API falhar
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#111';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+    const words = text.split('/');
+    words.forEach((w, i) => ctx.fillText(w, size/2, 30 + i*16));
+    ctx.fillStyle = '#6366f1';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('⚠️ Sem internet para gerar QR', size/2, size - 20);
+  };
+  img.src = qrUrl;
 }
 
 // ══════════════════════════════════════════════════════════════════
