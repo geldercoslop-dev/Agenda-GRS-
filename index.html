@@ -638,7 +638,11 @@
       </div>
       <!-- Subforms (hidden by default) -->
       <div class="fSubform hidden" id="fSubNova" style="margin:0 16px 16px;border-radius:16px;border:1px solid rgba(99,102,241,.2);">
-        <div style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:8px;padding-top:4px;">Escolha um ícone <span style="color:#ff5c6a">*</span></div>
+        <div style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:6px;padding-top:4px;">Escolha um ícone <span style="color:#ff5c6a">*</span></div>
+        <!-- Galeria de ícones 3D do icon_pack -->
+        <div style="font-size:10px;font-weight:700;color:rgba(165,180,252,.7);margin-bottom:5px;letter-spacing:.5px;">🖼️ ÍCONES 3D</div>
+        <div class="ipGallery" id="ipGalleryNova"></div>
+        <div style="font-size:10px;font-weight:700;color:rgba(165,180,252,.7);margin:8px 0 5px;letter-spacing:.5px;">😊 EMOJIS</div>
         <div id="emojiPicker" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px">
           <span class="epBtn" data-e="📋">📋</span><span class="epBtn" data-e="💼">💼</span><span class="epBtn" data-e="🏠">🏠</span><span class="epBtn" data-e="🎯">🎯</span><span class="epBtn" data-e="💡">💡</span><span class="epBtn" data-e="📚">📚</span><span class="epBtn" data-e="🛒">🛒</span><span class="epBtn" data-e="🏋️">🏋️</span><span class="epBtn" data-e="🎵">🎵</span><span class="epBtn" data-e="💰">💰</span><span class="epBtn" data-e="✈️">✈️</span><span class="epBtn" data-e="❤️">❤️</span><span class="epBtn" data-e="⭐">⭐</span><span class="epBtn" data-e="🔥">🔥</span><span class="epBtn" data-e="🎮">🎮</span><span class="epBtn" data-e="🧠">🧠</span>
           <span class="epBtn" id="epBtnMore" style="background:rgba(0,160,200,.2);border:1px dashed rgba(0,200,220,.4);font-size:18px;font-weight:900;color:#a5b4fc;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px">＋</span>
@@ -661,6 +665,9 @@
         <div class="fSelectGrid" id="fSelectEdit"></div>
         <div class="hidden" id="fEditForm" style="margin-top:10px">
           <input class="fInput" id="fInputEditName" type="text" placeholder="Novo nome...">
+          <div style="font-size:10px;font-weight:700;color:rgba(165,180,252,.7);margin:8px 0 5px;letter-spacing:.5px;">🖼️ ÍCONES 3D</div>
+          <div class="ipGallery" id="ipGalleryEdit"></div>
+          <div style="font-size:10px;font-weight:700;color:rgba(165,180,252,.7);margin:8px 0 5px;letter-spacing:.5px;">😊 EMOJI</div>
           <input class="fInput" id="fInputEditEmoji" type="text" placeholder="Emoji (ex: 📋)">
           <button class="fSaveBtn" id="fSaveEdit">✔ Salvar edição</button>
         </div>
@@ -835,6 +842,7 @@
 <script src="./sync.js"></script>
 <script src="./feriadosES.js"></script>
 <script src="./wallpapers.js"></script>
+<script src="./icon_pack.js"></script>
 <script src="./pwaRescue.js"></script>
 
 
@@ -1874,10 +1882,21 @@ function makeTile(f, isSub, children){
   el.className='folderTile'; el.dataset.id=f.id; el.draggable=true;
   if(isSub) el.style.cssText='opacity:.8;';
   const wrap=document.createElement('div'); wrap.className='fi-wrap';
-  const emo=document.createElement('div'); emo.className='fi';
-  emo.textContent=f.emoji||'📁';
-  if(isSub) emo.style.fontSize='16px';
-  wrap.appendChild(emo);
+
+  // Mostra imagem do icon_pack se tiver iconId, senão emoji
+  const iconEntry = (f.iconId && typeof ICON_PACK!=='undefined') ? ICON_PACK.find(ic=>ic.id===f.iconId) : null;
+  if(iconEntry){
+    const img=document.createElement('img');
+    img.src=iconEntry.data; img.alt='';
+    img.style.cssText=isSub?'width:28px;height:28px;object-fit:contain;':'width:48px;height:48px;object-fit:contain;';
+    wrap.appendChild(img);
+  } else {
+    const emo=document.createElement('div'); emo.className='fi';
+    emo.textContent=f.emoji||'📁';
+    if(isSub) emo.style.fontSize='16px';
+    wrap.appendChild(emo);
+  }
+
   const lbl=document.createElement('div'); lbl.className='fl';
   lbl.textContent=f.name;
   el.appendChild(wrap); el.appendChild(lbl);
@@ -2089,30 +2108,25 @@ function openTodasPastas(){
   if(typeof window._navPush === 'function') window._navPush();
   const {ov, box, close: _closeBase} = _modalBase();
   ov.id = 'todasPastasOv';
-  // Esconde rodapé (Léo + barra + botão) igual ao calendário expandido
+
   const _pr = document.getElementById('progressRow');
   if(_pr){ _pr.style.opacity='0'; _pr.style.pointerEvents='none'; _pr.style.transition='opacity .2s'; }
-  const close = ()=>{
-    _closeBase();
-    if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; }
-  };
+  const close = ()=>{ _closeBase(); if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; } };
 
-  // Header fixo
+  // ─ Header ─
   const hdr = document.createElement('div');
-  hdr.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px 10px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;';
+  hdr.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;';
   hdr.innerHTML = `
     <div style="flex:1;min-width:0;">
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:#e8f4ff;line-height:1.2;">📁 Todas as Pastas</div>
-      <div style="font-size:10px;color:rgba(255,255,255,.38);margin-top:4px;font-family:'Plus Jakarta Sans',sans-serif;">Segure e arraste para reordenar</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;color:#e8f4ff;">📁 Todas as Pastas</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.38);margin-top:3px;">Toque = abrir/ícone  •  Segure = mover</div>
     </div>
     <button id="_tpClose" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:900;padding:8px 16px;cursor:pointer;flex-shrink:0;">Fechar</button>`;
   box.appendChild(hdr);
 
-  // Área scrollável
+  // ─ Scroll + grid ─
   const scroll = document.createElement('div');
   scroll.style.cssText = 'overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;flex:1;min-height:0;padding:16px 14px 28px;';
-
-  // Grid de todas as pastas
   const grid = document.createElement('div');
   grid.id = '_tpGrid';
   grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:14px 6px;place-items:start center;';
@@ -2122,159 +2136,293 @@ function openTodasPastas(){
   state.folders.forEach(f=>{if(!order.includes(f.id))order.push(f.id);});
   const topLevel = order.filter(id=>byId[id]&&!byId[id].parentId);
 
-  // State for touch drag within modal
-  let _modalDragId = null;
-  let _modalDragEl = null;
-  let _modalDragClone = null;
-  let _modalDragOX = 0, _modalDragOY = 0;
-  let _modalLastSwap = null;
+  // ─ Drag state ─
+  let _modalDragId=null, _modalDragEl=null, _modalDragClone=null;
+  let _modalDragOX=0, _modalDragOY=0, _modalLastSwap=null;
 
-  function _buildModalTile(id){
-    const f = byId[id]; if(!f) return null;
-    // Usa exatamente as mesmas classes das pastas da frente — efeitos idênticos
-    const tile = document.createElement('button');
-    tile.dataset.id = id;
-    tile.className = 'folderTile';
-    tile.innerHTML = `
-      <div class="fi-wrap"><span class="fi">${escHtml(f.emoji||'📁')}</span></div>
-      <span class="fl">${escHtml(f.name)}</span>
+  // ─ Mini-menu: abre ao tocar numa pasta ─
+  function _openTileMenu(f, tileEl){
+    const existing = document.getElementById('_tpTileMenu');
+    if(existing) existing.remove();
+
+    const rect = tileEl.getBoundingClientRect();
+    const menu = document.createElement('div');
+    menu.id = '_tpTileMenu';
+    menu.style.cssText = `position:fixed;z-index:100002;background:rgba(6,20,32,.97);
+      border:1px solid rgba(0,200,230,.25);border-radius:14px;padding:6px;
+      box-shadow:0 12px 40px rgba(0,0,0,.6);min-width:190px;
+      left:${Math.min(rect.left, window.innerWidth-200)}px;
+      top:${Math.min(rect.bottom+6, window.innerHeight-160)}px;`;
+
+    const isSystem = SYSTEM_IDS.includes(f.id);
+    const iconEntry = (f.iconId && typeof ICON_PACK!=='undefined') ? ICON_PACK.find(ic=>ic.id===f.iconId) : null;
+    const iconHtml = iconEntry
+      ? `<img src="${iconEntry.data}" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;">`
+      : `<span style="font-size:16px;">${escHtml(f.emoji||'📁')}</span>`;
+
+    menu.innerHTML = `
+      <div style="padding:6px 10px 8px;font-size:11px;font-weight:800;color:rgba(255,255,255,.35);font-family:'Space Grotesk',sans-serif;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:4px;">
+        ${iconHtml} <span style="margin-left:4px;color:rgba(255,255,255,.6);">${escHtml(f.name)}</span>
+      </div>
+      <button id="_tmOpen" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:none;background:transparent;color:#e8f4ff;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border-radius:9px;text-align:left;">
+        <span style="font-size:16px;">📂</span> Abrir pasta
+      </button>
+      <button id="_tmIcon" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:none;background:transparent;color:#e8f4ff;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border-radius:9px;text-align:left;">
+        <span style="font-size:16px;">🎨</span> Trocar ícone
+      </button>
+      ${!isSystem ? `<button id="_tmRename" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:none;background:transparent;color:#e8f4ff;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border-radius:9px;text-align:left;">
+        <span style="font-size:16px;">✏️</span> Renomear
+      </button>` : ''}
     `;
 
-    // Click to open
-    tile.addEventListener('click', ()=>{
-      if(_modalDragId) return; // don't open during drag
-      ov.remove();
-      openBucket(id);
+    // Hover effect
+    menu.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('mouseenter',()=>btn.style.background='rgba(255,255,255,.07)');
+      btn.addEventListener('mouseleave',()=>btn.style.background='transparent');
     });
 
-    // Desktop drag
-    tile.draggable = true;
-    tile.addEventListener('dragstart',(e)=>{ _modalDragId=id; e.dataTransfer.effectAllowed='move'; tile.style.opacity='0.35'; });
-    tile.addEventListener('dragend',()=>{ tile.style.opacity=''; _modalDragId=null; save(); });
-    tile.addEventListener('dragover',(e)=>e.preventDefault());
-    tile.addEventListener('drop',(e)=>{
-      e.preventDefault();
-      if(_modalDragId && _modalDragId!==id){
-        const fi=state.folderOrder.indexOf(_modalDragId), ti=state.folderOrder.indexOf(id);
-        if(fi>=0&&ti>=0) [state.folderOrder[fi],state.folderOrder[ti]]=[state.folderOrder[ti],state.folderOrder[fi]];
+    menu.querySelector('#_tmOpen').addEventListener('click',()=>{ menu.remove(); close(); openBucket(f.id); });
+
+    menu.querySelector('#_tmIcon').addEventListener('click',()=>{
+      menu.remove();
+      openIconPickerForFolder(f.id, (newEmoji, newIconId)=>{
+        const folder = state.folders.find(x=>x.id===f.id);
+        if(!folder) return;
+        if(newIconId){ folder.iconId=newIconId; folder.emoji=newEmoji||folder.emoji; }
+        else { folder.emoji=newEmoji||'📁'; delete folder.iconId; }
         save(); renderFolders();
-        // Re-render modal grid
-        const tiles=[...grid.querySelectorAll('[data-id]')];
-        const elA=tiles.find(x=>x.dataset.id===_modalDragId);
-        const elB=tiles.find(x=>x.dataset.id===id);
-        if(elA&&elB){
-          const nextB=elB.nextSibling;
-          grid.insertBefore(elA,nextB||null);
-        }
+        // Atualiza o tile no modal
+        const oldTile = grid.querySelector(`[data-id="${f.id}"]`);
+        if(oldTile){ const newTile=_buildModalTile(f.id); if(newTile) oldTile.replaceWith(newTile); }
+        showToast('✅ Ícone atualizado!');
+      });
+    });
+
+    const rnBtn = menu.querySelector('#_tmRename');
+    if(rnBtn) rnBtn.addEventListener('click',()=>{
+      menu.remove();
+      const nv = prompt('Novo nome para "'+f.name+'":', f.name);
+      if(nv&&nv.trim()){ f.name=nv.trim(); save(); renderFolders();
+        const oldTile=grid.querySelector(`[data-id="${f.id}"]`);
+        if(oldTile){ const nt=_buildModalTile(f.id); if(nt) oldTile.replaceWith(nt); }
+        showToast('✅ Pasta renomeada!');
       }
     });
 
-    // Touch drag — long press
-    let _pressTimer = null;
-    tile.addEventListener('touchstart',(e)=>{
-      _pressTimer = setTimeout(()=>{
-        _modalDragId = id;
-        _modalDragEl = tile;
-        tile.style.opacity = '0';
-        tile.style.visibility = 'hidden';
+    // Fecha ao clicar fora
+    const _dismissMenu = (e)=>{ if(!menu.contains(e.target)){ menu.remove(); document.removeEventListener('pointerdown',_dismissMenu,true); }};
+    setTimeout(()=>document.addEventListener('pointerdown',_dismissMenu,true),50);
+    document.body.appendChild(menu);
+  }
 
-        const t = e.touches[0];
-        const rect = tile.getBoundingClientRect();
-        _modalDragOX = t.clientX - rect.left - rect.width/2;
-        _modalDragOY = t.clientY - rect.top - rect.height/2;
+  // ─ Constrói tile ─
+  function _buildModalTile(id){
+    const f = byId[id]; if(!f) return null;
+    const tile = document.createElement('button');
+    tile.dataset.id = id;
+    tile.className = 'folderTile';
+    tile.type = 'button';
 
-        // Create clone
-        _modalDragClone = tile.cloneNode(true);
-        _modalDragClone.style.cssText = `position:fixed;z-index:99999;pointer-events:none;opacity:.9;
-          transform:scale(1.08);left:${t.clientX-_modalDragOX-29}px;top:${t.clientY-_modalDragOY-40}px;
+    const iconEntry = (f.iconId && typeof ICON_PACK!=='undefined') ? ICON_PACK.find(ic=>ic.id===f.iconId) : null;
+    const iconHtml = iconEntry
+      ? `<img src="${iconEntry.data}" style="width:48px;height:48px;object-fit:contain;">`
+      : `<span class="fi">${escHtml(f.emoji||'📁')}</span>`;
+
+    tile.innerHTML = `<div class="fi-wrap">${iconHtml}</div><span class="fl">${escHtml(f.name)}</span>`;
+
+    // Tap curto = menu; long press = drag
+    let _pressTimer=null, _didDrag=false, _didMenu=false;
+
+    tile.addEventListener('pointerdown',(e)=>{
+      _didDrag=false; _didMenu=false;
+      _pressTimer=setTimeout(()=>{
+        _didDrag=true;
+        _modalDragId=id; _modalDragEl=tile;
+        tile.style.opacity='0'; tile.style.visibility='hidden';
+        const rect=tile.getBoundingClientRect();
+        _modalDragOX=e.clientX-rect.left-rect.width/2;
+        _modalDragOY=e.clientY-rect.top-rect.height/2;
+        _modalDragClone=tile.cloneNode(true);
+        _modalDragClone.style.cssText=`position:fixed;z-index:99999;pointer-events:none;opacity:.9;
+          transform:scale(1.1);left:${e.clientX-_modalDragOX-29}px;top:${e.clientY-_modalDragOY-40}px;
           width:58px;transition:none;filter:drop-shadow(0 8px 20px rgba(0,0,0,.5));`;
         document.body.appendChild(_modalDragClone);
-
         if(navigator.vibrate) navigator.vibrate(40);
-      }, 380);
+      },380);
     },{passive:true});
-    tile.addEventListener('touchend',()=>{
+
+    tile.addEventListener('click',()=>{
+      if(_didDrag) return;
+      _didMenu=true;
+      _openTileMenu(f, tile);
+    });
+
+    tile.addEventListener('pointerup',()=>{ clearTimeout(_pressTimer); });
+    tile.addEventListener('pointercancel',()=>{
       clearTimeout(_pressTimer);
       if(_modalDragClone){ _modalDragClone.remove(); _modalDragClone=null; }
       if(_modalDragEl){ _modalDragEl.style.opacity=''; _modalDragEl.style.visibility=''; }
       _modalDragId=null; _modalDragEl=null; _modalLastSwap=null;
-      save(); renderFolders();
-    },{passive:true});
-    tile.addEventListener('touchcancel',()=>{
-      clearTimeout(_pressTimer);
-      if(_modalDragClone){ _modalDragClone.remove(); _modalDragClone=null; }
-      if(_modalDragEl){ _modalDragEl.style.opacity=''; _modalDragEl.style.visibility=''; }
-      _modalDragId=null; _modalDragEl=null; _modalLastSwap=null;
-    },{passive:true});
+    });
+
+    // Desktop drag
+    tile.draggable=true;
+    tile.addEventListener('dragstart',(e)=>{ _modalDragId=id; e.dataTransfer.effectAllowed='move'; tile.style.opacity='0.35'; });
+    tile.addEventListener('dragend',()=>{ tile.style.opacity=''; _modalDragId=null; save(); renderFolders(); });
+    tile.addEventListener('dragover',(e)=>e.preventDefault());
+    tile.addEventListener('drop',(e)=>{
+      e.preventDefault();
+      if(_modalDragId&&_modalDragId!==id){
+        const fi=state.folderOrder.indexOf(_modalDragId),ti=state.folderOrder.indexOf(id);
+        if(fi>=0&&ti>=0)[state.folderOrder[fi],state.folderOrder[ti]]=[state.folderOrder[ti],state.folderOrder[fi]];
+        save(); renderFolders();
+        const tiles=[...grid.querySelectorAll('[data-id]')];
+        const elA=tiles.find(x=>x.dataset.id===_modalDragId), elB=tiles.find(x=>x.dataset.id===id);
+        if(elA&&elB){ const nb=elB.nextSibling; grid.insertBefore(elA,nb||null); }
+      }
+    });
 
     return tile;
   }
 
-  // Touch move on scroll area
+  // ─ Touch move global (drag no modal) ─
   scroll.addEventListener('touchmove',(e)=>{
     if(!_modalDragId||!_modalDragClone) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const t = e.touches[0];
+    e.preventDefault(); e.stopPropagation();
+    const t=e.touches[0];
     _modalDragClone.style.left=(t.clientX-_modalDragOX-29)+'px';
     _modalDragClone.style.top=(t.clientY-_modalDragOY-40)+'px';
-
     _modalDragClone.style.visibility='hidden';
     const under=document.elementFromPoint(t.clientX,t.clientY);
     _modalDragClone.style.visibility='';
-
     const target=under&&under.closest('[data-id]');
     const targetId=target&&target.dataset.id;
-
     if(target&&targetId&&targetId!==_modalDragId&&targetId!==_modalLastSwap){
       _modalLastSwap=targetId;
-      const fi=state.folderOrder.indexOf(_modalDragId);
-      const ti=state.folderOrder.indexOf(targetId);
+      const fi=state.folderOrder.indexOf(_modalDragId), ti=state.folderOrder.indexOf(targetId);
       if(fi>=0&&ti>=0&&fi!==ti){
         [state.folderOrder[fi],state.folderOrder[ti]]=[state.folderOrder[ti],state.folderOrder[fi]];
         const tiles=[...grid.querySelectorAll('[data-id]')];
-        const elA=tiles.find(x=>x.dataset.id===_modalDragId);
-        const elB=tiles.find(x=>x.dataset.id===targetId);
+        const elA=tiles.find(x=>x.dataset.id===_modalDragId), elB=tiles.find(x=>x.dataset.id===targetId);
         if(elA&&elB){
           const nextA=elA.nextSibling, nextB=elB.nextSibling;
           if(nextA===elB){ grid.insertBefore(elB,elA); }
           else if(nextB===elA){ grid.insertBefore(elA,elB); }
-          else {
-            const ph=document.createComment('');
-            grid.insertBefore(ph,elA);
-            grid.insertBefore(elA,nextB||null);
-            grid.insertBefore(elB,ph);
-            ph.remove();
-          }
-          elB.style.transform='scale(1.05)';
-          setTimeout(()=>{ if(elB) elB.style.transform=''; },250);
-          // Animação igual à tela inicial
-          elB.classList.add('_modalReorder');
-          setTimeout(()=>{ if(elB) elB.classList.remove('_modalReorder'); },280);
+          else { const ph=document.createComment(''); grid.insertBefore(ph,elA); grid.insertBefore(elA,nextB||null); grid.insertBefore(elB,ph); ph.remove(); }
+          elB.classList.add('reordering'); setTimeout(()=>elB.classList.remove('reordering'),280);
           if(_modalDragEl){ _modalDragEl.style.opacity='0'; _modalDragEl.style.visibility='hidden'; }
         }
       }
     } else if(!targetId||targetId===_modalDragId){ _modalLastSwap=null; }
   },{passive:false});
 
-  topLevel.forEach(id=>{ const t=_buildModalTile(id); if(t) grid.appendChild(t); });
+  document.addEventListener('pointerup', function _tpPointerUp(){
+    clearTimeout(undefined);
+    if(_modalDragClone){ _modalDragClone.remove(); _modalDragClone=null; }
+    if(_modalDragEl){ _modalDragEl.style.opacity=''; _modalDragEl.style.visibility=''; }
+    if(_modalDragId){ save(); renderFolders(); }
+    _modalDragId=null; _modalDragEl=null; _modalLastSwap=null;
+    document.removeEventListener('pointerup',_tpPointerUp);
+  },{once:true});
 
+  // Monta grid
+  topLevel.forEach(id=>{ const t=_buildModalTile(id); if(t) grid.appendChild(t); });
   scroll.appendChild(grid);
   box.appendChild(scroll);
-  box.style.cssText = (box.style.cssText||'') + 'display:flex;flex-direction:column;max-height:88vh;padding:0;overflow:hidden;';
+  box.style.cssText=(box.style.cssText||'')+'display:flex;flex-direction:column;max-height:88vh;padding:0;overflow:hidden;';
 
-  // Entrada suave — igual ao efeito das pastas da frente ao abrir o modal
-  box.style.opacity = '0';
-  box.style.transform = 'translateY(18px) scale(.97)';
-  box.style.transition = 'opacity .22s ease, transform .22s cubic-bezier(.34,1.56,.64,1)';
-  requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{
-      box.style.opacity = '1';
-      box.style.transform = 'translateY(0) scale(1)';
+  // Animação entrada
+  box.style.opacity='0'; box.style.transform='translateY(18px) scale(.97)';
+  box.style.transition='opacity .22s ease, transform .22s cubic-bezier(.34,1.56,.64,1)';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ box.style.opacity='1'; box.style.transform='translateY(0) scale(1)'; }));
+
+  document.getElementById('_tpClose').addEventListener('click', close);
+}
+
+// ══ ICON PICKER PARA PASTA EXISTENTE ══
+function openIconPickerForFolder(folderId, callback){
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:100001;display:flex;align-items:flex-end;justify-content:center;padding:0;';
+  const box = document.createElement('div');
+  box.style.cssText = 'width:100%;max-width:480px;background:var(--bg1,#021418);border-radius:22px 22px 0 0;border:1px solid rgba(0,200,230,.18);padding:0;display:flex;flex-direction:column;max-height:80vh;overflow:hidden;';
+
+  const folder = state.folders.find(f=>f.id===folderId);
+
+  box.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;">
+      <div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:900;color:#e8f4ff;">🎨 Trocar Ícone</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;">${escHtml(folder?folder.name:'Pasta')}</div>
+      </div>
+      <button id="_ipClose" style="background:rgba(255,255,255,.08);border:none;border-radius:10px;color:#fff;font-size:18px;width:34px;height:34px;cursor:pointer;">✕</button>
+    </div>
+    <div style="overflow-y:auto;flex:1;min-height:0;padding:14px 16px 24px;">
+      <div style="font-size:10px;font-weight:800;color:rgba(165,180,252,.7);margin-bottom:8px;letter-spacing:.5px;">🖼️ ÍCONES 3D</div>
+      <div id="_ip3dGallery" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;"></div>
+      <div style="font-size:10px;font-weight:800;color:rgba(165,180,252,.7);margin-bottom:8px;letter-spacing:.5px;">😊 EMOJIS</div>
+      <div id="_ipEmojiRow" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;">
+        ${['📋','💼','🏠','🎯','💡','📚','🛒','🏋️','🎵','💰','✈️','❤️','⭐','🔥','🎮','🧠','🍎','🚗','💊','📷','🎂','🌿','🏆','📝','🔑','🌍'].map(e=>`<button class="_ipEmoji" data-e="${e}" style="width:36px;height:36px;border-radius:8px;border:2px solid transparent;background:rgba(255,255,255,.06);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;">${e}</button>`).join('')}
+      </div>
+      <div style="font-size:10px;font-weight:800;color:rgba(165,180,252,.7);margin-bottom:8px;letter-spacing:.5px;">✏️ EMOJI PERSONALIZADO</div>
+      <input id="_ipCustom" type="text" placeholder="Digite ou cole um emoji..." style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid rgba(0,200,230,.25);background:rgba(255,255,255,.06);color:#e8f4ff;font-size:16px;font-family:'Plus Jakarta Sans',sans-serif;box-sizing:border-box;outline:none;">
+    </div>
+    <div style="padding:0 16px 20px;flex-shrink:0;">
+      <button id="_ipSave" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:900;cursor:pointer;">✔ Aplicar Ícone</button>
+    </div>`;
+
+  ov.appendChild(box);
+  document.body.appendChild(ov);
+
+  let selIconId = null, selEmoji = folder ? (folder.emoji||'📁') : '📁';
+
+  // Popula ícones 3D
+  const g3d = box.querySelector('#_ip3dGallery');
+  if(typeof ICON_PACK !== 'undefined'){
+    ICON_PACK.forEach(ic=>{
+      const btn = document.createElement('button');
+      btn.className = 'ipBtn'; btn.dataset.iconId = ic.id; btn.type='button';
+      if(folder && folder.iconId===ic.id) btn.classList.add('sel');
+      const img = document.createElement('img'); img.src=ic.data; img.alt=ic.id;
+      btn.appendChild(img);
+      btn.addEventListener('click',()=>{
+        g3d.querySelectorAll('.ipBtn').forEach(b=>b.classList.remove('sel'));
+        box.querySelectorAll('._ipEmoji').forEach(b=>b.style.borderColor='transparent');
+        btn.classList.add('sel');
+        selIconId=ic.id; selEmoji='';
+      });
+      g3d.appendChild(btn);
+    });
+  }
+
+  // Emojis fixos
+  box.querySelectorAll('._ipEmoji').forEach(btn=>{
+    if(folder && !folder.iconId && folder.emoji===btn.dataset.e) btn.style.borderColor='#f97316';
+    btn.addEventListener('click',()=>{
+      g3d.querySelectorAll('.ipBtn').forEach(b=>b.classList.remove('sel'));
+      box.querySelectorAll('._ipEmoji').forEach(b=>b.style.borderColor='transparent');
+      btn.style.borderColor='#f97316';
+      selIconId=null; selEmoji=btn.dataset.e;
+      box.querySelector('#_ipCustom').value='';
     });
   });
 
-  document.getElementById('_tpClose').addEventListener('click', close);
+  // Emoji customizado
+  box.querySelector('#_ipCustom').addEventListener('input',(e)=>{
+    const v=[...e.target.value][0];
+    if(v){ selIconId=null; selEmoji=v; g3d.querySelectorAll('.ipBtn').forEach(b=>b.classList.remove('sel')); box.querySelectorAll('._ipEmoji').forEach(b=>b.style.borderColor='transparent'); }
+  });
+
+  const closeIp = ()=>{ ov.remove(); };
+  box.querySelector('#_ipClose').addEventListener('click', closeIp);
+  box.querySelector('#_ipSave').addEventListener('click',()=>{
+    closeIp();
+    callback(selEmoji, selIconId);
+  });
+  ov.addEventListener('click',(e)=>{ if(e.target===ov) closeIp(); });
+
+  // Animação entrada
+  box.style.transform='translateY(100%)'; box.style.transition='transform .3s cubic-bezier(.34,1.4,.64,1)';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ box.style.transform='translateY(0)'; }));
 }
 
 // ══ OPEN / CLOSE BUCKET ══
@@ -3748,12 +3896,44 @@ function saveNameFromSub(){
 }
 function initEmojiPickerIn(container){
   let selectedEmoji = '';
+  let selectedIconId = null; // novo: rastreia ícone 3D escolhido
+
+  // ── Popula galeria de ícones 3D ──
+  const ipGallery = container.querySelector('#ipGalleryNova');
+  if(ipGallery && typeof ICON_PACK !== 'undefined'){
+    ICON_PACK.forEach(ic=>{
+      const btn = document.createElement('button');
+      btn.className = 'ipBtn'; btn.dataset.iconId = ic.id;
+      btn.type = 'button';
+      const img = document.createElement('img');
+      img.src = ic.data; img.alt = ic.id;
+      btn.appendChild(img);
+      btn.addEventListener('click',()=>{
+        // Deseleciona emoji
+        container.querySelectorAll('.epBtn').forEach(b=>b.classList.remove('sel'));
+        // Deseleciona outros ícones
+        ipGallery.querySelectorAll('.ipBtn').forEach(b=>b.classList.remove('sel'));
+        btn.classList.add('sel');
+        selectedIconId = ic.id;
+        selectedEmoji = '';
+        const show = container.querySelector('#emojiShow');
+        const sel = container.querySelector('#emojiSelected');
+        if(show){ show.innerHTML = `<img src="${ic.data}" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;">`; }
+        if(sel) sel.style.display = 'block';
+      });
+      ipGallery.appendChild(btn);
+    });
+  }
+
   container.querySelectorAll('.epBtn').forEach(btn=>{
     if(btn.id==='epBtnMore') return;
     btn.addEventListener('click',()=>{
       container.querySelectorAll('.epBtn').forEach(b=>b.classList.remove('sel'));
+      // Deseleciona ícones 3D
+      if(ipGallery) ipGallery.querySelectorAll('.ipBtn').forEach(b=>b.classList.remove('sel'));
       btn.classList.add('sel');
       selectedEmoji = btn.dataset.e;
+      selectedIconId = null;
       const show = container.querySelector('#emojiShow');
       const sel = container.querySelector('#emojiSelected');
       if(show) show.textContent = selectedEmoji;
@@ -3781,6 +3961,8 @@ function initEmojiPickerIn(container){
       const emoji=[...val][0];
       if(emoji){
         selectedEmoji=emoji;
+        selectedIconId=null;
+        if(ipGallery) ipGallery.querySelectorAll('.ipBtn').forEach(b=>b.classList.remove('sel'));
         moreBtnSub.textContent=emoji;
         const show=container.querySelector('#emojiShow');
         const sel=container.querySelector('#emojiSelected');
@@ -3802,7 +3984,9 @@ function initEmojiPickerIn(container){
     if(!name){ showToast('⚠️ Digite o nome da pasta!'); return; }
     const emoji = selectedEmoji || '📁';
     const id = 'f_'+Date.now();
-    state.folders.push(ensureSyncFields({id, name, emoji}));
+    const folderData = {id, name, emoji, parentId:null};
+    if(selectedIconId) folderData.iconId = selectedIconId;
+    state.folders.push(ensureSyncFields(folderData));
     state.folderOrder.push(id);
     state.tasks[id] = [];
     save(); renderFolders(); updateProgress();
@@ -6343,6 +6527,25 @@ function populateFolderSelect(containerId, mode){
         editingFolderId=f.id;
         document.getElementById('fInputEditName').value=f.name;
         document.getElementById('fInputEditEmoji').value=f.emoji||'📁';
+        // Popula galeria de ícones 3D no edit
+        const ipGEdit = document.getElementById('ipGalleryEdit');
+        if(ipGEdit && typeof ICON_PACK!=='undefined' && !ipGEdit.dataset.populated){
+          ipGEdit.dataset.populated='1';
+          ICON_PACK.forEach(ic=>{
+            const btn=document.createElement('button');
+            btn.className='ipBtn'; btn.dataset.iconId=ic.id; btn.type='button';
+            const img=document.createElement('img'); img.src=ic.data; img.alt=ic.id;
+            btn.appendChild(img);
+            if(f.iconId===ic.id) btn.classList.add('sel');
+            btn.addEventListener('click',()=>{
+              ipGEdit.querySelectorAll('.ipBtn').forEach(b=>b.classList.remove('sel'));
+              btn.classList.add('sel');
+              window._editIconId=ic.id;
+            });
+            ipGEdit.appendChild(btn);
+          });
+        }
+        window._editIconId = f.iconId || null;
         document.getElementById('fEditForm').classList.remove('hidden');
         document.getElementById('fInputEditName').focus();
       } else if(mode==='del'){
@@ -6668,9 +6871,12 @@ function initFolderModal(){
     const emoji=(document.getElementById('fInputEditEmoji').value||'').trim()||'📁';
     if(!name){showToast('⚠️ Digite um nome.');return;}
     const f=state.folders.find(x=>x.id===editingFolderId);
-    if(f){f.name=name;f.emoji=emoji;}
+    if(f){
+      f.name=name; f.emoji=emoji;
+      if(window._editIconId){ f.iconId=window._editIconId; } else { delete f.iconId; }
+    }
     save(); renderFolders();
-    editingFolderId=null;
+    editingFolderId=null; window._editIconId=null;
     closeFolderModal();
     showToast('✅ Pasta atualizada!');
   });
