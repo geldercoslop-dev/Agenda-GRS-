@@ -2360,8 +2360,8 @@ function openIconPickerForFolder(folderId, callback){
       <div style="font-size:10px;font-weight:800;color:rgba(165,180,252,.7);margin-bottom:8px;letter-spacing:.5px;">🖼️ ÍCONES 3D</div>
       <div id="_ip3dGallery" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;"></div>
       <div style="font-size:10px;font-weight:800;color:rgba(165,180,252,.7);margin-bottom:8px;letter-spacing:.5px;">😊 EMOJIS</div>
-      <div id="_ipEmojiRow" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;">
-        ${['📋','💼','🏠','🎯','💡','📚','🛒','🏋️','🎵','💰','✈️','❤️','⭐','🔥','🎮','🧠','🍎','🚗','💊','📷','🎂','🌿','🏆','📝','🔑','🌍'].map(e=>`<button class="_ipEmoji" data-e="${e}" style="width:36px;height:36px;border-radius:8px;border:2px solid transparent;background:rgba(255,255,255,.06);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;">${e}</button>`).join('')}
+      <div id="_ipEmojiRow" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        ${['📋','💼','🏠','🎯','💡','📚','🛒','🏋️','🎵','💰','✈️','❤️','⭐','🔥','🎮','🧠','🍎','🚗','💊','📷','🎂','🌿','🏆','📝','🔑','🌍'].map(e=>`<button class="_ipEmoji ipBtn _epBtn" data-e="${e}">${e}</button>`).join('')}
       </div>
       <div style="font-size:10px;font-weight:800;color:rgba(165,180,252,.7);margin-bottom:8px;letter-spacing:.5px;">✏️ EMOJI PERSONALIZADO</div>
       <input id="_ipCustom" type="text" placeholder="Digite ou cole um emoji..." style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid rgba(0,200,230,.25);background:rgba(255,255,255,.06);color:#e8f4ff;font-size:16px;font-family:'Plus Jakarta Sans',sans-serif;box-sizing:border-box;outline:none;">
@@ -2396,11 +2396,11 @@ function openIconPickerForFolder(folderId, callback){
 
   // Emojis fixos
   box.querySelectorAll('._ipEmoji').forEach(btn=>{
-    if(folder && !folder.iconId && folder.emoji===btn.dataset.e) btn.style.borderColor='#f97316';
+    if(folder && !folder.iconId && folder.emoji===btn.dataset.e) btn.classList.add('sel');
     btn.addEventListener('click',()=>{
       g3d.querySelectorAll('.ipBtn').forEach(b=>b.classList.remove('sel'));
-      box.querySelectorAll('._ipEmoji').forEach(b=>b.style.borderColor='transparent');
-      btn.style.borderColor='#f97316';
+      box.querySelectorAll('._ipEmoji').forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
       selIconId=null; selEmoji=btn.dataset.e;
       box.querySelector('#_ipCustom').value='';
     });
@@ -2931,7 +2931,7 @@ function _doRecognition(SR, btn, icon){
       _quickAddKey=null;
       _quickAddBucket=currentBucket;
       overlay.style.display='flex';
-      setTimeout(()=>{ input.focus(); input.select(); }, 150);
+      // Sem .focus() — não puxar teclado após reconhecimento de voz
     }
   };
 
@@ -3707,7 +3707,10 @@ function closeSettings(skipNavPop){
   const sOv=document.getElementById('sModalOverlay');
   if(sOv) sOv.classList.remove('show');
   if(!skipNavPop && typeof window._navPop==='function') window._navPop();
-  _restoreHomeChrome();
+  // Delay curto garante que: (a) a animação CSS do modal terminou,
+  // (b) qualquer setTimeout de reopen-settings-after-wallpaper também finalizou,
+  // antes de restaurarmos o chrome da home — evita o sumiço de calendário e rodapé.
+  setTimeout(()=>{ _restoreHomeChrome(); }, 60);
 }
 
 function saveSettings(){
@@ -3821,19 +3824,36 @@ function _restoreHomeChrome(){
   renderWeekStrip();
 
   const pr = document.getElementById('progressRow');
-  if(pr){ pr.classList.remove('hidden'); pr.style.opacity=''; pr.style.pointerEvents=''; pr.style.transition=''; }
+  if(pr){
+    pr.classList.remove('hidden');
+    pr.style.cssText = pr.style.cssText
+      .replace(/opacity\s*:[^;]+;?/gi,'')
+      .replace(/pointer-events\s*:[^;]+;?/gi,'')
+      .replace(/transition\s*:[^;]+;?/gi,'');
+    pr.style.opacity='1'; pr.style.pointerEvents=''; pr.style.display='flex';
+  }
 
   const wsw = document.getElementById('weekStripWrap');
-  if(wsw){ wsw.classList.remove('hidden'); wsw.classList.remove('expanded'); wsw.style.display=''; wsw.style.visibility=''; wsw.style.opacity=''; }
+  if(wsw){
+    wsw.classList.remove('hidden','expanded');
+    wsw.style.display=''; wsw.style.visibility='visible'; wsw.style.opacity='1';
+  }
 
   const wsc = document.getElementById('weekStripCard');
-  if(wsc){ wsc.classList.remove('hidden'); wsc.style.display=''; wsc.style.visibility=''; wsc.style.opacity=''; }
+  if(wsc){
+    wsc.classList.remove('hidden');
+    wsc.style.display=''; wsc.style.visibility='visible'; wsc.style.opacity='1';
+  }
 
   const cov = document.getElementById('calExpandOverlay');
   if(cov){ cov.classList.remove('open'); cov.style.display='none'; cov.style.pointerEvents='none'; cov.style.opacity='0'; }
 
   const bb = document.getElementById('bottomBar');
-  if(bb){ bb.classList.remove('hidden'); }
+  if(bb){ bb.classList.remove('hidden'); bb.style.display=''; }
+
+  // Garante que o listArea não está oculto por algum estado residual
+  const la = document.getElementById('listArea');
+  if(la){ la.style.display=''; la.style.visibility=''; }
 }
 function openSubScreen(title, bodyHtml, initFn, exitFn){
   _setFooter(false);
@@ -4350,15 +4370,37 @@ function init(){
   document.getElementById('dayZapSendBtn').addEventListener('click',shareWhatsApp);
   // Photo button
   // Função helper para processar arquivo de foto de pasta/dia
+  // Limite máximo de fotos por pasta
+  const MAX_BUCKET_PHOTOS = 15;
+
   function _handleBucketPhotoFile(file){
     if(!file) return;
-    resizeImage(file, 1200, 0.80, (dataUrl)=>{
+    // Captura o bucket NO MOMENTO do clique — evita bug onde currentBucket
+    // muda durante o processamento assíncrono da imagem
+    var targetBucket = currentBucket;
+    if(!targetBucket){ showToast('⚠️ Entre em uma pasta primeiro.'); return; }
+
+    // Verifica limite ANTES de processar a imagem
+    const current = (state.bucketPhotos||{})[targetBucket]||[];
+    if(current.length >= MAX_BUCKET_PHOTOS){
+      showToast(`🚫 Limite de ${MAX_BUCKET_PHOTOS} fotos por pasta atingido!`);
+      return;
+    }
+
+    resizeImage(file, 800, 0.65, (dataUrl)=>{
+      if(!dataUrl){ showToast('❌ Erro ao processar imagem.'); return; }
       if(!state.bucketPhotos) state.bucketPhotos={};
-      if(!state.bucketPhotos[currentBucket]) state.bucketPhotos[currentBucket]=[];
-      state.bucketPhotos[currentBucket].push({id:'p'+uid(), url:dataUrl, ts:Date.now()});
-      save();
-      renderDayView();
-      showToast('✅ Foto adicionada!');
+      if(!state.bucketPhotos[targetBucket]) state.bucketPhotos[targetBucket]=[];
+      // Verifica novamente dentro do callback (operações async simultâneas)
+      if(state.bucketPhotos[targetBucket].length >= MAX_BUCKET_PHOTOS){
+        showToast(`🚫 Limite de ${MAX_BUCKET_PHOTOS} fotos por pasta atingido!`);
+        return;
+      }
+      state.bucketPhotos[targetBucket].push({id:'p'+uid(), url:dataUrl, ts:Date.now()});
+      save(true);
+      if(currentBucket === targetBucket) renderDayView();
+      const remaining = MAX_BUCKET_PHOTOS - state.bucketPhotos[targetBucket].length;
+      showToast(remaining > 0 ? `✅ Foto adicionada! (${state.bucketPhotos[targetBucket].length}/${MAX_BUCKET_PHOTOS})` : `✅ Foto adicionada! Limite máximo atingido.`);
     });
   }
   document.getElementById('dayPhotoBtn').addEventListener('click',()=>{
@@ -4629,12 +4671,34 @@ function init(){
       // Navegação entre pastas — o popstate JÁ consumiu 1 entry, não repõe
       if(currentView==='day'){
         navigateBack();
-        // Após voltar, o _histDepth já foi decrementado acima — não repõe
         return;
       }
 
-      // Home — já decrementamos acima. Se chegou aqui na home, o próximo
-      // "voltar" vai consumir o 'base' state e sair do app normalmente.
+      // ── HOME: duplo toque para sair ──
+      // Na tela inicial, re-empurra uma entry para impedir saída acidental.
+      // Só sai se o usuário tocar "voltar" duas vezes em menos de 2 segundos.
+      if(currentView==='home'){
+        // Sempre recoloca a entry para não consumir o 'base'
+        _histDepth++;
+        history.pushState({app:'screen', depth:_histDepth},'');
+
+        const now = Date.now();
+        if(window._lastBackPress && (now - window._lastBackPress) < 2000){
+          // Segundo toque dentro de 2s → sai
+          window._lastBackPress = null;
+          if(window._backExitToast) clearTimeout(window._backExitToast);
+          flushPendingSave();
+          // Remove todas as entries do app e vai para o 'base'
+          history.go(-((_histDepth)));
+          return;
+        }
+        // Primeiro toque — avisa e aguarda segundo
+        window._lastBackPress = now;
+        showToast('⬅️ Toque novamente para sair');
+        if(window._backExitToast) clearTimeout(window._backExitToast);
+        window._backExitToast = setTimeout(()=>{ window._lastBackPress = null; }, 2100);
+        return;
+      }
     });
   })();
 
@@ -5164,6 +5228,13 @@ function openContas(){
   _renderContasOv();
 }
 
+// Formata número como moeda BR: 2370 → '2.370,00' ; '2370.5' → '2.370,50'
+function _fmtMoeda(v){
+  const n = parseFloat(String(v||0).replace(',','.'));
+  if(isNaN(n)) return String(v||'0');
+  return n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
 function _renderContasOv(){
   const old = document.getElementById('contasOv');
   if(old) old.remove();
@@ -5223,8 +5294,8 @@ function _renderContasOv(){
 
   function cardH(c,i){
     const parcelasInfo = c.parcelas&&c.parcelas.length>1
-      ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">${c.parcelas.map((p,pi)=>`<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:${p.paga?'rgba(34,197,94,.18)':'rgba(0,80,120,.35)'};border:1px solid ${p.paga?'rgba(34,197,94,.35)':'rgba(0,140,180,.2)'};color:${p.paga?'#4ade80':TEXT};cursor:pointer;" class="cParc" data-cidx="${i}" data-pidx="${pi}">${pi+1}/${c.parcelas.length} · R$${p.valor} · ${p.vencimento?p.vencimento.split('-').reverse().slice(0,2).join('/'):'?'}${p.paga?' ✓':''}</span>`).join('')}</div>` : '';
-    return `<div style="background:rgba(0,80,120,.22);border:1px solid rgba(0,140,180,.15);border-radius:14px;padding:13px 14px;margin-bottom:9px;${c.paga&&!c.parcelas?.length?'opacity:.55;':''}">
+      ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">${c.parcelas.map((p,pi)=>`<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:${p.paga?'rgba(34,197,94,.18)':'rgba(0,80,120,.35)'};border:1px solid ${p.paga?'rgba(34,197,94,.35)':'rgba(0,140,180,.2)'};color:${p.paga?'#4ade80':TEXT};cursor:pointer;" class="cParc" data-cidx="${i}" data-pidx="${pi}">${pi+1}/${c.parcelas.length} · R$ ${_fmtMoeda(p.valor)} · ${p.vencimento?p.vencimento.split('-').reverse().slice(0,2).join('/'):'?'}${p.paga?' ✓':''}</span>`).join('')}</div>` : '';
+    return `<div class="cCard" data-idx="${i}" style="background:rgba(0,80,120,.22);border:1px solid rgba(0,140,180,.15);border-radius:14px;padding:13px 14px;margin-bottom:9px;cursor:pointer;-webkit-tap-highlight-color:transparent;${c.paga&&!c.parcelas?.length?'opacity:.55;':''}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
@@ -5232,16 +5303,15 @@ function _renderContasOv(){
             ${c.fixa?'<span style="font-size:9px;font-weight:700;background:rgba(139,92,246,.2);color:#c4b5fd;border:1px solid rgba(139,92,246,.3);border-radius:5px;padding:1px 5px;flex-shrink:0;">FIXA</span>':''}
           </div>
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-            ${c.valor?`<span style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:${TEXT};">R$ ${escapeHtml(c.valor)}</span>`:''}
+            ${c.valor?`<span style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:${TEXT};">R$ ${_fmtMoeda(c.valor)}</span>`:''}
             <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${statusColor(c)};">${statusLabel(c)}</span>
           </div>
           ${c.obs?`<div style="font-size:11px;color:${MUTED};margin-top:4px;">${escapeHtml(c.obs)}</div>`:''}
           ${parcelasInfo}
         </div>
         <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
-          ${(!c.parcelas||c.parcelas.length<=1)?`<button class="cPagar" data-idx="${i}" style="background:${c.paga?'rgba(34,197,94,.12)':'rgba(34,197,94,.2)'};border:1px solid ${c.paga?'rgba(34,197,94,.2)':'rgba(34,197,94,.4)'};border-radius:8px;color:${c.paga?'rgba(34,197,94,.5)':'#4ade80'};font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="${c.paga?'Desfazer':'Marcar paga'}">${c.paga?'↩':'✓'}</button>`:''}
-          <button class="cEdit" data-idx="${i}" style="background:rgba(0,160,200,.15);border:1px solid rgba(0,160,200,.25);border-radius:8px;color:${ACC};font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✏️</button>
-          <button class="cDel" data-idx="${i}" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#f87171;font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">🗑️</button>
+          ${(!c.parcelas||c.parcelas.length<=1)?`<button class="cPagar" data-idx="${i}" style="background:${c.paga?'rgba(34,197,94,.12)':'rgba(34,197,94,.2)'};border:1px solid ${c.paga?'rgba(34,197,94,.2)':'rgba(34,197,94,.4)'};border-radius:8px;color:${c.paga?'rgba(34,197,94,.5)':'#4ade80'};font-size:13px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="${c.paga?'Desfazer':'Marcar paga'}">${c.paga?'↩':'✓'}</button>`:''}
+                  <button class="cDel" data-idx="${i}" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#f87171;font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">🗑️</button>
         </div>
       </div>
     </div>`;
@@ -5420,13 +5490,15 @@ function _renderContasOv(){
     _saveContas(arr); ov.querySelector('#_contasForm').style.display='none'; _renderContasOv();
   };
   ov.querySelector('#_contasBody').addEventListener('click',e=>{
-    const pBtn=e.target.closest('.cPagar'), eBtn=e.target.closest('.cEdit'), dBtn=e.target.closest('.cDel'), parcBtn=e.target.closest('.cParc');
+    const pBtn=e.target.closest('.cPagar'), dBtn=e.target.closest('.cDel'), parcBtn=e.target.closest('.cParc'), cCard=e.target.closest('.cCard');
     const arr=_getContas();
     const sorted2=[...arr].sort((a,b)=>{if(a.paga===b.paga)return(a.vencimento||'9999-12-31').toString().localeCompare((b.vencimento||'9999-12-31').toString());return a.paga?1:-1;});
     if(pBtn){
+      e.stopPropagation();
       const i=parseInt(pBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id);
       arr[real].paga=!arr[real].paga; _saveContas(arr); _renderContasOv();
     } else if(parcBtn){
+      e.stopPropagation();
       const ci=parseInt(parcBtn.dataset.cidx), pi=parseInt(parcBtn.dataset.pidx);
       const real=arr.findIndex(x=>x.id===sorted2[ci].id);
       if(real>=0&&arr[real].parcelas[pi]){
@@ -5434,11 +5506,12 @@ function _renderContasOv(){
         arr[real].paga=arr[real].parcelas.every(p=>p.paga);
         _saveContas(arr); _renderContasOv();
       }
-    } else if(eBtn){
-      const i=parseInt(eBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id); showCForm(real);
     } else if(dBtn){
+      e.stopPropagation();
       const i=parseInt(dBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id);
       if(!confirm(`Excluir "${arr[real].nome}"?`))return; arr.splice(real,1); _saveContas(arr); _renderContasOv();
+    } else if(cCard&&!pBtn&&!dBtn&&!parcBtn){
+      const i=parseInt(cCard.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id); showCForm(real);
     }
   });
 }
@@ -5497,24 +5570,23 @@ function _renderReceberOv(){
     const qtdBadge = c.qtd&&c.qtd>1
       ? `<span style="font-size:9px;font-weight:700;background:rgba(0,160,200,.18);color:${ACC};border:1px solid rgba(0,160,200,.3);border-radius:5px;padding:1px 5px;margin-left:5px;">${c.qtd}×</span>` : '';
     const parcelasInfo = c.parcelas&&c.parcelas.length>1
-      ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">${c.parcelas.map((p,pi)=>`<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:${p.recebido?'rgba(34,197,94,.18)':'rgba(0,80,120,.35)'};border:1px solid ${p.recebido?'rgba(34,197,94,.35)':'rgba(0,140,180,.2)'};color:${p.recebido?'#4ade80':TEXT};cursor:pointer;" class="rParc" data-cidx="${i}" data-pidx="${pi}">${pi+1}/${c.parcelas.length} · R$${p.valor} · ${p.vencimento?p.vencimento.split('-').reverse().slice(0,2).join('/'):'?'}${p.recebido?' ✓':''}</span>`).join('')}</div>` : '';
-    return `<div style="background:rgba(0,80,120,.22);border:1px solid rgba(0,140,180,.15);border-radius:14px;padding:13px 14px;margin-bottom:9px;${c.recebido&&!c.parcelas?.length?'opacity:.55;':''}">
+      ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">${c.parcelas.map((p,pi)=>`<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:${p.recebido?'rgba(34,197,94,.18)':'rgba(0,80,120,.35)'};border:1px solid ${p.recebido?'rgba(34,197,94,.35)':'rgba(0,140,180,.2)'};color:${p.recebido?'#4ade80':TEXT};cursor:pointer;" class="rParc" data-cidx="${i}" data-pidx="${pi}">${pi+1}/${c.parcelas.length} · R$ ${_fmtMoeda(p.valor)} · ${p.vencimento?p.vencimento.split('-').reverse().slice(0,2).join('/'):'?'}${p.recebido?' ✓':''}</span>`).join('')}</div>` : '';
+    return `<div class="rCard" data-idx="${i}" style="background:rgba(0,80,120,.22);border:1px solid rgba(0,140,180,.15);border-radius:14px;padding:13px 14px;margin-bottom:9px;cursor:pointer;-webkit-tap-highlight-color:transparent;${c.recebido&&!c.parcelas?.length?'opacity:.55;':''}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
             <span style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:800;color:${TEXT};flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(c.nome)}${qtdBadge}</span>
           </div>
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-            ${c.valor?`<span style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:${TEXT};">R$ ${escapeHtml(c.valor)}</span>`:''}
+            ${c.valor?`<span style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;color:${TEXT};">R$ ${_fmtMoeda(c.valor)}</span>`:''}
             <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:${statusColor(c)};">${statusLabel(c)}</span>
           </div>
           ${c.obs?`<div style="font-size:11px;color:${MUTED};margin-top:4px;">${escapeHtml(c.obs)}</div>`:''}
           ${parcelasInfo}
         </div>
         <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
-          ${(!c.parcelas||c.parcelas.length<=1)?`<button class="rReceber" data-idx="${i}" style="background:${c.recebido?'rgba(34,197,94,.12)':'rgba(34,197,94,.2)'};border:1px solid ${c.recebido?'rgba(34,197,94,.2)':'rgba(34,197,94,.4)'};border-radius:8px;color:${c.recebido?'rgba(34,197,94,.5)':'#4ade80'};font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="${c.recebido?'Desfazer':'Marcar recebido'}">${c.recebido?'↩':'✓'}</button>`:''}
-          <button class="rEdit" data-idx="${i}" style="background:rgba(0,160,200,.15);border:1px solid rgba(0,160,200,.25);border-radius:8px;color:${ACC};font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✏️</button>
-          <button class="rDel" data-idx="${i}" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#f87171;font-size:13px;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">🗑️</button>
+          ${(!c.parcelas||c.parcelas.length<=1)?`<button class="rReceber" data-idx="${i}" style="background:${c.recebido?'rgba(34,197,94,.12)':'rgba(34,197,94,.2)'};border:1px solid ${c.recebido?'rgba(34,197,94,.2)':'rgba(34,197,94,.4)'};border-radius:8px;color:${c.recebido?'rgba(34,197,94,.5)':'#4ade80'};font-size:13px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="${c.recebido?'Desfazer':'Marcar recebido'}">${c.recebido?'↩':'✓'}</button>`:''}
+          <button class="rDel" data-idx="${i}" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:8px;color:#f87171;font-size:16px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;">🗑</button>
         </div>
       </div>
     </div>`;
@@ -5709,13 +5781,15 @@ function _renderReceberOv(){
   };
 
   ov.querySelector('#_recBody').addEventListener('click',e=>{
-    const rBtn=e.target.closest('.rReceber'), eBtn=e.target.closest('.rEdit'), dBtn=e.target.closest('.rDel'), pBtn=e.target.closest('.rParc');
+    const rBtn=e.target.closest('.rReceber'), dBtn=e.target.closest('.rDel'), pBtn=e.target.closest('.rParc'), rCard=e.target.closest('.rCard');
     const arr=_getReceber();
     const sorted2=[...arr].sort((a,b)=>{if(a.recebido===b.recebido)return(a.vencimento||'9999-12-31').localeCompare(b.vencimento||'9999-12-31');return a.recebido?1:-1;});
     if(rBtn){
+      e.stopPropagation();
       const i=parseInt(rBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id);
       arr[real].recebido=!arr[real].recebido; _saveReceber(arr); _renderReceberOv();
     } else if(pBtn){
+      e.stopPropagation();
       const ci=parseInt(pBtn.dataset.cidx), pi=parseInt(pBtn.dataset.pidx);
       const real=arr.findIndex(x=>x.id===sorted2[ci].id);
       if(real>=0&&arr[real].parcelas[pi]){
@@ -5723,13 +5797,14 @@ function _renderReceberOv(){
         arr[real].recebido=arr[real].parcelas.every(p=>p.recebido);
         _saveReceber(arr); _renderReceberOv();
       }
-    } else if(eBtn){
-      const i=parseInt(eBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id);
-      showRForm(real);
     } else if(dBtn){
+      e.stopPropagation();
       const i=parseInt(dBtn.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id);
       if(!confirm(`Excluir "${arr[real].nome}"?`))return;
       arr.splice(real,1); _saveReceber(arr); _renderReceberOv();
+    } else if(rCard&&!rBtn&&!dBtn&&!pBtn){
+      const i=parseInt(rCard.dataset.idx); const real=arr.findIndex(x=>x.id===sorted2[i].id);
+      showRForm(real);
     }
   });
 }
@@ -6522,7 +6597,7 @@ function populateFolderSelect(containerId, mode){
       if(mode==='sub'){
         editingFolderId=f.id;
         document.getElementById('fSubSubForm').classList.remove('hidden');
-        document.getElementById('fInputSub').focus();
+        // sem focus automático
       } else if(mode==='edit'){
         editingFolderId=f.id;
         document.getElementById('fInputEditName').value=f.name;
@@ -6547,7 +6622,7 @@ function populateFolderSelect(containerId, mode){
         }
         window._editIconId = f.iconId || null;
         document.getElementById('fEditForm').classList.remove('hidden');
-        document.getElementById('fInputEditName').focus();
+        // sem focus automático
       } else if(mode==='del'){
         if(SYSTEM_IDS.includes(f.id)){showToast('⚠️ Esta pasta do sistema não pode ser excluída.');return;}
         const ov2=document.createElement('div');
@@ -6687,7 +6762,7 @@ function openPhotoFullscreen(photos, startIndex, bucketId){
     if(!state.bucketPhotos) state.bucketPhotos={};
     if(!state.bucketPhotos[bucketId]) state.bucketPhotos[bucketId]=[];
     state.bucketPhotos[bucketId]=state.bucketPhotos[bucketId].filter(x=>x.id!==photo.id);
-    save(); renderDayView(); ov.remove(); _cleanup();
+    save(true); renderDayView(); ov.remove(); _cleanup();
     // Reabre a galeria atualizada
     openBucketPhotoGallery(bucketId);
     showToast('🗑 Imagem excluída.');
@@ -9642,7 +9717,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:linear-grad
           </div>
         </div>
         <div class="card-body">
-          ${c.valor?`<div class="field"><div class="field-lbl">Valor</div><div class="field-val ${valorColor(c)}">R$ ${escapeHtml(c.valor)}</div></div>`:''}
+          ${c.valor?`<div class="field"><div class="field-lbl">Valor</div><div class="field-val ${valorColor(c)}">R$ ${_fmtMoeda(c.valor)}</div></div>`:''}
           <div class="field"><div class="field-lbl">Vencimento</div><div class="field-val">${c.vencimento?String(c.vencimento).includes('-')?c.vencimento.split('-').reverse().join('/'):('Dia '+c.vencimento):'—'}</div></div>
           ${c.parcelas&&c.parcelas.length>1?`<div class="field" style="grid-column:span 2"><div class="field-lbl">Parcelas</div><div class="field-val">${c.parcelas.filter(p=>p.paga).length}/${c.parcelas.length} pagas · R$ ${c.parcelas.filter(p=>!p.paga).reduce((s,p)=>s+(parseFloat(String(p.valor||0).replace(',','.'))||0),0).toFixed(2).replace('.',',')} restante</div></div>`:''}
           ${c.obs?`<div class="field" style="grid-column:span 2"><div class="field-lbl">Observação</div><div class="field-val">${escapeHtml(c.obs)}</div></div>`:''}
@@ -9794,7 +9869,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:linear-grad
           <span class="card-badge ${st.cls}">${st.lbl}</span>
         </div>
         <div class="card-body">
-          ${c.valor?`<div class="field"><div class="field-lbl">Valor Total</div><div class="field-val ${c.recebido?'green':c.vencimento&&c.vencimento<today?'red':'blue'}">R$ ${escapeHtml(c.valor)}</div></div>`:''}
+          ${c.valor?`<div class="field"><div class="field-lbl">Valor Total</div><div class="field-val ${c.recebido?'green':c.vencimento&&c.vencimento<today?'red':'blue'}">R$ ${_fmtMoeda(c.valor)}</div></div>`:''}
           ${(!c.parcelas||c.parcelas.length<=1)?`<div class="field"><div class="field-lbl">Vencimento</div><div class="field-val">${vcFmt}</div></div>`:''}
           ${parcelsHtml}
           ${c.obs?`<div class="field" style="grid-column:span 2"><div class="field-lbl">Observação</div><div class="field-val">${escapeHtml(c.obs)}</div></div>`:''}
@@ -10209,7 +10284,7 @@ function openHistoricoPaciente(){
     });
   });
 
-  setTimeout(()=>inp.focus(),150);
+  // sem focus automático
 }
 
 
@@ -10769,7 +10844,7 @@ function quickCreateSubfolder() {
   saveBtn.addEventListener('click', ()=>{
     if(saving) return; // evita duplo clique
     const name = inp.value.trim();
-    if(!name){ inp.style.borderColor='#ef4444'; inp.focus(); return; }
+    if(!name){ inp.style.borderColor='#ef4444'; return; }
     saving = true;
     const id = 'sub_' + Date.now();
     state.folders.push({ id, name, emoji: window._qsPickedEmoji||'📂', parentId: currentBucket });

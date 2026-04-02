@@ -536,20 +536,38 @@ var AppStorage = (function () {
     // Escrita async no IDB (background)
     _idbSet(KEY_STATE, serialized);
 
-    // Fotos
+    // Fotos — estratégia em camadas para evitar perda silenciosa
     var photosSerialized = _serialize(photos);
     if (photosSerialized !== null) {
       var photoOk = _syncSet(KEY_PHOTOS, photosSerialized);
       if (!photoOk && !_usingMemory) {
+        // Quota excedida: tenta comprimir reduzindo para as últimas 30 fotos por bucket
         try {
-          var trimmed = {};
-          for (var k in photos) { trimmed[k] = (photos[k] || []).slice(-20); }
-          var trimSerialized = _serialize(trimmed) || '{}';
-          _syncSet(KEY_PHOTOS, trimSerialized);
-          _idbSet(KEY_PHOTOS, trimSerialized);
-          _log('warn', 'saveState', 'Quota de fotos excedida — trimmed para últimas 20 por bucket');
+          var trimmed30 = {};
+          for (var k in photos) { trimmed30[k] = (photos[k] || []).slice(-30); }
+          var trim30Ser = _serialize(trimmed30) || '{}';
+          var ok30 = _syncSet(KEY_PHOTOS, trim30Ser);
+          if (ok30) {
+            _idbSet(KEY_PHOTOS, trim30Ser);
+            _log('warn', 'saveState', 'Quota excedida — fotos trimadas para últimas 30/bucket');
+          } else {
+            // Ainda falha: tenta 10 fotos por bucket
+            var trimmed10 = {};
+            for (var k2 in photos) { trimmed10[k2] = (photos[k2] || []).slice(-10); }
+            var trim10Ser = _serialize(trimmed10) || '{}';
+            var ok10 = _syncSet(KEY_PHOTOS, trim10Ser);
+            if (ok10) {
+              _idbSet(KEY_PHOTOS, trim10Ser);
+              _log('warn', 'saveState', 'Quota muito excedida — fotos trimadas para últimas 10/bucket');
+            } else {
+              // Último recurso: salva individualmente no IDB (sem localStorage)
+              _idbSet(KEY_PHOTOS, photosSerialized);
+              _log('warn', 'saveState', 'localStorage cheio — fotos salvas apenas no IDB');
+            }
+          }
         } catch (e) {
           _log('warn', 'saveState', 'Não foi possível salvar fotos', e.message);
+          try { _idbSet(KEY_PHOTOS, photosSerialized); } catch(_) {}
         }
       } else {
         _idbSet(KEY_PHOTOS, photosSerialized);
@@ -627,6 +645,31 @@ var AppStorage = (function () {
     parsed.bucketPhotos = _deserialize(rawPhotos, {});
     if (typeof parsed.bucketPhotos !== 'object' || Array.isArray(parsed.bucketPhotos)) {
       parsed.bucketPhotos = {};
+    }
+    // Se localStorage de fotos vazio, tenta recuperar do IDB (async)
+    var lsPhotoCount = 0;
+    try {
+      for (var bk in parsed.bucketPhotos) { lsPhotoCount += (parsed.bucketPhotos[bk]||[]).length; }
+    } catch(_) {}
+    if (lsPhotoCount === 0 && _idbAvailable) {
+      _idbGet(KEY_PHOTOS).then(function(idbRaw) {
+        if (!idbRaw) return;
+        var idbPhotos = _deserialize(idbRaw, {});
+        if (!idbPhotos || typeof idbPhotos !== 'object' || Array.isArray(idbPhotos)) return;
+        var hasAny = false;
+        for (var bki in idbPhotos) { if ((idbPhotos[bki]||[]).length > 0){ hasAny=true; break; } }
+        if (!hasAny) return;
+        if (typeof state !== 'undefined' && state) {
+          if (!state.bucketPhotos) state.bucketPhotos = {};
+          for (var bkj in idbPhotos) {
+            if (!(bkj in state.bucketPhotos) || (state.bucketPhotos[bkj]||[]).length === 0) {
+              state.bucketPhotos[bkj] = idbPhotos[bkj];
+            }
+          }
+          _log('log', 'loadState', 'Fotos recuperadas do IDB e mescladas ao state');
+          try { if (typeof renderDayView === 'function') renderDayView(); } catch(_) {}
+        }
+      }).catch(function(){});
     }
 
     return parsed;

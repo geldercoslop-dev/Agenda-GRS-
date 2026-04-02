@@ -191,8 +191,8 @@
     .weekStrip { display:grid; grid-template-columns:repeat(8,1fr); gap:3px; padding:12px 8px 6px; }
     /* Quando expandido, mostra grade 7-col do mês */
     .monthGrid {
-      display:none; grid-template-columns:repeat(7,1fr); gap:3px;
-      padding:4px 8px 20px;
+      display:none; grid-template-columns:repeat(7,1fr); gap:2px;
+      padding:2px 6px 14px;
     }
     .weekStripWrap.expanded .monthGrid { display:grid; }
     .weekStripWrap.expanded .weekStrip { display:none; }
@@ -287,10 +287,10 @@
     /* Células do mês — quadradas igual ao calendário fechado */
     .mCell {
       display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:4px; padding:0;
+      gap:2px; padding:0;
       aspect-ratio:1/1;
-      border-radius:10px; font-family:'Space Grotesk',sans-serif;
-      font-size:clamp(12px,3.2vw,14px);
+      border-radius:7px; font-family:'Space Grotesk',sans-serif;
+      font-size:clamp(8px,2.1vw,9px);
       font-weight:700; cursor:pointer; color:rgba(255,255,255,.85); position:relative;
       transition:background .1s;
       text-shadow: 0 1px 3px rgba(0,0,0,.4);
@@ -396,12 +396,15 @@
     .folderTile .fl { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 800; color: rgba(255,255,255,.88); text-align: center; line-height: 1.2; word-break: break-word; width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; white-space: normal; padding: 0 2px; }
 
     /* Icon pack gallery no picker de pastas */
-    .ipGallery { display:flex; flex-wrap:wrap; gap:6px; max-height:150px; overflow-y:auto; padding:4px 2px 6px; }
-    .ipBtn { width:44px; height:44px; border-radius:10px; border:2px solid transparent; background:rgba(255,255,255,.06); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:3px; transition:border-color .15s, background .15s; flex-shrink:0; }
-    .ipBtn:active, .ipBtn.sel { border-color:#f97316; background:rgba(249,115,22,.15); }
-    .ipBtn img { width:36px; height:36px; object-fit:contain; }
-    [data-theme="light"] .ipBtn { background:rgba(0,0,0,.06); }
-    [data-theme="light"] .ipBtn.sel { border-color:#f97316; background:rgba(249,115,22,.12); }
+    .ipGallery { display:flex; flex-wrap:wrap; gap:10px; overflow-y:auto; padding:4px 2px 8px; }
+    /* Tamanho unificado para 3D e emojis: célula 58x58, ícone 48px */
+    .ipBtn { width:58px; height:58px; border-radius:12px; border:2px solid transparent; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:border-color .15s, transform .12s; flex-shrink:0; }
+    .ipBtn:active { transform:scale(.88); }
+    .ipBtn.sel { border-color:#f97316; background:rgba(249,115,22,.12); }
+    .ipBtn img { width:48px; height:48px; object-fit:contain; filter:drop-shadow(0 3px 8px rgba(0,0,0,.35)); }
+    /* Emojis na mesma célula — font-size para igualar visualmente ao ícone 48px */
+    .ipBtn._epBtn { font-size:32px; line-height:1; }
+    [data-theme="light"] .ipBtn.sel { border-color:#f97316; background:rgba(249,115,22,.1); }
     [data-theme="light"] .folderTile .fi-wrap { background:transparent; border:none; box-shadow:none; }
     .folderTile.dragging { opacity:0.35 !important; transform:scale(1.1) !important; }
     /* Animação de reordenação no modal de todas as pastas */
@@ -427,9 +430,9 @@
     /* Overlay do calendário expandido — mesmo efeito do sidebar */
     #calExpandOverlay {
       display:none; position:fixed; inset:0; z-index:899;
-      background:rgba(0,0,0,.42);
-      backdrop-filter:blur(12px);
-      -webkit-backdrop-filter:blur(12px);
+      background:rgba(0,0,0,.72);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
       opacity:0; transition:opacity .3s ease;
       pointer-events:none;
     }
@@ -1061,7 +1064,9 @@
 #weekStripCard.expanded-overlay { overflow:visible !important; z-index:910 !important; }
 #weekStripCard.expanded-overlay .weekStripWrap.expanded {
   position:absolute; left:0; right:0; top:0; z-index:3;
-  box-shadow:0 16px 40px rgba(0,0,0,.45);
+  background:rgba(2,18,30,.92);
+  border-radius:0 0 20px 20px;
+  box-shadow:0 16px 48px rgba(0,0,0,.7);
 }
 
 /* Dica visual de swipe para cima nas pastas */
