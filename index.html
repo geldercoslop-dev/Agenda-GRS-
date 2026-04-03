@@ -3851,6 +3851,9 @@ function _restoreHomeChrome(){
   const bb = document.getElementById('bottomBar');
   if(bb){ bb.classList.remove('hidden'); bb.style.display=''; }
 
+  const _fabR = document.getElementById('sidebarFab');
+  if(_fabR){ _fabR.style.opacity='1'; _fabR.style.pointerEvents='auto'; _fabR.style.transform='scale(1)'; }
+
   // Garante que o listArea não está oculto por algum estado residual
   const la = document.getElementById('listArea');
   if(la){ la.style.display=''; la.style.visibility=''; }
@@ -4638,7 +4641,7 @@ function init(){
       }
       const _sr = document.getElementById('searchOverlay');
       if(_sr && _sr.style.display !== 'none'){
-        _sr.style.display = 'none';
+        closeSearch(true); // já restaura bottomBar + sidebarFab + progressRow
         _restoreHomeChrome();
         return;
       }
@@ -7652,11 +7655,15 @@ function importarDados() {
 // ══════════════════════════════════════════════════════════════════
 function openSearch() {
   const overlay = document.getElementById('searchOverlay');
-  // Oculta rodapé na tela de busca
+  if (!overlay) return;
+  // Oculta rodapé + botão menu na tela de busca
   const _pr = document.getElementById('progressRow');
   if(_pr){ _pr.style.opacity='0'; _pr.style.pointerEvents='none'; _pr.style.transition='opacity .15s'; }
-  const input   = document.getElementById('searchInput');
-  if (!overlay) return;
+  const _bb = document.getElementById('bottomBar');
+  if(_bb){ _bb.classList.add('hidden'); }
+  const _fab = document.getElementById('sidebarFab');
+  if(_fab){ _fab.style.opacity='0'; _fab.style.pointerEvents='none'; _fab.style.transform='scale(.7)'; }
+  const input = document.getElementById('searchInput');
   if (typeof window._navPush === 'function') window._navPush();
   overlay.style.display = 'flex';
   input.value = '';
@@ -7665,10 +7672,14 @@ function openSearch() {
 
 function closeSearch(skipNavPop) {
   const overlay = document.getElementById('searchOverlay');
-  // Restaura rodapé apenas se estiver na home
+  // Restaura rodapé + botão menu apenas se estiver na home
   if(typeof currentView !== 'undefined' && currentView === 'home'){
     const _pr = document.getElementById('progressRow');
-    if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; }
+    if(_pr){ _pr.style.opacity=''; _pr.style.pointerEvents=''; _pr.style.transition=''; }
+    const _bb = document.getElementById('bottomBar');
+    if(_bb){ _bb.classList.remove('hidden'); _bb.style.display=''; }
+    const _fab = document.getElementById('sidebarFab');
+    if(_fab){ _fab.style.opacity='1'; _fab.style.pointerEvents='auto'; _fab.style.transform='scale(1)'; }
   }
   if (overlay && overlay.style.display !== 'none') {
     overlay.style.display = 'none';
