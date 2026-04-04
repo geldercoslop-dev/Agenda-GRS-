@@ -49,7 +49,10 @@
   document.addEventListener('DOMContentLoaded', function () {
 
     // Boot primário: 100 ms após DOM pronto
-    setTimeout(forceUIBoot, 100);
+    setTimeout(function(){
+      if(window.__APP_PRIMARY_BOOT_DONE === true) return; // boot principal já executou
+      forceUIBoot();
+    }, 100);
 
     // Fallback de 1s: verifica se os elementos principais têm conteúdo
     setTimeout(function () {
@@ -60,6 +63,7 @@
 
       if (stripEmpty || foldersEmpty) {
         console.warn('[bootFix] UI vazia detectada após 1s — forçando recuperação');
+        window.__APP_PRIMARY_BOOT_DONE = false; // permite re-boot do bootFix
         forceUIBoot();
       }
     }, 1000);

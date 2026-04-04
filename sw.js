@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-Agenda Pro Max — Service Worker v46
+Agenda Pro Max — Service Worker v48
    Versão fixa — incrementar manualmente a cada deploy.
    ═══════════════════════════════════════════════════════ */
 
@@ -18,6 +18,7 @@ Agenda Pro Max — Service Worker v46
 //            v45 (2026-03) — expansão do calendário em overlay fixo + novos wallpapers 3D/imagem
 //            v46 (2026-03) — bump de cache para garantir atualização no PWA instalado
 //            v47 (2026-03) — refinamento de botões cadastro + forçar atualização
+//            v48 (2026-04) — correções de navegação: _modalBase, comprasOv, dailyReview, moveTaskModal, fotoExame
 const CACHE_VERSION = "v48";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
 // Prefixo usado para identificar caches deste app e limpar apenas os deles
