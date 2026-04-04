@@ -639,9 +639,7 @@
       <!-- Subforms (hidden by default) -->
       <div class="fSubform hidden" id="fSubNova" style="margin:0 16px 16px;border-radius:16px;border:1px solid rgba(99,102,241,.2);">
         <div style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:6px;padding-top:4px;">Escolha um ícone <span style="color:#ff5c6a">*</span></div>
-        <!-- Galeria de ícones 3D do icon_pack -->
-        <div style="font-size:10px;font-weight:700;color:rgba(165,180,252,.7);margin-bottom:5px;letter-spacing:.5px;">🖼️ ÍCONES 3D</div>
-        <div class="ipGallery" id="ipGalleryNova"></div>
+
         <div style="font-size:10px;font-weight:700;color:rgba(165,180,252,.7);margin:8px 0 5px;letter-spacing:.5px;">😊 EMOJIS</div>
         <div id="emojiPicker" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px">
           <span class="epBtn" data-e="📋">📋</span><span class="epBtn" data-e="💼">💼</span><span class="epBtn" data-e="🏠">🏠</span><span class="epBtn" data-e="🎯">🎯</span><span class="epBtn" data-e="💡">💡</span><span class="epBtn" data-e="📚">📚</span><span class="epBtn" data-e="🛒">🛒</span><span class="epBtn" data-e="🏋️">🏋️</span><span class="epBtn" data-e="🎵">🎵</span><span class="epBtn" data-e="💰">💰</span><span class="epBtn" data-e="✈️">✈️</span><span class="epBtn" data-e="❤️">❤️</span><span class="epBtn" data-e="⭐">⭐</span><span class="epBtn" data-e="🔥">🔥</span><span class="epBtn" data-e="🎮">🎮</span><span class="epBtn" data-e="🧠">🧠</span>
@@ -665,8 +663,7 @@
         <div class="fSelectGrid" id="fSelectEdit"></div>
         <div class="hidden" id="fEditForm" style="margin-top:10px">
           <input class="fInput" id="fInputEditName" type="text" placeholder="Novo nome...">
-          <div style="font-size:10px;font-weight:700;color:rgba(165,180,252,.7);margin:8px 0 5px;letter-spacing:.5px;">🖼️ ÍCONES 3D</div>
-          <div class="ipGallery" id="ipGalleryEdit"></div>
+
           <div style="font-size:10px;font-weight:700;color:rgba(165,180,252,.7);margin:8px 0 5px;letter-spacing:.5px;">😊 EMOJI</div>
           <input class="fInput" id="fInputEditEmoji" type="text" placeholder="Emoji (ex: 📋)">
           <button class="fSaveBtn" id="fSaveEdit">✔ Salvar edição</button>
@@ -825,25 +822,25 @@
       </div>
     </div>
 
-<script src="./state.js" defer></script>
-<script src="./storage.js" defer></script>
-<script src="./logger.js" defer></script>
-<script src="./validators.js" defer></script>
-<script src="./sanitizer.js" defer></script>
-<script src="./stateIntegrity.js" defer></script>
-<script src="./stateManager.js" defer></script>
-<script src="./syncQueue.js" defer></script>
-<script src="./moduleCheck.js" defer></script>
-<script src="./systemAudit.js" defer></script>
-<script src="./diagnostics.js" defer></script>
-<script src="./agenda.js" defer></script>
-<script src="./ui.js" defer></script>
-<script src="./notificacoes.js" defer></script>
-<script src="./sync.js" defer></script>
-<script src="./feriadosES.js" defer></script>
-<script src="./wallpapers.js" defer></script>
-<script src="./icon_pack.js" defer></script>
-<script src="./pwaRescue.js" defer></script>
+<script src="./state.js"></script>
+<script src="./storage.js"></script>
+<script src="./logger.js"></script>
+<script src="./validators.js"></script>
+<script src="./sanitizer.js"></script>
+<script src="./stateIntegrity.js"></script>
+<script src="./stateManager.js"></script>
+<script src="./syncQueue.js"></script>
+<script src="./moduleCheck.js"></script>
+<script src="./systemAudit.js"></script>
+<script src="./diagnostics.js"></script>
+<script src="./agenda.js"></script>
+<script src="./ui.js"></script>
+<script src="./notificacoes.js"></script>
+<script src="./sync.js"></script>
+<script src="./feriadosES.js"></script>
+<script src="./wallpapers.js"></script>
+
+<script src="./pwaRescue.js"></script>
 
 
 <script>
@@ -1883,19 +1880,11 @@ function makeTile(f, isSub, children){
   if(isSub) el.style.cssText='opacity:.8;';
   const wrap=document.createElement('div'); wrap.className='fi-wrap';
 
-  // Mostra imagem do icon_pack se tiver iconId, senão emoji
-  const iconEntry = (f.iconId && typeof ICON_PACK!=='undefined') ? ICON_PACK.find(ic=>ic.id===f.iconId) : null;
-  if(iconEntry){
-    const img=document.createElement('img');
-    img.src=iconEntry.data; img.alt='';
-    img.style.cssText=isSub?'width:28px;height:28px;object-fit:contain;':'width:48px;height:48px;object-fit:contain;';
-    wrap.appendChild(img);
-  } else {
-    const emo=document.createElement('div'); emo.className='fi';
-    emo.textContent=f.emoji||'📁';
-    if(isSub) emo.style.fontSize='16px';
-    wrap.appendChild(emo);
-  }
+  // Sempre usa emoji (ícones 3D removidos)
+  const emo=document.createElement('div'); emo.className='fi';
+  emo.textContent=f.emoji||'📁';
+  if(isSub) emo.style.fontSize='16px';
+  wrap.appendChild(emo);
 
   const lbl=document.createElement('div'); lbl.className='fl';
   lbl.textContent=f.name;
@@ -2153,7 +2142,7 @@ function openTodasPastas(){
       top:${Math.min(rect.bottom+6, window.innerHeight-160)}px;`;
 
     const isSystem = SYSTEM_IDS.includes(f.id);
-    const iconEntry = (f.iconId && typeof ICON_PACK!=='undefined') ? ICON_PACK.find(ic=>ic.id===f.iconId) : null;
+    const iconEntry = null; // ícones 3D removidos
     const iconHtml = iconEntry
       ? `<img src="${iconEntry.data}" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;">`
       : `<span style="font-size:16px;">${escHtml(f.emoji||'📁')}</span>`;
@@ -2186,8 +2175,7 @@ function openTodasPastas(){
       openIconPickerForFolder(f.id, (newEmoji, newIconId)=>{
         const folder = state.folders.find(x=>x.id===f.id);
         if(!folder) return;
-        if(newIconId){ folder.iconId=newIconId; folder.emoji=newEmoji||folder.emoji; }
-        else { folder.emoji=newEmoji||'📁'; delete folder.iconId; }
+        folder.emoji=newEmoji||'📁'; delete folder.iconId; // só emoji
         save(); renderFolders();
         // Atualiza o tile no modal
         const oldTile = grid.querySelector(`[data-id="${f.id}"]`);
@@ -2221,7 +2209,7 @@ function openTodasPastas(){
     tile.className = 'folderTile';
     tile.type = 'button';
 
-    const iconEntry = (f.iconId && typeof ICON_PACK!=='undefined') ? ICON_PACK.find(ic=>ic.id===f.iconId) : null;
+    const iconEntry = null; // ícones 3D removidos
     const iconHtml = iconEntry
       ? `<img src="${iconEntry.data}" style="width:48px;height:48px;object-fit:contain;">`
       : `<span class="fi">${escHtml(f.emoji||'📁')}</span>`;
@@ -2355,8 +2343,7 @@ function openIconPickerForFolder(folderId, callback){
       <button id="_ipClose" style="background:rgba(255,255,255,.08);border:none;border-radius:10px;color:#fff;font-size:18px;width:34px;height:34px;cursor:pointer;">✕</button>
     </div>
     <div style="overflow-y:auto;flex:1;min-height:0;padding:14px 16px 24px;">
-      <div style="font-size:10px;font-weight:800;color:rgba(165,180,252,.7);margin-bottom:8px;letter-spacing:.5px;">🖼️ ÍCONES 3D</div>
-      <div id="_ip3dGallery" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;"></div>
+
       <div style="font-size:10px;font-weight:800;color:rgba(165,180,252,.7);margin-bottom:8px;letter-spacing:.5px;">😊 EMOJIS</div>
       <div id="_ipEmojiRow" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
         ${['📋','💼','🏠','🎯','💡','📚','🛒','🏋️','🎵','💰','✈️','❤️','⭐','🔥','🎮','🧠','🍎','🚗','💊','📷','🎂','🌿','🏆','📝','🔑','🌍'].map(e=>`<button class="_ipEmoji ipBtn _epBtn" data-e="${e}">${e}</button>`).join('')}
@@ -2373,24 +2360,7 @@ function openIconPickerForFolder(folderId, callback){
 
   let selIconId = null, selEmoji = folder ? (folder.emoji||'📁') : '📁';
 
-  // Popula ícones 3D
-  const g3d = box.querySelector('#_ip3dGallery');
-  if(typeof ICON_PACK !== 'undefined'){
-    ICON_PACK.forEach(ic=>{
-      const btn = document.createElement('button');
-      btn.className = 'ipBtn'; btn.dataset.iconId = ic.id; btn.type='button';
-      if(folder && folder.iconId===ic.id) btn.classList.add('sel');
-      const img = document.createElement('img'); img.src=ic.data; img.alt=ic.id;
-      btn.appendChild(img);
-      btn.addEventListener('click',()=>{
-        g3d.querySelectorAll('.ipBtn').forEach(b=>b.classList.remove('sel'));
-        box.querySelectorAll('._ipEmoji').forEach(b=>b.style.borderColor='transparent');
-        btn.classList.add('sel');
-        selIconId=ic.id; selEmoji='';
-      });
-      g3d.appendChild(btn);
-    });
-  }
+
 
   // Emojis fixos
   box.querySelectorAll('._ipEmoji').forEach(btn=>{
@@ -3925,34 +3895,7 @@ function saveNameFromSub(){
 }
 function initEmojiPickerIn(container){
   let selectedEmoji = '';
-  let selectedIconId = null; // novo: rastreia ícone 3D escolhido
-
-  // ── Popula galeria de ícones 3D ──
-  const ipGallery = container.querySelector('#ipGalleryNova');
-  if(ipGallery && typeof ICON_PACK !== 'undefined'){
-    ICON_PACK.forEach(ic=>{
-      const btn = document.createElement('button');
-      btn.className = 'ipBtn'; btn.dataset.iconId = ic.id;
-      btn.type = 'button';
-      const img = document.createElement('img');
-      img.src = ic.data; img.alt = ic.id;
-      btn.appendChild(img);
-      btn.addEventListener('click',()=>{
-        // Deseleciona emoji
-        container.querySelectorAll('.epBtn').forEach(b=>b.classList.remove('sel'));
-        // Deseleciona outros ícones
-        ipGallery.querySelectorAll('.ipBtn').forEach(b=>b.classList.remove('sel'));
-        btn.classList.add('sel');
-        selectedIconId = ic.id;
-        selectedEmoji = '';
-        const show = container.querySelector('#emojiShow');
-        const sel = container.querySelector('#emojiSelected');
-        if(show){ show.innerHTML = `<img src="${ic.data}" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;">`; }
-        if(sel) sel.style.display = 'block';
-      });
-      ipGallery.appendChild(btn);
-    });
-  }
+  let selectedIconId = null; // rastreia emoji escolhido
 
   container.querySelectorAll('.epBtn').forEach(btn=>{
     if(btn.id==='epBtnMore') return;
@@ -6622,24 +6565,7 @@ function populateFolderSelect(containerId, mode){
         editingFolderId=f.id;
         document.getElementById('fInputEditName').value=f.name;
         document.getElementById('fInputEditEmoji').value=f.emoji||'📁';
-        // Popula galeria de ícones 3D no edit
-        const ipGEdit = document.getElementById('ipGalleryEdit');
-        if(ipGEdit && typeof ICON_PACK!=='undefined' && !ipGEdit.dataset.populated){
-          ipGEdit.dataset.populated='1';
-          ICON_PACK.forEach(ic=>{
-            const btn=document.createElement('button');
-            btn.className='ipBtn'; btn.dataset.iconId=ic.id; btn.type='button';
-            const img=document.createElement('img'); img.src=ic.data; img.alt=ic.id;
-            btn.appendChild(img);
-            if(f.iconId===ic.id) btn.classList.add('sel');
-            btn.addEventListener('click',()=>{
-              ipGEdit.querySelectorAll('.ipBtn').forEach(b=>b.classList.remove('sel'));
-              btn.classList.add('sel');
-              window._editIconId=ic.id;
-            });
-            ipGEdit.appendChild(btn);
-          });
-        }
+        window._editIconId = null; // ícones 3D removidos
         window._editIconId = f.iconId || null;
         document.getElementById('fEditForm').classList.remove('hidden');
         // sem focus automático
@@ -6968,7 +6894,7 @@ function initFolderModal(){
     const f=state.folders.find(x=>x.id===editingFolderId);
     if(f){
       f.name=name; f.emoji=emoji;
-      if(window._editIconId){ f.iconId=window._editIconId; } else { delete f.iconId; }
+      delete f.iconId; // ícones 3D removidos — apenas emoji
     }
     save(); renderFolders();
     editingFolderId=null; window._editIconId=null;
