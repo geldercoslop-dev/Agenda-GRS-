@@ -19,7 +19,8 @@ Agenda Pro Max — Service Worker v48
 //            v46 (2026-03) — bump de cache para garantir atualização no PWA instalado
 //            v47 (2026-03) — refinamento de botões cadastro + forçar atualização
 //            v48 (2026-04) — correções de navegação: _modalBase, comprasOv, dailyReview, moveTaskModal, fotoExame
-const CACHE_VERSION = "v48";
+//            v49 (2026-04) — fix JS quebrado (style duplicado) + CSS seletores inválidos
+const CACHE_VERSION = "v49";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
 // Prefixo usado para identificar caches deste app e limpar apenas os deles
 const CACHE_PREFIX  = "agenda-cache-";
