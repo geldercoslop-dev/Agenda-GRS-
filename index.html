@@ -6753,6 +6753,39 @@ const _metrics = (function() {
   };
 })();
 
+// ══ applyWallpaperPhoto — restaurado ══
+function applyWallpaperPhoto(dataUrl) {
+  const screen = document.querySelector('.screen');
+  if (!screen) return;
+  if (dataUrl) {
+    screen.style.backgroundImage = 'url(' + dataUrl + ')';
+    screen.style.backgroundSize  = 'cover';
+    screen.style.backgroundPosition = 'center';
+  } else {
+    screen.style.backgroundImage = '';
+    screen.style.backgroundSize  = '';
+    screen.style.backgroundPosition = '';
+  }
+}
+window.applyWallpaperPhoto = applyWallpaperPhoto;
+
+// ══ init — restaurado ══
+function init() {
+  state = load();
+  recoverStateIfEmpty(state);
+  setTheme(state.theme || 'dark');
+  if (state.uiTextColor) applyTextPalette(state.uiTextColor);
+  if (state.wallpaperPhoto) applyWallpaperPhoto(state.wallpaperPhoto);
+  if (state.profilePhoto) {
+    const img = document.getElementById('profileImg');
+    if (img) img.src = state.profilePhoto;
+  }
+  if (state.userName) {
+    const g = document.getElementById('hdrGreeting');
+    if (g) g.textContent = getGreeting();
+  }
+}
+
 init();
 window.__APP_PRIMARY_BOOT_DONE = true;
 // Executar migrações após init() para que state já esteja carregado
