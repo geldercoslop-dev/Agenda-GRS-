@@ -6780,10 +6780,19 @@ function init() {
     const img = document.getElementById('profileImg');
     if (img) img.src = state.profilePhoto;
   }
-  if (state.userName) {
-    const g = document.getElementById('hdrGreeting');
-    if (g) g.textContent = getGreeting();
-  }
+  // Re-render UI com state carregado
+  try { checkWeekTransition(); } catch(_) {}
+  try { migrateDataTasksToWeek(); } catch(_) {}
+  try { ensureSystemFolders(); } catch(_) {}
+  try { updateHeader(); } catch(_) {}
+  try { renderFolders(); } catch(_) {}
+  try { renderWeekStrip(); } catch(_) {}
+  try { updateProgress(); } catch(_) {}
+  try { initStripExpand(); } catch(_) {}
+  try { _initTouchDragGlobal(); } catch(_) {}
+  try { atualizarLupa('home'); } catch(_) {}
+  try { atualizarCalendario(); } catch(_) {}
+  setInterval(updateHeader, 60000);
 }
 
 init();
