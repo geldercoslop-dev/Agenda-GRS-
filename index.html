@@ -1722,6 +1722,26 @@ async function autoPickTextPaletteForWallpaper(dataUrl){
   if(lum >= 145) return 'black';
   return 'white';
 }
+// ── _modalBase: fábrica de modal padrão do app ──
+// Retorna { ov, box, close }
+// ov  = overlay full-screen (class modalOverlay)
+// box = div-card interno (estilizado por .modalOverlay > div no CSS)
+// close = função que remove o overlay e faz _navPop
+function _modalBase() {
+  const ov = document.createElement('div');
+  ov.className = 'modalOverlay';
+  if (typeof window._navPush === 'function') window._navPush();
+  const box = document.createElement('div');
+  ov.appendChild(box);
+  document.body.appendChild(ov);
+  function close() {
+    ov.remove();
+    if (typeof window._navPop === 'function') window._navPop();
+  }
+  ov.addEventListener('click', function(e) { if (e.target === ov) close(); });
+  return { ov, box, close };
+}
+
 function openTextPalettePicker(){
   const map = getTextPaletteMap();
   const current = String(state.uiTextColor || 'white');
@@ -4462,7 +4482,7 @@ function _renderDocsOv(){
         <span style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:17px;color:${TEXT};flex:1;letter-spacing:-.2px;">Documentos</span>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-      <button id="_docsNew" style="background:linear-gradient(135deg,#1e88e5,#1565c0);border:none;border-radius:12px;color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;padding:0 14px;height:38px;cursor:pointer;flex-shrink:0;">+ Novo</button>ce Grotesk',sans-serif;font-size:12px;font-weight:900;padding:8px 14px;cursor:pointer;flex-shrink:0;">+ Novo</button>
+      <button id="_docsNew" style="background:linear-gradient(135deg,#1e88e5,#1565c0);border:none;border-radius:12px;color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;padding:0 14px;height:38px;cursor:pointer;flex-shrink:0;">+ Novo</button>
       <button id="_docsBack" style="background:linear-gradient(135deg,#1e88e5,#1565c0);border:none;border-radius:20px;color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;padding:0 18px;height:38px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
     <div id="_docsBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(30,136,229,0.30) transparent;"></div>
@@ -4728,7 +4748,7 @@ function openFeriados(){
         <span style="font-size:22px;line-height:1;flex-shrink:0;">🎊</span>
         <span id="_ferTit" style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:17px;color:#e8f4ff;flex:1;letter-spacing:-.2px;">Feriados ${ano}</span>
       </div>
-      <button id="_ferBack" style="background:linear-gradient(135deg,#1e88e5,#1565c0);border:none;border-radius:20px;color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;padding:0 18px;height:38px;cursor:pointer;flex-shrink:0;">e Grotesk',sans-serif;font-size:13px;font-weight:800;padding:7px 13px;cursor:pointer;flex-shrink:0;">← Voltar</button>
+      <button id="_ferBack" style="background:linear-gradient(135deg,#1e88e5,#1565c0);border:none;border-radius:20px;color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;padding:0 18px;height:38px;cursor:pointer;flex-shrink:0;">← Voltar</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:12px;padding:14px 14px 12px;border-bottom:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,.14);">
       <label style="display:flex;flex-direction:column;gap:10px;">
@@ -6998,9 +7018,6 @@ function openConsultaModal(editId){
       </div>
       <button id="_cClose" style="background:linear-gradient(135deg,#1e88e5,#1565c0);border:none;border-radius:20px;color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;padding:0 18px;height:38px;cursor:pointer;flex-shrink:0;">Fechar</button>
     </div>
-    <div style="padding:20px;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;">
-    <!-- placeholder-remove -->2px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Fechar</button>
-    </div>
     <!-- Corpo com scroll -->
     <div style="flex:1;overflow-y:auto;padding:20px 16px 36px;scrollbar-width:thin;scrollbar-color:rgba(30,136,229,0.30) transparent;">
 
@@ -7182,7 +7199,7 @@ function openListaConsultas(){
         <span style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:17px;color:${TEXT};flex:1;letter-spacing:-.2px;">Consultas</span>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-      <button id="_lcAdd" style="background:linear-gradient(135deg,#1e88e5,#1565c0);border:none;border-radius:12px;color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;padding:0 14px;height:38px;cursor:pointer;flex-shrink:0;">border-radius:10px;color:#fff;font-family:Space Grotesk,sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Nova</button>
+      <button id="_lcAdd" style="background:linear-gradient(135deg,#1e88e5,#1565c0);border:none;border-radius:12px;color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;padding:0 14px;height:38px;cursor:pointer;flex-shrink:0;">Nova</button>
       <button id="_lcBack" style="background:linear-gradient(135deg,#1e88e5,#1565c0);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:Space Grotesk,sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Fechar</button>
     </div>
     <div id="_lcScroll" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(30,136,229,0.30) transparent;"></div>`;
@@ -7791,7 +7808,7 @@ function openListaRemedios(){
         <span style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:17px;color:${TEXT};flex:1;letter-spacing:-.2px;">Remédios</span>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-      <button id="_lrAdd" style="background:linear-gradient(135deg,#1e88e5,#1565c0);border:none;border-radius:12px;color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;padding:0 14px;height:38px;cursor:pointer;flex-shrink:0;">x;color:#fff;font-family:Space Grotesk,sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Novo</button>
+      <button id="_lrAdd" style="background:linear-gradient(135deg,#1e88e5,#1565c0);border:none;border-radius:12px;color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;padding:0 14px;height:38px;cursor:pointer;flex-shrink:0;">Novo</button>
       <button id="_lrBack" style="background:linear-gradient(135deg,#1e88e5,#1565c0);border:1px solid rgba(125,211,240,.35);border-radius:10px;color:#fff;font-family:Space Grotesk,sans-serif;font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;flex-shrink:0;line-height:1;min-width:78px;height:31px;display:inline-flex;align-items:center;justify-content:center;">Fechar</button>
     </div>
     <div id="_lrBody" style="flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:rgba(30,136,229,0.30) transparent;"></div>`;
