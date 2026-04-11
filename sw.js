@@ -21,7 +21,8 @@ Agenda Pro Max — Service Worker v48
 //            v48 (2026-04) — correções de navegação: _modalBase, comprasOv, dailyReview, moveTaskModal, fotoExame
 //            v49 (2026-04) — fix JS quebrado (style duplicado) + CSS seletores inválidos
 //            v53 (2026-04) — restaura _modalBase + corrige botões com CSS lixo + bump cache
-const CACHE_VERSION = "v53";
+//            v54 (2026-04) — corrige SyntaxError (} órfã) + openSettings/closeSidebar + sidebarFab
+const CACHE_VERSION = "v54";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
 // Prefixo usado para identificar caches deste app e limpar apenas os deles
 const CACHE_PREFIX  = "agenda-cache-";

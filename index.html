@@ -2477,31 +2477,81 @@ function openTodasPastas(){
 
 // ══ ICON PICKER PARA PASTA EXISTENTE ══
 function openIconPickerForFolder(folderId, callback){
+  const folder = state.folders.find(f=>f.id===folderId);
+  if(!folder) return;
   const ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:100001;display:flex;align-items:flex-end;justify-content:center;padding:0;';
+  if(typeof window._navPush==='function') window._navPush();
   const box = document.createElement('div');
   box.style.cssText = 'width:100%;max-width:480px;background:var(--bg1,#021418);border-radius:22px 22px 0 0;border:1px solid rgba(0,200,230,.18);padding:0;display:flex;flex-direction:column;max-height:80vh;overflow:hidden;';
-
-  const folder = state.folders.find(f=>f.id===folderId);
-
+  const ICONS=['📁','📂','📋','📌','📝','📅','💼','🏥','💊','💳','📊','🏠','⭐','🔑','🎯','📧','🚀','❤️','🎵','🎮','🍎','🏋️','📚','🔬','✈️','🌟','💡','🔒','🎁','🛒','💰','🎓','🌿','⚽','🎨','🔧','🍕','🎭','🐶','🌎','🏆'];
   box.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;min-height:56px;gap:10px;">
       <div style="display:flex;align-items:center;gap:10px;flex:1;">
         <span style="font-size:22px;line-height:1;flex-shrink:0;">🎨</span>
         <div style="flex:1;">
           <div style="font-family:Space Grotesk,sans-serif;font-size:17px;font-weight:700;color:#e8f4ff;letter-spacing:-.2px;">Trocar Ícone</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.40);margin-top:2px;">${escHtml(folder?folder.name:'Pasta')}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.40);margin-top:2px;">${escHtml(folder.name)}</div>
         </div>
       </div>
       <button id="_ipClose" style="background:linear-gradient(135deg,#1e88e5,#1565c0);border:none;border-radius:20px;color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;padding:0 18px;height:38px;cursor:pointer;flex-shrink:0;">Fechar</button>
-      
-`;
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:16px;overflow-y:auto;max-height:calc(80vh - 72px);">
+      ${ICONS.map(ic=>`<button class="_ipBtn" data-icon="${ic}" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.10);border-radius:10px;font-size:22px;padding:8px 0;cursor:pointer;">${ic}</button>`).join('')}
+    </div>`;
+  function close(){ ov.remove(); if(typeof window._navPop==='function') window._navPop(); }
+  ov.addEventListener('click',(e)=>{ if(e.target===ov) close(); });
+  box.querySelector('#_ipClose').addEventListener('click', close);
+  box.querySelectorAll('._ipBtn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const icon=btn.dataset.icon;
+      const fi=state.folders.findIndex(f=>f.id===folderId);
+      if(fi>=0){ state.folders[fi].icon=icon; save(); renderFolders(); }
+      if(typeof callback==='function') callback(icon);
+      close();
+    });
+  });
+  ov.appendChild(box);
+  document.body.appendChild(ov);
+}
 
-    box.querySelector('#_wpInternal').addEventListener('click', ()=>{ close(); openWallpaperCatalog(); });
-    box.querySelector('#_wpGallery').addEventListener('click', ()=>{ close(); openWallpaperPicker(); });
-    box.querySelector('#_wpTextColor').addEventListener('click', ()=>{ close(); openTextPalettePicker(); });
-    box.querySelector('#_wpCancel').addEventListener('click', close);
-  }
+// ══ FUNÇÕES GLOBAIS — Settings, Sidebar, Wallpaper ══
+function openSettings() {
+  if(typeof window._navPush==='function') window._navPush();
+  document.getElementById('sModalOverlay')?.classList.add('show');
+}
+function closeSettings(fromBack) {
+  document.getElementById('sModalOverlay')?.classList.remove('show');
+  if(!fromBack && typeof window._navPop==='function') window._navPop();
+}
+function openSidebar() {
+  if(typeof window._navPush==='function') window._navPush();
+  document.getElementById('sidebar')?.classList.add('open');
+  document.getElementById('sidebarOverlay')?.classList.add('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('sidebarOverlay')?.classList.remove('open');
+  if(typeof window._navPop==='function') window._navPop();
+}
+function openWallpaperSourcePicker() {
+  reopenSettingsAfterWallpaperPick = true;
+  const { box, close } = _modalBase();
+  box.innerHTML = `
+    <div style="padding:20px 20px 8px;">
+      <div style="font-family:Space Grotesk,sans-serif;font-size:17px;font-weight:700;color:#e8f4ff;margin-bottom:16px;">🖼️ Papel de parede</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button id="_wpInternal" style="padding:14px 16px;border-radius:12px;border:none;background:rgba(255,255,255,0.08);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;cursor:pointer;text-align:left;">🎨 Catálogo de wallpapers</button>
+        <button id="_wpGallery" style="padding:14px 16px;border-radius:12px;border:none;background:rgba(255,255,255,0.08);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;cursor:pointer;text-align:left;">📱 Escolher da galeria</button>
+        <button id="_wpTextColor" style="padding:14px 16px;border-radius:12px;border:none;background:rgba(255,255,255,0.08);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;cursor:pointer;text-align:left;">🎨 Cor do texto</button>
+        <button id="_wpCancel" style="margin-top:4px;padding:10px 16px;border-radius:12px;border:none;background:transparent;color:rgba(255,255,255,0.4);font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">Cancelar</button>
+      </div>
+    </div>`;
+  box.querySelector('#_wpInternal').addEventListener('click',()=>{ close(); openWallpaperCatalog(); });
+  box.querySelector('#_wpGallery').addEventListener('click',()=>{ close(); openWallpaperPicker(); });
+  box.querySelector('#_wpTextColor').addEventListener('click',()=>{ close(); openTextPalettePicker(); });
+  box.querySelector('#_wpCancel').addEventListener('click', close);
+}
 
   function openWallpaperCatalog(){
     const catalog = getWallpaperCatalog();
@@ -2578,6 +2628,7 @@ function openIconPickerForFolder(folderId, callback){
     fw.value = '';
     setTimeout(()=>fw.click(), 80);
   }
+  document.getElementById('sidebarFab')?.addEventListener('click', openSidebar);
   document.getElementById('sb-theme')?.addEventListener('click',()=>{ closeSidebar(); openWallpaperSourcePicker(); });
   document.getElementById('sb-today')?.addEventListener('click',()=>{
     closeSidebar();
@@ -3103,7 +3154,6 @@ function openIconPickerForFolder(folderId, callback){
   setInterval(autoBackup, 6 * 60 * 60 * 1000);
   // Gera um snapshot local logo após iniciar com app estável.
   setTimeout(autoBackup, 12000);
-}
 
 // ══ VERIFICAÇÃO DIÁRIA DE PENDÊNCIAS ══
 // A cada 1ª abertura do dia, verifica pendentes do dia anterior e pergunta um a um
