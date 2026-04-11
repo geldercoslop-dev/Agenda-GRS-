@@ -3123,38 +3123,6 @@ function openWallpaperSourcePicker() {
   document.getElementById('calAddBtn').addEventListener('click',calAddTask);
   document.getElementById('calTaskInput').addEventListener('keydown',(e)=>{if(e.key==='Enter')calAddTask();});
 
-  // Migrate dateTasks when week changes
-  checkWeekTransition();
-  migrateDataTasksToWeek();
-  // Garante pastas fixas do sistema
-  ensureSystemFolders();
-
-  // Verificação diária de pendências — abre tela obrigatória se houver pendentes do dia anterior
-  checkDailyPending();
-  // Checar de hora em hora
-  setInterval(checkDailyPending, 60 * 60 * 1000);
-
-  // Init dayBadge: empty on home screen
-  document.getElementById('dayBadge').textContent = '';
-
-  updateHeader();
-  renderFolders();
-  _scheduleIdleWarmup();
-  renderWeekStrip();
-  updateProgress();
-  initStripExpand();
-  _initTouchDragGlobal();
-  setInterval(updateHeader, 60000);
-  // Garante barra de busca visível na home ao iniciar
-  atualizarLupa('home');
-
-  // Lembrete de backup — avisa se passaram mais de 3 dias sem backup
-  setTimeout(checkBackupReminder, 3000);
-  // Backup automático de proteção a cada 6h (além do backup manual do usuário).
-  setInterval(autoBackup, 6 * 60 * 60 * 1000);
-  // Gera um snapshot local logo após iniciar com app estável.
-  setTimeout(autoBackup, 12000);
-
 // ══ VERIFICAÇÃO DIÁRIA DE PENDÊNCIAS ══
 // A cada 1ª abertura do dia, verifica pendentes do dia anterior e pergunta um a um
 
@@ -6862,7 +6830,16 @@ function init() {
   try { _initTouchDragGlobal(); } catch(_) {}
   try { atualizarLupa('home'); } catch(_) {}
   try { atualizarCalendario(); } catch(_) {}
+  try { _scheduleIdleWarmup(); } catch(_) {}
+  document.getElementById('dayBadge').textContent = '';
   setInterval(updateHeader, 60000);
+  // Verificação diária de pendências
+  try { checkDailyPending(); } catch(_) {}
+  setInterval(function(){ try{ checkDailyPending(); }catch(_){} }, 60 * 60 * 1000);
+  // Backup automático
+  setTimeout(function(){ try{ checkBackupReminder(); }catch(_){} }, 3000);
+  setInterval(function(){ try{ autoBackup(); }catch(_){} }, 6 * 60 * 60 * 1000);
+  setTimeout(function(){ try{ autoBackup(); }catch(_){} }, 12000);
 }
 
 init();
