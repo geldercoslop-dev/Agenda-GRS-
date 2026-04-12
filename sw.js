@@ -19,16 +19,7 @@ Agenda Pro Max — Service Worker v48
 //            v46 (2026-03) — bump de cache para garantir atualização no PWA instalado
 //            v47 (2026-03) — refinamento de botões cadastro + forçar atualização
 //            v48 (2026-04) — correções de navegação: _modalBase, comprasOv, dailyReview, moveTaskModal, fotoExame
-//            v49 (2026-04) — fix JS quebrado (style duplicado) + CSS seletores inválidos
-//            v53 (2026-04) — restaura _modalBase + corrige botões com CSS lixo + bump cache
-//            v54 (2026-04) — corrige SyntaxError (} órfã) + openSettings/closeSidebar + sidebarFab
-//            v55 (2026-04) — remove chamadas de render prematuras (NaN/UNDEFINED semana)
-//            v56 (2026-04) — SW força reload automático das abas ao atualizar
-//            v57 (2026-04) — init() com try/catch total + badge versão + getGreeting defensivo
-//            v58 (2026-04) — onerror global + badge no início do init para diagnóstico
-//            v59 (2026-04) — corrige ReferenceError startVoice + todas funções ausentes
-//            v60 (2026-04) — implementa openBucket + renderDayView + navigateBack correto
-const CACHE_VERSION = "v60";
+const CACHE_VERSION = "v48";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
 // Prefixo usado para identificar caches deste app e limpar apenas os deles
 const CACHE_PREFIX  = "agenda-cache-";
@@ -97,15 +88,12 @@ self.addEventListener("activate", (event) => {
     // Assume controle imediato de todas as abas abertas
     await self.clients.claim();
 
-    // Força reload de todas as abas abertas — garante que o novo código seja carregado
-    // sem depender do usuário clicar num banner
-    const allClients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
-    allClients.forEach((client) => {
-      // navigate() força a aba a recarregar a página atual com o novo SW
-      try { client.navigate(client.url); } catch(_) {
-        client.postMessage({ type: "SW_UPDATED", version: CACHE_VERSION });
-      }
-    });
+    // Avisa todas as abas que há nova versão ativa
+    // O index.html escuta esta mensagem e exibe banner de atualização
+    const allClients = await self.clients.matchAll({ includeUncontrolled: true });
+    allClients.forEach((client) =>
+      client.postMessage({ type: "SW_UPDATED", version: CACHE_VERSION })
+    );
   })());
 });
 
