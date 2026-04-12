@@ -832,6 +832,17 @@
 
 
 <script>
+// ══ CAPTURADOR DE ERROS GLOBAL — diagnóstico v57 ══
+window.onerror = function(msg, src, line, col, err) {
+  try {
+    var vb = document.getElementById('_appVersionBadge');
+    if (vb) vb.style.color = '#ff6b6b';
+    if (vb) vb.textContent = 'ERR L' + line + ': ' + String(msg).substring(0, 60);
+    console.error('[GLOBAL] JS Error linha ' + line + ':', msg, err);
+  } catch(_) {}
+  return false;
+};
+
 // ══ DESIGN SYSTEM — padrão unificado ══
 const _DS = {
   // Overlay de fundo
@@ -6812,6 +6823,7 @@ window.applyWallpaperPhoto = applyWallpaperPhoto;
 
 // ══ init — restaurado ══
 function init() {
+  try { var _vb=document.getElementById('_appVersionBadge'); if(_vb){_vb.style.color='#90ee90';_vb.textContent='init...';} } catch(_){}
   try { state = load(); } catch(e) { console.error('[init] load() falhou:', e); state = defaultState(); }
   try { recoverStateIfEmpty(state); } catch(_) {}
   try { setTheme(state.theme || 'dark'); } catch(_) {}
