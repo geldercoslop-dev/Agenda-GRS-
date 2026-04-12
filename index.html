@@ -2529,6 +2529,102 @@ function openIconPickerForFolder(folderId, callback){
   document.body.appendChild(ov);
 }
 
+// ══ FUNÇÕES GLOBAIS — Settings, Sidebar, Wallpaper, Nav, Relatórios ══
+
+// ── Navegação ──
+function navigateBack() {
+  try {
+    if (currentView === 'day') {
+      currentView = 'home';
+      const dayScreen = document.getElementById('dayScreen');
+      const homeScreen = document.getElementById('homeScreen');
+      if (dayScreen) dayScreen.classList.remove('active');
+      if (homeScreen) homeScreen.classList.add('active');
+      try { atualizarLupa('home'); } catch(_) {}
+    }
+  } catch(e) { console.error('[navigateBack]', e); }
+}
+function goSubBack() {
+  try {
+    const sub = document.getElementById('subScreen');
+    if (sub) sub.classList.remove('active');
+    const home = document.getElementById('homeScreen');
+    if (home) home.classList.add('active');
+    if (typeof window._navPop === 'function') window._navPop();
+  } catch(e) {}
+}
+function closeQuickAddOverlay() {
+  try {
+    const ov = document.getElementById('quickAddOverlay');
+    if (ov) ov.style.display = 'none';
+    const inp = document.getElementById('quickAddInput');
+    if (inp) inp.value = '';
+    if (typeof window._navPop === 'function') window._navPop();
+  } catch(e) {}
+}
+function startVoice() {
+  try {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { showToast('🎤 Reconhecimento de voz não suportado neste dispositivo.'); return; }
+    const rec = new SR();
+    rec.lang = 'pt-BR'; rec.continuous = false; rec.interimResults = false;
+    rec.onresult = function(e) {
+      const txt = e.results[0][0].transcript;
+      const inp = document.getElementById('quickAddInput');
+      if (inp) { inp.value = txt; }
+      showToast('🎤 "' + txt + '"');
+    };
+    rec.onerror = function(e) { showToast('🎤 Erro: ' + e.error); };
+    rec.start();
+    showToast('🎤 Ouvindo...');
+  } catch(e) { showToast('🎤 Voz não disponível.'); }
+}
+function generateReport() {
+  try {
+    if (typeof openRelatorio === 'function') { openRelatorio(); return; }
+    showToast('📊 Relatório em desenvolvimento.');
+  } catch(_) {}
+}
+function doBackup() {
+  try {
+    if (typeof openBackup === 'function') { openBackup(); return; }
+    const data = JSON.stringify(state);
+    const blob = new Blob([data], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'agenda-backup-' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    showToast('💾 Backup exportado!');
+  } catch(e) { showToast('💾 Erro no backup: ' + e.message); }
+}
+function shareWhatsApp() {
+  try {
+    if (typeof gerarRelatorioWhatsApp === 'function') { gerarRelatorioWhatsApp(); return; }
+    showToast('📲 WhatsApp não disponível.');
+  } catch(_) {}
+}
+function shareWhatsAppGlobal() {
+  try {
+    if (typeof gerarRelatorioWhatsApp === 'function') { gerarRelatorioWhatsApp(); return; }
+    showToast('📲 WhatsApp não disponível.');
+  } catch(_) {}
+}
+function saveSettings() {
+  try {
+    const nameInput = document.getElementById('inputName');
+    if (nameInput && nameInput.value.trim()) {
+      state.userName = nameInput.value.trim();
+      save();
+      updateHeader();
+      showToast('✅ Nome salvo!');
+    } else {
+      save();
+      showToast('✅ Configurações salvas!');
+    }
+    closeSettings();
+  } catch(e) { console.error('[saveSettings]', e); }
+}
+
 // ══ FUNÇÕES GLOBAIS — Settings, Sidebar, Wallpaper ══
 function openSettings() {
   if(typeof window._navPush==='function') window._navPush();
@@ -2671,7 +2767,7 @@ function openWallpaperSourcePicker() {
   // Day view footer
   document.getElementById('dayBackBtn').addEventListener('click',()=>navigateBack());
   document.getElementById('dayAddBtn').addEventListener('click',()=>openQuickAddForCurrentBucket());
-  document.getElementById('voiceBtn').addEventListener('click',startVoice);
+  document.getElementById('voiceBtn').addEventListener('click', function(){ if(typeof startVoice==='function') startVoice(); else showToast('🎤 Voz não disponível neste dispositivo.'); });
   document.getElementById('daySubBtn').addEventListener('click',()=>{ if(currentBucket) quickCreateSubfolder(); else showToast('⚠️ Entre em uma pasta primeiro.'); });
 
   // ── Detecta suporte a voz e esconde botão se não houver ──
@@ -2680,7 +2776,7 @@ function openWallpaperSourcePicker() {
     const vBtn = document.getElementById('voiceBtn');
     if(vBtn) vBtn.style.display = 'none';
   }
-  document.getElementById('dayZapSendBtn').addEventListener('click',shareWhatsApp);
+  document.getElementById('dayZapSendBtn').addEventListener('click',()=>{ if(typeof shareWhatsApp==='function') shareWhatsApp(); else showToast('📲 Compartilhamento não disponível.'); });
   // Photo button
   // Função helper para processar arquivo de foto de pasta/dia
   // Limite máximo de fotos por pasta
@@ -2756,10 +2852,10 @@ function openWallpaperSourcePicker() {
 
   // Bottom bar
   // Apurar removido
-  document.getElementById('cmdReport').addEventListener('click',generateReport);
-  document.getElementById('cmdBackup').addEventListener('click',doBackup);
-  document.getElementById('cmdZap').addEventListener('click',shareWhatsAppGlobal);
-  document.getElementById('cmdFolders').addEventListener('click',openTodasPastas);
+  document.getElementById('cmdReport').addEventListener('click',()=>{ if(typeof generateReport==='function') generateReport(); else showToast('📊 Relatório não disponível.'); });
+  document.getElementById('cmdBackup').addEventListener('click',()=>{ if(typeof doBackup==='function') doBackup(); else showToast('💾 Backup não disponível.'); });
+  document.getElementById('cmdZap').addEventListener('click',()=>{ if(typeof shareWhatsAppGlobal==='function') shareWhatsAppGlobal(); else showToast('📲 WhatsApp não disponível.'); });
+  document.getElementById('cmdFolders').addEventListener('click',()=>{ if(typeof openTodasPastas==='function') openTodasPastas(); });
   document.getElementById('cmdConsulta').addEventListener('click',()=>openConsultaModal());
   document.getElementById('cmdRemedio').addEventListener('click',()=>openRemedioModal());
 
@@ -2768,7 +2864,7 @@ function openWallpaperSourcePicker() {
   document.getElementById('subScreenOverlay').addEventListener('click',(e)=>{
     if(e.target===document.getElementById('subScreenOverlay')) goSubBack();
   });
-  document.getElementById('sSave').addEventListener('click',saveSettings);
+  document.getElementById('sSave').addEventListener('click',()=>{ if(typeof saveSettings==='function') saveSettings(); else showToast('⚙️ Configurações não disponível.'); });
   document.getElementById('sClose').addEventListener('click', closeSettings);
   document.getElementById('sModalOverlay').addEventListener('click',(e)=>{if(e.target===document.getElementById('sModalOverlay'))closeSettings();});
   document.getElementById('rowName').addEventListener('click',()=>{
@@ -3131,8 +3227,8 @@ function openWallpaperSourcePicker() {
   // Quick add task modal events
   document.getElementById('quickAddBtn').addEventListener('click', _doQuickAdd);
   document.getElementById('quickAddInput').addEventListener('keydown',(e)=>{ if(e.key==='Enter') _doQuickAdd(); });
-  document.getElementById('quickAddClose').addEventListener('click', closeQuickAddOverlay);
-  document.getElementById('quickAddOverlay').addEventListener('click',(e)=>{ if(e.target===document.getElementById('quickAddOverlay')) closeQuickAddOverlay(); });
+  document.getElementById('quickAddClose').addEventListener('click', ()=>{ if(typeof closeQuickAddOverlay==='function') closeQuickAddOverlay(); else { const ov=document.getElementById('quickAddOverlay'); if(ov) ov.style.display='none'; }});
+  document.getElementById('quickAddOverlay').addEventListener('click',(e)=>{ if(e.target===document.getElementById('quickAddOverlay')){ if(typeof closeQuickAddOverlay==='function') closeQuickAddOverlay(); else e.currentTarget.style.display='none'; }});
   document.getElementById('calNext').addEventListener('click',()=>{calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalModal();});
   document.getElementById('calAddBtn').addEventListener('click',calAddTask);
   document.getElementById('calTaskInput').addEventListener('keydown',(e)=>{if(e.key==='Enter')calAddTask();});

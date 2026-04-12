@@ -26,7 +26,8 @@ Agenda Pro Max — Service Worker v48
 //            v56 (2026-04) — SW força reload automático das abas ao atualizar
 //            v57 (2026-04) — init() com try/catch total + badge versão + getGreeting defensivo
 //            v58 (2026-04) — onerror global + badge no início do init para diagnóstico
-const CACHE_VERSION = "v58";
+//            v59 (2026-04) — corrige ReferenceError startVoice + todas funções ausentes
+const CACHE_VERSION = "v59";
 const CACHE_NAME    = "agenda-cache-" + CACHE_VERSION;
 // Prefixo usado para identificar caches deste app e limpar apenas os deles
 const CACHE_PREFIX  = "agenda-cache-";
