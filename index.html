@@ -126,6 +126,7 @@
       <div class="hdrCenter">
         <div class="hdrGreeting" id="hdrGreeting">Bom dia!</div>
         <div class="hdrSub" id="hdrSub">Domingo, 1 de março</div>
+        <div id="_appVersionBadge" style="font-size:9px;color:rgba(255,255,255,0.25);font-family:monospace;letter-spacing:.5px;">carregando...</div>
       </div>
       <div class="hdrRight">
         <div class="clockBg">
@@ -1638,9 +1639,11 @@ function _sanitizeInboundData(raw) {
 }
 function getGreeting() {
   const h = new Date().getHours();
-  if (h<12) return 'Bom dia, '+state.userName+'!';
-  if (h<18) return 'Boa tarde, '+state.userName+'!';
-  return 'Boa noite, '+state.userName+'!';
+  const nome = (state && state.userName) ? state.userName : '';
+  const sufixo = nome ? (', ' + nome + '!') : '!';
+  if (h<12) return 'Bom dia' + sufixo;
+  if (h<18) return 'Boa tarde' + sufixo;
+  return 'Boa noite' + sufixo;
 }
 
 // ══ THEME ══
@@ -6809,30 +6812,27 @@ window.applyWallpaperPhoto = applyWallpaperPhoto;
 
 // ══ init — restaurado ══
 function init() {
-  state = load();
-  recoverStateIfEmpty(state);
-  setTheme(state.theme || 'dark');
-  if (state.uiTextColor) applyTextPalette(state.uiTextColor);
-  if (state.wallpaperPhoto) applyWallpaperPhoto(state.wallpaperPhoto);
-  if (state.profilePhoto) {
-    const img = document.getElementById('profileImg');
-    if (img) img.src = state.profilePhoto;
-  }
+  try { state = load(); } catch(e) { console.error('[init] load() falhou:', e); state = defaultState(); }
+  try { recoverStateIfEmpty(state); } catch(_) {}
+  try { setTheme(state.theme || 'dark'); } catch(_) {}
+  try { if (state.uiTextColor) applyTextPalette(state.uiTextColor); } catch(_) {}
+  try { if (state.wallpaperPhoto) applyWallpaperPhoto(state.wallpaperPhoto); } catch(_) {}
+  try { if (state.profilePhoto) { const img = document.getElementById('profileImg'); if (img) img.src = state.profilePhoto; } } catch(_) {}
   // Re-render UI com state carregado
   try { checkWeekTransition(); } catch(_) {}
   try { migrateDataTasksToWeek(); } catch(_) {}
   try { ensureSystemFolders(); } catch(_) {}
-  try { updateHeader(); } catch(_) {}
-  try { renderFolders(); } catch(_) {}
-  try { renderWeekStrip(); } catch(_) {}
+  try { updateHeader(); } catch(e) { console.error('[init] updateHeader falhou:', e); }
+  try { renderFolders(); } catch(e) { console.error('[init] renderFolders falhou:', e); }
+  try { renderWeekStrip(); } catch(e) { console.error('[init] renderWeekStrip falhou:', e); }
   try { updateProgress(); } catch(_) {}
   try { initStripExpand(); } catch(_) {}
   try { _initTouchDragGlobal(); } catch(_) {}
   try { atualizarLupa('home'); } catch(_) {}
   try { atualizarCalendario(); } catch(_) {}
   try { _scheduleIdleWarmup(); } catch(_) {}
-  document.getElementById('dayBadge').textContent = '';
-  setInterval(updateHeader, 60000);
+  try { const db = document.getElementById('dayBadge'); if(db) db.textContent = ''; } catch(_) {}
+  setInterval(function(){ try{ updateHeader(); }catch(_){} }, 60000);
   // Verificação diária de pendências
   try { checkDailyPending(); } catch(_) {}
   setInterval(function(){ try{ checkDailyPending(); }catch(_){} }, 60 * 60 * 1000);
@@ -6840,10 +6840,16 @@ function init() {
   setTimeout(function(){ try{ checkBackupReminder(); }catch(_){} }, 3000);
   setInterval(function(){ try{ autoBackup(); }catch(_){} }, 6 * 60 * 60 * 1000);
   setTimeout(function(){ try{ autoBackup(); }catch(_){} }, 12000);
+  // Indica que o boot concluiu
+  window.__APP_PRIMARY_BOOT_DONE = true;
+  // Badge de versão visível para diagnóstico
+  try {
+    var vb = document.getElementById('_appVersionBadge');
+    if(vb) vb.textContent = 'v57';
+  } catch(_) {}
 }
 
 init();
-window.__APP_PRIMARY_BOOT_DONE = true;
 // Executar migrações após init() para que state já esteja carregado
 state = _runMigrations(state);
 
