@@ -2536,11 +2536,13 @@ function navigateBack() {
   try {
     if (currentView === 'day') {
       currentView = 'home';
-      const dayScreen = document.getElementById('dayScreen');
-      const homeScreen = document.getElementById('homeScreen');
-      if (dayScreen) dayScreen.classList.remove('active');
-      if (homeScreen) homeScreen.classList.add('active');
+      var dayView  = document.getElementById('dayView');
+      var homeView = document.getElementById('homeView');
+      if (dayView)  dayView.classList.remove('show');
+      if (homeView) homeView.classList.add('show');
+      currentBucket = null;
       try { atualizarLupa('home'); } catch(_) {}
+      try { renderFolders(); } catch(_) {}
     }
   } catch(e) { console.error('[navigateBack]', e); }
 }
@@ -2623,6 +2625,137 @@ function saveSettings() {
     }
     closeSettings();
   } catch(e) { console.error('[saveSettings]', e); }
+}
+
+// ══ openBucket / renderDayView — abre pasta e exibe tarefas ══
+
+// Pastas especiais → abrem overlay próprio
+var _SPECIAL_FOLDER_OPENERS = {
+  '_consultas': function(){ if(typeof openConsultaModal==='function') openConsultaModal(); },
+  '_remedios':  function(){ if(typeof openRemedioModal==='function')  openRemedioModal();  },
+  '_exames':    function(){ if(typeof openExames==='function')         openExames();         },
+  '_docs':      function(){ if(typeof openDocs==='function')           openDocs();           },
+  '_mercado':   function(){ if(typeof openMercado==='function')        openMercado();        },
+  '_contas':    function(){ if(typeof openContas==='function')         openContas();         },
+  '_receber':   function(){ if(typeof openReceber==='function')        openReceber();        },
+};
+
+function openBucket(bucketId, doPushHistory) {
+  if (!bucketId) return;
+  // Pasta especial → overlay próprio, não muda de view
+  if (_SPECIAL_FOLDER_OPENERS[bucketId]) {
+    _SPECIAL_FOLDER_OPENERS[bucketId]();
+    return;
+  }
+  if (doPushHistory !== false && typeof window._navPush === 'function') window._navPush();
+  currentBucket = bucketId;
+  currentView = 'day';
+  var homeView = document.getElementById('homeView');
+  var dayView  = document.getElementById('dayView');
+  if (homeView) homeView.classList.remove('show');
+  if (dayView)  dayView.classList.add('show');
+  // Atualiza label do botão Voltar
+  var backLabel = document.getElementById('backLabel');
+  if (backLabel) {
+    var dayEntry = DAYS.find(function(d){ return d.id === bucketId; });
+    if (dayEntry) {
+      var dayIdx  = DAYS.findIndex(function(d){ return d.id === bucketId; });
+      var wkStart = parseLocalDate(state.weekStartISO);
+      var dt = addDays(wkStart, dayIdx);
+      var MESES_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      backLabel.textContent = dayEntry.name + ' ' + dt.getDate() + '/' + MESES_SHORT[dt.getMonth()];
+    } else {
+      var folder = state.folders.find(function(f){ return f.id === bucketId; });
+      backLabel.textContent = folder ? (folder.emoji + ' ' + folder.name) : '← Voltar';
+    }
+  }
+  renderDayView();
+  try { updateProgress(); } catch(_) {}
+  try { atualizarLupa('day'); } catch(_) {}
+  // Subpastas
+  try { _renderSubFolders(bucketId); } catch(_) {}
+}
+
+function renderDayView() {
+  var listArea = document.getElementById('listArea');
+  if (!listArea || !currentBucket) return;
+  var tasks = (state.tasks && Array.isArray(state.tasks[currentBucket])) ? state.tasks[currentBucket] : [];
+  listArea.innerHTML = '';
+  if (tasks.length === 0) {
+    listArea.innerHTML = '<div style="text-align:center;padding:60px 20px;color:rgba(255,255,255,.35);font-family:Space Grotesk,sans-serif;"><div style="font-size:40px;margin-bottom:12px;">📋</div><div style="font-size:14px;font-weight:700;">Nenhuma tarefa</div><div style="font-size:12px;margin-top:6px;opacity:.7;">Toque em ADD para adicionar</div></div>';
+    return;
+  }
+  tasks.forEach(function(task) {
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.07);gap:12px;cursor:pointer;';
+    row.dataset.taskId = task.id;
+    var check = document.createElement('div');
+    check.style.cssText = 'width:24px;height:24px;border-radius:50%;border:2px solid ' + (task.done ? '#4ade80' : 'rgba(255,255,255,.3)') + ';background:' + (task.done ? '#4ade80' : 'transparent') + ';flex-shrink:0;display:flex;align-items:center;justify-content:center;';
+    if (task.done) check.innerHTML = '<svg width="13" height="13" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#021418" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
+    var label = document.createElement('div');
+    label.style.cssText = 'flex:1;font-family:Space Grotesk,sans-serif;font-size:15px;font-weight:600;color:' + (task.done ? 'rgba(255,255,255,.35)' : 'rgba(232,244,255,.92)') + ';' + (task.done ? 'text-decoration:line-through;' : '') + 'line-height:1.4;word-break:break-word;';
+    label.textContent = task.text || '';
+    // Marcar como feito/não feito
+    check.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var arr = state.tasks[currentBucket] || [];
+      var t = arr.find(function(x){ return x.id === task.id; });
+      if (t) { t.done = !t.done; save(); renderDayView(); try{updateProgress();}catch(_){} try{renderWeekStrip();}catch(_){} }
+    });
+    // Segurar para abrir menu de edição/exclusão
+    var pressTimer = null;
+    function startPress(){ pressTimer = setTimeout(function(){ pressTimer=null; _openTaskEditMenu(task); }, 600); }
+    function cancelPress(){ if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } }
+    row.addEventListener('touchstart', startPress, {passive:true});
+    row.addEventListener('touchend',   cancelPress);
+    row.addEventListener('touchmove',  cancelPress);
+    row.appendChild(check); row.appendChild(label);
+    listArea.appendChild(row);
+  });
+}
+
+function _openTaskEditMenu(task) {
+  var arr = state.tasks[currentBucket] || [];
+  var ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
+  var box = document.createElement('div');
+  box.style.cssText = 'width:100%;max-width:480px;background:#0d233a;border-radius:22px 22px 0 0;padding:20px 16px 32px;';
+  box.innerHTML = '<div style="font-family:Space Grotesk,sans-serif;font-size:15px;font-weight:700;color:#e8f4ff;margin-bottom:16px;padding:0 4px;">' + escHtml(task.text) + '</div>'
+    + '<button id="_teEdit" style="width:100%;padding:13px;border-radius:12px;border:none;background:rgba(255,255,255,.08);color:#e8f4ff;font-family:Space Grotesk,sans-serif;font-weight:700;font-size:14px;cursor:pointer;margin-bottom:8px;">✏️ Editar</button>'
+    + '<button id="_teDel" style="width:100%;padding:13px;border-radius:12px;border:none;background:rgba(239,68,68,.15);color:#fca5a5;font-family:Space Grotesk,sans-serif;font-weight:700;font-size:14px;cursor:pointer;margin-bottom:8px;">🗑️ Excluir</button>'
+    + '<button id="_teCancel" style="width:100%;padding:11px;border-radius:12px;border:none;background:transparent;color:rgba(255,255,255,.4);font-family:Space Grotesk,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">Cancelar</button>';
+  function closeMenu(){ ov.remove(); }
+  ov.addEventListener('click', function(e){ if(e.target===ov) closeMenu(); });
+  box.querySelector('#_teCancel').addEventListener('click', closeMenu);
+  box.querySelector('#_teDel').addEventListener('click', function(){
+    closeMenu();
+    _deleteTaskWithUndo(arr, currentBucket, task.id);
+  });
+  box.querySelector('#_teEdit').addEventListener('click', function(){
+    closeMenu();
+    var newText = prompt('Editar tarefa:', task.text);
+    if (newText && newText.trim() && newText.trim() !== task.text) {
+      var t = arr.find(function(x){ return x.id===task.id; });
+      if(t){ t.text = newText.trim(); save(); renderDayView(); showToast('✅ Tarefa editada!'); }
+    }
+  });
+  ov.appendChild(box);
+  document.body.appendChild(ov);
+}
+
+function _renderSubFolders(bucketId) {
+  var area = document.getElementById('subFolderArea');
+  var btn  = document.getElementById('quickSubBtn');
+  if (!area) return;
+  var subs = state.folders.filter(function(f){ return f.parentId === bucketId; });
+  if (subs.length === 0) {
+    area.style.display = 'none';
+    return;
+  }
+  area.style.display = 'grid';
+  area.innerHTML = subs.map(function(f){
+    return '<button onclick="openBucket(\''+f.id+'\')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;"><span style="font-size:22px;">'+escHtml(f.emoji||'📂')+'</span><span style="font-family:Space Grotesk,sans-serif;font-size:10px;font-weight:700;color:#e8f4ff;">'+escHtml(f.name)+'</span></button>';
+  }).join('');
 }
 
 // ══ FUNÇÕES GLOBAIS — Settings, Sidebar, Wallpaper ══
